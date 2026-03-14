@@ -15,6 +15,10 @@ run/main_scene="uid://cyhlknb4do2ui"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 
+[autoload]
+
+DatabaseManager="*res://scripts/autoload/DatabaseManager.gd"
+
 [input]
 
 cima={
