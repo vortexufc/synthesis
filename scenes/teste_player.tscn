@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://cyhlknb4do2ui"]
+
+[ext_resource type="Texture2D" uid="uid://dbkoend4q2lae" path="res://dungeon.png" id="1_2lcu3"]
+[ext_resource type="Script" uid="uid://b1niptup4t0uq" path="res://scripts/player.gd" id="1_uhc0a"]
+[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="3_cnmog"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
+radius = 25.0
+height = 112.0
+
+[node name="Teste Player" type="Node2D" unique_id=1109676720]
+
+[node name="Dungeon" type="Sprite2D" parent="." unique_id=296188293]
+position = Vector2(1045, 726)
+texture = ExtResource("1_2lcu3")
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=815031926]
+position = Vector2(1500, 325)
+script = ExtResource("1_uhc0a")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=628981794]
+shape = SubResource("CapsuleShape2D_2lcu3")
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=174424826]
+limit_left = 0
+limit_top = 0
+limit_right = 2048
+limit_bottom = 1410
+position_smoothing_enabled = true
+
+[node name="Node" type="Node" parent="." unique_id=1579749844]
+script = ExtResource("3_cnmog")

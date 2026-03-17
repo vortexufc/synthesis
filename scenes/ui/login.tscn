@@ -1,0 +1,138 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/login.gd" id="1_xxyyzz"]
+[ext_resource type="Texture2D" path="res://background-cad-log.png" id="2_lrtfn"]
+[ext_resource type="FontFile" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_xebxy"]
+[ext_resource type="FontFile" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="4_vjchv"]
+
+[node name="LoginScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xxyyzz")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_lrtfn")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.490196)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(450, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LabelTitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_xebxy")
+theme_override_font_sizes/font_size = 24
+text = "LOGIN DO JOGADOR"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxEmail" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxEmail"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_vjchv")
+text = "E-MAIL"
+
+[node name="EmailInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxEmail"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_vjchv")
+placeholder_text = "SEUEMAIL@EXEMPLO.COM"
+
+[node name="VBoxPassword" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxPassword"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_vjchv")
+text = "SENHA"
+
+[node name="HBoxPassword" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxPassword"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PasswordInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxPassword/HBoxPassword"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_vjchv")
+placeholder_text = "SUASENHA123$"
+secret = true
+
+[node name="BtnShowPassword" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxPassword/HBoxPassword"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_xebxy")
+theme_override_font_sizes/font_size = 12
+toggle_mode = true
+text = " O "
+
+[node name="Spacer" type="Control" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="HBoxButtons" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="BtnLogin" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_xebxy")
+text = "ENTRAR"
+
+[node name="BtnBack" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_xebxy")
+text = "VOLTAR"
+
+[node name="Spacer2" type="Control" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+
+[node name="LinkRegister" type="LinkButton" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("4_vjchv")
+text = "NÃO POSSUI CONTA? REGISTRE-SE."
