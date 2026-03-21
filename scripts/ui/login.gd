@@ -12,6 +12,10 @@ func _ready() -> void:
 	btn_back.pressed.connect(_on_btn_back_pressed)
 	link_register.pressed.connect(_on_link_register_pressed)
 	btn_show_password.toggled.connect(_on_btn_show_password_toggled)
+	
+	# Escutando as respostas do banco
+	DatabaseManager.auth_sucesso.connect(_on_auth_sucesso)
+	DatabaseManager.auth_erro.connect(_on_auth_erro)
 
 func _on_btn_show_password_toggled(button_pressed: bool) -> void:
 	password_input.secret = !button_pressed
@@ -30,7 +34,20 @@ func _on_btn_login_pressed() -> void:
 		return
 		
 	print("Tentando fazer login para: ", email)
-	# Integrar com backend de autenticação
+	
+	btn_login.disabled = true
+	# Chama o banco!
+	DatabaseManager.fazer_login(email, password)
+
+func _on_auth_sucesso(token: String) -> void:
+	print("Logado com sucesso! Token Recebido: ", token)
+	# salvar o token em alguma variavel pra lembrar depois se quiser
+	# e vai pro jogo
+	# get_tree().change_scene_to_file("res://scenes/levels/andar_1.tscn")
+
+func _on_auth_erro(mensagem: String) -> void:
+	print("Erro ao fazer login: ", mensagem)
+	btn_login.disabled = false
 
 func _on_btn_back_pressed() -> void:
 	print("Voltar pressionado. Mudando de cena...")
