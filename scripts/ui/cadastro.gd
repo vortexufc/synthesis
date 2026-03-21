@@ -32,7 +32,7 @@ func _on_btn_create_pressed() -> void:
 	var password := password_input.text
 	
 	if player_name.is_empty() or email.is_empty() or password.is_empty():
-		print("Preencha todos os campos!")
+		_show_error_popup("Preencha todos os campos!")
 		# Aqui você pode mostrar um Label de erro na UI
 		return
 		
@@ -58,3 +58,10 @@ func _on_btn_back_pressed() -> void:
 func _on_link_login_pressed() -> void:
 	print("Ir para login. Mudando de cena...")
 	get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
+
+func _show_error_popup(mensagem: String) -> void:
+	var dialog = AcceptDialog.new()
+	dialog.dialog_text = mensagem
+	dialog.title = "Atenção"
+	add_child(dialog)
+	dialog.popup_centered()

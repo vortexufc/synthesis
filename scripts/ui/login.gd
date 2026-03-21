@@ -30,7 +30,7 @@ func _on_btn_login_pressed() -> void:
 	var password := password_input.text
 	
 	if email.is_empty() or password.is_empty():
-		print("Preencha e-mail e senha!")
+		_show_error_popup("Preencha todos os campos!")
 		return
 		
 	print("Tentando fazer login para: ", email)
@@ -56,3 +56,10 @@ func _on_btn_back_pressed() -> void:
 func _on_link_register_pressed() -> void:
 	print("Ir para registro. Mudando de cena...")
 	get_tree().change_scene_to_file("res://scenes/ui/cadastro.tscn")
+
+func _show_error_popup(mensagem: String) -> void:
+	var dialog = AcceptDialog.new()
+	dialog.dialog_text = mensagem
+	dialog.title = "Atenção"
+	add_child(dialog)
+	dialog.popup_centered()
