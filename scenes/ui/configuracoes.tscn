@@ -1,0 +1,238 @@
+[gd_scene format=3 uid="uid://c74j7d22qxx"]
+
+[ext_resource type="Script" path="res://scripts/ui/configuracoes.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://tm5vxiwpt18v" path="res://fundomenuinicial.png" id="2_bg"]
+[ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_font"]
+[ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="4_font"]
+
+[sub_resource type="Shader" id="Shader_blur"]
+code = "shader_type canvas_item;
+uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
+uniform float lod: hint_range(0.0, 5.0) = 3.0;
+void fragment(){
+	vec4 color = textureLod(SCREEN_TEXTURE, SCREEN_UV, lod);
+	COLOR = color;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_blur"]
+shader = SubResource("Shader_blur")
+shader_parameter/lod = 3.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+content_margin_left = 32.0
+content_margin_top = 32.0
+content_margin_right = 32.0
+content_margin_bottom = 32.0
+bg_color = Color(0.109804, 0.168627, 0.309804, 0.8)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.533333, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.109804, 0.168627, 0.309804, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0.533333, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.160784, 0.247059, 0.45098, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 0.666667, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[node name="Configuracoes" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BlurOverlay" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_blur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 60.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
+text = "CONFIGURAÇÕES"
+horizontal_alignment = 1
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 100.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="VBoxMusic" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "MÚSICA"
+
+[node name="HSliderMusic" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.1
+value = 0.5
+
+[node name="VBoxSfx" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "EFEITOS SONOROS"
+
+[node name="HSliderSfx" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.1
+value = 0.5
+
+[node name="HBoxLang" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxLang"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "IDIOMA"
+vertical_alignment = 1
+
+[node name="BtnPT" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxLang"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+text = "PORTUGUÊS"
+
+[node name="BtnEN" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxLang"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+text = "INGLÊS"
+
+[node name="HBoxJoystick" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 16
+text = "JOYSTICK VIRTUAL"
+vertical_alignment = 1
+
+[node name="CheckJoystick" type="CheckButton" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick"]
+layout_mode = 2
+size_flags_horizontal = 8
+button_pressed = true
+
+[node name="BtnVoltar" type="Button" parent="."]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -125.0
+offset_top = -80.0
+offset_right = 125.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+text = "VOLTAR"

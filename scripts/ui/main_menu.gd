@@ -25,6 +25,7 @@ func _on_btn_vestiario_pressed() -> void:
 
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")
+	get_tree().change_scene_to_file("res://scenes/ui/configuracoes.tscn")
 
 # ---------------------------------------------------------
 # LIDERANÇA DA SEMANA (Leaderboard) - PRONTO PARA SUPABASE
