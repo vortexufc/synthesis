@@ -10,6 +10,7 @@ signal dados_recebidos(dados: Array)
 # sinais para a tela de login e cadastro
 signal auth_sucesso(token: String)
 signal auth_erro(mensagem: String)
+signal reset_senha_enviado()
 
 # no q cuida das requisições
 var http_request: HTTPRequest
@@ -67,6 +68,10 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 			print("usuario cadastrado com sucesso!")
 			# o auth do supabase envia um "user" no signup
 			auth_sucesso.emit("cadastrado_ok")
+		elif body_text == "{}" or body_text == "":
+			# a rota de recuperar senha da 200 mas retorna body vazio
+			print("Email de recuperacao enviado!")
+			reset_senha_enviado.emit()
 		else:
 			print("dados gerais chegaram.")
 			dados_recebidos.emit(dados)
@@ -100,6 +105,14 @@ func fazer_login(email: String, senha: String) -> void:
 	}
 	# endpoint do supabase pra pegar o token de login
 	make_request("/auth/v1/token?grant_type=password", HTTPClient.METHOD_POST, data)
+
+func recuperar_senha(email: String) -> void:
+	print("Pedindo reset de senha para: ", email)
+	var data = {
+		"email": email
+	}
+	# endpoint do supabase pra mandar o email de reset
+	make_request("/auth/v1/recover", HTTPClient.METHOD_POST, data)
 
 # --- FUNCOES DA TASK 2 ---
 
