@@ -43,10 +43,10 @@ func _on_btn_login_pressed() -> void:
 	DatabaseManager.fazer_login(email, password)
 
 func _on_auth_sucesso(token: String) -> void:
-	print("Logado com sucesso! Token Recebido: ", token)
-	# salvar o token em alguma variavel pra lembrar depois se quiser
-	# e vai pro jogo
-	# get_tree().change_scene_to_file("res://scenes/levels/andar_1.tscn")
+	print("usuario logou com sucesso!")
+	print("Logado com sucesso! Token Recebido:\n", token)
+	# Ir para o menu principal
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _on_auth_erro(mensagem: String) -> void:
 	print("Erro ao fazer login: ", mensagem)

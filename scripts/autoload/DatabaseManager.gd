@@ -4,6 +4,12 @@ extends Node
 var supabase_url: String = "https://uszmgqludyymspsarciw.supabase.co"
 var supabase_key: String = "sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
 
+# ---- SESSAO ATIVA DO JOGADOR ----
+var user_token: String = ""
+var user_nick: String = ""
+var user_cla: String = "Nenhum"
+# ---------------------------------
+
 # sinal pra avisar outras partes do jogo q a resposta chegou
 signal dados_recebidos(dados: Array)
 
@@ -60,10 +66,18 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	var dados = json.data
 	
 	if response_code >= 200 and response_code < 300:
-		# sucesso (pode ser auth ou GET)
-		if typeof(dados) == TYPE_DICTIONARY and dados.has("access_token"):
+		# sucesso na auth (login ou token)
+		if dados is Dictionary and dados.has("access_token"):
 			print("usuario logou com sucesso!")
-			auth_sucesso.emit(dados["access_token"])
+			
+			# Salvando os dados locais do player na memoria
+			user_token = dados.access_token
+			
+			if dados.has("user") and dados.user.has("user_metadata"):
+				user_nick = dados.user.user_metadata.get("nick", "Mago Desconhecido")
+				user_cla = dados.user.user_metadata.get("cla", "Nenhum")
+				
+			auth_sucesso.emit(user_token)
 		elif typeof(dados) == TYPE_DICTIONARY and dados.has("user"):
 			print("usuario cadastrado com sucesso!")
 			# o auth do supabase envia um "user" no signup
@@ -88,11 +102,15 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 
 # --- FUNCOES DA TASK 3 (AUTH) ---
 
-func cadastrar_usuario(email: String, senha: String) -> void:
+func cadastrar_usuario(email: String, senha: String, nick: String) -> void:
 	print("tentando cadastrar: ", email)
 	var data = {
 		"email": email,
-		"password": senha
+		"password": senha,
+		"data": {
+			"nick": nick,
+			"cla": "Nenhum"
+		}
 	}
 	# endpoint do supabase pra criar conta
 	make_request("/auth/v1/signup", HTTPClient.METHOD_POST, data)

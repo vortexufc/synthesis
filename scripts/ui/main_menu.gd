@@ -11,6 +11,45 @@ func _ready() -> void:
 	btn_ranking.pressed.connect(_on_btn_ranking_pressed)
 	btn_vestiario.pressed.connect(_on_btn_vestiario_pressed)
 	btn_config.pressed.connect(_on_btn_config_pressed)
+	
+	# ========= SISTEMA DE PERFIL (BACKEND-6) =========
+	var hbox_perfil = HBoxContainer.new()
+	hbox_perfil.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	hbox_perfil.position = Vector2(24, 24)
+	hbox_perfil.add_theme_constant_override("separation", 12)
+	
+	var btn_avatar = TextureButton.new()
+	var tex = load("res://avatar.png.png") as Texture2D
+	
+	if tex == null:
+		tex = load("res://avatar.png") as Texture2D
+		
+	if tex == null:
+		tex = PlaceholderTexture2D.new()
+		tex.size = Vector2(48, 48)
+		
+	btn_avatar.texture_normal = tex
+	btn_avatar.ignore_texture_size = true
+	btn_avatar.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	btn_avatar.custom_minimum_size = Vector2(48, 48)
+	
+	var lbl_nome = Label.new()
+	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+	if font: lbl_nome.add_theme_font_override("font", font)
+	lbl_nome.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	if DatabaseManager.user_token == "":
+		lbl_nome.text = "NÃO LOGADO"
+		btn_avatar.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/ui/cadastro.tscn"))
+	else:
+		lbl_nome.text = DatabaseManager.user_nick.to_upper() + "\nCLÃ: " + DatabaseManager.user_cla.to_upper()
+		# Tenta pintar de outra cor pra simular o avatar do mago por enquanto
+		btn_avatar.modulate = Color(0.2, 0.5, 1.0) # Azul mágico!
+		
+	hbox_perfil.add_child(btn_avatar)
+	hbox_perfil.add_child(lbl_nome)
+	add_child(hbox_perfil)
+	# =================================================
 
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
