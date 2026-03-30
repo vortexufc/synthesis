@@ -18,4 +18,9 @@ func _physics_process(_delta: float) -> void:
 	elif not direcao_horizontal == 0:
 		velocity.x = direcao_horizontal * VELOCIDADE
 	
+	# Exemplo áudio
+	if Input.is_action_just_pressed("ui_accept"):
+		AudioManager.play_sfx("ui-1")
+	
+	
 	move_and_slide()
