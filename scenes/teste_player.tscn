@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://dbkoend4q2lae" path="res://dungeon.png" id="1_2lcu3"]
 [ext_resource type="Script" uid="uid://b1niptup4t0uq" path="res://scripts/player.gd" id="1_uhc0a"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="3_cnmog"]
+[ext_resource type="PackedScene" uid="uid://ci4wfm3uypja1" path="res://scenes/enemy_trigger.tscn" id="4_enemy"]
 [ext_resource type="Texture2D" uid="uid://c3fbe1i7737tb" path="res://sprits/standard/run.png" id="3_k3sj2"]
 [ext_resource type="Texture2D" uid="uid://cuuwaunub4y4m" path="res://sprits/standard/idle.png" id="3_r0kh6"]
 
@@ -364,3 +365,7 @@ frame_progress = 0.97908
 
 [node name="Node" type="Node" parent="." unique_id=1579749844]
 script = ExtResource("3_cnmog")
+
+[node name="EnemyTrigger" parent="." instance=ExtResource("4_enemy")]
+position = Vector2(1700, 325)
+
