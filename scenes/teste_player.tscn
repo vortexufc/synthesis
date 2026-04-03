@@ -353,6 +353,7 @@ limit_right = 2048
 limit_bottom = 1410
 position_smoothing_enabled = true
 
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="Player" unique_id=505117895]
 [node name="sprite" type="AnimatedSprite2D" parent="Player" unique_id=1594718633]
 position = Vector2(0, -7)
 scale = Vector2(1.5, 1.5)

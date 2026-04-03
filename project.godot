@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 DatabaseManager="*res://scripts/autoload/DatabaseManager.gd"
 QuizManager="*uid://c75m37qb5ujge"
+AudioManager="*uid://bo05m2ssexiiy"
 TransitionScreen="*uid://ljn44efihbum"
 
 [input]
