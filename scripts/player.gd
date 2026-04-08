@@ -33,5 +33,10 @@ func _physics_process(_delta: float) -> void:
 	else:
 		$sprite.play("idle_" + ultima_direcao)
 	
+	# Exemplo áudio
+	if Input.is_action_just_pressed("ui_accept"):
+		AudioManager.play_sfx("ui-1")
+	
+	
 	move_and_slide()
 	move_and_slide()

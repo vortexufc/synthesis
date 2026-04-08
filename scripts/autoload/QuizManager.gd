@@ -2,18 +2,18 @@ extends Node
 
 var questions = [
 	{
-		"question": "Quanto é 2 + 2?",
-		"options": ["1", "2", "3", "4"],
-		"answer": 3
+		"question": "O golem tem massa de 100kg e aceleração de 2 m/s². Qual a força do impacto?",
+		"options": ["50 N", "200 N", "100 N", "20 N"],
+		"answer": 1 # 200 N (100 * 2)
 	},
 	{
-		"question": "Capital do Brasil?",
-		"options": ["Rio", "Brasília", "São Paulo", "Salvador"],
-		"answer": 1
+		"question": "Se um feitiço gasta 30 mana e você tem 100. Quantos feiticos iguais pode lançar?",
+		"options": ["3", "2", "4", "5"],
+		"answer": 0
 	},
 	{
-		"question": "Quanto é 5 * 3?",
-		"options": ["10", "15", "20", "8"],
+		"question": "O slime tem 50 de vida e você causa 12 de dano por ataque. Quantos ataques para derrotar?",
+		"options": ["4", "5", "6", "3"],
 		"answer": 1
 	}
 ]
@@ -21,40 +21,118 @@ var questions = [
 var shuffled_questions = []
 var current_index = 0
 
+# Referências da Interface
+var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
+var ui_instancia = null
+var pergunta_atual = null
+
+# Sinal que as outras tasks (ex: Combat-3) vão escutar!
+signal resultado_batalha(acertou: bool)
+
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS # Super importante para rodar no pause!
 	randomize()
 	reset_questions()
 	
-	for i in range(3):
-		var q = get_random_question()
-		print(q)
+	# Escuta o sinal do NPC no mundo! (Task Combat-1 -> Combat-2)
+	GlobalSignals.iniciar_batalha.connect(iniciar_batalha)
+
 func reset_questions():
 	shuffled_questions = questions.duplicate()
 	shuffled_questions.shuffle()
 	current_index = 0
-	
-	
-#FUNÇÃO PARA EMBARALHAR ALTERNATIVAS (FELIPE)
+
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
-	
 	var correct_answer = new_q["options"][new_q["answer"]]
-	
 	new_q["options"].shuffle()
-	
 	new_q["answer"] = new_q["options"].find(correct_answer)
-	
 	return new_q
 
-
 func get_random_question():
-
 	if current_index >= shuffled_questions.size():
-		print("acabaram as perguntas")
-		return null
-	
+		reset_questions() # Reseta pra nunca acabar as perguntas no protótipo
 	var q = shuffled_questions[current_index]
 	current_index += 1
-	
 	return shuffle_questions(q)
+
+# ================================
+# TASK COMBAT-2: FLUXO DE BATALHA COM HP
+# ================================
+
+var vida_maxima_jogador: float = 100.0
+var vida_atual_jogador: float = 100.0
+
+var vida_maxima_inimigo: float = 100.0
+var vida_atual_inimigo: float = 100.0
+
+var _jogador_batalha: Node2D = null
+
+func iniciar_batalha() -> void:
+	print("Batalha Iniciada! Congelando o tempo do mundo...")
+	get_tree().paused = true
 	
+	vida_atual_jogador = vida_maxima_jogador
+	vida_atual_inimigo = vida_maxima_inimigo
+	
+	if ui_instancia == null:
+		ui_instancia = batalha_ui_cena.instantiate()
+		add_child(ui_instancia)
+		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
+		
+	# Inseta o Modelo Verdeiro do Mago ali dentro da tela
+	if is_instance_valid(_jogador_batalha):
+		_jogador_batalha.queue_free()
+	
+	var jogador_cena = load("res://scenes/player.tscn")
+	_jogador_batalha = jogador_cena.instantiate()
+	# Arranca fora todo o cérebro/script do Boneco-Clone para ele virar um manequim animado! 
+	_jogador_batalha.set_script(null)
+	
+	# Arranca a Câmera, Colisão e Áudio da cópia para ela não bagunçar a tela
+	for child in _jogador_batalha.get_children():
+		if child is Camera2D or child is CollisionShape2D or child is AudioStreamPlayer2D:
+			child.queue_free()
+	
+	# Põe ele na UI e vira ele pra Direita (pra ele olhar pro Golem)
+	ui_instancia.get_node("Control/PosicaoMago").add_child(_jogador_batalha)
+	_jogador_batalha.get_node("sprite").play("idle_direita")
+	
+	# Reinicia Barras visuais
+	ui_instancia.atualizar_vida(1.0, 1.0)
+	
+	# Puxa o Rodada 1
+	_nova_rodada()
+
+func _nova_rodada() -> void:
+	pergunta_atual = get_random_question()
+	ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
+
+func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
+	var acertou = (indice_botao == pergunta_atual["answer"])
+	
+	if acertou:
+		# Multiplicador do Relógio (Dano Base = 10. Bonus Máximo = 25 extras)
+		var rapidez = clamp(tempo_sobrando / 300.0, 0.0, 1.0)
+		var dano = 10 + int(25 * rapidez)
+		vida_atual_inimigo -= dano
+		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano, vida_atual_inimigo])
+	else:
+		var dano_player = 25
+		vida_atual_jogador -= dano_player
+		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_player, vida_atual_jogador])
+	
+	resultado_batalha.emit(acertou)
+	
+	# Manda UI cortar os rects verde e vermelho para animar perda
+	ui_instancia.atualizar_vida(vida_atual_jogador/vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
+	
+	# Espera o jogador ver a barra caindo
+	await get_tree().create_timer(1.2).timeout
+	
+	if vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
+		ui_instancia.ocultar_interface()
+		get_tree().paused = false
+		print("=== THE END: LUTA ACABOU! Voltando ao mapa. ===")
+	else:
+		_nova_rodada()
