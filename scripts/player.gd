@@ -5,7 +5,7 @@ const VELOCIDADE = 100.0
 var direcao_horizontal: int
 var direcao_vertical: int
 
-var ultima_direcao = ""
+var ultima_direcao = "baixo"
 
 func _physics_process(_delta: float) -> void:
 
