@@ -18,8 +18,10 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+GlobalSignals="*res://scripts/autoload/GlobalSignals.gd"
 DatabaseManager="*res://scripts/autoload/DatabaseManager.gd"
 QuizManager="*uid://c75m37qb5ujge"
+AudioManager="*uid://bo05m2ssexiiy"
 TransitionScreen="*uid://ljn44efihbum"
 
 [input]

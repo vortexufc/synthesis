@@ -5,7 +5,7 @@ const VELOCIDADE = 100.0
 var direcao_horizontal: int
 var direcao_vertical: int
 
-var ultima_direcao = ""
+var ultima_direcao = "baixo"
 
 func _physics_process(_delta: float) -> void:
 
@@ -33,5 +33,9 @@ func _physics_process(_delta: float) -> void:
 	else:
 		$sprite.play("idle_" + ultima_direcao)
 	
-	move_and_slide()
+	# Exemplo áudio
+	if Input.is_action_just_pressed("ui_accept"):
+		AudioManager.play_sfx("ui-1")
+	
+	
 	move_and_slide()

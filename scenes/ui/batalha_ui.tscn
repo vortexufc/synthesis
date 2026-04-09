@@ -1,0 +1,210 @@
+[gd_scene format=3 uid="uid://ddlky8y123abc"]
+
+[ext_resource type="Script" uid="uid://dg0bo4jhp31cy" path="res://scripts/ui/batalha_ui.gd" id="1_abcde"]
+[ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_fghij"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sukng"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qhges"]
+atlas = SubResource("AtlasTexture_sukng")
+
+[node name="BatalhaUI" type="CanvasLayer" unique_id=1951544455]
+process_mode = 3
+script = ExtResource("1_abcde")
+
+[node name="Control" type="Control" parent="." unique_id=1726436305]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FundoPreto" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="BackgroundMockup" type="TextureRect" parent="Control" unique_id=1416241752]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PosicaoMago" type="Marker2D" parent="Control" unique_id=1581849298]
+position = Vector2(190, 400)
+
+
+[node name="SpriteMonstro" type="TextureRect" parent="Control" unique_id=1740609982]
+layout_mode = 0
+offset_left = 650.0
+offset_top = 180.0
+offset_right = 930.0
+offset_bottom = 450.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HealthPlayer" type="ColorRect" parent="Control" unique_id=1149034248]
+layout_mode = 0
+offset_left = 130.0
+offset_top = 230.0
+offset_right = 330.0
+offset_bottom = 250.0
+color = Color(0, 0.8, 0.100001, 1)
+
+[node name="HealthEnemy" type="ColorRect" parent="Control" unique_id=1733765942]
+layout_mode = 0
+offset_left = 750.0
+offset_top = 180.0
+offset_right = 980.0
+offset_bottom = 200.0
+color = Color(0.8, 0, 0.100001, 1)
+
+[node name="TimerPainel" type="ColorRect" parent="Control" unique_id=1340639034]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 90.0
+grow_horizontal = 2
+color = Color(0.8, 0.400002, 0, 1)
+
+[node name="TimerBordas" type="ColorRect" parent="Control/TimerPainel" unique_id=1204836938]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TextoTempo" type="Label" parent="Control/TimerPainel" unique_id=599606702]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.8, 0, 1)
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 18
+text = "TEMPO:
+05:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FooterColor" type="ColorRect" parent="Control" unique_id=989732457]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -220.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.0156863, 0.054902, 0.223529, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="Control/FooterColor" unique_id=1916504475]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/FooterColor/MarginContainer" unique_id=594675633]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="QuestionPanel" type="Panel" parent="Control/FooterColor/MarginContainer/VBoxContainer" unique_id=426852834]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="Control/FooterColor/MarginContainer/VBoxContainer/QuestionPanel" unique_id=1015849680]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0627451, 0.160784, 0.352941, 1)
+
+[node name="BordaAzul" type="ColorRect" parent="Control/FooterColor/MarginContainer/VBoxContainer/QuestionPanel/ColorRect" unique_id=1417015455]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.533333, 1, 1)
+
+[node name="LabelQuestion" type="Label" parent="Control/FooterColor/MarginContainer/VBoxContainer/QuestionPanel" unique_id=790973950]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 14
+text = "Pergunta de teste?"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="HBoxButtons" type="HBoxContainer" parent="Control/FooterColor/MarginContainer/VBoxContainer" unique_id=1122023179]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="BtnA" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=836706299]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 12
+text = "A) "
+
+[node name="BtnB" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=2146990982]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 12
+text = "B) "
+
+[node name="BtnC" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=833519478]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 12
+text = "C) "
+
+[node name="BtnD" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=184217321]
+custom_minimum_size = Vector2(180, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 12
+text = "D) "
