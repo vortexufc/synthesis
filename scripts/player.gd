@@ -2,8 +2,8 @@ extends CharacterBody2D
 
 const VELOCIDADE = 100.0
 
-var direcao_horizontal: int
-var direcao_vertical: int
+var direcao_horizontal: float
+var direcao_vertical: float
 
 var ultima_direcao = "baixo"
 
