@@ -121,6 +121,14 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		var dano_player = 25
 		vida_atual_jogador -= dano_player
 		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_player, vida_atual_jogador])
+		
+		# Feedback Visual de Dano no Mago
+		if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
+			var sprite_mago = _jogador_batalha.get_node("sprite")
+			# set_pause_mode evita que o tween paralise por conta do jogo pausado
+			var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
+			tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
 	
 	resultado_batalha.emit(acertou)
 	
