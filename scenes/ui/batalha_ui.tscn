@@ -2,11 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dg0bo4jhp31cy" path="res://scripts/ui/batalha_ui.gd" id="1_abcde"]
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_fghij"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_sukng"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_qhges"]
-atlas = SubResource("AtlasTexture_sukng")
+[ext_resource type="Texture2D" uid="uid://da5t6wdvucdfb" path="res://assets/sprites/Backgrounds/Old Dungeon/OldDungeon.png" id="2_qhges"]
+[ext_resource type="PackedScene" uid="uid://ddyv4ur73toyc" path="res://scenes/Entidades/Evil_Wizzard.tscn" id="3_3t2t5"]
 
 [node name="BatalhaUI" type="CanvasLayer" unique_id=1951544455]
 process_mode = 3
@@ -20,7 +17,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="FundoPreto" type="ColorRect" parent="Control"]
+[node name="FundoPreto" type="ColorRect" parent="Control" unique_id=469154618]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -36,12 +33,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("2_qhges")
 expand_mode = 1
 stretch_mode = 6
 
 [node name="PosicaoMago" type="Marker2D" parent="Control" unique_id=1581849298]
 position = Vector2(190, 400)
-
 
 [node name="SpriteMonstro" type="TextureRect" parent="Control" unique_id=1740609982]
 layout_mode = 0
@@ -51,6 +48,11 @@ offset_right = 930.0
 offset_bottom = 450.0
 expand_mode = 1
 stretch_mode = 5
+
+[node name="AnimatedSprite2D" parent="Control/SpriteMonstro" unique_id=2072700108 instance=ExtResource("3_3t2t5")]
+position = Vector2(225, 166)
+scale = Vector2(2, 2)
+flip_h = true
 
 [node name="HealthPlayer" type="ColorRect" parent="Control" unique_id=1149034248]
 layout_mode = 0

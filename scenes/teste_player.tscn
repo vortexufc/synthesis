@@ -2,10 +2,11 @@
 
 [ext_resource type="Script" uid="uid://b1niptup4t0uq" path="res://scripts/player.gd" id="1_uhc0a"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="3_cnmog"]
-[ext_resource type="Texture2D" uid="uid://c3fbe1i7737tb" path="res://sprits/standard/run.png" id="3_k3sj2"]
-[ext_resource type="Texture2D" uid="uid://cuuwaunub4y4m" path="res://sprits/standard/idle.png" id="3_r0kh6"]
-[ext_resource type="Texture2D" uid="uid://cdlgl3m00rqr6" path="res://sprits/tilesets/walls_floor.png" id="5_k3sj2"]
+[ext_resource type="Texture2D" uid="uid://c3fbe1i7737tb" path="res://assets/sprites/Characters/Maguinho/run.png" id="3_k3sj2"]
+[ext_resource type="Texture2D" uid="uid://cuuwaunub4y4m" path="res://assets/sprites/Characters/Maguinho/idle.png" id="3_r0kh6"]
 [ext_resource type="PackedScene" uid="uid://ci4wfm3uypja1" path="res://scenes/enemy_trigger.tscn" id="4_enemy"]
+[ext_resource type="Texture2D" uid="uid://cdlgl3m00rqr6" path="res://assets/sprites/tilesets/Dungeon_Basic/walls_floor.png" id="5_k3sj2"]
+[ext_resource type="PackedScene" uid="uid://ddyv4ur73toyc" path="res://scenes/Entidades/Evil_Wizzard.tscn" id="7_iy05v"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
 radius = 18.0
@@ -690,3 +691,7 @@ tile_set = SubResource("TileSet_iy05v")
 
 [node name="EnemyTrigger" parent="." unique_id=1337622235 instance=ExtResource("4_enemy")]
 position = Vector2(1700, 325)
+
+[node name="AnimatedSprite2D" parent="EnemyTrigger" unique_id=2072700108 instance=ExtResource("7_iy05v")]
+scale = Vector2(1.5, 1.5)
+flip_h = true
