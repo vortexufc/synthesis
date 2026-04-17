@@ -1,0 +1,21 @@
+[gd_scene format=4 uid="uid://mimico_trap_01"]
+
+[ext_resource type="Script" path="res://scripts/mimico.gd" id="1_mimico"]
+[ext_resource type="Texture2D" uid="uid://dtpfthc6y5oxq" path="res://assets/sprites/tilesets/Dungeon_Basic/doors_lever_chest_animation.png" id="2_chest"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mimico"]
+size = Vector2(28, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_chest_closed"]
+atlas = ExtResource("2_chest")
+region = Rect2(0, 128, 32, 32)
+
+[node name="Mimico" type="Area2D"]
+script = ExtResource("1_mimico")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+shape = SubResource("RectangleShape2D_mimico")
+
+[node name="BauSprite" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_chest_closed")
