@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const VELOCIDADE = 100.0
+const VELOCIDADE = 200.0
 
 var direcao_horizontal: float
 var direcao_vertical: float

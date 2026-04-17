@@ -63,4 +63,3 @@ func _on_botao_pressionado(indice: int) -> void:
 
 func ocultar_interface() -> void:
 	self.hide()
-

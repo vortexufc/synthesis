@@ -1,9 +1,9 @@
 [gd_scene format=4 uid="uid://qbeqlr5gp7g1"]
 
-[ext_resource type="PackedScene" uid="uid://duglruekhrgk0" path="res://scenes/player.tscn" id="1_d4mpu"]
-[ext_resource type="Texture2D" uid="uid://f732cdagvfdv" path="res://sprits/tilesets/Objects.png" id="2_d4mpu"]
-[ext_resource type="Texture2D" uid="uid://dtpfthc6y5oxq" path="res://sprits/tilesets/doors_lever_chest_animation.png" id="3_72nxe"]
-[ext_resource type="Texture2D" uid="uid://cdlgl3m00rqr6" path="res://sprits/tilesets/walls_floor.png" id="3_acrbh"]
+[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/player.tscn" id="1_d4mpu"]
+[ext_resource type="Texture2D" uid="uid://f732cdagvfdv" path="res://assets/sprites/tilesets/Dungeon_Basic/Objects.png" id="2_d4mpu"]
+[ext_resource type="Texture2D" uid="uid://dtpfthc6y5oxq" path="res://assets/sprites/tilesets/Dungeon_Basic/doors_lever_chest_animation.png" id="3_72nxe"]
+[ext_resource type="Texture2D" uid="uid://cdlgl3m00rqr6" path="res://assets/sprites/tilesets/Dungeon_Basic/walls_floor.png" id="3_acrbh"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2gh0s"]
 texture = ExtResource("3_acrbh")

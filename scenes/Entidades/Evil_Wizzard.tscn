@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://ddyv4ur73toyc"]
+
+[ext_resource type="Texture2D" uid="uid://b2vaj1fsrqsbv" path="res://assets/sprites/Characters/Evil_Wizzard/Idle.png" id="1_yhd1n"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_itwxv"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(0, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n5n7t"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m3px0"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(500, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0cbup"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(750, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p0cem"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(1000, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ui4ih"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(1250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ujdt6"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(1500, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xxk54"]
+atlas = ExtResource("1_yhd1n")
+region = Rect2(1750, 0, 250, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lhd7t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_itwxv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n5n7t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m3px0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0cbup")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p0cem")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ui4ih")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ujdt6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xxk54")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" unique_id=2072700108]
+sprite_frames = SubResource("SpriteFrames_lhd7t")
+autoplay = "default"
+frame_progress = 0.5112759
