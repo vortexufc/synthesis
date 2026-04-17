@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ci4wfm3uypja1" path="res://scenes/enemy_trigger.tscn" id="4_enemy"]
 [ext_resource type="Texture2D" uid="uid://cdlgl3m00rqr6" path="res://assets/sprites/tilesets/Dungeon_Basic/walls_floor.png" id="5_k3sj2"]
 [ext_resource type="PackedScene" uid="uid://ddyv4ur73toyc" path="res://scenes/Entidades/Evil_Wizzard.tscn" id="7_iy05v"]
+[ext_resource type="PackedScene" uid="uid://mimico_trap_01" path="res://scenes/mimico.tscn" id="8_mimico"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
 radius = 18.0
@@ -695,3 +696,7 @@ position = Vector2(1700, 325)
 [node name="AnimatedSprite2D" parent="EnemyTrigger" unique_id=2072700108 instance=ExtResource("7_iy05v")]
 scale = Vector2(1.5, 1.5)
 flip_h = true
+
+[node name="Mimico" parent="." unique_id=987654321 instance=ExtResource("8_mimico")]
+position = Vector2(1200, 325)
+scale = Vector2(2, 2)
