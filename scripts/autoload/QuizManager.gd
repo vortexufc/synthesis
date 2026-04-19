@@ -1,23 +1,6 @@
 extends Node
 
-var questions = [
-	{
-		"question": "O golem tem massa de 100kg e aceleração de 2 m/s². Qual a força do impacto?",
-		"options": ["50 N", "200 N", "100 N", "20 N"],
-		"answer": 1 # 200 N (100 * 2)
-	},
-	{
-		"question": "Se um feitiço gasta 30 mana e você tem 100. Quantos feiticos iguais pode lançar?",
-		"options": ["3", "2", "4", "5"],
-		"answer": 0
-	},
-	{
-		"question": "O slime tem 50 de vida e você causa 12 de dano por ataque. Quantos ataques para derrotar?",
-		"options": ["4", "5", "6", "3"],
-		"answer": 1
-	}
-]
-
+var questions = []
 var shuffled_questions = []
 var current_index = 0
 
@@ -32,15 +15,24 @@ signal resultado_batalha(acertou: bool)
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS # Super importante para rodar no pause!
 	randomize()
-	reset_questions()
+	
+	# Assina no sinal do banco de dados e Manda baixar as do Chão 1
+	DatabaseManager.perguntas_recebidas.connect(_on_perguntas_chegaram)
+	DatabaseManager.puxar_perguntas(1)
 	
 	# Escuta o sinal do NPC no mundo! (Task Combat-1 -> Combat-2)
 	GlobalSignals.iniciar_batalha.connect(iniciar_batalha)
 
+func _on_perguntas_chegaram(dados: Array) -> void:
+	# Quando terminar o download na nuvem, salva na memória e prepara as variáveis
+	questions = dados
+	reset_questions()
+
 func reset_questions():
-	shuffled_questions = questions.duplicate()
-	shuffled_questions.shuffle()
-	current_index = 0
+	if questions.size() > 0:
+		shuffled_questions = questions.duplicate()
+		shuffled_questions.shuffle()
+		current_index = 0
 
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
@@ -69,6 +61,10 @@ var vida_atual_inimigo: float = 100.0
 var _jogador_batalha: Node2D = null
 
 func iniciar_batalha() -> void:
+	if questions.size() == 0:
+		print("Aguardando download do banco de dados das perguntas...")
+		await DatabaseManager.perguntas_recebidas
+
 	print("Batalha Iniciada! Congelando o tempo do mundo...")
 	get_tree().paused = true
 	

@@ -12,6 +12,7 @@ var user_cla: String = "Nenhum"
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
 signal dados_recebidos(dados: Array)
+signal perguntas_recebidas(perguntas: Array)
 
 # sinais para a tela de login e cadastro
 signal auth_sucesso(token: String)
@@ -87,8 +88,12 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 			print("Email de recuperacao enviado!")
 			reset_senha_enviado.emit()
 		else:
-			print("dados gerais chegaram.")
-			dados_recebidos.emit(dados)
+			if typeof(dados) == TYPE_ARRAY and dados.size() > 0 and dados[0].has("question"):
+				print("Perguntas carregadas do banco!")
+				perguntas_recebidas.emit(dados)
+			else:
+				print("dados gerais chegaram.")
+				dados_recebidos.emit(dados)
 	else:
 		# qndo da erro (senha errada, etc)
 		var msg_erro = "Erro da API"
@@ -139,3 +144,10 @@ func puxar_alunos() -> void:
 	print("tentando buscar os alunos no banco...")
 	# "/rest/v1/nome_tabela" -> o select=* puxa todas colunas
 	make_request("/rest/v1/alunos?select=*", HTTPClient.METHOD_GET)
+
+func puxar_perguntas(andar_id: int = 1) -> void:
+	print("buscando perguntas do andar: ", andar_id, "...")
+	var query = "/rest/v1/perguntas?select=*"
+	if andar_id > 0:
+		query += "&andar_id=eq." + str(andar_id)
+	make_request(query, HTTPClient.METHOD_GET)

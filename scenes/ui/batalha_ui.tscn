@@ -38,14 +38,14 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="PosicaoMago" type="Marker2D" parent="Control" unique_id=1581849298]
-position = Vector2(190, 400)
+position = Vector2(190, 340)
 
 [node name="SpriteMonstro" type="TextureRect" parent="Control" unique_id=1740609982]
 layout_mode = 0
 offset_left = 650.0
-offset_top = 180.0
+offset_top = 120.0
 offset_right = 930.0
-offset_bottom = 450.0
+offset_bottom = 390.0
 expand_mode = 1
 stretch_mode = 5
 
@@ -57,17 +57,17 @@ flip_h = true
 [node name="HealthPlayer" type="ColorRect" parent="Control" unique_id=1149034248]
 layout_mode = 0
 offset_left = 130.0
-offset_top = 230.0
+offset_top = 170.0
 offset_right = 330.0
-offset_bottom = 250.0
+offset_bottom = 190.0
 color = Color(0, 0.8, 0.100001, 1)
 
 [node name="HealthEnemy" type="ColorRect" parent="Control" unique_id=1733765942]
 layout_mode = 0
 offset_left = 750.0
-offset_top = 180.0
+offset_top = 120.0
 offset_right = 980.0
-offset_bottom = 200.0
+offset_bottom = 140.0
 color = Color(0.8, 0, 0.100001, 1)
 
 [node name="TimerPainel" type="ColorRect" parent="Control" unique_id=1340639034]
@@ -116,7 +116,7 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -220.0
+offset_top = -280.0
 grow_horizontal = 2
 grow_vertical = 0
 color = Color(0.0156863, 0.054902, 0.223529, 1)
@@ -135,7 +135,7 @@ theme_override_constants/margin_bottom = 20
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/FooterColor/MarginContainer" unique_id=594675633]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 10
 
 [node name="QuestionPanel" type="Panel" parent="Control/FooterColor/MarginContainer/VBoxContainer" unique_id=426852834]
 layout_mode = 2
@@ -169,44 +169,66 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_fonts/font = ExtResource("2_fghij")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 10
 text = "Pergunta de teste?"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="HBoxButtons" type="HBoxContainer" parent="Control/FooterColor/MarginContainer/VBoxContainer" unique_id=1122023179]
+[node name="HBoxButtons" type="GridContainer" parent="Control/FooterColor/MarginContainer/VBoxContainer" unique_id=1122023179]
 layout_mode = 2
-theme_override_constants/separation = 30
-alignment = 1
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 10
+columns = 2
 
 [node name="BtnA" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=836706299]
-custom_minimum_size = Vector2(180, 50)
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_fghij")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "A) "
+autowrap_mode = 2
 
 [node name="BtnB" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=2146990982]
-custom_minimum_size = Vector2(180, 50)
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_fghij")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "B) "
+autowrap_mode = 2
 
 [node name="BtnC" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=833519478]
-custom_minimum_size = Vector2(180, 50)
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_fghij")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "C) "
+autowrap_mode = 2
 
 [node name="BtnD" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=184217321]
-custom_minimum_size = Vector2(180, 50)
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_fghij")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 10
 text = "D) "
+autowrap_mode = 2
+
+[node name="BtnE" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=999999999]
+custom_minimum_size = Vector2(180, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_fghij")
+theme_override_font_sizes/font_size = 10
+text = "E) "
+autowrap_mode = 2

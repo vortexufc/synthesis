@@ -7,6 +7,7 @@ signal resposta_escolhida(indice: int, tempo_usado: float)
 @onready var btn_b: Button = $Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons/BtnB
 @onready var btn_c: Button = $Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons/BtnC
 @onready var btn_d: Button = $Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons/BtnD
+@onready var btn_e: Button = $Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons/BtnE
 @onready var label_tempo: Label = $Control/TimerPainel/TextoTempo
 
 @onready var health_player: ColorRect = $Control/HealthPlayer
@@ -17,7 +18,7 @@ var tempo_restante: float = 300.0
 var tempo_rodando: bool = false
 
 func _ready() -> void:
-	_botoes = [btn_a, btn_b, btn_c, btn_d]
+	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
 	for i in range(_botoes.size()):
 		_botoes[i].pressed.connect(_on_botao_pressionado.bind(i))
 
@@ -39,7 +40,7 @@ func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	
 	for i in range(_botoes.size()):
 		if i < alternativas.size():
-			var prefix = ["A) ", "B) ", "C) ", "D) "][i]
+			var prefix = ["A) ", "B) ", "C) ", "D) ", "E) "][i]
 			_botoes[i].text = prefix + str(alternativas[i])
 			_botoes[i].show()
 			_botoes[i].disabled = false
