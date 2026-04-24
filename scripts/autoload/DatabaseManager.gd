@@ -55,7 +55,7 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 		push_error("deu ruim na req pra: " + url)
 
 # quando o supabase responde cai aqui
-func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+func _on_request_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var body_text = body.get_string_from_utf8()
 	var json: JSON = JSON.new()
 	var erro_json = json.parse(body_text)

@@ -52,9 +52,7 @@ func get_random_question():
 # TASK COMBAT-2: FLUXO DE BATALHA COM HP
 # ================================
 
-var vida_maxima_jogador: float = 100.0
-var vida_atual_jogador: float = 100.0
-
+# Variáveis do inimigo
 var vida_maxima_inimigo: float = 100.0
 var vida_atual_inimigo: float = 100.0
 
@@ -68,7 +66,7 @@ func iniciar_batalha() -> void:
 	print("Batalha Iniciada! Congelando o tempo do mundo...")
 	get_tree().paused = true
 	
-	vida_atual_jogador = vida_maxima_jogador
+	# Apenas resetamos a vida do inimigo, a vida do jogador é persistente no PlayerStats
 	vida_atual_inimigo = vida_maxima_inimigo
 	
 	if ui_instancia == null:
@@ -91,7 +89,7 @@ func iniciar_batalha() -> void:
 			child.queue_free()
 	
 	# Põe ele na UI e vira ele pra Direita (pra ele olhar pro Golem)
-	ui_instancia.get_node("Control/PosicaoMago").add_child(_jogador_batalha)
+	ui_instancia.get_node("Control/PosicaoMago").call_deferred("add_child", _jogador_batalha)
 	_jogador_batalha.get_node("sprite").play("idle_direita")
 	
 	# Reinicia Barras visuais
@@ -115,8 +113,8 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano, vida_atual_inimigo])
 	else:
 		var dano_player = 25
-		vida_atual_jogador -= dano_player
-		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_player, vida_atual_jogador])
+		PlayerStats.sofrer_dano(dano_player)
+		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_player, PlayerStats.vida_atual_jogador])
 		
 		# Feedback Visual de Dano no Mago
 		if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
@@ -129,14 +127,15 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	resultado_batalha.emit(acertou)
 	
 	# Manda UI cortar os rects verde e vermelho para animar perda
-	ui_instancia.atualizar_vida(vida_atual_jogador/vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
+	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
 	
 	# Espera o jogador ver a barra caindo
 	await get_tree().create_timer(1.2).timeout
 	
-	if vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
+	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
 		ui_instancia.ocultar_interface()
 		get_tree().paused = false
+		GlobalSignals.batalha_encerrada.emit()
 		print("=== THE END: LUTA ACABOU! Voltando ao mapa. ===")
 	else:
 		_nova_rodada()
