@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://df7s0qg1k8awe"]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_abcd"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_abcd")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HealthBarBG" type="ColorRect" parent="Control"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 40.0
+color = Color(0.2, 0.0, 0.0, 1.0)
+mouse_filter = 2
+
+[node name="HealthBarFill" type="ColorRect" parent="Control"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 40.0
+color = Color(0.0, 0.8, 0.1, 1.0)
+mouse_filter = 2
+
+[node name="HealthText" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 45.0
+offset_right = 220.0
+offset_bottom = 70.0
+text = "100 / 100"
+horizontal_alignment = 1
+mouse_filter = 2

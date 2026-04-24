@@ -8,6 +8,8 @@
 [ext_resource type="Texture2D" uid="uid://cdlgl3m00rqr6" path="res://assets/sprites/tilesets/Dungeon_Basic/walls_floor.png" id="5_k3sj2"]
 [ext_resource type="PackedScene" uid="uid://ddyv4ur73toyc" path="res://scenes/Entidades/Evil_Wizzard.tscn" id="7_iy05v"]
 [ext_resource type="PackedScene" uid="uid://mimico_trap_01" path="res://scenes/mimico.tscn" id="8_mimico"]
+[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="9_hud"]
+[ext_resource type="PackedScene" uid="uid://cx402m722l9x2" path="res://scenes/ui/inventario_ui.tscn" id="10_inv"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
 radius = 18.0
@@ -700,3 +702,10 @@ flip_h = true
 [node name="Mimico" parent="." unique_id=987654321 instance=ExtResource("8_mimico")]
 position = Vector2(1200, 325)
 scale = Vector2(2, 2)
+
+[node name="HUD" parent="." unique_id=561849811 instance=ExtResource("9_hud")]
+visible = false
+
+[node name="InventarioUI" parent="." unique_id=741849812 instance=ExtResource("10_inv")]
+visible = false
+

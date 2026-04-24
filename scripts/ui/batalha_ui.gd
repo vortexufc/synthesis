@@ -21,13 +21,21 @@ func _ready() -> void:
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
 	for i in range(_botoes.size()):
 		_botoes[i].pressed.connect(_on_botao_pressionado.bind(i))
+		
+	# se curar no inventario, arruma a barra verde
+	PlayerStats.vida_alterada.connect(_on_vida_jogador_alterada)
+
+func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
+	var pct = atual / maxima
+	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	t.tween_property(health_player, "size:x", max(0.0, 200.0 * pct), 0.5)
 
 func _process(delta: float) -> void:
 	if self.visible and tempo_rodando:
 		tempo_restante -= delta
 		if tempo_restante <= 0:
 			tempo_restante = 0
-			_on_botao_pressionado(-1) # Força envio de -1 (errado)
+			_on_botao_pressionado(-1) # errou por tempo
 		
 		var minutos = int(tempo_restante) / 60
 		var segundos = int(tempo_restante) % 60
@@ -48,15 +56,15 @@ func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 			_botoes[i].hide()
 
 func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
-	# Como o mundo inteiro está pausado, o Tween morre se não dissermos pra ele ignorar a pausa!
+	# tween de pausa senao a animacao nao toca
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
 	
-	# Usando size:x corta exatamente o tamanho do quadrado de 200/230 pixels base.
+	# tamanho do retangulo (200px / 230px)
 	t.tween_property(health_player, "size:x", max(0.0, 200.0 * pct_player), 0.5)
 	t.tween_property(health_enemy, "size:x", max(0.0, 230.0 * pct_enemy), 0.5)
 
 func _on_botao_pressionado(indice: int) -> void:
-	tempo_rodando = false # Congela o relógio
+	tempo_rodando = false # para o timer
 	for btn in _botoes:
 		btn.disabled = true
 		

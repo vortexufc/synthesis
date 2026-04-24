@@ -1,0 +1,232 @@
+[gd_scene load_steps=5 format=3 uid="uid://cx402m722max2"]
+
+[ext_resource type="Script" path="res://scripts/ui/inventario_ui.gd" id="1_invgd"]
+[ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.12, 0.08, 0.18, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.6, 0.4, 0.1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Theme" id="Theme_inv"]
+default_font = ExtResource("2_font")
+default_font_size = 12
+Panel/styles/panel = SubResource("StyleBoxFlat_panel")
+TabContainer/fonts/font = ExtResource("2_font")
+Button/fonts/font = ExtResource("2_font")
+Label/fonts/font = ExtResource("2_font")
+
+[node name="InventarioUI" type="CanvasLayer"]
+process_mode = 3
+layer = 10
+script = ExtResource("1_invgd")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_inv")
+
+[node name="BG" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="MarginContainer" type="MarginContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 50
+
+[node name="Panel" type="Panel" parent="Control/MarginContainer"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Control/MarginContainer/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginTitulo" type="MarginContainer" parent="Control/MarginContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="Titulo" type="Label" parent="Control/MarginContainer/Panel/VBox/MarginTitulo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Bolsa Arcana"
+horizontal_alignment = 1
+
+[node name="HBox" type="HBoxContainer" parent="Control/MarginContainer/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="TabContainer" type="TabContainer" parent="Control/MarginContainer/Panel/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="Pocoes" type="MarginContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer/Pocoes"]
+layout_mode = 2
+
+[node name="GridPocoes" type="HFlowContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer/Pocoes/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="Itens" type="MarginContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer/Itens"]
+layout_mode = 2
+
+[node name="GridItens" type="HFlowContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer/Itens/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="Grimorio" type="MarginContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer/Grimorio"]
+layout_mode = 2
+
+[node name="GridGrimorio" type="HFlowContainer" parent="Control/MarginContainer/Panel/VBox/HBox/TabContainer/Grimorio/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="PainelDetalhes" type="Panel" parent="Control/MarginContainer/Panel/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="Control/MarginContainer/Panel/VBox/HBox/PainelDetalhes"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBox" type="VBoxContainer" parent="Control/MarginContainer/Panel/VBox/HBox/PainelDetalhes/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="DetalheTitulo" type="Label" parent="Control/MarginContainer/Panel/VBox/HBox/PainelDetalhes/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.1, 1)
+text = "Selecione um item"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="DetalheDesc" type="Label" parent="Control/MarginContainer/Panel/VBox/HBox/PainelDetalhes/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "..."
+autowrap_mode = 2
+
+[node name="BtnAcao" type="Button" parent="Control/MarginContainer/Panel/VBox/HBox/PainelDetalhes/Margin/VBox"]
+layout_mode = 2
+text = "Ação"
+
+[node name="PainelLeitura" type="Panel" parent="Control"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control/PainelLeitura"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.05, 0.0, 0.95)
+
+[node name="Margem" type="MarginContainer" parent="Control/PainelLeitura"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 150
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 150
+theme_override_constants/margin_bottom = 80
+
+[node name="VBox" type="VBoxContainer" parent="Control/PainelLeitura/Margem"]
+layout_mode = 2
+
+[node name="LabelTitulo" type="Label" parent="Control/PainelLeitura/Margem/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 28
+text = "Titulo da Pagina"
+horizontal_alignment = 1
+
+[node name="LabelTexto" type="Label" parent="Control/PainelLeitura/Margem/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Texto do grimorio vai aqui..."
+autowrap_mode = 2
+
+[node name="BtnFecharLeitura" type="Button" parent="Control/PainelLeitura/Margem/VBox"]
+layout_mode = 2
+text = "Fechar Leitura"
