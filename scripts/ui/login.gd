@@ -20,6 +20,14 @@ func _ready() -> void:
 	DatabaseManager.auth_erro.connect(_on_auth_erro)
 	DatabaseManager.reset_senha_enviado.connect(_on_reset_senha_enviado)
 
+func _exit_tree() -> void:
+	if DatabaseManager.auth_sucesso.is_connected(_on_auth_sucesso):
+		DatabaseManager.auth_sucesso.disconnect(_on_auth_sucesso)
+	if DatabaseManager.auth_erro.is_connected(_on_auth_erro):
+		DatabaseManager.auth_erro.disconnect(_on_auth_erro)
+	if DatabaseManager.reset_senha_enviado.is_connected(_on_reset_senha_enviado):
+		DatabaseManager.reset_senha_enviado.disconnect(_on_reset_senha_enviado)
+
 func _on_btn_show_password_toggled(button_pressed: bool) -> void:
 	password_input.secret = !button_pressed
 	
@@ -70,7 +78,7 @@ func _on_esqueci_senha_pressed() -> void:
 
 func _on_btn_back_pressed() -> void:
 	print("Voltar pressionado. Mudando de cena...")
-	# get_tree().change_scene_to_file("res://scenes/ui/menu_principal.tscn")
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _on_link_register_pressed() -> void:
 	print("Ir para registro. Mudando de cena...")

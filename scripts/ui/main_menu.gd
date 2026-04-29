@@ -40,7 +40,7 @@ func _ready() -> void:
 	
 	if DatabaseManager.user_token == "":
 		lbl_nome.text = "NÃO LOGADO"
-		btn_avatar.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/ui/cadastro.tscn"))
+		btn_avatar.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/ui/login.tscn"))
 	else:
 		lbl_nome.text = DatabaseManager.user_nick.to_upper() + "\nCLÃ: " + DatabaseManager.user_cla.to_upper()
 		# Tenta pintar de outra cor pra simular o avatar do mago por enquanto

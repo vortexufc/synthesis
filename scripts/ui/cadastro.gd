@@ -88,7 +88,7 @@ func _on_auth_erro(mensagem: String) -> void:
 
 func _on_btn_back_pressed() -> void:
 	print("Voltar pressionado. Mudando de cena...")
-	# get_tree().change_scene_to_file("res://scenes/ui/menu_principal.tscn")
+	get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
 
 func _on_link_login_pressed() -> void:
 	print("Ir para login. Mudando de cena...")
