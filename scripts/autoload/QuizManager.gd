@@ -20,7 +20,7 @@ func _ready():
 	DatabaseManager.perguntas_recebidas.connect(_on_perguntas_chegaram)
 	DatabaseManager.puxar_perguntas(1)
 	
-	# Escuta o sinal do NPC no mundo! (Task Combat-1 -> Combat-2)
+	# Escuta o sinal do NPC no mundo! (Task Combat-1 -> Combat-2 -> Combat-4)
 	GlobalSignals.iniciar_batalha.connect(iniciar_batalha)
 
 func _on_perguntas_chegaram(dados: Array) -> void:
@@ -56,12 +56,23 @@ func get_random_question():
 var vida_maxima_inimigo: float = 100.0
 var vida_atual_inimigo: float = 100.0
 
+# [Combat-4] Dados do inimigo atual (definidos pelo EnemyTrigger da cena)
+var _num_questoes: int = 5           ## Máximo de rodadas desta batalha
+var _rodada_atual: int = 0           ## Contador de rodadas jogadas
+var _duracao_batalha: float = 300.0  ## Duração total do timer (usado no cálculo de rapidez)
+
 var _jogador_batalha: Node2D = null
 
-func iniciar_batalha() -> void:
+func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	if questions.size() == 0:
 		print("Aguardando download do banco de dados das perguntas...")
 		await DatabaseManager.perguntas_recebidas
+
+	# [Combat-4] Carrega os dados do inimigo (com fallback seguro)
+	_num_questoes   = enemy_data.get("num_questoes",   5)
+	_duracao_batalha = enemy_data.get("duracao_batalha", 300.0)
+	_rodada_atual   = 0
+	print("[Combat-4] Batalha: %d questões / %.0fs — Golem do Andar 1" % [_num_questoes, _duracao_batalha])
 
 	print("Batalha Iniciada! Congelando o tempo do mundo...")
 	get_tree().paused = true
@@ -94,11 +105,23 @@ func iniciar_batalha() -> void:
 	
 	# Reinicia Barras visuais
 	ui_instancia.atualizar_vida(1.0, 1.0)
+
+	# [Combat-4] Inicia o timer com a duração do inimigo (não resetado entre rodadas)
+	ui_instancia.iniciar_timer(_duracao_batalha)
 	
 	# Puxa o Rodada 1
 	_nova_rodada()
 
 func _nova_rodada() -> void:
+	# [Combat-4] Verifica se atingiu o limite de rodadas do inimigo
+	_rodada_atual += 1
+	if _rodada_atual > _num_questoes:
+		print("[Combat-4] Todas as %d questões respondidas. Batalha encerrada!" % _num_questoes)
+		ui_instancia.ocultar_interface()
+		get_tree().paused = false
+		GlobalSignals.batalha_encerrada.emit()
+		return
+	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
 	pergunta_atual = get_random_question()
 	ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
 
@@ -106,8 +129,9 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
 	
 	if acertou:
-		# Multiplicador do Relógio (Dano Base = 10. Bonus Máximo = 25 extras)
-		var rapidez = clamp(tempo_sobrando / 300.0, 0.0, 1.0)
+		# [Combat-4] Multiplicador de rapidez relativo à duração real da batalha do inimigo
+		# (Dano Base = 10. Bonus Máximo = 25 extras pela velocidade de resposta)
+		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)
 		var dano = 10 + int(25 * rapidez)
 		vida_atual_inimigo -= dano
 		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano, vida_atual_inimigo])

@@ -14,8 +14,12 @@ signal resposta_escolhida(indice: int, tempo_usado: float)
 @onready var health_enemy: ColorRect = $Control/HealthEnemy
 
 var _botoes: Array = []
+
+# [Combat-4] O timer corre de forma contínua durante toda a batalha.
+# tempo_restante só é (re)definido por iniciar_timer() — nunca em atualizar_pergunta().
 var tempo_restante: float = 300.0
 var tempo_rodando: bool = false
+var _duracao_batalha: float = 300.0  ## Espelho da duração do inimigo (para exibição futura)
 
 func _ready() -> void:
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
@@ -41,8 +45,16 @@ func _process(delta: float) -> void:
 		var segundos = int(tempo_restante) % 60
 		label_tempo.text = "TEMPO:\n%02d:%02d" % [minutos, segundos]
 
+# [Combat-4] Inicia o timer com a duração correta do inimigo.
+# Deve ser chamado UMA ÚNICA VEZ por batalha, antes da primeira rodada.
+func iniciar_timer(duracao: float) -> void:
+	_duracao_batalha = duracao
+	tempo_restante   = duracao
+	tempo_rodando    = true
+
 func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	self.show()
+	# [Combat-4] Retoma a contagem — NÃO reinicia tempo_restante (timer é contínuo por batalha)
 	tempo_rodando = true
 	label_pergunta.text = texto
 	

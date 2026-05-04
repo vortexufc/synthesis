@@ -1,7 +1,8 @@
 extends Node
 
 @warning_ignore("unused_signal")
-signal iniciar_batalha
+# [Combat-4] EnemyData: { "num_questoes": int, "duracao_batalha": float }
+signal iniciar_batalha(enemy_data: Dictionary)
 @warning_ignore("unused_signal")
 signal batalha_encerrada
 @warning_ignore("unused_signal")
