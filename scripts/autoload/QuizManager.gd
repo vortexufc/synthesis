@@ -120,6 +120,7 @@ func _nova_rodada() -> void:
 		ui_instancia.ocultar_interface()
 		get_tree().paused = false
 		GlobalSignals.batalha_encerrada.emit()
+		PlayerStats.salvar()
 		return
 	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
 	pergunta_atual = get_random_question()
@@ -128,17 +129,19 @@ func _nova_rodada() -> void:
 func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
 	
+	var dano_final = 0
+	
 	if acertou:
 		# [Combat-4] Multiplicador de rapidez relativo à duração real da batalha do inimigo
 		# (Dano Base = 10. Bonus Máximo = 25 extras pela velocidade de resposta)
 		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)
-		var dano = 10 + int(25 * rapidez)
-		vida_atual_inimigo -= dano
-		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano, vida_atual_inimigo])
+		dano_final = 10 + int(25 * rapidez)
+		vida_atual_inimigo -= dano_final
+		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano_final, vida_atual_inimigo])
 	else:
-		var dano_player = 25
-		PlayerStats.sofrer_dano(dano_player)
-		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_player, PlayerStats.vida_atual_jogador])
+		dano_final = 25
+		PlayerStats.sofrer_dano(dano_final)
+		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_final, PlayerStats.vida_atual_jogador])
 		
 		# Feedback Visual de Dano no Mago
 		if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
@@ -150,6 +153,9 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	
 	resultado_batalha.emit(acertou)
 	
+	# Chama o feedback visual da task Combat-6
+	ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final)
+	
 	# Manda UI cortar os rects verde e vermelho para animar perda
 	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
 	
@@ -160,6 +166,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		ui_instancia.ocultar_interface()
 		get_tree().paused = false
 		GlobalSignals.batalha_encerrada.emit()
+		PlayerStats.salvar()
 		print("=== THE END: LUTA ACABOU! Voltando ao mapa. ===")
 	else:
 		_nova_rodada()
