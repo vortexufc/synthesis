@@ -1,6 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://game_over_12345"]
 
 [ext_resource type="Script" path="res://scripts/ui/game_over.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font"]
+[ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="3_font"]
 
 [node name="GameOver" type="CanvasLayer"]
 process_mode = 3
@@ -32,13 +34,15 @@ alignment = 1
 
 [node name="Titulo" type="Label" parent="ColorRect/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 64
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 48
 text = "FIM DE JOGO"
 horizontal_alignment = 1
 
 [node name="Stats" type="Label" parent="ColorRect/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 32
 text = "Tempo Restante: --s
 Precisão: --%"
 horizontal_alignment = 1
@@ -50,10 +54,12 @@ alignment = 1
 
 [node name="BtnTentarNovamente" type="Button" parent="ColorRect/VBoxContainer/HBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 24
 text = "Tentar Novamente"
 
 [node name="BtnMenuPrincipal" type="Button" parent="ColorRect/VBoxContainer/HBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 24
 text = "Menu Principal"
