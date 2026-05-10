@@ -167,6 +167,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		get_tree().paused = false
 		GlobalSignals.batalha_encerrada.emit()
 		PlayerStats.salvar()
-		print("=== THE END: LUTA ACABOU! Voltando ao mapa. ===")
+		var vitoria = (vida_atual_inimigo <= 0)
+		GlobalSignals.fim_de_jogo.emit(vitoria)
 	else:
 		_nova_rodada()
