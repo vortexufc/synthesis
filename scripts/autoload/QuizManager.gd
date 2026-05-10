@@ -6,6 +6,7 @@ var current_index = 0
 
 # Referências da Interface
 var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
+var game_over_cena = preload("res://scenes/ui/game_over.tscn")
 var ui_instancia = null
 var pergunta_atual = null
 
@@ -15,6 +16,10 @@ signal resultado_batalha(acertou: bool)
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS # Super importante para rodar no pause!
 	randomize()
+	
+	# Instancia o Game Over na raiz do jogo para ele sempre existir
+	var go_inst = game_over_cena.instantiate()
+	add_child(go_inst)
 	
 	# Assina no sinal do banco de dados e Manda baixar as do Chão 1
 	DatabaseManager.perguntas_recebidas.connect(_on_perguntas_chegaram)
@@ -167,6 +172,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		get_tree().paused = false
 		GlobalSignals.batalha_encerrada.emit()
 		PlayerStats.salvar()
-		print("=== THE END: LUTA ACABOU! Voltando ao mapa. ===")
+		var vitoria = (vida_atual_inimigo <= 0)
+		GlobalSignals.fim_de_jogo.emit(vitoria)
 	else:
 		_nova_rodada()

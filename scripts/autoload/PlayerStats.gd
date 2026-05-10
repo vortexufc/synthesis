@@ -76,6 +76,12 @@ func curar_vida(valor: float) -> void:
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	salvar()
 
+# funcao para resetar a vida após Game Over
+func resetar_vida() -> void:
+	vida_atual_jogador = vida_maxima_jogador
+	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
+	salvar()
+
 # funcao de tomar dano
 func sofrer_dano(valor: float) -> void:
 	vida_atual_jogador -= valor
