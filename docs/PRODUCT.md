@@ -10,7 +10,7 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [Combat-5] Validar EnemyData nas Cenas de Sala (garantir constantes e export overrides no inspetor).
 - [x] [UI-8] Criar Tela de Game Over / Vitória com base em emissões de sinal no Godot.
 - [ ] Finalizar integração das sprites do mago.
-- [ ] Adicionar novas salas de masmorra e desafios.
+- [x] [Level-3] Planejamento do Andar 2 — Salas, tilesets RF_Catacombs e 2D Pixel Dungeon integrados à main.
 
 ## Changelog
 Ver arquivo `CHANGELOG.md` na raiz do projeto.
