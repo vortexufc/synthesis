@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyi42d17gpo85"
-path="res://.godot/imported/hurt.png-445e84a2efbd22617da510120971b1fe.ctex"
+uid="uid://bs2ii4ut24qj4"
+path="res://.godot/imported/scroll_32x32.png-bae4958444d0673615a6b8b6ad30bf67.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/Characters/Maguinho/hurt.png"
-dest_files=["res://.godot/imported/hurt.png-445e84a2efbd22617da510120971b1fe.ctex"]
+source_file="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png"
+dest_files=["res://.godot/imported/scroll_32x32.png-bae4958444d0673615a6b8b6ad30bf67.ctex"]
 
 [params]
 

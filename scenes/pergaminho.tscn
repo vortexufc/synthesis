@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://cv1hh557ja58c"]
+
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="2_5fp00"]
+[ext_resource type="Script" uid="uid://7jj11qw68wtb" path="res://scripts/ItemPergaminho.gd" id="3_qso5x"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mimico"]
+size = Vector2(28, 28)
+
+[node name="pergaminho" type="Area2D" unique_id=706257676]
+scale = Vector2(4, 4)
+script = ExtResource("3_qso5x")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1352803906]
+position = Vector2(0, 4)
+shape = SubResource("RectangleShape2D_mimico")
+
+[node name="PergaminhoSprite" type="Sprite2D" parent="." unique_id=1070801581]
+texture = ExtResource("2_5fp00")

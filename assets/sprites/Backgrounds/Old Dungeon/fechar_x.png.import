@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3fbe1i7737tb"
-path="res://.godot/imported/run.png-a34182dca2755d33acea6f22beeb5780.ctex"
+uid="uid://df2evw7knd00d"
+path="res://.godot/imported/fechar_x.png-fef5cc71ec9f659ed12b3f67510d4f74.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/Characters/Maguinho/run.png"
-dest_files=["res://.godot/imported/run.png-a34182dca2755d33acea6f22beeb5780.ctex"]
+source_file="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png"
+dest_files=["res://.godot/imported/fechar_x.png-fef5cc71ec9f659ed12b3f67510d4f74.ctex"]
 
 [params]
 

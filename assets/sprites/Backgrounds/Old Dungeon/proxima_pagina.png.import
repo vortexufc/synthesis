@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hwsa2ktyuf41"
-path="res://.godot/imported/thrust.png-b9d1c5c56c46c38638acc4425bef6817.ctex"
+uid="uid://cwg0mo350v3ub"
+path="res://.godot/imported/proxima_pagina.png-8ebf1f0a69940c07c66083e1c502791f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/Characters/Maguinho/thrust.png"
-dest_files=["res://.godot/imported/thrust.png-b9d1c5c56c46c38638acc4425bef6817.ctex"]
+source_file="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png"
+dest_files=["res://.godot/imported/proxima_pagina.png-8ebf1f0a69940c07c66083e1c502791f.ctex"]
 
 [params]
 
