@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dbwrhq475e5aa"]
 
-[ext_resource type="Texture2D" uid="uid://b2d15a427atyi" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll.png" id="1_7kjbd"]
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="1_7kjbd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_30uds"]
 size = Vector2(145, 80)

@@ -738,6 +738,7 @@ flip_h = true
 position = Vector2(1200, 325)
 scale = Vector2(2, 2)
 
+
 [node name="HUD" parent="." unique_id=561849811 instance=ExtResource("9_hud")]
 visible = false
 
@@ -810,3 +811,18 @@ layout_mode = 2
 texture_normal = ExtResource("17_n6usc")
 ignore_texture_size = true
 stretch_mode = 5
+
+[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1422902887]
+
+[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=1750025168]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=1868661074]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
