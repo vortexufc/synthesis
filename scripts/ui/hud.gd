@@ -13,8 +13,8 @@ func _ready() -> void:
 	PlayerStats.vida_alterada.connect(atualizar_vida)
 	
 	# esconde a barra na batalha
-	GlobalSignals.iniciar_batalha.connect(func(): visible = false)
-	GlobalSignals.batalha_encerrada.connect(func(): visible = true)
+	GlobalSignals.iniciar_batalha.connect(func(_enemy_data): self.hide())
+	GlobalSignals.batalha_encerrada.connect(func(): self.show())
 
 func atualizar_vida(atual: float, maxima: float) -> void:
 	var pct = clamp(atual / maxima, 0.0, 1.0)
