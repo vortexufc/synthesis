@@ -2,7 +2,8 @@ extends Node
 
 # chaves do nosso banco no supabase
 var supabase_url: String = "https://uszmgqludyymspsarciw.supabase.co"
-var supabase_key: String = "sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
+# chave lida do ProjectSettings pra nao ficar exposta no codigo
+var supabase_key: String = ProjectSettings.get_setting("application/config/supabase_key", "")
 
 # ---- SESSAO ATIVA DO JOGADOR ----
 var user_token: String = ""

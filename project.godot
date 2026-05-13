@@ -10,10 +10,10 @@ config_version=5
 
 [application]
 
-config/name="Licoes Arcanas"
 run/main_scene="uid://cyhlknb4do2ui"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
+config/supabase_key="sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
 
 [autoload]
 
@@ -23,6 +23,10 @@ QuizManager="*res://scripts/autoload/QuizManager.gd"
 AudioManager="*uid://bo05m2ssexiiy"
 TransitionScreen="*uid://ljn44efihbum"
 PlayerStats="*res://scripts/autoload/PlayerStats.gd"
+
+[global]
+
+supabase=false
 
 [input]
 
