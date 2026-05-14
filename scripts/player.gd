@@ -12,6 +12,13 @@ var travado: bool = false
 
 # [Fix-1] HP unificado: gerenciado exclusivamente pelo autoload PlayerStats
 
+func _ready() -> void:
+	# quando a batalha começar, vira o mago pra direita (olhando pro inimigo)
+	GlobalSignals.iniciar_batalha.connect(func(_d):
+		ultima_direcao = "direita"
+		$sprite.play("idle_direita")
+	)
+
 func _physics_process(_delta: float) -> void:
 	# Se travado pelo Mímico, não processa input de movimento
 	if travado:
