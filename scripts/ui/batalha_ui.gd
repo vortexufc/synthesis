@@ -24,6 +24,8 @@ var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
 
 func _ready() -> void:
+	# garante que os botoes funcionem mesmo com o jogo pausado
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
 	for i in range(_botoes.size()):
 		_botoes[i].pressed.connect(_on_botao_pressionado.bind(i))

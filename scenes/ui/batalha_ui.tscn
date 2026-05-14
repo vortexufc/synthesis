@@ -7,6 +7,7 @@
 
 [node name="BatalhaUI" type="CanvasLayer" unique_id=1951544455]
 process_mode = 3
+layer = 5
 script = ExtResource("1_abcde")
 
 [node name="Control" type="Control" parent="." unique_id=1726436305]
@@ -24,6 +25,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="BackgroundMockup" type="TextureRect" parent="Control" unique_id=1416241752]
@@ -33,12 +35,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("2_qhges")
 expand_mode = 1
 stretch_mode = 6
 
 [node name="PosicaoMago" type="Marker2D" parent="Control" unique_id=1581849298]
-position = Vector2(190, 340)
+position = Vector2(268, 303)
 
 [node name="SpriteMonstro" type="TextureRect" parent="Control" unique_id=1740609982]
 layout_mode = 0

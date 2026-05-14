@@ -106,7 +106,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	
 	# Põe ele na UI e vira ele pra Direita (pra ele olhar pro Golem)
 	ui_instancia.get_node("Control/PosicaoMago").call_deferred("add_child", _jogador_batalha)
-	_jogador_batalha.get_node("sprite").play("idle_direita")
+	_jogador_batalha.get_node("sprite").call_deferred("play", "idle_direita")
 	
 	# Reinicia Barras visuais
 	ui_instancia.atualizar_vida(1.0, 1.0)
@@ -164,8 +164,8 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	# Manda UI cortar os rects verde e vermelho para animar perda
 	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
 	
-	# Espera o jogador ver a barra caindo
-	await get_tree().create_timer(1.2).timeout
+	# Espera o jogador ver a barra caindo (process_always=true pra funcionar com o jogo pausado)
+	await get_tree().create_timer(1.2, true).timeout
 	
 	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
 		ui_instancia.ocultar_interface()

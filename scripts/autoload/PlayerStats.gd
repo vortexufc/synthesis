@@ -53,12 +53,8 @@ func carregar():
 		var json = JSON.new()
 		if json.parse(content) == OK:
 			var data = json.data
-			vida_atual_jogador = data.get("vida_atual_jogador", vida_maxima_jogador)
-			
-			# Se morreu no save anterior, ressuscita pra não ficar travado!
-			if vida_atual_jogador <= 0:
-				vida_atual_jogador = vida_maxima_jogador
-				
+			# HP sempre começa cheio (jogo offline por enquanto)
+			vida_atual_jogador = vida_maxima_jogador
 			pocoes = data.get("pocoes", [])
 			itens = data.get("itens", [])
 			grimorio = data.get("grimorio", [])
