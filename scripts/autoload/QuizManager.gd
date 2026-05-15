@@ -68,6 +68,11 @@ var _duracao_batalha: float = 300.0  ## Duração total do timer (usado no cálc
 
 var _jogador_batalha: Node2D = null
 
+var _acertos_batalha: int = 0
+var _erros_batalha: int = 0
+var _dano_causado: int = 0
+var _tempo_inicio_batalha: float = 0
+
 func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	if questions.size() == 0:
 		print("Aguardando download do banco de dados das perguntas...")
@@ -78,6 +83,11 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	_duracao_batalha = enemy_data.get("duracao_batalha", 300.0)
 	_rodada_atual   = 0
 	print("[Combat-4] Batalha: %d questões / %.0fs — Golem do Andar 1" % [_num_questoes, _duracao_batalha])
+
+	_acertos_batalha = 0
+	_erros_batalha = 0
+	_dano_causado = 0
+	_tempo_inicio_batalha = Time.get_ticks_msec()
 
 	print("Batalha Iniciada! Congelando o tempo do mundo...")
 	get_tree().paused = true
@@ -123,9 +133,21 @@ func _nova_rodada() -> void:
 	if _rodada_atual > _num_questoes:
 		print("[Combat-4] Todas as %d questões respondidas. Batalha encerrada!" % _num_questoes)
 		ui_instancia.ocultar_interface()
-		get_tree().paused = false
-		GlobalSignals.batalha_encerrada.emit()
+		
+		var vitoria = (vida_atual_inimigo <= 0)
+		var tempo_decorrido = (Time.get_ticks_msec() - _tempo_inicio_batalha) / 1000.0
+		var precisao = 0
+		if (_acertos_batalha + _erros_batalha) > 0:
+			precisao = float(_acertos_batalha) / float(_acertos_batalha + _erros_batalha) * 100.0
+		var stats = {
+			"tempo": tempo_decorrido,
+			"precisao": int(precisao),
+			"dano": _dano_causado
+		}
+		
+		GlobalSignals.batalha_encerrada.emit(vitoria)
 		PlayerStats.salvar()
+		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
 		return
 	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
 	pergunta_atual = get_random_question()
@@ -137,13 +159,16 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var dano_final = 0
 	
 	if acertou:
+		_acertos_batalha += 1
 		# [Combat-4] Multiplicador de rapidez relativo à duração real da batalha do inimigo
 		# (Dano Base = 10. Bonus Máximo = 25 extras pela velocidade de resposta)
 		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)
 		dano_final = 10 + int(25 * rapidez)
 		vida_atual_inimigo -= dano_final
+		_dano_causado += dano_final
 		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano_final, vida_atual_inimigo])
 	else:
+		_erros_batalha += 1
 		dano_final = 25
 		PlayerStats.sofrer_dano(dano_final)
 		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_final, PlayerStats.vida_atual_jogador])
@@ -169,10 +194,20 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	
 	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
 		ui_instancia.ocultar_interface()
-		get_tree().paused = false
-		GlobalSignals.batalha_encerrada.emit()
-		PlayerStats.salvar()
+		
 		var vitoria = (vida_atual_inimigo <= 0)
-		GlobalSignals.fim_de_jogo.emit(vitoria)
+		var tempo_decorrido = (Time.get_ticks_msec() - _tempo_inicio_batalha) / 1000.0
+		var precisao = 0
+		if (_acertos_batalha + _erros_batalha) > 0:
+			precisao = float(_acertos_batalha) / float(_acertos_batalha + _erros_batalha) * 100.0
+		var stats = {
+			"tempo": tempo_decorrido,
+			"precisao": int(precisao),
+			"dano": _dano_causado
+		}
+		
+		GlobalSignals.batalha_encerrada.emit(vitoria)
+		PlayerStats.salvar()
+		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
 	else:
 		_nova_rodada()

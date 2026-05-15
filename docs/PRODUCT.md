@@ -9,6 +9,7 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] Melhorar temporizadores contínuos de combate (Combat-1 até Combat-3).
 - [x] [Combat-5] Validar EnemyData nas Cenas de Sala (garantir constantes e export overrides no inspetor).
 - [x] [UI-8] Criar Tela de Game Over / Vitória com base em emissões de sinal no Godot.
+- [x] [Fix-6] Estatísticas Reais na Tela de Game Over / Vitória (Tempo, Precisão, Dano) e ocultação condicional do EnemyTrigger.
 - [ ] Finalizar integração das sprites do mago.
 - [x] [Level-3] Planejamento do Andar 2 — Salas, tilesets RF_Catacombs e 2D Pixel Dungeon integrados à main.
 

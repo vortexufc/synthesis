@@ -8,6 +8,14 @@ const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 @export var num_questoes: int = 5           ## Rodadas de quiz desta batalha
 @export var duracao_batalha: float = 300.0  ## Segundos totais (5 min para o Golem do Andar 1)
 
+func _ready() -> void:
+	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
+
+func _on_batalha_encerrada(vitoria: bool) -> void:
+	if not vitoria:
+		show()
+		set_deferred("monitoring", true)
+
 func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player": # Checa se é especificamente o player
 		var enemy_data: Dictionary = {
