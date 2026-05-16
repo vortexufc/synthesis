@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b2713wbgtpddw"
-path="res://.godot/imported/walk.png-6c12d0f1632d279c02a8a459301f5815.ctex"
+uid="uid://bxnoitoqop8gj"
+path="res://.godot/imported/projetil_magia_rastro.png-6722f68d9b50ba5f5f8d6df6ab731c28.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/Characters/Maguinho/walk.png"
-dest_files=["res://.godot/imported/walk.png-6c12d0f1632d279c02a8a459301f5815.ctex"]
+source_file="res://assets/sprites/Particles/projetil_magia_rastro.png"
+dest_files=["res://.godot/imported/projetil_magia_rastro.png-6722f68d9b50ba5f5f8d6df6ab731c28.ctex"]
 
 [params]
 

@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://cyhlknb4do2ui"]
 
 [ext_resource type="Script" uid="uid://b1niptup4t0uq" path="res://scripts/player.gd" id="1_uhc0a"]
-[ext_resource type="Texture2D" uid="uid://b2713wbgtpddw" path="res://assets/sprites/Characters/Maguinho/Walk.png" id="2_2nptd"]
+[ext_resource type="Texture2D" uid="uid://b2713wbgtpddw" path="res://assets/sprites/Characters/Maguinho/walk.png" id="2_2nptd"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="3_cnmog"]
 [ext_resource type="Texture2D" uid="uid://bb58dqe3i4i1p" path="res://assets/sprites/Characters/Maguinho/idle.png" id="3_r0kh6"]
 [ext_resource type="PackedScene" uid="uid://ci4wfm3uypja1" path="res://scenes/enemy_trigger.tscn" id="4_enemy"]
@@ -737,7 +737,6 @@ flip_h = true
 [node name="Mimico" parent="." unique_id=987654321 instance=ExtResource("8_mimico")]
 position = Vector2(1200, 325)
 scale = Vector2(2, 2)
-
 
 [node name="HUD" parent="." unique_id=561849811 instance=ExtResource("9_hud")]
 visible = false
