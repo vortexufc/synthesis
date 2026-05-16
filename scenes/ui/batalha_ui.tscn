@@ -4,6 +4,229 @@
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_fghij"]
 [ext_resource type="Texture2D" uid="uid://da5t6wdvucdfb" path="res://assets/sprites/Backgrounds/Old Dungeon/OldDungeon.png" id="2_qhges"]
 [ext_resource type="PackedScene" uid="uid://ddyv4ur73toyc" path="res://scenes/Entidades/Evil_Wizzard.tscn" id="3_3t2t5"]
+[ext_resource type="Texture2D" uid="uid://bxnoitoqop8gj" path="res://assets/sprites/Particles/projetil_magia_rastro.png" id="5_kepm2"]
+[ext_resource type="Texture2D" uid="uid://d20kl4h5r0lcj" path="res://assets/sprites/Particles/projetil_magia.png" id="6_su8ar"]
+[ext_resource type="Texture2D" uid="uid://ba6y2xhk7xul2" path="res://assets/sprites/Particles/projetil_magia_rastro2.png" id="7_su8ar"]
+
+[sub_resource type="Animation" id="Animation_iggoh"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ParticulasMago/Projetil:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(250, 250)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ParticulasMago/Projetil/CPUParticles2D:emitting")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ParticulasMago/Explosao/CPUParticles2D:emitting")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ParticulasMago/Projetil/Sprite2D:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("ParticulasInimigo/Projetil:position")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(875, 300)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("ParticulasInimigo/Projetil/CPUParticles2D:emitting")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("ParticulasInimigo/Projetil/Sprite2D:visible")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("ParticulasInimigo/Explosao/CPUParticles2D:emitting")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_u70fr"]
+resource_name = "ataque_inimigo"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ParticulasInimigo/Projetil:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(875, 300), Vector2(275, 300)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ParticulasInimigo/Projetil/CPUParticles2D:emitting")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ParticulasInimigo/Projetil/Sprite2D:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ParticulasInimigo/Explosao/CPUParticles2D:emitting")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [false, true]
+}
+
+[sub_resource type="Animation" id="Animation_pyadc"]
+resource_name = "ataque_mago"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ParticulasMago/Projetil:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(275, 300), Vector2(875, 300)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ParticulasMago/Projetil/CPUParticles2D:emitting")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.23333335, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ParticulasMago/Explosao/CPUParticles2D:emitting")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [false, true]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ParticulasMago/Projetil/Sprite2D:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_u70fr"]
+_data = {
+&"RESET": SubResource("Animation_iggoh"),
+&"ataque_inimigo": SubResource("Animation_u70fr"),
+&"ataque_mago": SubResource("Animation_pyadc")
+}
+
+[sub_resource type="Curve" id="Curve_7v22q"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.24719107), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_u25ki"]
+offsets = PackedFloat32Array(0, 0.22839506, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="Curve" id="Curve_oiqal"]
+_data = [Vector2(0.07978723, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [node name="BatalhaUI" type="CanvasLayer" unique_id=1951544455]
 process_mode = 3
@@ -235,3 +458,86 @@ theme_override_fonts/font = ExtResource("2_fghij")
 theme_override_font_sizes/font_size = 10
 text = "E) "
 autowrap_mode = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=467992820]
+libraries/ = SubResource("AnimationLibrary_u70fr")
+
+[node name="ParticulasMago" type="Node2D" parent="." unique_id=1206794698]
+
+[node name="Projetil" type="Node2D" parent="ParticulasMago" unique_id=1364010030]
+position = Vector2(250, 250)
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasMago/Projetil" unique_id=307948851]
+emitting = false
+amount = 12
+texture = ExtResource("5_kepm2")
+emission_shape = 3
+emission_rect_extents = Vector2(1, 12)
+gravity = Vector2(-200, 0)
+scale_amount_min = 2.0
+scale_amount_max = 3.0
+scale_amount_curve = SubResource("Curve_7v22q")
+color_ramp = SubResource("Gradient_u25ki")
+
+[node name="Sprite2D" type="Sprite2D" parent="ParticulasMago/Projetil" unique_id=1880609191]
+visible = false
+scale = Vector2(3, 3)
+texture = ExtResource("6_su8ar")
+
+[node name="Explosao" type="Node2D" parent="ParticulasMago" unique_id=1045767724]
+position = Vector2(875, 300)
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasMago/Explosao" unique_id=1880818786]
+emitting = false
+amount = 32
+one_shot = true
+explosiveness = 1.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+scale_amount_min = 4.0
+scale_amount_max = 6.0
+scale_amount_curve = SubResource("Curve_oiqal")
+color = Color(1, 0.8352941, 0.4117647, 1)
+
+[node name="ParticulasInimigo" type="Node2D" parent="." unique_id=1339662815]
+
+[node name="Projetil" type="Node2D" parent="ParticulasInimigo" unique_id=1342107903]
+position = Vector2(875, 300)
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasInimigo/Projetil" unique_id=389938337]
+emitting = false
+amount = 12
+texture = ExtResource("7_su8ar")
+emission_shape = 3
+emission_rect_extents = Vector2(1, 12)
+gravity = Vector2(200, 0)
+scale_amount_min = 2.0
+scale_amount_max = 3.0
+scale_amount_curve = SubResource("Curve_7v22q")
+color_ramp = SubResource("Gradient_u25ki")
+
+[node name="Sprite2D" type="Sprite2D" parent="ParticulasInimigo/Projetil" unique_id=350833620]
+visible = false
+scale = Vector2(3, 3)
+texture = ExtResource("6_su8ar")
+flip_h = true
+
+[node name="Explosao" type="Node2D" parent="ParticulasInimigo" unique_id=576705782]
+z_index = 1
+position = Vector2(260, 300)
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasInimigo/Explosao" unique_id=2037059368]
+emitting = false
+amount = 32
+one_shot = true
+explosiveness = 1.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+scale_amount_min = 4.0
+scale_amount_max = 6.0
+scale_amount_curve = SubResource("Curve_oiqal")
+color = Color(0.6313726, 0.40784314, 0.5686275, 1)

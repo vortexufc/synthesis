@@ -15,6 +15,7 @@ signal resposta_escolhida(indice: int, tempo_usado: float)
 
 var _botoes: Array = []
 
+
 # [Combat-4] O timer corre de forma contínua durante toda a batalha.
 # tempo_restante só é (re)definido por iniciar_timer() — nunca em atualizar_pergunta().
 var tempo_restante: float = 300.0
@@ -111,13 +112,25 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 		
 	var lbl = Label.new()
 	if acertou:
+		$AnimationPlayer.play("ataque_mago")
+		await $AnimationPlayer.animation_finished
+		# Flash
+		var tween = create_tween()
+		tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
+		tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 1, 1, 1), 0.35)
 		lbl.text = str(valor) + " DMG!"
 		lbl.modulate = Color(0.2, 0.8, 0.2)
 	else:
 		if _ultimo_botao_clicado == -1:
 			lbl.text = "Tempo!"
 		else:
-			lbl.text = "-" + str(valor) + " HP"
+			$AnimationPlayer.play("ataque_inimigo")
+			await $AnimationPlayer.animation_finished
+			# Flash 
+			var tween = create_tween()
+			tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
+			tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 1, 1, 1), 0.35)
+		lbl.text = "-" + str(valor) + " HP"
 		lbl.modulate = Color(0.9, 0.2, 0.2)
 		
 	lbl.add_theme_font_size_override("font_size", 40)
