@@ -126,10 +126,7 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 		else:
 			$AnimationPlayer.play("ataque_inimigo")
 			await $AnimationPlayer.animation_finished
-			# Flash 
-			var tween = create_tween()
-			tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
-			tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 1, 1, 1), 0.35)
+			
 		lbl.text = "-" + str(valor) + " HP"
 		lbl.modulate = Color(0.9, 0.2, 0.2)
 		

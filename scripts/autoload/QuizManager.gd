@@ -155,41 +155,40 @@ func _nova_rodada() -> void:
 
 func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
-	
 	var dano_final = 0
 	
 	if acertou:
-		_acertos_batalha += 1
-		# [Combat-4] Multiplicador de rapidez relativo à duração real da batalha do inimigo
-		# (Dano Base = 10. Bonus Máximo = 25 extras pela velocidade de resposta)
 		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)
 		dano_final = 10 + int(25 * rapidez)
-		vida_atual_inimigo -= dano_final
-		_dano_causado += dano_final
-		print("✅ VEREDITO: Certa! Dano crítico de %s! Sangue Golem: %s/100" % [dano_final, vida_atual_inimigo])
 	else:
-		_erros_batalha += 1
 		dano_final = 25
-		PlayerStats.sofrer_dano(dano_final)
-		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_final, PlayerStats.vida_atual_jogador])
-		
-		# Feedback Visual de Dano no Mago
-		if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
-			var sprite_mago = _jogador_batalha.get_node("sprite")
-			# set_pause_mode evita que o tween paralise por conta do jogo pausado
-			var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-			tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
-			tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
 	
 	resultado_batalha.emit(acertou)
 	
-	# Chama o feedback visual da task Combat-6
-	ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final)
+	# aguarda o fim da animação
+	await ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final)
 	
-	# Manda UI cortar os rects verde e vermelho para animar perda
+	if acertou:
+		_acertos_batalha += 1
+		vida_atual_inimigo -= dano_final
+		_dano_causado += dano_final
+		print("✅ VEREDITO: Certa! Dano de %s! Sangue Golem: %s/100" % [dano_final, vida_atual_inimigo])
+	else:
+		_erros_batalha += 1
+		PlayerStats.sofrer_dano(dano_final)
+		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_final, PlayerStats.vida_atual_jogador])
+		
+		# feedback visual
+		if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
+			var sprite_mago = _jogador_batalha.get_node("sprite")
+			var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
+			tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
+			
+	# atualiza as barras na interface
 	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
 	
-	# Espera o jogador ver a barra caindo (process_always=true pra funcionar com o jogo pausado)
+	# delay antes da proxima pergunta
 	await get_tree().create_timer(1.2, true).timeout
 	
 	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
