@@ -53,8 +53,7 @@ func carregar():
 		var json = JSON.new()
 		if json.parse(content) == OK:
 			var data = json.data
-			# HP sempre começa cheio (jogo offline por enquanto)
-			vida_atual_jogador = vida_maxima_jogador
+			vida_atual_jogador = vida_maxima_jogador # reseta hp inicial
 			pocoes = data.get("pocoes", [])
 			itens = data.get("itens", [])
 			grimorio = data.get("grimorio", [])
