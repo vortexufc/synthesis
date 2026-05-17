@@ -4,8 +4,15 @@ Todas as mudanças notáveis do projeto "Lições Arcanas" serão documentadas n
 
 ## [Unreleased]
 ### Added
+- **[Dev-1] Script `scripts/enemy.gd`**: inimigo com variáveis exportáveis `vida_maxima`, `velocidade`, `dano` e `distancia_patrulha`. Implementa patrulha vai-e-vem em linha reta via `_physics_process`.
+- **[Dev-1] Lógica de patrulha**: inimigo inverte direção ao atingir `distancia_patrulha` pixels do ponto de origem. Flip automático do sprite conforme direção.
+- **[Dev-1] Integração com EnemyTrigger**: ao player entrar na área, o pai do trigger (inimigo) é notificado via `_on_batalha_iniciada`, pausando a patrulha antes de emitir `iniciar_batalha`.
+- **[Dev-1] `andar_id = 1`** adicionado ao `enemy_data` do `EnemyTrigger`. O `QuizManager` lê esse campo e chama `DatabaseManager.puxar_perguntas(andar_id)` dinamicamente, garantindo que o Andar 1 carregue perguntas de Biologia.
+- **[Dev-1] Cena `Evil_Wizzard.tscn` promovida** para cena completa: nó raiz `CharacterBody2D` com `enemy.gd`, `CollisionShape2D` (cápsula corporal) e filho `EnemyTrigger` com `Area2D` de detecção.
+- **[Trap-1] Mímico Físico**: o baú falso agora possui um `StaticBody2D` ativado dinamicamente após a armadilha disparar, bloqueando a passagem do jogador sobre o baú.
+- **[Combat-Fix] Vida Zerada**: corrigido o bug em que o jogador renascia com `0 HP` ao retornar para o Menu Principal pela tela de derrota e tentar jogar novamente. `PlayerStats.resetar_vida()` agora é chamado corretamente.
 - Novas constantes `GOLEM_MENOR` e `GOLEM_ANTIGO` em `enemy_trigger.gd` para parametrizar inimigos.
-- Mensagem de log de combate (`[Combat-5] Batalha: X questões / Ys ao iniciar batalha.`) ao iniciar a batalha.
+- Mensagem de log de combate (`[Dev-1 / Combat-5] Batalha: X questões / Ys / Andar Z`) ao iniciar a batalha.
 - Sinal global `fim_de_jogo(vitoria: bool)` para comunicar o término de uma partida ao invés de print duro no console.
 - Cena de Game Over/Vitória (`scenes/ui/game_over.tscn` e respectivo script) com estado visual variável, estatísticas e botões de re-tentativa e menu principal.
 

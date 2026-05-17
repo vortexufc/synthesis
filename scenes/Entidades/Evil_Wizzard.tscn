@@ -1,37 +1,39 @@
 [gd_scene format=3 uid="uid://ddyv4ur73toyc"]
 
-[ext_resource type="Texture2D" uid="uid://b2vaj1fsrqsbv" path="res://assets/sprites/Characters/Evil_Wizzard/Idle.png" id="1_yhd1n"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="1_enemy"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_trigger"]
+[ext_resource type="Texture2D" uid="uid://b2vaj1fsrqsbv" path="res://assets/sprites/Characters/Evil_Wizzard/Idle.png" id="3_sprite"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_itwxv"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(0, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n5n7t"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(250, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m3px0"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(500, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0cbup"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(750, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_p0cem"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(1000, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ui4ih"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(1250, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ujdt6"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(1500, 0, 250, 250)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xxk54"]
-atlas = ExtResource("1_yhd1n")
+atlas = ExtResource("3_sprite")
 region = Rect2(1750, 0, 250, 250)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_lhd7t"]
@@ -66,7 +68,38 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" unique_id=2072700108]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 30.0
+height = 90.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
+size = Vector2(90, 90)
+
+[node name="EvilWizzard" type="CharacterBody2D"]
+script = ExtResource("1_enemy")
+vida_maxima = 100.0
+velocidade = 55.0
+dano = 25.0
+tempo_min_direcao = 0.8
+tempo_max_direcao = 2.2
+chance_pausa = 0.2
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_lhd7t")
 autoplay = "default"
-frame_progress = 0.5112759
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -10)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="EnemyTrigger" type="Area2D" parent="."]
+script = ExtResource("2_trigger")
+num_questoes = 5
+duracao_batalha = 300.0
+andar_id = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger"]
+shape = SubResource("RectangleShape2D_trigger")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

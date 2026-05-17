@@ -46,7 +46,7 @@ func _process(delta: float) -> void:
 			tempo_restante = 0
 			_on_botao_pressionado(-1) # errou por tempo
 		
-		var minutos = int(tempo_restante) / 60
+		var minutos = int(tempo_restante / 60.0)
 		var segundos = int(tempo_restante) % 60
 		label_tempo.text = "TEMPO:\n%02d:%02d" % [minutos, segundos]
 

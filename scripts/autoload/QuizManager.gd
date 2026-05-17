@@ -21,9 +21,11 @@ func _ready():
 	var go_inst = game_over_cena.instantiate()
 	add_child(go_inst)
 	
-	# Assina no sinal do banco de dados e Manda baixar as do Chão 1
+	# Assina no sinal do banco de dados e Manda baixar as do Chão 1 (padrão)
+	# [Dev-1] O andar real é definido pelo enemy_data.andar_id ao iniciar_batalha
+	_andar_atual = 1
 	DatabaseManager.perguntas_recebidas.connect(_on_perguntas_chegaram)
-	DatabaseManager.puxar_perguntas(1)
+	DatabaseManager.puxar_perguntas(_andar_atual)
 	
 	# Escuta o sinal do NPC no mundo! (Task Combat-1 -> Combat-2 -> Combat-4)
 	GlobalSignals.iniciar_batalha.connect(iniciar_batalha)
@@ -65,6 +67,7 @@ var vida_atual_inimigo: float = 100.0
 var _num_questoes: int = 5           ## Máximo de rodadas desta batalha
 var _rodada_atual: int = 0           ## Contador de rodadas jogadas
 var _duracao_batalha: float = 300.0  ## Duração total do timer (usado no cálculo de rapidez)
+var _andar_atual: int = 1            ## [Dev-1] Andar atual → filtra perguntas (1=Biologia, 2=Química, 3=Física)
 
 var _jogador_batalha: Node2D = null
 
@@ -78,11 +81,21 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		print("Aguardando download do banco de dados das perguntas...")
 		await DatabaseManager.perguntas_recebidas
 
-	# [Combat-4] Carrega os dados do inimigo (com fallback seguro)
-	_num_questoes   = enemy_data.get("num_questoes",   5)
+	# [Combat-4 / Dev-1] Carrega os dados do inimigo (com fallback seguro)
+	_num_questoes    = enemy_data.get("num_questoes",    5)
 	_duracao_batalha = enemy_data.get("duracao_batalha", 300.0)
-	_rodada_atual   = 0
-	print("[Combat-4] Batalha: %d questões / %.0fs — Golem do Andar 1" % [_num_questoes, _duracao_batalha])
+	_rodada_atual    = 0
+
+	# [Dev-1] Se o andar mudou, re-busca as perguntas do novo andar antes de começar
+	var novo_andar: int = enemy_data.get("andar_id", 1)
+	if novo_andar != _andar_atual or questions.size() == 0:
+		_andar_atual = novo_andar
+		print("[Dev-1] Carregando perguntas do Andar %d..." % _andar_atual)
+		DatabaseManager.puxar_perguntas(_andar_atual)
+		if questions.size() == 0:
+			await DatabaseManager.perguntas_recebidas
+
+	print("[Dev-1 / Combat-4] Batalha: %d questões / %.0fs — Andar %d" % [_num_questoes, _duracao_batalha, _andar_atual])
 
 	_acertos_batalha = 0
 	_erros_batalha = 0

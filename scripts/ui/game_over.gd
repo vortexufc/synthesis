@@ -75,5 +75,6 @@ func _on_tentar_novamente_pressed() -> void:
 func _on_menu_principal_pressed() -> void:
 	hide()
 	get_tree().paused = false
+	PlayerStats.resetar_vida()
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 

@@ -34,6 +34,10 @@ func _sequencia_mimico(player: Node2D) -> void:
 	# 1) Trava o movimento do player
 	player.travado = true
 
+	# Habilita o StaticBody2D para que o jogador não possa passar por cima do baú
+	if has_node("StaticBody2D/CollisionShape2D"):
+		$StaticBody2D/CollisionShape2D.set_deferred("disabled", false)
+
 	# 2) Tremor + flash vermelho simultâneos (placeholder visual)
 	_executar_tremor(player)
 	_flash_vermelho(player)
