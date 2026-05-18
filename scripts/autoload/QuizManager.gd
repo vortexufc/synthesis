@@ -117,7 +117,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	if is_instance_valid(_jogador_batalha):
 		_jogador_batalha.queue_free()
 	
-	var jogador_cena = load("res://scenes/player.tscn")
+	var jogador_cena = load("res://scenes/Entidades/player.tscn")
 	_jogador_batalha = jogador_cena.instantiate()
 	# Arranca fora todo o cérebro/script do Boneco-Clone para ele virar um manequim animado! 
 	_jogador_batalha.set_script(null)
