@@ -1,7 +1,7 @@
-[gd_scene format=4 uid="uid://mimico_trap_01"]
+[gd_scene format=4]
 
-[ext_resource type="Script" path="res://scripts/mimico.gd" id="1_mimico"]
-[ext_resource type="Texture2D" uid="uid://dtpfthc6y5oxq" path="res://assets/sprites/tilesets/Dungeon_Basic/doors_lever_chest_animation.png" id="2_chest"]
+[ext_resource type="Script" uid="uid://d2lgndoapt4jk" path="res://scripts/mimico.gd" id="1_mimico"]
+[ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="2_chest"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mimico"]
 size = Vector2(26, 20)
