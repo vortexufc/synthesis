@@ -70,7 +70,7 @@ func _on_tentar_novamente_pressed() -> void:
 	hide()
 	get_tree().paused = false
 	PlayerStats.resetar_vida()
-	get_tree().reload_current_scene()
+	get_tree().change_scene_to_file("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_menu_principal_pressed() -> void:
 	hide()

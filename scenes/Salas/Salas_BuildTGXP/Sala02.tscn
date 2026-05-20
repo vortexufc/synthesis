@@ -1,5 +1,6 @@
 [gd_scene format=4 uid="uid://5lllet6n0nl"]
 
+[ext_resource type="Script" path="res://scripts/levels/sala02.gd" id="1_level_script"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_upxhh"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_jfcty"]
 [ext_resource type="Texture2D" uid="uid://ddl5ei2h1o3s5" path="res://assets/sprites/tilesets/Alquimia/OBJETOS02.png" id="3_jfcty"]
@@ -217,6 +218,7 @@ sources/0 = SubResource("TileSetAtlasSource_o7ard")
 sources/1 = SubResource("TileSetAtlasSource_5jaf4")
 
 [node name="Node2D" type="Node2D" unique_id=792371022]
+script = ExtResource("1_level_script")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_upxhh")]
 z_index = 4

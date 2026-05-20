@@ -1,5 +1,6 @@
 [gd_scene format=4 uid="uid://4moelfejd0k1"]
 
+[ext_resource type="Script" path="res://scripts/levels/corredor.gd" id="1_level_script"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_6co4c"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_q58dl"]
 [ext_resource type="Texture2D" uid="uid://htjac61qk8ai" path="res://assets/sprites/tilesets/Alquimia/tochas (1).png" id="3_j8j2g"]
@@ -111,6 +112,7 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_6co4c")
 
 [node name="Node2D" type="Node2D" unique_id=1363704381]
+script = ExtResource("1_level_script")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_6co4c")]
 position = Vector2(620, 1320)
