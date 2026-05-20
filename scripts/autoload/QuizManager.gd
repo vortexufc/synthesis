@@ -174,7 +174,10 @@ func _nova_rodada() -> void:
 		print("[Combat-4] Todas as %d questões respondidas. Batalha encerrada!" % _num_questoes)
 		ui_instancia.ocultar_interface()
 		
-		var vitoria = (vida_atual_inimigo <= 0)
+		# Se acabaram as perguntas, vence quem tiver mais vida (percentualmente) ou se acertou a maioria.
+		var pct_vida_jogador = PlayerStats.vida_atual_jogador / float(PlayerStats.vida_maxima_jogador)
+		var pct_vida_inimigo = vida_atual_inimigo / float(vida_maxima_inimigo)
+		var vitoria = (vida_atual_inimigo <= 0) or (_acertos_batalha >= _erros_batalha) or (pct_vida_jogador > pct_vida_inimigo)
 		var tempo_decorrido = (Time.get_ticks_msec() - _tempo_inicio_batalha) / 1000.0
 		var precisao = 0
 		if (_acertos_batalha + _erros_batalha) > 0:

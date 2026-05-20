@@ -54,8 +54,8 @@ func _ready() -> void:
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
 	
-	# Muda para a cena do andar 1
-	get_tree().change_scene_to_file("res://scenes/teste_player.tscn")
+	# Muda para a cena do andar 1 (Corredor)
+	get_tree().change_scene_to_file("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado")

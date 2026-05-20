@@ -13,6 +13,7 @@ var travado: bool = false
 # [Fix-1] HP unificado: gerenciado exclusivamente pelo autoload PlayerStats
 
 func _ready() -> void:
+	add_to_group("player")
 	# quando a batalha começar, vira o mago pra direita (olhando pro inimigo)
 	GlobalSignals.iniciar_batalha.connect(func(_d):
 		ultima_direcao = "direita"

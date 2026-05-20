@@ -25,11 +25,24 @@ func _ready() -> void:
 	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
 	QuizManager.sprite_frame_inimigo_atual = QuizManager.sprite_frames_inimigos[id_inimigo]
 
+var _em_batalha: bool = false
+
 func _on_batalha_encerrada(vitoria: bool) -> void:
-	## Reativa o trigger somente em derrota (inimigo ainda vivo)
+	if not _em_batalha:
+		return # Ignora se não foi esse inimigo que batalhou
+
+	_em_batalha = false
+
 	if not vitoria:
 		show()
 		set_deferred("monitoring", true)
+	else:
+		# Se venceu, deleta o inimigo do mapa
+		var pai = get_parent()
+		if pai:
+			pai.queue_free()
+		else:
+			queue_free()
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player":
@@ -54,6 +67,7 @@ func _on_body_entered(body: Node2D) -> void:
 		if pai and pai.has_method("_on_batalha_iniciada"):
 			pai._on_batalha_iniciada(enemy_data)
 
+		_em_batalha = true # <--- MARCA ESTE INIMIGO COMO O ENGAJADO
 		GlobalSignals.iniciar_batalha.emit(enemy_data)
 		hide()
 		set_deferred("monitoring", false)
