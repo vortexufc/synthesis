@@ -10,6 +10,13 @@ var game_over_cena = preload("res://scenes/ui/game_over.tscn")
 var ui_instancia = null
 var pergunta_atual = null
 
+var sprite_frames_inimigos = {
+	"slime_p": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
+	"slime_g": preload("res://assets/sprites/Sprite Frames/slime_g.tres")
+}
+
+var sprite_frame_inimigo_atual
+
 # Sinal que as outras tasks (ex: Combat-3) vão escutar!
 signal resultado_batalha(acertou: bool)
 

@@ -25,6 +25,10 @@ var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
 
 func _ready() -> void:
+	# Carrega sprite específico do inimigo
+	$Control/SpriteMonstro/AnimatedSprite2D.sprite_frames = QuizManager.sprite_frame_inimigo_atual
+	$Control/SpriteMonstro/AnimatedSprite2D.play("default")
+	
 	# garante que os botoes funcionem mesmo com o jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]

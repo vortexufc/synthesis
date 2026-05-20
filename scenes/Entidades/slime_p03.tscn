@@ -91,6 +91,7 @@ frame_progress = 0.80110544
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=1372674659]
 script = ExtResource("2_j52eq")
+id_inimigo = "slime_p"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1148828728]
 position = Vector2(4, 15)

@@ -8,8 +8,6 @@
 [ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="5_vd8j2"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="6_2hl56"]
 [ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/slime_p01.tscn" id="6_upxhh"]
-[ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/slime_p02.tscn" id="9_vd8j2"]
-[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/slime_p03.tscn" id="10_2hl56"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="11_o7ard"]
 [ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="12_5jaf4"]
 [ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="13_e6l1b"]
@@ -243,13 +241,13 @@ tile_set = SubResource("TileSet_e6l1b")
 z_index = 3
 position = Vector2(832, 711)
 
-[node name="Slime_p02" parent="." unique_id=341725225 instance=ExtResource("9_vd8j2")]
+[node name="Slime_P2" parent="." unique_id=944160757 instance=ExtResource("6_upxhh")]
 z_index = 3
-position = Vector2(460, 588)
+position = Vector2(501, 679)
 
-[node name="Slime_p03" parent="." unique_id=1797331560 instance=ExtResource("10_2hl56")]
+[node name="Slime_P3" parent="." unique_id=1637608024 instance=ExtResource("6_upxhh")]
 z_index = 3
-position = Vector2(818, 505)
+position = Vector2(652, 523)
 
 [node name="Node" type="Node" parent="." unique_id=1167297945]
 script = ExtResource("6_2hl56")
