@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://slimap_sala02_c"]
+
+[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/slime_p01.tscn" id="1_base"]
+
+[node name="Slime_P" instance=ExtResource("1_base")]
+
+[node name="EnemyTrigger" parent="." inherit=true]
+id_inimigo = "slime_p"
+num_questoes = 3
+duracao_batalha = 180.0
+andar_id = 2
+questoes_locais = [{
+"question": "O que é uma reação química?",
+"options": ["Mudança de estado físico", "Transformação de substâncias em novas substâncias", "Mistura de elementos", "Separação de misturas"],
+"answer": 1
+}, {
+"question": "Qual destes é um metal alcalino?",
+"options": ["Cobre", "Ferro", "Sódio", "Chumbo"],
+"answer": 2
+}, {
+"question": "Na tabela periódica, os elementos são organizados por:",
+"options": ["Massa atômica", "Número de nêutrons", "Número atômico", "Estado físico"],
+"answer": 2
+}, {
+"question": "O que são isótopos?",
+"options": ["Átomos com mesmo número de prótons e nêutrons diferentes", "Moléculas com mesmo peso", "Elementos do mesmo grupo", "Átomos com cargas opostas"],
+"answer": 0
+}, {
+"question": "A ferrugem do ferro é um exemplo de:",
+"options": ["Mudança física", "Reação química (oxidação)", "Fusão", "Sublimação"],
+"answer": 1
+}, {
+"question": "Qual é o menor nível de organização da matéria?",
+"options": ["Molécula", "Célula", "Átomo", "Próton"],
+"answer": 2
+}, {
+"question": "O símbolo químico do potássio é:",
+"options": ["P", "Po", "Pt", "K"],
+"answer": 3
+}, {
+"question": "Que tipo de ligação química é formada pelo compartilhamento de elétrons?",
+"options": ["Iônica", "Metálica", "Covalente", "Magnética"],
+"answer": 2
+}, {
+"question": "Qual família da tabela periódica contém gases nobres?",
+"options": ["Família 1 (IA)", "Família 17 (VIIA)", "Família 18 (VIII A)", "Família 2 (IIA)"],
+"answer": 2
+}]

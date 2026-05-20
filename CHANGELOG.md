@@ -4,6 +4,15 @@ Todas as mudanças notáveis do projeto "Lições Arcanas" serão documentadas n
 
 ## [Unreleased]
 ### Added
+- **[BuildTGXP] Questões Locais por Inimigo**: sistema de `questoes_locais: Array` exportável no `EnemyTrigger`. Quando preenchido, substitui o banco Supabase para aquela batalha, permitindo questões hardcoded por inimigo.
+- **[BuildTGXP] Questões de Química — Sala01**: `SlimeG_Sala01.tscn` com 5 questões fáceis (símbolo do ouro, estados da matéria, elemento mais abundante, número atômico do C, misturas).
+- **[BuildTGXP] Questões de Química — Sala02**: 3 slimes com questões distintas — SlimeP_A (átomo, atmosfera, H₂O), SlimeP_B (O₂, substância pura, pH), SlimeP_C (reação química, metais alcalinos, tabela periódica).
+- **[QuizManager] Suporte a `questoes_locais`**: `iniciar_batalha` verifica `enemy_data["questoes_locais"]`; se presente, usa essas questões e ignora o banco para a batalha atual. `reset_questions` também respeita a prioridade local.
+
+### Fixed
+- **[BugFix Crítico] Loop de dano infinito ao expirar o timer**: quando `tempo_restante` chegava a 0, `_on_botao_pressionado(-1)` disparava dano. Mas na nova rodada `atualizar_pergunta` reativava `tempo_rodando = true` com `tempo_restante = 0`, causando dano imediato em loop a cada frame — o jogador morria mesmo acertando todas as questões. **Correção**: (1) flag `_processando_resposta` bloqueia re-entrada; (2) `atualizar_pergunta` só reativa o timer se `tempo_restante > 0`; (3) `_process` para o timer antes de chamar o botão; (4) caminho de timeout em `mostrar_resultado` agora tem `await` de 0.5s.
+
+
 - **[Dev-1] Script `scripts/enemy.gd`**: inimigo com variáveis exportáveis `vida_maxima`, `velocidade`, `dano` e `distancia_patrulha`. Implementa patrulha vai-e-vem em linha reta via `_physics_process`.
 - **[Dev-1] Lógica de patrulha**: inimigo inverte direção ao atingir `distancia_patrulha` pixels do ponto de origem. Flip automático do sprite conforme direção.
 - **[Dev-1] Integração com EnemyTrigger**: ao player entrar na área, o pai do trigger (inimigo) é notificado via `_on_batalha_iniciada`, pausando a patrulha antes de emitir `iniciar_batalha`.

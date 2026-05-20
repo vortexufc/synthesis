@@ -4,6 +4,9 @@ var questions = []
 var shuffled_questions = []
 var current_index = 0
 
+## [Local] Questões específicas do inimigo atual (sobrescrevem o banco)
+var _questoes_locais_ativas: Array = []
+
 # Referências da Interface
 var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
 var game_over_cena = preload("res://scenes/ui/game_over.tscn")
@@ -43,7 +46,14 @@ func _on_perguntas_chegaram(dados: Array) -> void:
 	reset_questions()
 
 func reset_questions():
-	if questions.size() > 0:
+	# Garante seed diferente a cada chamada (autoload não reinicia com a cena)
+	randomize()
+	# [Local] Se houver questões locais ativas, recicla elas — não o banco
+	if _questoes_locais_ativas.size() > 0:
+		shuffled_questions = _questoes_locais_ativas.duplicate()
+		shuffled_questions.shuffle()
+		current_index = 0
+	elif questions.size() > 0:
 		shuffled_questions = questions.duplicate()
 		shuffled_questions.shuffle()
 		current_index = 0
@@ -95,7 +105,17 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 
 	# [Dev-1] Se o andar mudou, re-busca as perguntas do novo andar antes de começar
 	var novo_andar: int = enemy_data.get("andar_id", 1)
-	if novo_andar != _andar_atual or questions.size() == 0:
+
+	# [Local] Verifica se o inimigo tem questões próprias hardcoded
+	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
+
+	if _questoes_locais_ativas.size() > 0:
+		# Usa as questões locais — ignora banco para esta batalha
+		print("[Local] Batalha com questões locais (%d questões)" % _questoes_locais_ativas.size())
+		shuffled_questions = _questoes_locais_ativas.duplicate()
+		shuffled_questions.shuffle()
+		current_index = 0
+	elif novo_andar != _andar_atual or questions.size() == 0:
 		_andar_atual = novo_andar
 		print("[Dev-1] Carregando perguntas do Andar %d..." % _andar_atual)
 		DatabaseManager.puxar_perguntas(_andar_atual)

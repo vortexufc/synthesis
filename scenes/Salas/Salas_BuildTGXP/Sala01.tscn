@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_oxtvn"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_tjhdw"]
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="3_pocxu"]
-[ext_resource type="PackedScene" uid="uid://b2xv3dnkiuce8" path="res://scenes/Entidades/Slime_G.tscn" id="4_tjhdw"]
+[ext_resource type="PackedScene" uid="uid://slimeg_sala01" path="res://scenes/Entidades/SlimeG_Sala01.tscn" id="4_tjhdw"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_arpr6"]
 [ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="5_pj2sm"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="7_3wl6h"]

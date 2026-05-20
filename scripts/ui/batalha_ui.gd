@@ -15,6 +15,8 @@ signal resposta_escolhida(indice: int, tempo_usado: float)
 
 var _botoes: Array = []
 
+# [BugFix] Flag que bloqueia chamadas duplicadas enquanto uma resposta está sendo processada
+var _processando_resposta: bool = false
 
 # [Combat-4] O timer corre de forma contínua durante toda a batalha.
 # tempo_restante só é (re)definido por iniciar_timer() — nunca em atualizar_pergunta().
@@ -48,7 +50,9 @@ func _process(delta: float) -> void:
 		tempo_restante -= delta
 		if tempo_restante <= 0:
 			tempo_restante = 0
-			_on_botao_pressionado(-1) # errou por tempo
+			tempo_rodando = false  # [BugFix] Para ANTES de chamar o botão para evitar re-entrada
+			if not _processando_resposta:  # [BugFix] Só dispara se não há resposta em andamento
+				_on_botao_pressionado(-1) # errou por tempo
 		
 		var minutos = int(tempo_restante / 60.0)
 		var segundos = int(tempo_restante) % 60
@@ -63,8 +67,10 @@ func iniciar_timer(duracao: float) -> void:
 
 func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	self.show()
-	# [Combat-4] Retoma a contagem — NÃO reinicia tempo_restante (timer é contínuo por batalha)
-	tempo_rodando = true
+	_processando_resposta = false  # [BugFix] Libera o lock para a nova pergunta
+	# [BugFix] Só retoma o timer se ainda há tempo — evita loop de timeout
+	if tempo_restante > 0:
+		tempo_rodando = true
 	label_pergunta.text = texto
 	# Cancela o tween antigo das cores pra ele não sobreescrever o branco da nova pergunta
 	if _tween_botoes:
@@ -89,6 +95,10 @@ func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 	t.tween_property(health_enemy, "size:x", max(0.0, 230.0 * pct_enemy), 0.5)
 
 func _on_botao_pressionado(indice: int) -> void:
+	# [BugFix] Ignora cliques duplicados ou re-entrada do timer
+	if _processando_resposta:
+		return
+	_processando_resposta = true
 	_ultimo_botao_clicado = indice
 	tempo_rodando = false # para o timer
 	for btn in _botoes:
@@ -126,7 +136,9 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 		lbl.modulate = Color(0.2, 0.8, 0.2)
 	else:
 		if _ultimo_botao_clicado == -1:
+			# [BugFix] Timeout: espera um tempo fixo para o label aparecer antes de continuar
 			lbl.text = "Tempo!"
+			await get_tree().create_timer(0.5, true).timeout
 		else:
 			$AnimationPlayer.play("ataque_inimigo")
 			await $AnimationPlayer.animation_finished
