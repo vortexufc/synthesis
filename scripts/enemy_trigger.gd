@@ -6,6 +6,7 @@ extends Area2D
 # ──────────────────────────────────────────
 # Dados configuráveis pelo Inspector
 # ──────────────────────────────────────────
+@export var id_inimigo:        String = "slime_p"
 @export var num_questoes:      int   = 5      ## Rodadas de quiz desta batalha
 @export var duracao_batalha:   float = 300.0  ## Segundos totais (5 min = Golem Andar 1)
 @export var andar_id:          int   = 1      ## [Dev-1] Identifica o andar → QuizManager carrega Biologia
@@ -14,8 +15,10 @@ extends Area2D
 const GOLEM_MENOR = { "num_questoes": 3, "duracao_batalha": 300.0 }
 const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 
+
 func _ready() -> void:
 	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
+	QuizManager.sprite_frame_inimigo_atual = QuizManager.sprite_frames_inimigos[id_inimigo]
 
 func _on_batalha_encerrada(vitoria: bool) -> void:
 	## Reativa o trigger somente em derrota (inimigo ainda vivo)

@@ -90,6 +90,7 @@ autoplay = "default"
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=1326508244]
 script = ExtResource("2_g6j42")
+id_inimigo = "slime_p"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=848870105]
 position = Vector2(4, 15)
