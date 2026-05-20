@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://slimap_sala02_b"]
+
+[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/slime_p01.tscn" id="1_base"]
+
+[node name="Slime_P" instance=ExtResource("1_base")]
+
+[node name="EnemyTrigger" parent="." inherit=true]
+id_inimigo = "slime_p"
+num_questoes = 3
+duracao_batalha = 180.0
+andar_id = 2
+questoes_locais = [{
+"question": "Qual é o símbolo químico do oxigênio?",
+"options": ["O", "Ox", "Og", "Oc"],
+"answer": 0
+}, {
+"question": "Uma substância pura é composta por:",
+"options": ["Dois ou mais elementos diferentes", "Apenas um tipo de molécula ou átomo", "Misturas de compostos", "Apenas metais"],
+"answer": 1
+}, {
+"question": "O pH neutro é igual a:",
+"options": ["0", "14", "7", "5"],
+"answer": 2
+}, {
+"question": "Ácidos têm pH:",
+"options": ["Maior que 7", "Igual a 7", "Menor que 7", "Igual a 14"],
+"answer": 2
+}, {
+"question": "O símbolo químico do sódio é:",
+"options": ["So", "Sd", "Na", "Sn"],
+"answer": 2
+}, {
+"question": "Qual destes é um não-metal?",
+"options": ["Ferro", "Cobre", "Enxofre", "Alumínio"],
+"answer": 2
+}, {
+"question": "A densidade da água é aproximadamente:",
+"options": ["0,5 g/cm³", "2,0 g/cm³", "1,0 g/cm³", "0,1 g/cm³"],
+"answer": 2
+}, {
+"question": "O gelo é a água no estado:",
+"options": ["Gasoso", "Líquido", "Plasma", "Sólido"],
+"answer": 3
+}, {
+"question": "Qual é o símbolo químico do cálcio?",
+"options": ["C", "Cl", "Ca", "Co"],
+"answer": 2
+}]

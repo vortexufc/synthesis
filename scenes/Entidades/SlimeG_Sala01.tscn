@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://slimeg_sala01"]
+
+[ext_resource type="PackedScene" uid="uid://b2xv3dnkiuce8" path="res://scenes/Entidades/Slime_G.tscn" id="1_base"]
+
+[node name="Slime_G" instance=ExtResource("1_base")]
+
+[node name="EnemyTrigger" parent="." inherit=true]
+id_inimigo = "slime_g"
+num_questoes = 5
+duracao_batalha = 300.0
+andar_id = 2
+questoes_locais = [{
+"question": "Qual é o símbolo químico do ouro?",
+"options": ["Au", "Ag", "Fe", "Cu"],
+"answer": 0
+}, {
+"question": "Quantos estados físicos da matéria existem?",
+"options": ["3", "4", "2", "5"],
+"answer": 1
+}, {
+"question": "Qual é o elemento mais abundante na crosta terrestre?",
+"options": ["Ferro", "Silício", "Oxigênio", "Alumínio"],
+"answer": 2
+}, {
+"question": "O número atômico do carbono é:",
+"options": ["6", "8", "12", "14"],
+"answer": 0
+}, {
+"question": "Qual mistura é homogênea?",
+"options": ["Água e areia", "Água e sal dissolvido", "Água e óleo", "Água e pedras"],
+"answer": 1
+}, {
+"question": "Qual é o símbolo químico do ferro?",
+"options": ["Fr", "Fe", "F", "Fo"],
+"answer": 1
+}, {
+"question": "A tabela periódica organiza os elementos por:",
+"options": ["Massa atômica", "Estado físico", "Número atômico crescente", "Cor do elemento"],
+"answer": 2
+}, {
+"question": "Qual é a fórmula química do gás carbônico?",
+"options": ["CO", "CO2", "C2O", "C2O2"],
+"answer": 1
+}, {
+"question": "O estado físico do ferro à temperatura ambiente é:",
+"options": ["Gasoso", "Líquido", "Sólido", "Plasma"],
+"answer": 2
+}, {
+"question": "Qual destes é um exemplo de mudança química?",
+"options": ["Gelo derretendo", "Papel sendo rasgado", "Madeira pegando fogo", "Água evaporando"],
+"answer": 2
+}]

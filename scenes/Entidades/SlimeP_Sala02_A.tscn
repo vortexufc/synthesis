@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://slimap_sala02_a"]
+
+[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/slime_p01.tscn" id="1_base"]
+
+[node name="Slime_P" instance=ExtResource("1_base")]
+
+[node name="EnemyTrigger" parent="." inherit=true]
+id_inimigo = "slime_p"
+num_questoes = 3
+duracao_batalha = 180.0
+andar_id = 2
+questoes_locais = [{
+"question": "O que é um átomo?",
+"options": ["A menor partícula de um elemento", "Um tipo de molécula", "Uma mistura de elementos", "Um estado da matéria"],
+"answer": 0
+}, {
+"question": "Qual gás compõe a maior parte da atmosfera terrestre?",
+"options": ["Oxigênio", "Dióxido de carbono", "Nitrogênio", "Hidrogênio"],
+"answer": 2
+}, {
+"question": "A fórmula química da água é:",
+"options": ["H2O2", "HO", "H2O", "H3O"],
+"answer": 2
+}, {
+"question": "O hidrogênio é o elemento de número atômico:",
+"options": ["2", "1", "3", "4"],
+"answer": 1
+}, {
+"question": "Qual é o estado físico da água à temperatura de 25°C?",
+"options": ["Sólido", "Gasoso", "Plasma", "Líquido"],
+"answer": 3
+}, {
+"question": "A névoa que vemos ao respirar no frio é um exemplo de:",
+"options": ["Ebulição", "Fusão", "Condensação", "Solidificação"],
+"answer": 2
+}, {
+"question": "Qual destes elementos é um gás nobre?",
+"options": ["Cloro", "Argônio", "Bromo", "Flúor"],
+"answer": 1
+}, {
+"question": "A água salgada é um exemplo de mistura:",
+"options": ["Heterogênea", "Pura", "Homogênea", "Elementar"],
+"answer": 2
+}, {
+"question": "Quantos elétrons tem o átomo de hélio?",
+"options": ["1", "3", "4", "2"],
+"answer": 3
+}]
