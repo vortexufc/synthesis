@@ -161,7 +161,6 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "JOGAR"
 
 [node name="BtnRanking" type="Button" parent="MarginContainer/VBoxButtons" unique_id=2016836333]
-visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
@@ -175,7 +174,6 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "RANKING"
 
 [node name="BtnVestiario" type="Button" parent="MarginContainer/VBoxButtons" unique_id=811134012]
-visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
@@ -189,7 +187,6 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "VESTIÁRIO"
 
 [node name="BtnConfig" type="Button" parent="MarginContainer/VBoxButtons" unique_id=1039033382]
-visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
@@ -203,7 +200,6 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "CONFIGURAÇÕES"
 
 [node name="LeaderboardPanel" type="PanelContainer" parent="." unique_id=1310522272]
-visible = false
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
