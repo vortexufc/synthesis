@@ -149,10 +149,13 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# Arranca fora todo o cérebro/script do Boneco-Clone para ele virar um manequim animado! 
 	_jogador_batalha.set_script(null)
 	
-	# Arranca a Câmera, Colisão e Áudio da cópia para ela não bagunçar a tela
+	# Arranca a Câmera, Colisão e Áudio da cópia para ela não bagunçar a tela.
+	# Remove os nós imediatamente e chama free() síncrono para que a Camera2D da cópia
+	# nunca entre ativa na Scene Tree e evite reposicionar o viewport / desalinhamento da UI.
 	for child in _jogador_batalha.get_children():
 		if child is Camera2D or child is CollisionShape2D or child is AudioStreamPlayer2D:
-			child.queue_free()
+			_jogador_batalha.remove_child(child)
+			child.free()
 	
 	# Põe ele na UI e vira ele pra Direita (pra ele olhar pro Golem)
 	ui_instancia.get_node("Control/PosicaoMago").call_deferred("add_child", _jogador_batalha)
