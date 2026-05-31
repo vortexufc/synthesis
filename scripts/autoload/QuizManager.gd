@@ -135,10 +135,21 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# Apenas resetamos a vida do inimigo, a vida do jogador é persistente no PlayerStats
 	vida_atual_inimigo = vida_maxima_inimigo
 	
+	# Define o sprite frame do inimigo atual dinamicamente para esta batalha
+	var enemy_id = enemy_data.get("id_inimigo", "slime_g")
+	sprite_frame_inimigo_atual = sprite_frames_inimigos.get(enemy_id, sprite_frames_inimigos["slime_g"])
+	
 	if ui_instancia == null:
 		ui_instancia = batalha_ui_cena.instantiate()
 		add_child(ui_instancia)
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
+	else:
+		# Se a UI já existia, atualiza os sprite frames do monstro de forma explícita
+		var anim_sprite = ui_instancia.get_node_or_null("Control/SpriteMonstro/AnimatedSprite2D")
+		if anim_sprite:
+			anim_sprite.sprite_frames = sprite_frame_inimigo_atual
+			anim_sprite.play("default")
+
 		
 	# Configura o sprite do inimigo usando a função exposta na UI
 	if enemy_data.has("sprite_frames"):
@@ -155,10 +166,13 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# Arranca fora todo o cérebro/script do Boneco-Clone para ele virar um manequim animado! 
 	_jogador_batalha.set_script(null)
 	
-	# Arranca a Câmera, Colisão e Áudio da cópia para ela não bagunçar a tela
+	# Arranca a Câmera, Colisão e Áudio da cópia para ela não bagunçar a tela.
+	# Remove os nós imediatamente e chama free() síncrono para que a Camera2D da cópia
+	# nunca entre ativa na Scene Tree e evite reposicionar o viewport / desalinhamento da UI.
 	for child in _jogador_batalha.get_children():
 		if child is Camera2D or child is CollisionShape2D or child is AudioStreamPlayer2D:
-			child.queue_free()
+			_jogador_batalha.remove_child(child)
+			child.free()
 	
 	# Põe ele na UI e vira ele pra Direita (pra ele olhar pro Golem)
 	ui_instancia.get_node("Control/PosicaoMago").call_deferred("add_child", _jogador_batalha)
