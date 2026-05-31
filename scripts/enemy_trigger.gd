@@ -23,7 +23,6 @@ const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 
 func _ready() -> void:
 	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
-	QuizManager.sprite_frame_inimigo_atual = QuizManager.sprite_frames_inimigos[id_inimigo]
 
 var _em_batalha: bool = false
 
@@ -51,6 +50,7 @@ func _on_body_entered(body: Node2D) -> void:
 			"num_questoes":    num_questoes,
 			"duracao_batalha": duracao_batalha,
 			"andar_id":        andar_id,
+			"id_inimigo":      id_inimigo,
 		}
 
 		# [Local] Se houver questões hardcoded, injeta no enemy_data

@@ -135,10 +135,21 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# Apenas resetamos a vida do inimigo, a vida do jogador é persistente no PlayerStats
 	vida_atual_inimigo = vida_maxima_inimigo
 	
+	# Define o sprite frame do inimigo atual dinamicamente para esta batalha
+	var enemy_id = enemy_data.get("id_inimigo", "slime_g")
+	sprite_frame_inimigo_atual = sprite_frames_inimigos.get(enemy_id, sprite_frames_inimigos["slime_g"])
+	
 	if ui_instancia == null:
 		ui_instancia = batalha_ui_cena.instantiate()
 		add_child(ui_instancia)
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
+	else:
+		# Se a UI já existia, atualiza os sprite frames do monstro de forma explícita
+		var anim_sprite = ui_instancia.get_node_or_null("Control/SpriteMonstro/AnimatedSprite2D")
+		if anim_sprite:
+			anim_sprite.sprite_frames = sprite_frame_inimigo_atual
+			anim_sprite.play("default")
+
 		
 	# Inseta o Modelo Verdeiro do Mago ali dentro da tela
 	if is_instance_valid(_jogador_batalha):

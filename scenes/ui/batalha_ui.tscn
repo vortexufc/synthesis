@@ -20,7 +20,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(250, 250)]
+"values": [Vector2(250, 350)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -68,7 +68,7 @@ tracks/4/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(875, 300)]
+"values": [Vector2(875, 350)]
 }
 tracks/5/type = "value"
 tracks/5/imported = false
@@ -119,7 +119,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(875, 300), Vector2(275, 300)]
+"values": [Vector2(875, 350), Vector2(275, 350)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -170,7 +170,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(275, 300), Vector2(875, 300)]
+"values": [Vector2(275, 350), Vector2(875, 350)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -264,14 +264,14 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="PosicaoMago" type="Marker2D" parent="Control" unique_id=1581849298]
-position = Vector2(251, 296)
+position = Vector2(260, 397)
 
 [node name="SpriteMonstro" type="TextureRect" parent="Control" unique_id=1740609982]
 layout_mode = 0
 offset_left = 650.0
-offset_top = 120.0
+offset_top = 233.0
 offset_right = 930.0
-offset_bottom = 390.0
+offset_bottom = 503.0
 expand_mode = 1
 stretch_mode = 5
 
@@ -293,9 +293,9 @@ color = Color(0, 0.8, 0.100001, 1)
 [node name="HealthEnemy" type="ColorRect" parent="Control" unique_id=1733765942]
 layout_mode = 0
 offset_left = 750.0
-offset_top = 120.0
+offset_top = 233.0
 offset_right = 980.0
-offset_bottom = 140.0
+offset_bottom = 253.0
 color = Color(0.8, 0, 0.100001, 1)
 
 [node name="TimerPainel" type="ColorRect" parent="Control" unique_id=1340639034]
@@ -467,10 +467,9 @@ libraries/ = SubResource("AnimationLibrary_u70fr")
 [node name="ParticulasMago" type="Node2D" parent="." unique_id=1206794698]
 
 [node name="Projetil" type="Node2D" parent="ParticulasMago" unique_id=1364010030]
-position = Vector2(250, 250)
+position = Vector2(250, 350)
 
 [node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasMago/Projetil" unique_id=307948851]
-position = Vector2(1, 0)
 emitting = false
 amount = 12
 texture = ExtResource("5_kepm2")
@@ -488,9 +487,10 @@ scale = Vector2(3, 3)
 texture = ExtResource("6_su8ar")
 
 [node name="Explosao" type="Node2D" parent="ParticulasMago" unique_id=1045767724]
-position = Vector2(875, 300)
+position = Vector2(875, 350)
 
 [node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasMago/Explosao" unique_id=1880818786]
+position = Vector2(2, -5)
 emitting = false
 amount = 32
 one_shot = true
@@ -507,9 +507,10 @@ color = Color(1, 0.8352941, 0.4117647, 1)
 [node name="ParticulasInimigo" type="Node2D" parent="." unique_id=1339662815]
 
 [node name="Projetil" type="Node2D" parent="ParticulasInimigo" unique_id=1342107903]
-position = Vector2(875, 300)
+position = Vector2(875, 350)
 
 [node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasInimigo/Projetil" unique_id=389938337]
+position = Vector2(-55, -4)
 emitting = false
 amount = 12
 texture = ExtResource("7_su8ar")
@@ -529,10 +530,10 @@ flip_h = true
 
 [node name="Explosao" type="Node2D" parent="ParticulasInimigo" unique_id=576705782]
 z_index = 1
-position = Vector2(251, 296)
+position = Vector2(260, 350)
 
 [node name="CPUParticles2D" type="CPUParticles2D" parent="ParticulasInimigo/Explosao" unique_id=2037059368]
-position = Vector2(0, 2)
+position = Vector2(0, -1)
 emitting = false
 amount = 32
 one_shot = true
