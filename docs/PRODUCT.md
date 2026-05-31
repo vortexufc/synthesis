@@ -11,6 +11,8 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [UI-8] Criar Tela de Game Over / Vitória com base em emissões de sinal no Godot.
 - [x] [Fix-6] Estatísticas Reais na Tela de Game Over / Vitória (Tempo, Precisão, Dano) e ocultação condicional do EnemyTrigger.
 - [ ] Finalizar integração das sprites do mago.
+- [x] [Fix-8] Bug de Câmera da Batalha (Inimigos Subindo/Sumindo)
+- [x] [Fix-9] Proporções em Tela Cheia (elementos fora do lugar)
 - [x] [Level-3] Planejamento do Andar 2 — Salas, tilesets RF_Catacombs e 2D Pixel Dungeon integrados à main.
 
 ## Changelog

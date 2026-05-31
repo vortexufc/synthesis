@@ -64,6 +64,14 @@ inventory={
 
 3d/physics_engine="Jolt Physics"
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
