@@ -23,7 +23,6 @@ const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 
 func _ready() -> void:
 	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
-	QuizManager.sprite_frame_inimigo_atual = QuizManager.sprite_frames_inimigos[id_inimigo]
 
 var _em_batalha: bool = false
 
@@ -53,6 +52,17 @@ func _on_body_entered(body: Node2D) -> void:
 			"andar_id":        andar_id,
 		}
 
+		var node_pai = get_parent()
+
+		# [Fix-9] Fallback inteligente do Sprite do inimigo
+		if QuizManager.sprite_frames_inimigos.has(id_inimigo):
+			enemy_data["sprite_frames"] = QuizManager.sprite_frames_inimigos[id_inimigo]
+		else:
+			if node_pai and node_pai.has_node("AnimatedSprite2D"):
+				enemy_data["sprite_frames"] = node_pai.get_node("AnimatedSprite2D").sprite_frames
+			elif node_pai and node_pai.has_node("sprite"):
+				enemy_data["sprite_frames"] = node_pai.get_node("sprite").sprite_frames
+
 		# [Local] Se houver questões hardcoded, injeta no enemy_data
 		if questoes_locais.size() > 0:
 			enemy_data["questoes_locais"] = questoes_locais
@@ -63,9 +73,8 @@ func _on_body_entered(body: Node2D) -> void:
 		])
 
 		# Para a patrulha do inimigo-pai (se este trigger for filho de um enemy.gd)
-		var pai = get_parent()
-		if pai and pai.has_method("_on_batalha_iniciada"):
-			pai._on_batalha_iniciada(enemy_data)
+		if node_pai and node_pai.has_method("_on_batalha_iniciada"):
+			node_pai._on_batalha_iniciada(enemy_data)
 
 		_em_batalha = true # <--- MARCA ESTE INIMIGO COMO O ENGAJADO
 		GlobalSignals.iniciar_batalha.emit(enemy_data)
