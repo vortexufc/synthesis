@@ -140,6 +140,12 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		add_child(ui_instancia)
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
 		
+	# Configura o sprite do inimigo usando a função exposta na UI
+	if enemy_data.has("sprite_frames"):
+		ui_instancia.configurar_inimigo(enemy_data["sprite_frames"])
+	elif sprite_frame_inimigo_atual != null:
+		ui_instancia.configurar_inimigo(sprite_frame_inimigo_atual)
+		
 	# Inseta o Modelo Verdeiro do Mago ali dentro da tela
 	if is_instance_valid(_jogador_batalha):
 		_jogador_batalha.queue_free()

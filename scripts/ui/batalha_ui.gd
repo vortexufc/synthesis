@@ -27,10 +27,6 @@ var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
 
 func _ready() -> void:
-	# Carrega sprite específico do inimigo
-	$Control/SpriteMonstro/AnimatedSprite2D.sprite_frames = QuizManager.sprite_frame_inimigo_atual
-	$Control/SpriteMonstro/AnimatedSprite2D.play("default")
-	
 	# garante que os botoes funcionem mesmo com o jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
@@ -40,6 +36,10 @@ func _ready() -> void:
 	# se curar no inventario, arruma a barra verde
 	PlayerStats.vida_alterada.connect(_on_vida_jogador_alterada)
 
+func configurar_inimigo(frames: SpriteFrames) -> void:
+	if frames and $Control/SpriteMonstro/AnimatedSprite2D:
+		$Control/SpriteMonstro/AnimatedSprite2D.sprite_frames = frames
+		$Control/SpriteMonstro/AnimatedSprite2D.play("default")
 func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 	var pct = atual / maxima
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)

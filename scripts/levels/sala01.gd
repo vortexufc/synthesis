@@ -5,15 +5,15 @@ func _ready() -> void:
 	var area = Area2D.new()
 	area.name = "PortaTransicao"
 	area.set_script(porta_script)
-	area.set("proxima_cena", "res://scenes/Salas/Salas_BuildTGXP/Sala02.tscn")
+	area.set("proxima_cena", "")
 
 	var collision = CollisionShape2D.new()
 	var shape = RectangleShape2D.new()
-	shape.size = Vector2(60, 60)
+	shape.size = Vector2(100, 100) # Aumentado para pegar bem a entrada
 	collision.shape = shape
 	area.add_child(collision)
 
-	# Posição que o usuário confirmou que funciona (porta da esquerda)
+	# Posição corrigida de volta para a parede Esquerda da Sala 01
 	area.position = Vector2(280, 270)
 
 	# A porta detecta os corpos (que estão no mask 1)
