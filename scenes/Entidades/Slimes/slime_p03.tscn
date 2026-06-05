@@ -84,6 +84,7 @@ radius = 34.44198
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1797331560]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=555330662]
+z_index = 4
 scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_b21ks")
 autoplay = "default"
@@ -91,7 +92,6 @@ frame_progress = 0.80110544
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=1372674659]
 script = ExtResource("2_j52eq")
-id_inimigo = "slime_p"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1148828728]
 position = Vector2(4, 15)

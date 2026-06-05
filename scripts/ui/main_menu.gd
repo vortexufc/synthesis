@@ -87,4 +87,3 @@ func update_leaderboard(top_3_clans: Array) -> void:
 		# TODO: Aqui entrará a lógica para baixar a foto do clan via HTTPRequest e aplicar na TextureRect:
 		# var logo_texture = clan_node.get_node("LogoPanel/LogoTexture")
 		# download_and_set_texture(clan_data["foto_url"], logo_texture)
-

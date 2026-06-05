@@ -79,6 +79,7 @@ size = Vector2(84, 34)
 script = ExtResource("1_mo75o")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=899433634]
+z_index = 4
 scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_eh4ga")
 autoplay = "default"

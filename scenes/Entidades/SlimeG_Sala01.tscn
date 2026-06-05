@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://slimeg_sala01"]
+[gd_scene format=3]
 
-[ext_resource type="PackedScene" uid="uid://b2xv3dnkiuce8" path="res://scenes/Entidades/Slime_G.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://b2xv3dnkiuce8" path="res://scenes/Entidades/Slimes/Slime_G.tscn" id="1_base"]
 
 [node name="Slime_G" instance=ExtResource("1_base")]
 
