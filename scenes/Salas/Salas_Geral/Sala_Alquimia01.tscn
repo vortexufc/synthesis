@@ -11,9 +11,9 @@
 [ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="12_l8835"]
 [ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="13_3e0bg"]
 [ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="14_otqa1"]
-[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/slime_p01.tscn" id="15_4dkkf"]
+[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/Slimes/slime_p01.tscn" id="15_4dkkf"]
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="15_45wk2"]
-[ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/slime_p02.tscn" id="16_utxh4"]
+[ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/Slimes/slime_p02.tscn" id="16_utxh4"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="16_ysph6"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="17_vnf66"]
 

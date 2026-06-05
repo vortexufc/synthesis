@@ -84,13 +84,13 @@ radius = 34.44198
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=341725225]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1466160193]
+z_index = 4
 scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_cjw4v")
 autoplay = "default"
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=1326508244]
 script = ExtResource("2_g6j42")
-id_inimigo = "slime_p"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=848870105]
 position = Vector2(4, 15)

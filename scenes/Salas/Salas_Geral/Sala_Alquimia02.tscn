@@ -14,9 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="12_cek5a"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="13_ipqdf"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="14_mmqix"]
-[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/slime_p01.tscn" id="15_qstay"]
-[ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/slime_p02.tscn" id="16_7ttf2"]
-[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/slime_p03.tscn" id="17_qn8ir"]
+[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/Slimes/slime_p01.tscn" id="15_qstay"]
+[ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/Slimes/slime_p02.tscn" id="16_7ttf2"]
+[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="17_qn8ir"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4oytm"]
 texture = ExtResource("2_qn8ir")
