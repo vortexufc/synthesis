@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-run/main_scene="uid://cyhlknb4do2ui"
+run/main_scene="res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 config/supabase_key="sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
@@ -24,6 +24,12 @@ AudioManager="*uid://bo05m2ssexiiy"
 TransitionScreen="*uid://ljn44efihbum"
 PlayerStats="*res://scripts/autoload/PlayerStats.gd"
 DungeonGenerator="*res://scripts/autoload/DungeonGenerator.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
 
 [global]
 
@@ -64,14 +70,6 @@ inventory={
 [physics]
 
 3d/physics_engine="Jolt Physics"
-
-[display]
-
-window/size/viewport_width=1280
-window/size/viewport_height=720
-window/size/resizable=true
-window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 
 [rendering]
 

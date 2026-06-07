@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/Slimes/slime_p01.tscn" id="15_qstay"]
 [ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/Slimes/slime_p02.tscn" id="16_7ttf2"]
 [ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="17_qn8ir"]
+[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="18_wtiqe"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4oytm"]
 texture = ExtResource("2_qn8ir")
@@ -1734,3 +1735,6 @@ position = Vector2(448, 364)
 [node name="CharacterBody2D2" parent="." unique_id=1797331560 instance=ExtResource("17_qn8ir")]
 z_index = 4
 position = Vector2(1070, 480)
+
+[node name="PortaTransicao" parent="." unique_id=1288109124 instance=ExtResource("18_wtiqe")]
+position = Vector2(579, 272)

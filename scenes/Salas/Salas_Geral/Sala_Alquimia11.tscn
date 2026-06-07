@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_05077"]
 [ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="16_fcm5f"]
 [ext_resource type="PackedScene" uid="uid://c1kl1nfi3tcp2" path="res://scenes/Entidades/Slimes/slime_p04.tscn" id="17_djeh6"]
+[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="18_qs38v"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_djeh6"]
 texture = ExtResource("2_djeh6")
@@ -1797,3 +1798,6 @@ position = Vector2(657, 498)
 
 [node name="CharacterBody2D2" parent="." unique_id=555386077 instance=ExtResource("17_djeh6")]
 position = Vector2(1782, 874)
+
+[node name="PortaTransicao" parent="." unique_id=1754424379 instance=ExtResource("18_qs38v")]
+position = Vector2(244, 232)

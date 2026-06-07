@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="13_hvrib"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="14_dn56l"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_oxv5w"]
+[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="16_dx6ka"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k0jjw"]
 texture = ExtResource("2_dx6ka")
@@ -1735,3 +1736,6 @@ grow_vertical = 2
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="PortaTransicao" parent="." unique_id=2086503148 instance=ExtResource("16_dx6ka")]
+position = Vector2(581, 267)

@@ -1,30 +1,41 @@
 extends Node
 
-# Fila estática de salas (caminho da masmorra)
-# [Level-4] - Caminho: Início -> Sala Desafio A -> Sala Desafio B -> Sala Boss
-var rotas_da_masmorra: Array = [
-	"res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn",
-	"res://scenes/Salas/Salas_BuildTGXP/Sala01.tscn",
-	"res://scenes/Salas/Salas_BuildTGXP/Sala02.tscn",
-	"res://scenes/ui/parabens_ui.tscn" # Representando a finalização/Boss temporariamente
+var sala_inicial = "res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn"
+var sala_01 = "res://scenes/Salas/Salas_BuildTGXP/Sala01.tscn"
+
+# Pool das 12 novas salas aleatórias
+var salas_alquimia: Array = [
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia01.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia02.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia03.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia04.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia05.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia06.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia07.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia08.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia09.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia10.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia11.tscn",
+	"res://scenes/Salas/Salas_Geral/Sala_Alquimia12.tscn"
 ]
 
-var indice_sala_atual: int = 0
+func _ready():
+	randomize()
 
 func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 	var cena_atual = arquivo_cena_atual
 	if cena_atual == "" and get_tree().current_scene:
 		cena_atual = get_tree().current_scene.scene_file_path
 		
-	var idx = rotas_da_masmorra.find(cena_atual)
-	
-	if idx != -1 and idx < rotas_da_masmorra.size() - 1:
-		return rotas_da_masmorra[idx + 1]
-	elif idx == rotas_da_masmorra.size() - 1:
-		return rotas_da_masmorra[-1] # Trava na última sala (ou Boss)
+	# Lógica da progressão: Corredor -> Sala 01 -> Salas Aleatórias
+	if cena_atual == sala_inicial:
+		return sala_01
 	else:
-		# Fallback se tiver rodado o jogo do meio de uma sala que não tá na lista
-		return rotas_da_masmorra[1]
+		# Se não estiver no Corredor (ou seja, se já estiver na Sala01 ou numa sala aleatória), sorteia a próxima!
+		return get_sala_aleatoria()
+
+func get_sala_aleatoria() -> String:
+	return salas_alquimia[randi() % salas_alquimia.size()]
 
 func resetar_masmorra() -> void:
 	pass

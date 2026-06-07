@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="15_45wk2"]
 [ext_resource type="PackedScene" uid="uid://tg7w674srihh" path="res://scenes/Entidades/Slimes/slime_p02.tscn" id="16_utxh4"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="16_ysph6"]
+[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="17_utxh4"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="17_vnf66"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28inc"]
@@ -1699,3 +1700,6 @@ position = Vector2(893, 619)
 
 [node name="CharacterBody2D" parent="." unique_id=341725225 instance=ExtResource("16_utxh4")]
 position = Vector2(383, 458)
+
+[node name="PortaTransicao" parent="." unique_id=1210008520 instance=ExtResource("17_utxh4")]
+position = Vector2(586, 277)
