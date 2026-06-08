@@ -16,8 +16,8 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [Level-3] Planejamento do Andar 2 — Salas, tilesets RF_Catacombs e 2D Pixel Dungeon integrados à main.
 - [x] [UI-9] Ajustar alinhamento vertical dos inimigos e partículas de batalha à altura do mago (Y = 397)
 - [x] [Fix-11] Forçar atualização do sprite do inimigo dinamicamente na UI de batalha ao colidir com o trigger (resolve slime de fogo mostrando sprite do slime azul).
-
-
+- [ ] [Move-2] Patrulha Dinâmica nos Slimes Pequenos.
+- [ ] [UI-10] Transições de Cena Polidas com TransitionScreen.
 
 ## Changelog
 Ver arquivo `CHANGELOG.md` na raiz do projeto.
