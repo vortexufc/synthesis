@@ -54,7 +54,7 @@ func _on_auth_sucesso(token: String) -> void:
 	print("usuario logou com sucesso!")
 	print("Logado com sucesso! Token Recebido:\n", token)
 	# Ir para o menu principal
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
 func _on_auth_erro(mensagem: String) -> void:
 	print("Erro ao fazer login: ", mensagem)
@@ -78,11 +78,11 @@ func _on_esqueci_senha_pressed() -> void:
 
 func _on_btn_back_pressed() -> void:
 	print("Voltar pressionado. Mudando de cena...")
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
 func _on_link_register_pressed() -> void:
 	print("Ir para registro. Mudando de cena...")
-	get_tree().change_scene_to_file("res://scenes/ui/cadastro.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/cadastro.tscn")
 
 func _show_error_popup(mensagem: String) -> void:
 	var dialog = AcceptDialog.new()

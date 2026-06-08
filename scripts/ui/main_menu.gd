@@ -40,7 +40,7 @@ func _ready() -> void:
 	
 	if DatabaseManager.user_token == "":
 		lbl_nome.text = "NÃO LOGADO"
-		btn_avatar.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/ui/login.tscn"))
+		btn_avatar.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/login.tscn"))
 	else:
 		lbl_nome.text = DatabaseManager.user_nick.to_upper() + "\nCLÃ: " + DatabaseManager.user_cla.to_upper()
 		# Tenta pintar de outra cor pra simular o avatar do mago por enquanto
@@ -55,7 +55,7 @@ func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
 	
 	# Muda para a cena do andar 1 (Corredor)
-	get_tree().change_scene_to_file("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
+	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado")
@@ -65,7 +65,7 @@ func _on_btn_vestiario_pressed() -> void:
 
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")
-	get_tree().change_scene_to_file("res://scenes/ui/configuracoes.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/configuracoes.tscn")
 
 # ---------------------------------------------------------
 # LIDERANÇA DA SEMANA (Leaderboard) - PRONTO PARA SUPABASE

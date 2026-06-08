@@ -15,4 +15,4 @@ func _on_body_entered(body: Node2D) -> void:
 			cena_alvo = DungeonGenerator.get_proxima_sala(arquivo_sala)
 			
 		if cena_alvo != "":
-			get_tree().call_deferred("change_scene_to_file", cena_alvo)
+			TransitionScreen.change_scene(cena_alvo)
