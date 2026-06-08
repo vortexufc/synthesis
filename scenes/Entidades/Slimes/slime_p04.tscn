@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://dw0kcy471tol3" path="res://assets/sprites/Characters/Slime_P/slime_P.png" id="1_iq0qe"]
 [ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_hvbyr"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="3_hvbyr"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_iq0qe"]
 atlas = ExtResource("1_iq0qe")
@@ -82,6 +83,10 @@ height = 94.0
 radius = 34.44198
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=555386077]
+script = ExtResource("3_hvbyr")
+vida_maxima = 60.0
+velocidade = 35.0
+dano = 15.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=200391135]
 z_index = 4

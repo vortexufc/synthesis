@@ -4,6 +4,7 @@ Todas as mudanças notáveis do projeto "Lições Arcanas" serão documentadas n
 
 ## [Unreleased]
 ### Added
+- **[Move-2] Patrulha Dinâmica nos Slimes Pequenos**: O script `res://scripts/enemy.gd` foi adicionado aos slimes pequenos (`slime_p01.tscn` a `slime_p04.tscn`) com parâmetros customizados de velocidade (`35.0`), vida máxima (`60.0`) e dano (`15.0`). Eles agora patrulham aleatoriamente as salas e param/se ocultam corretamente nas batalhas.
 - **[BuildTGXP] Questões Locais por Inimigo**: sistema de `questoes_locais: Array` exportável no `EnemyTrigger`. Quando preenchido, substitui o banco Supabase para aquela batalha, permitindo questões hardcoded por inimigo.
 - **[BuildTGXP] Questões de Química — Sala01**: `SlimeG_Sala01.tscn` com 5 questões fáceis (símbolo do ouro, estados da matéria, elemento mais abundante, número atômico do C, misturas).
 - **[BuildTGXP] Questões de Química — Sala02**: 3 slimes com questões distintas — SlimeP_A (átomo, atmosfera, H₂O), SlimeP_B (O₂, substância pura, pH), SlimeP_C (reação química, metais alcalinos, tabela periódica).
