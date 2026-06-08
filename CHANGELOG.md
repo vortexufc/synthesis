@@ -4,6 +4,7 @@ Todas as mudanças notáveis do projeto "Lições Arcanas" serão documentadas n
 
 ## [Unreleased]
 ### Added
+- **[UI-10] Transições de Cena Polidas**: Substituição de todas as chamadas diretas a `get_tree().change_scene_to_file(...)` e `get_tree().call_deferred("change_scene_to_file", ...)` pelo uso do autoload `TransitionScreen.change_scene(...)`. Isso unifica e suaviza a transição visual entre menus, salas, telas de login/cadastro e fim de jogo por meio de um fade suave.
 - **[BuildTGXP] Questões Locais por Inimigo**: sistema de `questoes_locais: Array` exportável no `EnemyTrigger`. Quando preenchido, substitui o banco Supabase para aquela batalha, permitindo questões hardcoded por inimigo.
 - **[BuildTGXP] Questões de Química — Sala01**: `SlimeG_Sala01.tscn` com 5 questões fáceis (símbolo do ouro, estados da matéria, elemento mais abundante, número atômico do C, misturas).
 - **[BuildTGXP] Questões de Química — Sala02**: 3 slimes com questões distintas — SlimeP_A (átomo, atmosfera, H₂O), SlimeP_B (O₂, substância pura, pH), SlimeP_C (reação química, metais alcalinos, tabela periódica).

@@ -37,4 +37,4 @@ func _on_menu_pressed() -> void:
 	hide()
 	particulas.emitting = false
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")

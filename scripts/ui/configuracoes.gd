@@ -38,7 +38,7 @@ func _on_joystick_toggled(button_pressed: bool) -> void:
 
 func _on_voltar_pressed() -> void:
 	print("Botão VOLTAR pressionado")
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
 func _update_language_buttons(is_pt: bool) -> void:
 	var inactive_color = Color(0.5, 0.5, 0.5, 1) # Cinza para inativo

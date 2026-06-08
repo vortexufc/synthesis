@@ -80,7 +80,7 @@ func _on_auth_sucesso(token: String) -> void:
 	
 	# Espera 5 segundos cravados e joga pra tela de Login
 	await get_tree().create_timer(5.0).timeout
-	get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/login.tscn")
 
 func _on_auth_erro(mensagem: String) -> void:
 	print("Erro ao criar conta: ", mensagem)
@@ -88,11 +88,11 @@ func _on_auth_erro(mensagem: String) -> void:
 
 func _on_btn_back_pressed() -> void:
 	print("Voltar pressionado. Mudando de cena...")
-	get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/login.tscn")
 
 func _on_link_login_pressed() -> void:
 	print("Ir para login. Mudando de cena...")
-	get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
+	TransitionScreen.change_scene("res://scenes/ui/login.tscn")
 
 func _show_error_popup(mensagem: String) -> void:
 	var dialog = AcceptDialog.new()
