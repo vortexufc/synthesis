@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-run/main_scene="res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 config/supabase_key="sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"

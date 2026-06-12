@@ -14,11 +14,38 @@ var travado: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
+	
+	# Reposiciona o player na porta correta quando estiver voltando de uma sala
+	call_deferred("_reposicionar_na_porta_correta")
+	
 	# quando a batalha começar, vira o mago pra direita (olhando pro inimigo)
 	GlobalSignals.iniciar_batalha.connect(func(_d):
 		ultima_direcao = "direita"
 		$sprite.play("idle_direita")
 	)
+
+func _reposicionar_na_porta_correta() -> void:
+	if not get_node_or_null("/root/DungeonGenerator"):
+		return
+	
+	var portas = get_tree().get_nodes_in_group("porta_transicao")
+	if portas.is_empty():
+		return
+		
+	if DungeonGenerator.vindo_de_porta_de_retorno:
+		# Ao VOLTAR, nasce perto da porta de AVANÇO desta sala (porta de cima/norte)
+		for porta in portas:
+			if not porta.porta_de_retorno:
+				global_position = porta.global_position
+				global_position.y += 180 # Nasce mais abaixo (escapando de colisão)
+				break
+	else:
+		# Ao AVANÇAR, nasce perto da porta de RETORNO desta sala (porta de baixo/sul)
+		for porta in portas:
+			if porta.porta_de_retorno:
+				global_position = porta.global_position
+				global_position.y -= 180 # Nasce mais acima (escapando de colisão)
+				break
 
 func _physics_process(_delta: float) -> void:
 	# Se travado pelo Mímico, não processa input de movimento
