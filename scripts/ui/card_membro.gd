@@ -87,11 +87,15 @@ func _on_btn_expulsar_pressed() -> void:
 	add_child(confirm)
 	confirm.confirmed.connect(func():
 		btn_expulsar.disabled = true
-		var sucesso: bool = await ClanManager.expel_member(member_name)
+		var resultado: Dictionary = await ClanManager.expel_member(member_name)
 		btn_expulsar.disabled = false
-		if sucesso:
+		if resultado.get("success", false):
 			print("Membro expulso: ", member_name)
 		else:
-			push_error("Falha ao expulsar membro")
+			var dialog: AcceptDialog = AcceptDialog.new()
+			dialog.title = "Erro ao Expulsar"
+			dialog.dialog_text = resultado.get("message", "Falha ao expulsar membro")
+			add_child(dialog)
+			dialog.popup_centered()
 	)
 	confirm.popup_centered()

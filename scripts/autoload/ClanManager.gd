@@ -150,14 +150,21 @@ func check_membership_sync() -> void:
 		if DatabaseManager.user_cla != "Nenhum":
 			DatabaseManager.atualizar_cla_usuario("Nenhum")
 
-func create_clan(clan_name: String, tag: String, description: String) -> bool:
+func create_clan(clan_name: String, tag: String, description: String) -> Dictionary:
 	var name_clean: String = clan_name.strip_edges()
 	var tag_clean: String = tag.strip_edges().to_upper()
 	
-	if name_clean.is_empty() or tag_clean.is_empty():
-		return false
+	if name_clean.length() < 3:
+		return {"success": false, "message": "O nome do clã deve ter pelo menos 3 caracteres!"}
+	if tag_clean.length() < 2 or tag_clean.length() > 5:
+		return {"success": false, "message": "A TAG deve ter entre 2 e 5 letras!"}
+	if description.is_empty():
+		return {"success": false, "message": "A descrição não pode ser vazia!"}
 		
 	var nick: String = get_player_nick()
+	if nick.is_empty() or nick == "NÃO LOGADO":
+		return {"success": false, "message": "Você precisa estar logado para criar um clã!"}
+		
 	var score: int = get_player_score()
 	
 	# 1. Tenta criar o clã na tabela Clas
@@ -171,8 +178,10 @@ func create_clan(clan_name: String, tag: String, description: String) -> bool:
 	
 	var res_clan = await DatabaseManager.request_async("/rest/v1/Clas", HTTPClient.METHOD_POST, clan_data)
 	if not res_clan["success"]:
-		push_error("Erro ao criar clã no Supabase: " + res_clan["message"])
-		return false
+		var msg = res_clan["message"]
+		if msg.contains("duplicate key") or msg.contains("already exists"):
+			msg = "Nome ou TAG de clã já estão em uso!"
+		return {"success": false, "message": msg}
 		
 	# 2. Tenta inserir o líder na tabela MembrosCla
 	var member_data = {
@@ -185,20 +194,21 @@ func create_clan(clan_name: String, tag: String, description: String) -> bool:
 	if not res_member["success"]:
 		# Exclui o clã caso não registre o líder para evitar orfandade
 		await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + name_clean.uri_encode(), HTTPClient.METHOD_DELETE)
-		push_error("Erro ao registrar líder do clã: " + res_member["message"])
-		return false
+		return {"success": false, "message": "Erro ao registrar líder do clã: " + res_member["message"]}
 		
 	# 3. Sincroniza local e carrega lista
 	DatabaseManager.atualizar_cla_usuario(name_clean)
 	await load_clans()
-	return true
+	return {"success": true, "message": "Clã criado com sucesso!"}
 
-func join_clan(clan_name: String) -> bool:
+func join_clan(clan_name: String) -> Dictionary:
 	var nick: String = get_player_nick()
+	if nick.is_empty() or nick == "NÃO LOGADO":
+		return {"success": false, "message": "Você precisa estar logado para entrar em um clã!"}
 	
 	# Impede se já pertencer a um clã
 	if DatabaseManager.user_cla != "Nenhum" and not DatabaseManager.user_cla.is_empty():
-		return false
+		return {"success": false, "message": "Você já faz parte de um clã!"}
 		
 	var score: int = get_player_score()
 	var member_data = {
@@ -211,8 +221,7 @@ func join_clan(clan_name: String) -> bool:
 	# 1. Tenta inserir na tabela de membros
 	var res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
 	if not res_member["success"]:
-		push_error("Erro ao se juntar ao clã no Supabase: " + res_member["message"])
-		return false
+		return {"success": false, "message": "Erro ao se juntar ao clã: " + res_member["message"]}
 		
 	# 2. Obter membros atuais para atualizar o score do clã
 	var res_all = await DatabaseManager.request_async("/rest/v1/MembrosCla?cla_nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_GET)
@@ -227,19 +236,19 @@ func join_clan(clan_name: String) -> bool:
 	
 	DatabaseManager.atualizar_cla_usuario(clan_name)
 	await load_clans()
-	return true
+	return {"success": true, "message": "Entrou no clã com sucesso!"}
 
-func leave_clan() -> bool:
+func leave_clan() -> Dictionary:
 	var nick: String = get_player_nick()
 	var clan_name: String = DatabaseManager.user_cla
 	
 	if clan_name == "Nenhum" or clan_name.is_empty():
-		return false
+		return {"success": false, "message": "Você não pertence a nenhum clã!"}
 		
 	# 1. Puxa os membros atuais do clã
 	var res_members = await DatabaseManager.request_async("/rest/v1/MembrosCla?cla_nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_GET)
 	if not res_members["success"] or not res_members["data"] is Array:
-		return false
+		return {"success": false, "message": "Erro ao ler membros do clã no Supabase: " + res_members["message"]}
 		
 	var members: Array = res_members["data"]
 	
@@ -252,7 +261,7 @@ func leave_clan() -> bool:
 			
 	if member_row == null:
 		DatabaseManager.atualizar_cla_usuario("Nenhum")
-		return true
+		return {"success": true, "message": "Você já foi removido do clã!"}
 		
 	var cargo = member_row.get("cargo", "Membro")
 	
@@ -261,8 +270,7 @@ func leave_clan() -> bool:
 			# Único membro e líder: desfaz o clã
 			var res_del = await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_DELETE)
 			if not res_del["success"]:
-				push_error("Erro ao desfazer o clã no Supabase: " + res_del["message"])
-				return false
+				return {"success": false, "message": "Erro ao desfazer o clã: " + res_del["message"]}
 		else:
 			# Promove o próximo membro com maior pontuação (excluindo a si mesmo)
 			var candidatos: Array = []
@@ -293,8 +301,7 @@ func leave_clan() -> bool:
 		# Apenas deleta de MembrosCla
 		var res_del = await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=eq." + nick.uri_encode(), HTTPClient.METHOD_DELETE)
 		if not res_del["success"]:
-			push_error("Erro ao sair do clã no Supabase: " + res_del["message"])
-			return false
+			return {"success": false, "message": "Erro ao sair do clã: " + res_del["message"]}
 			
 		# Recalcula score total
 		var novo_score: int = 0
@@ -305,25 +312,24 @@ func leave_clan() -> bool:
 		
 	DatabaseManager.atualizar_cla_usuario("Nenhum")
 	await load_clans()
-	return true
+	return {"success": true, "message": "Saiu do clã com sucesso!"}
 
-func expel_member(member_name: String) -> bool:
+func expel_member(member_name: String) -> Dictionary:
 	var clan_name: String = DatabaseManager.user_cla
 	if clan_name == "Nenhum" or clan_name.is_empty():
-		return false
+		return {"success": false, "message": "Você não pertence a nenhum clã!"}
 		
 	var clan: Dictionary = get_clan_info(clan_name)
 	if clan.is_empty() or clan["leader"] != get_player_nick():
-		return false
+		return {"success": false, "message": "Apenas o líder do clã pode expulsar membros!"}
 		
 	if member_name == get_player_nick():
-		return false
+		return {"success": false, "message": "Você não pode expulsar a si mesmo!"}
 		
 	# 1. Deleta a linha do jogador na tabela MembrosCla
 	var res_del = await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=eq." + member_name.uri_encode(), HTTPClient.METHOD_DELETE)
 	if not res_del["success"]:
-		push_error("Erro ao expulsar membro do Supabase: " + res_del["message"])
-		return false
+		return {"success": false, "message": "Erro ao expulsar membro do Supabase: " + res_del["message"]}
 		
 	# 2. Recalcula o score total
 	var novo_score: int = 0
@@ -333,7 +339,7 @@ func expel_member(member_name: String) -> bool:
 			
 	await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_PATCH, {"score": novo_score})
 	await load_clans()
-	return true
+	return {"success": true, "message": "Membro expulso com sucesso!"}
 
 func adicionar_pontos_cla(clan_name: String, member_name: String, pontos: int) -> void:
 	if clan_name == "Nenhum" or clan_name.is_empty():

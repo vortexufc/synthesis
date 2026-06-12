@@ -76,14 +76,14 @@ func _on_btn_entrar_pressed() -> void:
 		return
 		
 	btn_entrar.disabled = true
-	var sucesso: bool = await ClanManager.join_clan(clan_name)
+	var resultado: Dictionary = await ClanManager.join_clan(clan_name)
 	btn_entrar.disabled = false
 	
-	if sucesso:
+	if resultado.get("success", false):
 		print("Entrou no clã: ", clan_name)
 	else:
 		var dialog: AcceptDialog = AcceptDialog.new()
-		dialog.title = "Erro"
-		dialog.dialog_text = "Não foi possível entrar no clã!"
+		dialog.title = "Erro ao Entrar no Clã"
+		dialog.dialog_text = resultado.get("message", "Não foi possível entrar no clã!")
 		add_child(dialog)
 		dialog.popup_centered()

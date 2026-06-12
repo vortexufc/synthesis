@@ -87,16 +87,16 @@ func _on_btn_confirmar_pressed() -> void:
 	btn_cancelar.disabled = true
 	
 	# Tenta criar o clã
-	var sucesso: bool = await ClanManager.create_clan(nome, tag, descricao)
+	var resultado: Dictionary = await ClanManager.create_clan(nome, tag, descricao)
 	
 	btn_confirmar.disabled = false
 	btn_cancelar.disabled = false
 	
-	if sucesso:
+	if resultado.get("success", false):
 		print("Clã criado com sucesso!")
 		queue_free()
 	else:
-		_mostrar_erro("Nome ou TAG de clã já estão em uso!")
+		_mostrar_erro(resultado.get("message", "Nome ou TAG de clã já estão em uso!"))
 
 func _mostrar_erro(msg: String) -> void:
 	var dialog: AcceptDialog = AcceptDialog.new()

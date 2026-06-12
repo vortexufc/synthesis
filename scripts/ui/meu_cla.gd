@@ -90,12 +90,16 @@ func _on_btn_sair_pressed() -> void:
 	add_child(confirm)
 	confirm.confirmed.connect(func():
 		btn_sair.disabled = true
-		var sucesso: bool = await ClanManager.leave_clan()
+		var resultado: Dictionary = await ClanManager.leave_clan()
 		btn_sair.disabled = false
-		if sucesso:
+		if resultado.get("success", false):
 			print("Saiu do clã com sucesso")
 		else:
-			push_error("Erro ao tentar sair do clã")
+			var dialog: AcceptDialog = AcceptDialog.new()
+			dialog.title = "Erro ao Sair do Clã"
+			dialog.dialog_text = resultado.get("message", "Erro ao tentar sair do clã")
+			add_child(dialog)
+			dialog.popup_centered()
 	)
 	confirm.popup_centered()
 
