@@ -75,7 +75,10 @@ func _on_btn_entrar_pressed() -> void:
 	if clan_name.is_empty():
 		return
 		
-	var sucesso: bool = ClanManager.join_clan(clan_name)
+	btn_entrar.disabled = true
+	var sucesso: bool = await ClanManager.join_clan(clan_name)
+	btn_entrar.disabled = false
+	
 	if sucesso:
 		print("Entrou no clã: ", clan_name)
 	else:

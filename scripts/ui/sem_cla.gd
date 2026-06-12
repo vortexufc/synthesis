@@ -82,6 +82,11 @@ func _carregar_lista(lista: Array) -> void:
 
 func _on_btn_buscar_pressed() -> void:
 	var query: String = input_busca.text
+	btn_buscar.disabled = true
+	# Puxa atualizações do banco antes da pesquisa
+	await ClanManager.load_clans()
+	btn_buscar.disabled = false
+	
 	var filtrados: Array = ClanManager.search_clans(query)
 	_carregar_lista(filtrados)
 	

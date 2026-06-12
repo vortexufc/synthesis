@@ -83,8 +83,15 @@ func _on_btn_confirmar_pressed() -> void:
 		_mostrar_erro("Por favor, preencha uma breve descrição para o clã!")
 		return
 		
+	btn_confirmar.disabled = true
+	btn_cancelar.disabled = true
+	
 	# Tenta criar o clã
-	var sucesso: bool = ClanManager.create_clan(nome, tag, descricao)
+	var sucesso: bool = await ClanManager.create_clan(nome, tag, descricao)
+	
+	btn_confirmar.disabled = false
+	btn_cancelar.disabled = false
+	
 	if sucesso:
 		print("Clã criado com sucesso!")
 		queue_free()

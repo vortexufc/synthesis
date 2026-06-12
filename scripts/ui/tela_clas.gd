@@ -23,6 +23,24 @@ func _atualizar_tela() -> void:
 	for child in dynamic_container.get_children():
 		child.queue_free()
 		
+	# Feedback visual de carregamento
+	var lbl_loading: Label = Label.new()
+	var font: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font:
+		lbl_loading.add_theme_font_override("font", font)
+	lbl_loading.text = "Carregando dados do clã online..."
+	lbl_loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_loading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl_loading.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dynamic_container.add_child(lbl_loading)
+	
+	# Carrega os clãs da nuvem
+	await ClanManager.load_clans()
+	
+	# Remove feedback
+	if is_instance_valid(lbl_loading):
+		lbl_loading.queue_free()
+		
 	var user_cla: String = DatabaseManager.user_cla
 	if user_cla == "Nenhum" or user_cla.is_empty():
 		var sem_cla: VBoxContainer = sem_cla_scene.instantiate() as VBoxContainer

@@ -89,7 +89,9 @@ func _on_btn_sair_pressed() -> void:
 		
 	add_child(confirm)
 	confirm.confirmed.connect(func():
-		var sucesso: bool = ClanManager.leave_clan()
+		btn_sair.disabled = true
+		var sucesso: bool = await ClanManager.leave_clan()
+		btn_sair.disabled = false
 		if sucesso:
 			print("Saiu do clã com sucesso")
 		else:

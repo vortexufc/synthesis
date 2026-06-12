@@ -183,3 +183,48 @@ func atualizar_cla_usuario(novo_cla: String) -> void:
 		}
 	}
 	make_request("/auth/v1/user", HTTPClient.METHOD_PUT, data)
+
+# Realiza uma requisição HTTP assíncrona ao Supabase e aguarda seu retorno
+func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
+	var url: String = supabase_url + endpoint
+	var http: HTTPRequest = HTTPRequest.new()
+	add_child(http)
+	
+	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key
+	var headers: PackedStringArray = [
+		"apikey: " + supabase_key,
+		"Authorization: Bearer " + auth_bearer,
+		"Content-Type: application/json",
+		"Prefer: return=representation"
+	]
+	
+	var body: String = ""
+	if not data.is_empty():
+		body = JSON.stringify(data)
+		
+	var err = http.request(url, headers, method, body)
+	if err != OK:
+		http.queue_free()
+		return {"success": false, "code": 0, "message": "Falha ao iniciar requisição HTTP"}
+		
+	var response = await http.request_completed
+	http.queue_free()
+	
+	var response_code: int = response[1]
+	var response_body: PackedByteArray = response[3]
+	
+	var body_text: String = response_body.get_string_from_utf8()
+	var json: JSON = JSON.new()
+	var parse_err = json.parse(body_text)
+	
+	var res_data = json.data if parse_err == OK else null
+	
+	if response_code >= 200 and response_code < 300:
+		return {"success": true, "code": response_code, "data": res_data}
+	else:
+		var error_msg: String = "Erro da API Supabase"
+		if res_data is Dictionary:
+			error_msg = res_data.get("error_description", res_data.get("msg", res_data.get("message", "Erro desconhecido")))
+		elif res_data is Array and res_data.size() > 0 and res_data[0] is Dictionary:
+			error_msg = res_data[0].get("message", "Erro desconhecido")
+		return {"success": false, "code": response_code, "message": error_msg}

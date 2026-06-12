@@ -86,7 +86,9 @@ func _on_btn_expulsar_pressed() -> void:
 	confirm.dialog_text = "Tem certeza que deseja expulsar " + member_name + " do clã?"
 	add_child(confirm)
 	confirm.confirmed.connect(func():
-		var sucesso: bool = ClanManager.expel_member(member_name)
+		btn_expulsar.disabled = true
+		var sucesso: bool = await ClanManager.expel_member(member_name)
+		btn_expulsar.disabled = false
 		if sucesso:
 			print("Membro expulso: ", member_name)
 		else:
