@@ -79,6 +79,10 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				user_nick = dados.user.user_metadata.get("nick", "Mago Desconhecido")
 				user_cla = dados.user.user_metadata.get("cla", "Nenhum")
 				
+				# Funde o progresso de Convidado assim que logar ou se registrar!
+				if RankingManager.has_method("fundir_conta_guest"):
+					RankingManager.fundir_conta_guest(user_nick, user_cla)
+				
 			auth_sucesso.emit(user_token)
 		elif typeof(dados) == TYPE_DICTIONARY and dados.has("user"):
 			print("usuario cadastrado com sucesso!")

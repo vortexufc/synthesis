@@ -24,6 +24,7 @@ AudioManager="*uid://bo05m2ssexiiy"
 TransitionScreen="*uid://ljn44efihbum"
 PlayerStats="*res://scripts/autoload/PlayerStats.gd"
 DungeonGenerator="*res://scripts/autoload/DungeonGenerator.gd"
+RankingManager="*res://scripts/autoload/RankingManager.gd"
 
 [display]
 

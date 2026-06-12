@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ranking_item.gd" id="1_item"]
+
+[node name="RankingItem" type="PanelContainer"]
+custom_minimum_size = Vector2(800, 60)
+offset_right = 800.0
+offset_bottom = 60.0
+script = ExtResource("1_item")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="LblPosicao" type="Label" parent="HBox"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "1º"
+horizontal_alignment = 1
+
+[node name="IconeMedalha" type="TextureRect" parent="HBox"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconeMago" type="TextureRect" parent="HBox"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Margin" type="Control" parent="HBox"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="LblNome" type="Label" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Nome do Jogador"
+vertical_alignment = 1
+
+[node name="LblScore" type="Label" parent="HBox"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+text = "0 PTS"
+horizontal_alignment = 2
+
+[node name="MarginRight" type="Control" parent="HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+
