@@ -84,9 +84,7 @@ func get_top_clans() -> Array:
 	return list
 
 # Retorna sugestões de clãs EMBARALHADAS (sem ordem por ranking) — usado pela TelaClas.
-# Garante pelo menos MIN_SUGESTOES opções exibindo os clãs semente duplicados se necessário.
 func get_sugestoes_clas() -> Array:
-	const MIN_SUGESTOES: int = 5
 	var disponiveis: Array = []
 	var meu_cla: String = DatabaseManager.user_cla
 	
@@ -95,25 +93,15 @@ func get_sugestoes_clas() -> Array:
 		if c["name"] != meu_cla:
 			disponiveis.append(c.duplicate(true))
 			
-	# Se não há clãs suficientes, preenche repetindo os disponíveis até atingir MIN_SUGESTOES
-	if disponiveis.is_empty():
-		return disponiveis
-		
-	var resultado: Array = disponiveis.duplicate(true)
-	var idx: int = 0
-	while resultado.size() < MIN_SUGESTOES:
-		resultado.append(disponiveis[idx % disponiveis.size()].duplicate(true))
-		idx += 1
-		
 	# Embaralha usando Fisher-Yates
 	randomize()
-	for i in range(resultado.size() - 1, 0, -1):
+	for i in range(disponiveis.size() - 1, 0, -1):
 		var j: int = randi() % (i + 1)
-		var tmp = resultado[i]
-		resultado[i] = resultado[j]
-		resultado[j] = tmp
+		var tmp = disponiveis[i]
+		disponiveis[i] = disponiveis[j]
+		disponiveis[j] = tmp
 		
-	return resultado
+	return disponiveis
 
 # Busca por nome/tag
 func search_clans(query: String) -> Array:

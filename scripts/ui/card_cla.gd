@@ -53,6 +53,9 @@ func _aplicar_visual() -> void:
 
 # Assinatura sem posição/rank — o ranking fica na aba de Ranking
 func set_info(p_clan_name: String, tag: String, score: int, member_count: int) -> void:
+	if not is_node_ready():
+		await ready
+		
 	clan_name = p_clan_name
 	
 	lbl_nome_tag.text = clan_name + "  [" + tag + "]"
