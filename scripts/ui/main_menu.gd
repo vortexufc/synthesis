@@ -50,6 +50,13 @@ func _ready() -> void:
 	hbox_perfil.add_child(lbl_nome)
 	add_child(hbox_perfil)
 	# =================================================
+	
+	# ========= LEADERBOARD DE CLÃS (ONLINE) =========
+	# Atualiza imediatamente com o cache atual (pode estar vazio no primeiro frame)
+	_atualizar_leaderboard()
+	# Re-atualiza automaticamente quando o ClanManager terminar de carregar do Supabase
+	ClanManager.clan_list_updated.connect(_atualizar_leaderboard)
+	# ================================================
 
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
@@ -70,22 +77,33 @@ func _on_btn_config_pressed() -> void:
 	TransitionScreen.change_scene("res://scenes/ui/configuracoes.tscn")
 
 # ---------------------------------------------------------
-# LIDERANÇA DA SEMANA (Leaderboard) - PRONTO PARA SUPABASE
+# LIDERANÇA DA SEMANA - Alimentada pelo ClanManager online
 # ---------------------------------------------------------
-
-# Exemplo de como você vai receber os dados do Supabase depois e preencher:
-func update_leaderboard(top_3_clans: Array) -> void:
-	# Supondo que top_3_clans seja um array de dicionários: 
-	# [{ "nome": "...", "pontos": 1200, "foto_url": "..." }, ...]
+func _atualizar_leaderboard() -> void:
+	var leaderboard_panel = get_node_or_null("LeaderboardPanel")
+	if leaderboard_panel == null:
+		return
+		
+	var top_clans: Array = ClanManager.get_top_clans()
 	
-	for i in range(min(top_3_clans.size(), 3)):
-		var clan_node = $LeaderboardPanel/MarginContainer/VBoxContainer.get_node("Clan" + str(i + 1))
-		var clan_data = top_3_clans[i]
+	for i in range(1, 4):
+		var clan_node = leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/Clan" + str(i))
+		if clan_node == null:
+			continue
+			
+		var name_lbl = clan_node.get_node_or_null("VBoxInfo/Name")
+		var pts_lbl  = clan_node.get_node_or_null("VBoxInfo/Pts")
 		
-		# Atualiza nome e pontos
-		clan_node.get_node("VBoxInfo/Name").text = clan_data["nome"].to_upper()
-		clan_node.get_node("VBoxInfo/Pts").text = "PONTOS: " + str(clan_data["pontos"])
-		
-		# TODO: Aqui entrará a lógica para baixar a foto do clan via HTTPRequest e aplicar na TextureRect:
-		# var logo_texture = clan_node.get_node("LogoPanel/LogoTexture")
-		# download_and_set_texture(clan_data["foto_url"], logo_texture)
+		if name_lbl == null or pts_lbl == null:
+			continue
+			
+		var idx = i - 1
+		if idx < top_clans.size():
+			var clan = top_clans[idx]
+			name_lbl.text = clan.get("name", "---").to_upper()
+			pts_lbl.text  = "PONTOS: " + str(clan.get("score", 0))
+		else:
+			# Sem dados suficientes — exibe placeholder
+			name_lbl.text = "---"
+			pts_lbl.text  = "PONTOS: 0"
+

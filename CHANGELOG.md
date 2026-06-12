@@ -5,7 +5,10 @@ Todas as mudanças notáveis do projeto "Lições Arcanas" serão documentadas n
 ## [Unreleased]
 ### Added
 - **[UI-11] Sistema de Clãs**: Criação de um sistema de clãs completo, permitindo que os jogadores criem, busquem, entrem e saiam de clãs. Inclui o painel principal (`TelaClas.tscn`), a tela de busca (`SemCla.tscn`), o popup de criação (`PopupCriarCla.tscn`), a tela de membros (`MeuCla.tscn`), e os componentes reutilizáveis para cards de clãs e de membros (`CardCla.tscn` e `CardMembro.tscn`). Gerenciado pelo novo singleton `ClanManager.gd` com persistência de dados online centralizada no Supabase (tabelas relacionais `Clas` e `MembrosCla` via chamadas REST assíncronas concorrentes).
-- **[UI-10] Transições de Cena Polidas**: Substituição de todas as chamadas diretas a `get_tree().change_scene_to_file(...)` e `get_tree().call_deferred("change_scene_to_file", ...)` pelo uso do autoload `TransitionScreen.change_scene(...)`. Isso unifica e suaviza a transição visual entre menus, salas, telas de login/cadastro e fim de jogo por meio de um fade suave.
+
+### Fixed
+- **[Fix-12] Top 3 de Clãs no Menu Principal (dados reais)**: O painel "Liderança da Semana" do `MainMenu` exibia dados mockados (textos estáticos na cena). Agora o `main_menu.gd` conecta o sinal `clan_list_updated` do `ClanManager` à nova função `_atualizar_leaderboard()`, que lê `ClanManager.get_top_clans()` e preenche os nós `Clan1/2/3` com nome e pontuação reais vindos do Supabase. Clãs ausentes exibem "---" como placeholder.
+
 - **[Move-2] Patrulha Dinâmica nos Slimes Pequenos**: O script `res://scripts/enemy.gd` foi adicionado aos slimes pequenos (`slime_p01.tscn` a `slime_p04.tscn`) com parâmetros customizados de velocidade (`35.0`), vida máxima (`60.0`) e dano (`15.0`). Eles agora patrulham aleatoriamente as salas e param/se ocultam corretamente nas batalhas.
 - **[BuildTGXP] Questões Locais por Inimigo**: sistema de `questoes_locais: Array` exportável no `EnemyTrigger`. Quando preenchido, substitui o banco Supabase para aquela batalha, permitindo questões hardcoded por inimigo.
 - **[BuildTGXP] Questões de Química — Sala01**: `SlimeG_Sala01.tscn` com 5 questões fáceis (símbolo do ouro, estados da matéria, elemento mais abundante, número atômico do C, misturas).
