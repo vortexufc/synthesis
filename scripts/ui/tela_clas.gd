@@ -15,10 +15,16 @@ func _ready() -> void:
 func _on_btn_voltar_pressed() -> void:
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
+var _is_loading: bool = false
+
 func _on_clan_updated() -> void:
-	_atualizar_tela()
+	# Só reconstrói a tela se não estivermos no meio de um carregamento explícito da TelaClas
+	if not _is_loading:
+		_montar_tela()
 
 func _atualizar_tela() -> void:
+	_is_loading = true
+	
 	# Limpa instâncias anteriores
 	for child in dynamic_container.get_children():
 		child.queue_free()
@@ -40,6 +46,13 @@ func _atualizar_tela() -> void:
 	# Remove feedback
 	if is_instance_valid(lbl_loading):
 		lbl_loading.queue_free()
+		
+	_is_loading = false
+	_montar_tela()
+
+func _montar_tela() -> void:
+	for child in dynamic_container.get_children():
+		child.queue_free()
 		
 	var user_cla: String = DatabaseManager.user_cla
 	if user_cla == "Nenhum" or user_cla.is_empty():
