@@ -114,9 +114,9 @@ func get_local_nick() -> String:
 	local_guest_nick = "Mago_" + str(randi() % 9000 + 1000) # Ex: Mago_4821
 	
 	# Salva para sempre neste dispositivo
-	var file = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
-	file.store_string(JSON.stringify({"guest_nick": local_guest_nick}))
-	file.close()
+	var file_out = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
+	file_out.store_string(JSON.stringify({"guest_nick": local_guest_nick}))
+	file_out.close()
 	
 	return local_guest_nick
 
