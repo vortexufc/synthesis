@@ -32,6 +32,9 @@ func _aplicar_visual():
 		label_score.add_theme_font_override("font", font)
 
 func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false) -> void:
+	if not is_node_ready():
+		await ready
+		
 	# Textos básicos
 	label_nome.text = nome
 	label_score.text = str(score) + " PTS"

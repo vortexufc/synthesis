@@ -126,7 +126,7 @@ func _atualizar_lista():
 	if modo_atual == ModoRanking.GERAL:
 		lista_dados = RankingManager.ranking_geral
 	else:
-		lista_dados = RankingManager.ranking_clas
+		lista_dados = ClanManager.get_top_clans()
 		eh_cla = true
 		
 	# Adiciona os itens na UI

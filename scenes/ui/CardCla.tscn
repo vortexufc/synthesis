@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/card_cla.gd" id="1_card"]
+
+[node name="CardCla" type="PanelContainer"]
+custom_minimum_size = Vector2(800, 60)
+offset_right = 800.0
+offset_bottom = 60.0
+script = ExtResource("1_card")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="LblNomeTag" type="Label" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Nome do Clã [TAG]"
+vertical_alignment = 1
+
+[node name="LblMembros" type="Label" parent="HBox"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "0 membros"
+vertical_alignment = 1
+
+[node name="LblScore" type="Label" parent="HBox"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "1500 PTS"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MarginRight" type="Control" parent="HBox"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="BtnEntrar" type="Button" parent="HBox"]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+size_flags_vertical = 4
+text = "ENTRAR"
+
+[node name="MarginRight2" type="Control" parent="HBox"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2

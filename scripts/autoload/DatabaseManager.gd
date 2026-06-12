@@ -37,9 +37,10 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	var url: String = supabase_url + endpoint
 	
 	# headers q o supabase pede
+	var auth_bearer = user_token if not user_token.is_empty() else supabase_key
 	var headers: PackedStringArray = [
 		"apikey: " + supabase_key,
-		"Authorization: Bearer " + supabase_key,
+		"Authorization: Bearer " + auth_bearer,
 		"Content-Type: application/json",
 		"Prefer: return=representation"
 	]
@@ -84,10 +85,19 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
 			auth_sucesso.emit(user_token)
-		elif typeof(dados) == TYPE_DICTIONARY and dados.has("user"):
-			print("usuario cadastrado com sucesso!")
-			# o auth do supabase envia um "user" no signup
-			auth_sucesso.emit("cadastrado_ok")
+		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
+			print("usuario cadastrado ou atualizado com sucesso!")
+			var user_data = dados.get("user", dados)
+			if user_data is Dictionary and user_data.has("user_metadata"):
+				user_nick = user_data.user_metadata.get("nick", user_nick)
+				user_cla = user_data.user_metadata.get("cla", user_cla)
+				print("Metadata do usuario atualizada! Nick: ", user_nick, " Cla: ", user_cla)
+			
+			# Se veio de cadastrar (sem token de sessao ativa), emite sucesso. Senao, avisa dados_recebidos.
+			if dados.has("user") and not dados.has("access_token") and user_token.is_empty():
+				auth_sucesso.emit("cadastrado_ok")
+			else:
+				dados_recebidos.emit(dados)
 		elif body_text == "{}" or body_text == "":
 			# a rota de recuperar senha da 200 mas retorna body vazio
 			print("Email de recuperacao enviado!")
@@ -156,3 +166,65 @@ func puxar_perguntas(andar_id: int = 1) -> void:
 	if andar_id > 0:
 		query += "&andar_id=eq." + str(andar_id)
 	make_request(query, HTTPClient.METHOD_GET)
+
+# --- FUNCOES DO CLÃ ---
+
+func atualizar_cla_usuario(novo_cla: String) -> void:
+	print("tentando atualizar cla do usuario para: ", novo_cla)
+	user_cla = novo_cla
+	
+	if user_token.is_empty():
+		print("jogador offline. atualizado localmente.")
+		return
+		
+	var data = {
+		"data": {
+			"cla": novo_cla
+		}
+	}
+	make_request("/auth/v1/user", HTTPClient.METHOD_PUT, data)
+
+# Realiza uma requisição HTTP assíncrona ao Supabase e aguarda seu retorno
+func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
+	var url: String = supabase_url + endpoint
+	var http: HTTPRequest = HTTPRequest.new()
+	add_child(http)
+	
+	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key
+	var headers: PackedStringArray = [
+		"apikey: " + supabase_key,
+		"Authorization: Bearer " + auth_bearer,
+		"Content-Type: application/json",
+		"Prefer: return=representation"
+	]
+	
+	var body: String = ""
+	if not data.is_empty():
+		body = JSON.stringify(data)
+		
+	var err = http.request(url, headers, method, body)
+	if err != OK:
+		http.queue_free()
+		return {"success": false, "code": 0, "message": "Falha ao iniciar requisição HTTP"}
+		
+	var response = await http.request_completed
+	http.queue_free()
+	
+	var response_code: int = response[1]
+	var response_body: PackedByteArray = response[3]
+	
+	var body_text: String = response_body.get_string_from_utf8()
+	var json: JSON = JSON.new()
+	var parse_err = json.parse(body_text)
+	
+	var res_data = json.data if parse_err == OK else null
+	
+	if response_code >= 200 and response_code < 300:
+		return {"success": true, "code": response_code, "data": res_data}
+	else:
+		var error_msg: String = "Erro da API Supabase"
+		if res_data is Dictionary:
+			error_msg = res_data.get("error_description", res_data.get("msg", res_data.get("message", "Erro desconhecido")))
+		elif res_data is Array and res_data.size() > 0 and res_data[0] is Dictionary:
+			error_msg = res_data[0].get("message", "Erro desconhecido")
+		return {"success": false, "code": response_code, "message": error_msg}

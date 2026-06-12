@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/sem_cla.gd" id="1_sem"]
+
+[node name="SemCla" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+script = ExtResource("1_sem")
+
+[node name="HBoxAcoes" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="InputBusca" type="LineEdit" parent="HBoxAcoes"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Buscar clã por nome ou TAG..."
+
+[node name="BtnBuscar" type="Button" parent="HBoxAcoes"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "BUSCAR"
+
+[node name="BtnCriarPopup" type="Button" parent="HBoxAcoes"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+text = "CRIAR NOVO CLÃ"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="LblTop" type="Label" parent="."]
+layout_mode = 2
+text = "CLÃS EXISTENTES"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListaDeClas" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

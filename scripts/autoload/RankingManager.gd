@@ -60,6 +60,10 @@ func add_score(player_name: String, cla: String, score: int) -> void:
 	# Atualiza ranking de Clãs (soma pontos para a equipe)
 	_update_cla_score(cla, score)
 	
+	# Sincroniza com a persistência de clãs se existir o singleton
+	if has_node("/root/ClanManager"):
+		get_node("/root/ClanManager").adicionar_pontos_cla(cla, player_name, score)
+	
 	save_ranking()
 
 func _update_cla_score(cla: String, score: int) -> void:
@@ -110,9 +114,9 @@ func get_local_nick() -> String:
 	local_guest_nick = "Mago_" + str(randi() % 9000 + 1000) # Ex: Mago_4821
 	
 	# Salva para sempre neste dispositivo
-	var file = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
-	file.store_string(JSON.stringify({"guest_nick": local_guest_nick}))
-	file.close()
+	var file_out = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
+	file_out.store_string(JSON.stringify({"guest_nick": local_guest_nick}))
+	file_out.close()
 	
 	return local_guest_nick
 
