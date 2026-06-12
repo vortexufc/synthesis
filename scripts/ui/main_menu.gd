@@ -58,7 +58,8 @@ func _on_btn_jogar_pressed() -> void:
 	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_btn_ranking_pressed() -> void:
-	print("Botão RANKING pressionado")
+	print("Botão RANKING pressionado - abrindo RankingLocal")
+	TransitionScreen.change_scene("res://scenes/ui/ranking_ui.tscn")
 
 func _on_btn_vestiario_pressed() -> void:
 	print("Botão VESTIÁRIO pressionado")

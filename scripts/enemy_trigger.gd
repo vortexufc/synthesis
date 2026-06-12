@@ -34,7 +34,12 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 
 	if not vitoria:
 		show()
-		set_deferred("monitoring", true)
+		# [Bugfix] Espera meio segundo (sem rodar no pause) antes de ativar a colisão. 
+		# Isso impede que a batalha reinicie no micro-segundo em que o Game Over 
+		# despausa o jogo para transitar para o Menu.
+		await get_tree().create_timer(0.5, false).timeout
+		if is_instance_valid(self):
+			set_deferred("monitoring", true)
 	else:
 		# Se venceu, deleta o inimigo do mapa
 		var pai = get_parent()

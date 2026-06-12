@@ -50,12 +50,33 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		particulas.emitting = false
 	
 	if dict_stats.is_empty():
-		stats.text = "Tempo Sobrevivido: --s\nPrecisão: --%\nDano Causado: --"
+		stats.text = "Tempo de Batalha: --s\nPrecisão: --%\nDano Causado: --"
 	else:
-		stats.text = "Tempo Sobrevivido: %.1fs\nPrecisão: %d%%\nDano Causado: %d" % [
-			dict_stats.get("tempo", 0.0),
-			dict_stats.get("precisao", 0),
-			dict_stats.get("dano", 0)
+		var tempo = dict_stats.get("tempo", 0.0)
+		var precisao = dict_stats.get("precisao", 0)
+		var dano = dict_stats.get("dano", 0)
+		
+		var pontos = 0
+		if vitoria:
+			# Matemágica do Ranking:
+			# 10 pts por dano + (precisão * 5) + Bônus de rapidez (Até 300 segundos, sobra * 2)
+			var bonus_tempo = max(0, (300 - tempo) * 2)
+			pontos = int((dano * 10) + (precisao * 5) + bonus_tempo)
+			
+			var nick = DatabaseManager.user_nick
+			var cla = DatabaseManager.user_cla
+			
+			# Se a pessoa não tiver logado, pega o ID único do dispositivo dela!
+			if nick == "": 
+				nick = RankingManager.get_local_nick()
+			if cla == "": 
+				cla = "Sem Clã"
+			
+			# Envia para salvar localmente no Top 5!
+			RankingManager.add_score(nick, cla, pontos)
+			
+		stats.text = "Tempo: %.1fs\nPrecisão: %d%%\nDano: %d\n\n+ %d PONTOS" % [
+			tempo, precisao, dano, pontos
 		]
 	
 	# Se for vitória, aguarda 3 segundos e volta pro jogo
@@ -65,16 +86,19 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		hide()
 		particulas.emitting = false
 		get_tree().paused = false
+		QuizManager.fechar_ui_batalha()
 
 func _on_tentar_novamente_pressed() -> void:
 	hide()
 	get_tree().paused = false
 	PlayerStats.resetar_vida()
+	QuizManager.fechar_ui_batalha()
 	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_menu_principal_pressed() -> void:
 	hide()
 	get_tree().paused = false
 	PlayerStats.resetar_vida()
+	QuizManager.fechar_ui_batalha()
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 

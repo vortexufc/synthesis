@@ -144,6 +144,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		add_child(ui_instancia)
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
 	else:
+		ui_instancia.show() # Garante que está visível se foi reciclada
 		# Se a UI já existia, atualiza os sprite frames do monstro de forma explícita
 		var anim_sprite = ui_instancia.get_node_or_null("Control/SpriteMonstro/AnimatedSprite2D")
 		if anim_sprite:
@@ -215,6 +216,11 @@ func _nova_rodada() -> void:
 	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
 	pergunta_atual = get_random_question()
 	ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
+
+func fechar_ui_batalha() -> void:
+	if ui_instancia:
+		ui_instancia.queue_free()
+		ui_instancia = null
 
 func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
