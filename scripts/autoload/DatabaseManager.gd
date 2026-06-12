@@ -37,9 +37,10 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	var url: String = supabase_url + endpoint
 	
 	# headers q o supabase pede
+	var auth_bearer = user_token if not user_token.is_empty() else supabase_key
 	var headers: PackedStringArray = [
 		"apikey: " + supabase_key,
-		"Authorization: Bearer " + supabase_key,
+		"Authorization: Bearer " + auth_bearer,
 		"Content-Type: application/json",
 		"Prefer: return=representation"
 	]
@@ -84,10 +85,19 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
 			auth_sucesso.emit(user_token)
-		elif typeof(dados) == TYPE_DICTIONARY and dados.has("user"):
-			print("usuario cadastrado com sucesso!")
-			# o auth do supabase envia um "user" no signup
-			auth_sucesso.emit("cadastrado_ok")
+		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
+			print("usuario cadastrado ou atualizado com sucesso!")
+			var user_data = dados.get("user", dados)
+			if user_data is Dictionary and user_data.has("user_metadata"):
+				user_nick = user_data.user_metadata.get("nick", user_nick)
+				user_cla = user_data.user_metadata.get("cla", user_cla)
+				print("Metadata do usuario atualizada! Nick: ", user_nick, " Cla: ", user_cla)
+			
+			# Se veio de cadastrar (sem token de sessao ativa), emite sucesso. Senao, avisa dados_recebidos.
+			if dados.has("user") and not dados.has("access_token") and user_token.is_empty():
+				auth_sucesso.emit("cadastrado_ok")
+			else:
+				dados_recebidos.emit(dados)
 		elif body_text == "{}" or body_text == "":
 			# a rota de recuperar senha da 200 mas retorna body vazio
 			print("Email de recuperacao enviado!")
@@ -156,3 +166,20 @@ func puxar_perguntas(andar_id: int = 1) -> void:
 	if andar_id > 0:
 		query += "&andar_id=eq." + str(andar_id)
 	make_request(query, HTTPClient.METHOD_GET)
+
+# --- FUNCOES DO CLÃ ---
+
+func atualizar_cla_usuario(novo_cla: String) -> void:
+	print("tentando atualizar cla do usuario para: ", novo_cla)
+	user_cla = novo_cla
+	
+	if user_token.is_empty():
+		print("jogador offline. atualizado localmente.")
+		return
+		
+	var data = {
+		"data": {
+			"cla": novo_cla
+		}
+	}
+	make_request("/auth/v1/user", HTTPClient.METHOD_PUT, data)

@@ -173,7 +173,7 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "RANKING"
 
-[node name="BtnVestiario" type="Button" parent="MarginContainer/VBoxButtons" unique_id=811134012]
+[node name="BtnClas" type="Button" parent="MarginContainer/VBoxButtons" unique_id=811134012]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
@@ -184,7 +184,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
-text = "VESTIÁRIO"
+text = "CLÃS"
 
 [node name="BtnConfig" type="Button" parent="MarginContainer/VBoxButtons" unique_id=1039033382]
 layout_mode = 2

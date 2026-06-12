@@ -60,6 +60,10 @@ func add_score(player_name: String, cla: String, score: int) -> void:
 	# Atualiza ranking de Clãs (soma pontos para a equipe)
 	_update_cla_score(cla, score)
 	
+	# Sincroniza com a persistência de clãs se existir o singleton
+	if has_node("/root/ClanManager"):
+		get_node("/root/ClanManager").adicionar_pontos_cla(cla, player_name, score)
+	
 	save_ranking()
 
 func _update_cla_score(cla: String, score: int) -> void:

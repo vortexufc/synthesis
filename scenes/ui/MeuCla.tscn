@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/meu_cla.gd" id="1_meu"]
+
+[node name="MeuCla" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+script = ExtResource("1_meu")
+
+[node name="HBoxInfo" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="VBoxDetalhes" type="VBoxContainer" parent="HBoxInfo"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="LblNomeTag" type="Label" parent="HBoxInfo/VBoxDetalhes"]
+layout_mode = 2
+text = "Nome do Clã [TAG]"
+
+[node name="LblPontuacao" type="Label" parent="HBoxInfo/VBoxDetalhes"]
+layout_mode = 2
+text = "Pontuação Total: 0"
+
+[node name="LblDescricao" type="Label" parent="HBoxInfo/VBoxDetalhes"]
+layout_mode = 2
+text = "Descrição do clã..."
+autowrap_mode = 3
+
+[node name="BtnSair" type="Button" parent="HBoxInfo"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_vertical = 0
+text = "SAIR DO CLÃ"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="HBoxSub" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="LblMembrosTitulo" type="Label" parent="HBoxSub"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Membros (0/50)"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ListaDeMembros" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

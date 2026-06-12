@@ -2,14 +2,14 @@ extends Control
 
 @onready var btn_jogar = $MarginContainer/VBoxButtons/BtnJogar
 @onready var btn_ranking = $MarginContainer/VBoxButtons/BtnRanking
-@onready var btn_vestiario = $MarginContainer/VBoxButtons/BtnVestiario
+@onready var btn_clas = $MarginContainer/VBoxButtons/BtnClas
 @onready var btn_config = $MarginContainer/VBoxButtons/BtnConfig
 
 func _ready() -> void:
 	# Conectando os sinais 'pressed' aos seus respectivos callbacks
 	btn_jogar.pressed.connect(_on_btn_jogar_pressed)
 	btn_ranking.pressed.connect(_on_btn_ranking_pressed)
-	btn_vestiario.pressed.connect(_on_btn_vestiario_pressed)
+	btn_clas.pressed.connect(_on_btn_clas_pressed)
 	btn_config.pressed.connect(_on_btn_config_pressed)
 	
 	# ========= SISTEMA DE PERFIL (BACKEND-6) =========
@@ -61,8 +61,9 @@ func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
 	TransitionScreen.change_scene("res://scenes/ui/ranking_ui.tscn")
 
-func _on_btn_vestiario_pressed() -> void:
-	print("Botão VESTIÁRIO pressionado")
+func _on_btn_clas_pressed() -> void:
+	print("Botão CLÃS pressionado - abrindo TelaClas")
+	TransitionScreen.change_scene("res://scenes/ui/TelaClas.tscn")
 
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")

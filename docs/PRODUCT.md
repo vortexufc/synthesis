@@ -18,6 +18,7 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [Fix-11] Forçar atualização do sprite do inimigo dinamicamente na UI de batalha ao colidir com o trigger (resolve slime de fogo mostrando sprite do slime azul).
 - [x] [Move-2] Patrulha Dinâmica nos Slimes Pequenos.
 - [x] [UI-10] Transições de Cena Polidas com TransitionScreen.
+- [x] [UI-11] Sistema de Clãs (TelaClas, SemCla, MeuCla, PopupCriarCla, CardMembro, CardCla)
 
 ## Changelog
 Ver arquivo `CHANGELOG.md` na raiz do projeto.
