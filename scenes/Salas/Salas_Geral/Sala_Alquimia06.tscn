@@ -1768,3 +1768,7 @@ offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=1362576015 instance=ExtResource("16_1cllm")]
 position = Vector2(576, 244)
+
+[node name="PortaRetorno" parent="." unique_id=677165342 instance=ExtResource("16_1cllm")]
+position = Vector2(575, 797)
+porta_de_retorno = true

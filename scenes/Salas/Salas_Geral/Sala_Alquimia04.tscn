@@ -1741,3 +1741,7 @@ position = Vector2(797, 484)
 
 [node name="PortaTransicao" parent="." unique_id=505049648 instance=ExtResource("17_nlicr")]
 position = Vector2(580, 273)
+
+[node name="PortaRetorno" parent="." unique_id=710790180 instance=ExtResource("17_nlicr")]
+position = Vector2(579, 839)
+porta_de_retorno = true

@@ -19,7 +19,10 @@ func _ready():
 	btn_clas.pressed.connect(_on_btn_clas_pressed)
 	btn_voltar.pressed.connect(_on_btn_voltar_pressed)
 	
-	# Pede ao Autoload para carregar do disco (json)
+	# Conecta ao sinal para atualizar a tela quando o online carregar
+	RankingManager.ranking_atualizado.connect(_atualizar_lista)
+
+	# Força reload do online e atualiza a lista
 	RankingManager.load_ranking()
 	_atualizar_lista()
 
@@ -126,7 +129,10 @@ func _atualizar_lista():
 	if modo_atual == ModoRanking.GERAL:
 		lista_dados = RankingManager.ranking_geral
 	else:
-		lista_dados = ClanManager.get_top_clans()
+		# Pega do ClanManager (que tem os dados online do Supabase)
+		var clans = ClanManager.get_top_clans()
+		for c in clans:
+			lista_dados.append({"name": c["name"], "score": c["score"]})
 		eh_cla = true
 		
 	# Adiciona os itens na UI

@@ -28,5 +28,19 @@ CREATE TABLE MembrosCla (
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ===================================================
+-- RANKING GERAL DE PLAYERS
+-- ===================================================
 
+CREATE TABLE RankingGeral (
+    player_name VARCHAR(255) PRIMARY KEY,
+    score INT DEFAULT 0,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Permite SELECT público (leitura sem login)
+ALTER TABLE RankingGeral ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura publica do ranking" ON RankingGeral FOR SELECT USING (true);
+-- Apenas usuários autenticados podem inserir/atualizar
+CREATE POLICY "Insert autenticado" ON RankingGeral FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Update proprio player" ON RankingGeral FOR UPDATE USING (player_name = auth.jwt() ->> 'nick');

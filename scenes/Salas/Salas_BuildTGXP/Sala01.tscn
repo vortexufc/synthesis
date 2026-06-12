@@ -175,7 +175,7 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_74uva")
 sources/1 = SubResource("TileSetAtlasSource_5tlg5")
 
-[node name="Node2D" type="Node2D" unique_id=1559116760]
+[node name="Node2D2" type="Node2D" unique_id=1559116760]
 script = ExtResource("1_level_script")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_oxtvn")]
@@ -291,4 +291,8 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=1254393895 instance=ExtResource("15_gt6bf")]
-position = Vector2(196, 259)
+position = Vector2(195, 249)
+
+[node name="PortaRetorno" parent="." unique_id=1989116557 instance=ExtResource("15_gt6bf")]
+position = Vector2(585, 1076)
+porta_de_retorno = true
