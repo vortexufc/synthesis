@@ -39,6 +39,7 @@ var DIRECOES: Array = [
 ]
 
 func _ready() -> void:
+	add_to_group("inimigos")
 	vida_atual = vida_maxima
 	randomize()
 
