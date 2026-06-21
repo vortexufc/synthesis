@@ -95,6 +95,7 @@ shape = SubResource("CapsuleShape2D_body")
 
 [node name="EnemyTrigger" type="Area2D" parent="."]
 script = ExtResource("2_trigger")
+id_inimigo = "evil_wizzard"
 num_questoes = 5
 duracao_batalha = 300.0
 andar_id = 1

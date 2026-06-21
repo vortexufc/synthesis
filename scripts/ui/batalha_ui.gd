@@ -36,20 +36,25 @@ func _ready() -> void:
 	# se curar no inventario, arruma a barra verde
 	PlayerStats.vida_alterada.connect(_on_vida_jogador_alterada)
 
-func configurar_inimigo(frames: SpriteFrames) -> void:
+func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 	if frames and $Control/SpriteMonstro/AnimatedSprite2D:
 		$Control/SpriteMonstro/AnimatedSprite2D.sprite_frames = frames
 		$Control/SpriteMonstro/AnimatedSprite2D.play("default")
 		
-		# [UI] Ajusta posição do monstro grande (Robão) para não cortar embaixo
-		if frames.resource_path.ends_with("robo_g.tres"):
-			$Control/SpriteMonstro.position.y = 130.0
-			$Control/HealthEnemy.position.y = 160.0
-			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = false # Robão original já encara a esquerda
+		# [UI] Ajusta posições para inimigos grandes não cortarem a tela embaixo
+		if id_inimigo == "robo_g" or id_inimigo == "evil_wizzard":
+			$Control/SpriteMonstro.position.y = 200.0
+			$Control/HealthEnemy.position.y = 165.0
 		else:
 			$Control/SpriteMonstro.position.y = 233.0
 			$Control/HealthEnemy.position.y = 233.0
-			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true  # Os slimes precisam ser virados
+			
+		# [UI] Apenas os robôs originalmente encaram a esquerda, logo não precisam do flip_h.
+		# Slimes e o Mago encaram a direita na sprite original, então precisam.
+		if id_inimigo == "robo_g" or id_inimigo.begins_with("robo_p"):
+			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = false
+		else:
+			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true
 func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 	var pct = atual / maxima
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
