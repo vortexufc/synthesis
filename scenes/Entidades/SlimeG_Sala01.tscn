@@ -10,43 +10,27 @@ num_questoes = 5
 duracao_batalha = 300.0
 andar_id = 2
 questoes_locais = [{
-"question": "Qual é o símbolo químico do ouro?",
-"options": ["Au", "Ag", "Fe", "Cu"],
-"answer": 0
+"answer": 0,
+"options": ["Uma solução alcalina (básica) de pH alto", "Outra poção ácida de pH 1", "Água destilada purificada apenas", "Um sal altamente insolúvel e ácido"],
+"question": "Para neutralizar uma poção de ácido de slime (pH = 2) que corroeu as botas do guerreiro, qual reagente alquímico básico o curandeiro deve utilizar para aproximar o pH de 7 (neutro)?"
 }, {
-"question": "Quantos estados físicos da matéria existem?",
-"options": ["3", "4", "2", "5"],
-"answer": 1
+"answer": 2,
+"options": ["Condensação", "Sublimação", "Fusão", "Vaporização"],
+"question": "O Golem de Cristal derrete sob calor extremo em um processo físico onde a estrutura ordenada de silício passa do estado sólido para o estado líquido. Qual o nome dessa transição física de estado da matéria?"
 }, {
-"question": "Qual é o elemento mais abundante na crosta terrestre?",
-"options": ["Ferro", "Silício", "Oxigênio", "Alumínio"],
-"answer": 2
+"answer": 1,
+"options": ["Halogênios", "Metais alcalinos", "Gases nobres", "Metais alcalino-terrosos"],
+"question": "Para sintetizar a lendária Pedra Filosofal, um alquimista mistura \"Sódio arcano\" (Na) altamente reativo com água mágica. O sódio puro reage violentamente liberando hidrogênio. Na tabela periódica, a qual família pertence o elemento Sódio?"
 }, {
-"question": "O número atômico do carbono é:",
-"options": ["6", "8", "12", "14"],
-"answer": 0
+"answer": 3,
+"options": ["Mistura heterogênea", "Mistura coloidal", "Suspensão grosseira", "Mistura homogênea (solução)"],
+"question": "A poção \"Sopro de Névoa\" é criada misturando cristais azuis de sal marinho em água purificada. O sal dissolve-se completamente, formando uma mistura homogênea transparente de fase única. Que tipo de mistura é essa?"
 }, {
-"question": "Qual mistura é homogênea?",
-"options": ["Água e areia", "Água e sal dissolvido", "Água e óleo", "Água e pedras"],
-"answer": 1
+"answer": 0,
+"options": ["Reação de combustão", "Reação de eletrólise", "Reação de fotólise", "Reação de neutralização"],
+"question": "O mago arremessa uma runa de fogo que desencadeia a oxidação violenta de carvão mágico na presença de oxigênio gasoso (O₂), gerando gás carbônico (CO₂). Como é classificado esse tipo de reação química exotérmica?"
 }, {
-"question": "Qual é o símbolo químico do ferro?",
-"options": ["Fr", "Fe", "F", "Fo"],
-"answer": 1
-}, {
-"question": "A tabela periódica organiza os elementos por:",
-"options": ["Massa atômica", "Estado físico", "Número atômico crescente", "Cor do elemento"],
-"answer": 2
-}, {
-"question": "Qual é a fórmula química do gás carbônico?",
-"options": ["CO", "CO2", "C2O", "C2O2"],
-"answer": 1
-}, {
-"question": "O estado físico do ferro à temperatura ambiente é:",
-"options": ["Gasoso", "Líquido", "Sólido", "Plasma"],
-"answer": 2
-}, {
-"question": "Qual destes é um exemplo de mudança química?",
-"options": ["Gelo derretendo", "Papel sendo rasgado", "Madeira pegando fogo", "Água evaporando"],
-"answer": 2
+"answer": 1,
+"options": ["Liberação de íons hidróxido (OH-) em solução aquosa", "Liberação de íons hidrogênio (H+) em solução aquosa", "Doação de um par de elétrons em qualquer meio", "Neutralização instantânea de qualquer sal neutro"],
+"question": "Uma poção ácida misteriosa possui alta concentração de íons de hidrogênio (H+). O que define o caráter ácido de uma substância de acordo com a teoria clássica de Arrhenius?"
 }]

@@ -10,39 +10,19 @@ num_questoes = 3
 duracao_batalha = 180.0
 andar_id = 2
 questoes_locais = [{
-"question": "O que é um átomo?",
-"options": ["A menor partícula de um elemento", "Um tipo de molécula", "Uma mistura de elementos", "Um estado da matéria"],
-"answer": 0
+"answer": 2,
+"options": ["Ligação covalente", "Ligação iônica", "Ligação metálica", "Força de Van der Waals"],
+"question": "Para forjar uma armadura de Mithril indestrutível, o ferreiro funde cobre e estanho mágicos, formando uma liga metálica em que os átomos compartilham elétrons livres em uma \"nuvem eletrônica\". Que tipo de ligação química une esses metais?"
 }, {
-"question": "Qual gás compõe a maior parte da atmosfera terrestre?",
-"options": ["Oxigênio", "Dióxido de carbono", "Nitrogênio", "Hidrogênio"],
-"answer": 2
+"answer": 0,
+"options": ["Lei das Proporções Múltiplas (Dalton)", "Lei da Conservação das Massas (Lavoisier)", "Lei das Proporções Constantes (Proust)", "Lei de Volumetria (Gay-Lussac)"],
+"question": "Um robô alquimista analisa o vapor condensado das masmorras e encontra monóxido de carbono (CO) e dióxido de carbono (CO₂). Ambos os gases são compostos por Carbono e Oxigênio, mas possuem diferentes propriedades. Qual lei ponderal explica que elementos combinam-se em proporções de números inteiros para formar diferentes compostos?"
 }, {
-"question": "A fórmula química da água é:",
-"options": ["H2O2", "HO", "H2O", "H3O"],
-"answer": 2
+"answer": 2,
+"options": ["Metais de transição", "Halogênios", "Gases nobres", "Calcogênios"],
+"question": "Os magos usam o elemento \"Gás de Hélio arcano\" para flutuar baús pesados. O hélio é um gás extremamente estável que não reage com quase nada devido à sua camada de valência completa. Em qual família da tabela periódica o hélio está localizado?"
 }, {
-"question": "O hidrogênio é o elemento de número atômico:",
-"options": ["2", "1", "3", "4"],
-"answer": 1
-}, {
-"question": "Qual é o estado físico da água à temperatura de 25°C?",
-"options": ["Sólido", "Gasoso", "Plasma", "Líquido"],
-"answer": 3
-}, {
-"question": "A névoa que vemos ao respirar no frio é um exemplo de:",
-"options": ["Ebulição", "Fusão", "Condensação", "Solidificação"],
-"answer": 2
-}, {
-"question": "Qual destes elementos é um gás nobre?",
-"options": ["Cloro", "Argônio", "Bromo", "Flúor"],
-"answer": 1
-}, {
-"question": "A água salgada é um exemplo de mistura:",
-"options": ["Heterogênea", "Pura", "Homogênea", "Elementar"],
-"answer": 2
-}, {
-"question": "Quantos elétrons tem o átomo de hélio?",
-"options": ["1", "3", "4", "2"],
-"answer": 3
+"answer": 2,
+"options": ["Ligação metálica pura", "Ligação iônica forte", "Ligação covalente polar", "Ligação de hidrogênio dipolar"],
+"question": "O veneno corrosivo de um slime ácido é constituído por ácido clorídrico (HCl), em que o átomo de Hidrogênio e o de Cloro compartilham um par de elétrons devido à diferença de eletronegatividade entre eles. Que tipo de ligação química ocorre nessa molécula?"
 }]

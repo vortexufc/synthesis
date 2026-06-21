@@ -94,7 +94,10 @@ var _dano_causado: int = 0
 var _tempo_inicio_batalha: float = 0
 
 func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
-	if questions.size() == 0:
+	# [Local] Verifica se o inimigo tem questões próprias hardcoded
+	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
+
+	if _questoes_locais_ativas.size() == 0 and questions.size() == 0:
 		print("Aguardando download do banco de dados das perguntas...")
 		await DatabaseManager.perguntas_recebidas
 
@@ -105,9 +108,6 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 
 	# [Dev-1] Se o andar mudou, re-busca as perguntas do novo andar antes de começar
 	var novo_andar: int = enemy_data.get("andar_id", 1)
-
-	# [Local] Verifica se o inimigo tem questões próprias hardcoded
-	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
 
 	if _questoes_locais_ativas.size() > 0:
 		# Usa as questões locais — ignora banco para esta batalha

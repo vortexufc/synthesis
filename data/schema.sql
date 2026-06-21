@@ -1,10 +1,12 @@
 -- Schema do banco de dados 
 
-CREATE TABLE Perguntas (
+CREATE TABLE perguntas (
     id SERIAL PRIMARY KEY,
-    texto TEXT NOT NULL,
-    alternativas JSONB NOT NULL,
-    resposta_correta SMALLINT NOT NULL
+    question TEXT NOT NULL,
+    options JSONB NOT NULL,
+    answer SMALLINT NOT NULL,
+    andar_id INTEGER NOT NULL,
+    nivel_progresso INTEGER DEFAULT 1
 );
 
 -- ===================================================
