@@ -15,7 +15,12 @@ var pergunta_atual = null
 
 var sprite_frames_inimigos = {
 	"slime_p": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
-	"slime_g": preload("res://assets/sprites/Sprite Frames/slime_g.tres")
+	"slime_g": preload("res://assets/sprites/Sprite Frames/slime_g.tres"),
+	## [PROG-06] Inimigos do Andar 3 — Física
+	"robo_p_laranja": preload("res://assets/sprites/Sprite Frames/robo_p_laranja.tres"),
+	"robo_p_amarelo":  preload("res://assets/sprites/Sprite Frames/robo_p_amarelo.tres"),
+	"robo_p_ciano":    preload("res://assets/sprites/Sprite Frames/robo_p_ciano.tres"),
+	"robo_g":          preload("res://assets/sprites/Sprite Frames/robo_g.tres"),
 }
 
 var sprite_frame_inimigo_atual

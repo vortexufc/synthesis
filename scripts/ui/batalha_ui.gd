@@ -22,7 +22,7 @@ var _processando_resposta: bool = false
 # tempo_restante só é (re)definido por iniciar_timer() — nunca em atualizar_pergunta().
 var tempo_restante: float = 300.0
 var tempo_rodando: bool = false
-var _duracao_batalha: float = 300.0  ## Espelho da duração do inimigo (para exibição futura)
+var _duracao_batalha: float = 300.0 ## Espelho da duração do inimigo (para exibição futura)
 var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
 
@@ -40,6 +40,16 @@ func configurar_inimigo(frames: SpriteFrames) -> void:
 	if frames and $Control/SpriteMonstro/AnimatedSprite2D:
 		$Control/SpriteMonstro/AnimatedSprite2D.sprite_frames = frames
 		$Control/SpriteMonstro/AnimatedSprite2D.play("default")
+		
+		# [UI] Ajusta posição do monstro grande (Robão) para não cortar embaixo
+		if frames.resource_path.ends_with("robo_g.tres"):
+			$Control/SpriteMonstro.position.y = 130.0
+			$Control/HealthEnemy.position.y = 160.0
+			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = false # Robão original já encara a esquerda
+		else:
+			$Control/SpriteMonstro.position.y = 233.0
+			$Control/HealthEnemy.position.y = 233.0
+			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true  # Os slimes precisam ser virados
 func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 	var pct = atual / maxima
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -50,8 +60,8 @@ func _process(delta: float) -> void:
 		tempo_restante -= delta
 		if tempo_restante <= 0:
 			tempo_restante = 0
-			tempo_rodando = false  # [BugFix] Para ANTES de chamar o botão para evitar re-entrada
-			if not _processando_resposta:  # [BugFix] Só dispara se não há resposta em andamento
+			tempo_rodando = false # [BugFix] Para ANTES de chamar o botão para evitar re-entrada
+			if not _processando_resposta: # [BugFix] Só dispara se não há resposta em andamento
 				_on_botao_pressionado(-1) # errou por tempo
 		
 		var minutos = int(tempo_restante / 60.0)
@@ -62,12 +72,12 @@ func _process(delta: float) -> void:
 # Deve ser chamado UMA ÚNICA VEZ por batalha, antes da primeira rodada.
 func iniciar_timer(duracao: float) -> void:
 	_duracao_batalha = duracao
-	tempo_restante   = duracao
-	tempo_rodando    = true
+	tempo_restante = duracao
+	tempo_rodando = true
 
 func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	self.show()
-	_processando_resposta = false  # [BugFix] Libera o lock para a nova pergunta
+	_processando_resposta = false # [BugFix] Libera o lock para a nova pergunta
 	# [BugFix] Só retoma o timer se ainda há tempo — evita loop de timeout
 	if tempo_restante > 0:
 		tempo_rodando = true
@@ -140,8 +150,16 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 			lbl.text = "Tempo!"
 			await get_tree().create_timer(0.5, true).timeout
 		else:
+			# Toca animação customizada do monstro se existir (ex: Robão)
+			if $Control/SpriteMonstro/AnimatedSprite2D.sprite_frames.has_animation("ataque"):
+				$Control/SpriteMonstro/AnimatedSprite2D.play("ataque")
+				
 			$AnimationPlayer.play("ataque_inimigo")
 			await $AnimationPlayer.animation_finished
+			
+			# Retorna pro idle
+			if $Control/SpriteMonstro/AnimatedSprite2D.sprite_frames.has_animation("default"):
+				$Control/SpriteMonstro/AnimatedSprite2D.play("default")
 			
 		lbl.text = "-" + str(valor) + " HP"
 		lbl.modulate = Color(0.9, 0.2, 0.2)

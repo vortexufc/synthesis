@@ -1,0 +1,109 @@
+[gd_scene format=3 uid="uid://robogfisica"]
+
+[ext_resource type="Texture2D" uid="uid://6mrjbwhkhenha" path="res://assets/sprites/Characters/Robo_G/robo_g.png" id="1_robog"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="2_robog"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="3_robog"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
+atlas = ExtResource("1_robog")
+region = Rect2(0, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle2"]
+atlas = ExtResource("1_robog")
+region = Rect2(144, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle3"]
+atlas = ExtResource("1_robog")
+region = Rect2(288, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle4"]
+atlas = ExtResource("1_robog")
+region = Rect2(432, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk1"]
+atlas = ExtResource("1_robog")
+region = Rect2(0, 144, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk2"]
+atlas = ExtResource("1_robog")
+region = Rect2(144, 144, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk3"]
+atlas = ExtResource("1_robog")
+region = Rect2(288, 144, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk4"]
+atlas = ExtResource("1_robog")
+region = Rect2(432, 144, 144, 144)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_robo_g"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk4")
+}],
+"loop": false,
+"name": &"ataque",
+"speed": 6.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_robog"]
+radius = 52.0
+height = 160.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_robog"]
+size = Vector2(100, 40)
+
+[node name="Robo_G" type="CharacterBody2D" unique_id=1200000031]
+script = ExtResource("2_robog")
+vida_maxima = 150.0
+velocidade = 30.0
+dano = 30.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1200000032]
+z_index = 4
+scale = Vector2(1.2, 1.2)
+sprite_frames = SubResource("SpriteFrames_robo_g")
+autoplay = "default"
+
+[node name="EnemyTrigger" type="Area2D" parent="." unique_id=1200000033]
+script = ExtResource("3_robog")
+id_inimigo = "robo_g"
+andar_id = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1200000034]
+position = Vector2(0, 40)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_robog")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1200000035]
+position = Vector2(0, 45)
+shape = SubResource("RectangleShape2D_robog")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]
