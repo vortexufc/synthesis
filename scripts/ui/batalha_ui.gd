@@ -49,7 +49,12 @@ func configurar_inimigo(frames: SpriteFrames) -> void:
 		else:
 			$Control/SpriteMonstro.position.y = 233.0
 			$Control/HealthEnemy.position.y = 233.0
-			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true  # Os slimes precisam ser virados
+			
+			# Slimes precisam do flip_h para olhar pra esquerda, Mago e Robôs não.
+			if "Evil_Wizzard" in frames.resource_path or "robo_p" in frames.resource_path:
+				$Control/SpriteMonstro/AnimatedSprite2D.flip_h = false
+			else:
+				$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true
 func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 	var pct = atual / maxima
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
