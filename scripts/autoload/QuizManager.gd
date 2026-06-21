@@ -48,15 +48,37 @@ func _on_perguntas_chegaram(dados: Array) -> void:
 func reset_questions():
 	# Garante seed diferente a cada chamada (autoload não reinicia com a cena)
 	randomize()
-	# [Local] Se houver questões locais ativas, recicla elas — não o banco
+	# [Local] Se houver questões locais ativas, recicla elas — sem progressão de dificuldade
 	if _questoes_locais_ativas.size() > 0:
 		shuffled_questions = _questoes_locais_ativas.duplicate()
 		shuffled_questions.shuffle()
 		current_index = 0
 	elif questions.size() > 0:
-		shuffled_questions = questions.duplicate()
-		shuffled_questions.shuffle()
+		# [PROG-02] Progressão Didática: organiza por nivel_progresso (se disponível)
+		# Perguntas sem o campo nivel_progresso são tratadas como nível 1 (sem quebrar)
+		shuffled_questions = _ordenar_por_progressao(questions)
 		current_index = 0
+
+## [PROG-02] Agrupa as perguntas por nível de dificuldade e embaralha dentro de cada grupo.
+## Se a pergunta não tiver o campo nivel_progresso (perguntas antigas), usa nível 1.
+## Resultado: Fácil (1) → Médio (2) → Difícil (3), com variedade dentro de cada grupo.
+func _ordenar_por_progressao(lista: Array) -> Array:
+	var grupos: Dictionary = {}
+	for pergunta in lista:
+		var nivel: int = pergunta.get("nivel_progresso", 1)
+		if not grupos.has(nivel):
+			grupos[nivel] = []
+		grupos[nivel].append(pergunta)
+	
+	var resultado: Array = []
+	var niveis_ordenados = grupos.keys()
+	niveis_ordenados.sort()  # Garante ordem 1, 2, 3...
+	for nivel in niveis_ordenados:
+		var grupo = grupos[nivel].duplicate()
+		grupo.shuffle()  # Variedade dentro do mesmo nível
+		resultado.append_array(grupo)
+	
+	return resultado
 
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
@@ -94,9 +116,11 @@ var _dano_causado: int = 0
 var _tempo_inicio_batalha: float = 0
 
 func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
-	# [Local] Verifica se o inimigo tem questões próprias hardcoded
+	# [PROG-02 / Offline Fix] Lê as questões locais PRIMEIRO, antes de qualquer await.
+	# Se o inimigo tiver questões hardcoded, a batalha inicia sem precisar do banco.
 	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
 
+	# Só aguarda o banco se NÃO tiver questões locais E o banco ainda não carregou
 	if _questoes_locais_ativas.size() == 0 and questions.size() == 0:
 		print("Aguardando download do banco de dados das perguntas...")
 		await DatabaseManager.perguntas_recebidas
@@ -110,7 +134,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	var novo_andar: int = enemy_data.get("andar_id", 1)
 
 	if _questoes_locais_ativas.size() > 0:
-		# Usa as questões locais — ignora banco para esta batalha
+		# Usa as questões locais — ignora banco para esta batalha (funciona offline)
 		print("[Local] Batalha com questões locais (%d questões)" % _questoes_locais_ativas.size())
 		shuffled_questions = _questoes_locais_ativas.duplicate()
 		shuffled_questions.shuffle()
