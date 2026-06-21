@@ -162,9 +162,11 @@ func puxar_alunos() -> void:
 
 func puxar_perguntas(andar_id: int = 1) -> void:
 	print("buscando perguntas do andar: ", andar_id, "...")
+	# [PROG-02] Ordena por nivel_progresso para progressão didática (1=Fácil → 3=Difícil)
 	var query = "/rest/v1/perguntas?select=*"
 	if andar_id > 0:
 		query += "&andar_id=eq." + str(andar_id)
+	query += "&order=nivel_progresso.asc"
 	make_request(query, HTTPClient.METHOD_GET)
 
 # --- FUNCOES DO CLÃ ---

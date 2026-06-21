@@ -48,15 +48,38 @@ func _on_perguntas_chegaram(dados: Array) -> void:
 func reset_questions():
 	# Garante seed diferente a cada chamada (autoload não reinicia com a cena)
 	randomize()
-	# [Local] Se houver questões locais ativas, recicla elas — não o banco
+	# [Local] Se houver questões locais ativas, recicla elas — sem progressão de dificuldade
 	if _questoes_locais_ativas.size() > 0:
 		shuffled_questions = _questoes_locais_ativas.duplicate()
 		shuffled_questions.shuffle()
 		current_index = 0
 	elif questions.size() > 0:
-		shuffled_questions = questions.duplicate()
-		shuffled_questions.shuffle()
+		# [PROG-02] Progressão Didática: agrupa por nivel_progresso e embaralha
+		# dentro de cada grupo, mantendo a ordem: Fácil → Médio → Difícil
+		shuffled_questions = _ordenar_por_progressao(questions)
 		current_index = 0
+
+## [PROG-02] Organiza as perguntas em ordem crescente de dificuldade.
+## Dentro de cada nível (1=Fácil, 2=Médio, 3=Difícil) as perguntas são
+## embaralhadas entre si, mas os grupos nunca se misturam.
+func _ordenar_por_progressao(lista: Array) -> Array:
+	var grupos: Dictionary = {}
+	for pergunta in lista:
+		var nivel: int = pergunta.get("nivel_progresso", 1)
+		if not grupos.has(nivel):
+			grupos[nivel] = []
+		grupos[nivel].append(pergunta)
+	
+	# Embaralha dentro de cada grupo para variedade, mas mantém a ordem dos grupos
+	var resultado: Array = []
+	var niveis_ordenados = grupos.keys()
+	niveis_ordenados.sort()  # garante 1, 2, 3...
+	for nivel in niveis_ordenados:
+		var grupo = grupos[nivel].duplicate()
+		grupo.shuffle()
+		resultado.append_array(grupo)
+	
+	return resultado
 
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
