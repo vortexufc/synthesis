@@ -3,6 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://d27lzx67ml5c1" path="res://assets/sprites/Characters/Robo_P/robo_p.png" id="1_robop"]
 [ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="2_robop"]
 [ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="3_robop"]
+[ext_resource type="SpriteFrames" uid="uid://sfrobopciano" path="res://assets/sprites/Sprite Frames/robo_p_ciano.tres" id="4_frames"]
+
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rp01"]
 atlas = ExtResource("1_robop")
@@ -63,7 +65,7 @@ dano = 20.0
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1200000022]
 z_index = 4
 scale = Vector2(1.5, 1.5)
-sprite_frames = SubResource("SpriteFrames_robo_p_ciano")
+sprite_frames = ExtResource("4_frames")
 autoplay = "default"
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=1200000023]

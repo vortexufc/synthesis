@@ -66,6 +66,8 @@ func _physics_process(delta: float) -> void:
 			_sortear_nova_direcao()
 		velocity = Vector2.ZERO
 		move_and_slide()
+		if sprite:
+			sprite.play("default")
 		return
 
 	# Contagem regressiva para trocar de direção
@@ -83,9 +85,22 @@ func _physics_process(delta: float) -> void:
 	# Move na direção atual
 	velocity = _direcao * velocidade
 
-	# Flip horizontal do sprite conforme componente X da direção
-	if sprite and _direcao.x != 0.0:
-		sprite.flip_h = (_direcao.x < 0.0)
+	# Atualiza a animação dependendo da direção
+	if sprite:
+		if sprite.sprite_frames and sprite.sprite_frames.has_animation("walk_side"):
+			if abs(_direcao.x) > abs(_direcao.y):
+				sprite.play("walk_side")
+				# A arte original (Y=0) do robô está olhando para a ESQUERDA.
+				# Então para andar para a direita (> 0.0), precisamos virar (flip_h = true).
+				sprite.flip_h = (_direcao.x > 0.0)
+			elif _direcao.y > 0:
+				sprite.play("walk_down")
+			elif _direcao.y < 0:
+				sprite.play("walk_up")
+		else:
+			# Lógica antiga para inimigos simples (Slime, etc)
+			if _direcao.x != 0.0:
+				sprite.flip_h = (_direcao.x < 0.0)
 
 	move_and_slide()
 

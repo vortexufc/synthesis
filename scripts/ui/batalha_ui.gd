@@ -39,12 +39,23 @@ func _ready() -> void:
 func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 	if frames and $Control/SpriteMonstro/AnimatedSprite2D:
 		$Control/SpriteMonstro/AnimatedSprite2D.sprite_frames = frames
-		$Control/SpriteMonstro/AnimatedSprite2D.play("default")
 		
-		# [UI] Ajusta posições para inimigos grandes não cortarem a tela embaixo
-		if id_inimigo == "robo_g" or id_inimigo == "evil_wizzard":
-			$Control/SpriteMonstro.position.y = 200.0
+		# [UI] Robozinhos pequenos não tem animação de idle, só de andar.
+		# Então congelamos eles no primeiro frame para ficarem parados de frente.
+		if id_inimigo.begins_with("robo_p"):
+			$Control/SpriteMonstro/AnimatedSprite2D.stop()
+			$Control/SpriteMonstro/AnimatedSprite2D.frame = 0
+		else:
+			$Control/SpriteMonstro/AnimatedSprite2D.play("default")
+		
+		# [UI] Ajusta posições individuais para inimigos grandes não cortarem a tela embaixo
+		if id_inimigo == "robo_g":
+			$Control/SpriteMonstro.position.y = 130.0 # Robão é gigante, precisa subir bastante
 			$Control/HealthEnemy.position.y = 165.0
+		elif id_inimigo == "evil_wizzard":
+			$Control/SpriteMonstro.position.y = 195.0 # Mago fica perfeito nessa altura
+			$Control/HealthEnemy.position.y = 165.0
+
 		else:
 			$Control/SpriteMonstro.position.y = 233.0
 			$Control/HealthEnemy.position.y = 233.0
