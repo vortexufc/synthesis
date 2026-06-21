@@ -1,11 +1,25 @@
 -- Schema do banco de dados 
+-- IMPORTANTE: Os nomes das colunas (question, options, answer) devem ser EXATAMENTE esses,
+-- pois o DatabaseManager.gd e QuizManager.gd dependem dessas chaves para funcionar.
 
-CREATE TABLE Perguntas (
-    id SERIAL PRIMARY KEY,
-    texto TEXT NOT NULL,
-    alternativas JSONB NOT NULL,
-    resposta_correta SMALLINT NOT NULL
+CREATE TABLE perguntas (
+    id              SERIAL   PRIMARY KEY,
+    question        TEXT     NOT NULL,                  -- Texto da pergunta
+    options         JSONB    NOT NULL,                  -- Array JSON com as 4 alternativas
+    answer          SMALLINT NOT NULL,                  -- Índice (0-3) da resposta correta em options
+    andar_id        INT      NOT NULL DEFAULT 1,        -- Andar: 1=Biologia, 2=Química, 3=Física
+    nivel_progresso INT      NOT NULL DEFAULT 1         -- Dificuldade: 1=Fácil, 2=Médio, 3=Difícil
 );
+
+-- ===================================================
+-- MIGRAÇÃO: Execute no painel SQL do Supabase
+-- se a tabela 'perguntas' já existir com as colunas antigas
+-- ===================================================
+-- ALTER TABLE perguntas RENAME COLUMN texto TO question;
+-- ALTER TABLE perguntas RENAME COLUMN alternativas TO options;
+-- ALTER TABLE perguntas RENAME COLUMN resposta_correta TO answer;
+-- ALTER TABLE perguntas ADD COLUMN IF NOT EXISTS andar_id INT NOT NULL DEFAULT 1;
+-- ALTER TABLE perguntas ADD COLUMN IF NOT EXISTS nivel_progresso INT NOT NULL DEFAULT 1;
 
 -- ===================================================
 -- SISTEMA DE CLÃS
