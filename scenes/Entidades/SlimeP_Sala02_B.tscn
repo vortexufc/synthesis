@@ -10,39 +10,19 @@ num_questoes = 3
 duracao_batalha = 180.0
 andar_id = 2
 questoes_locais = [{
-"question": "Qual é o símbolo químico do oxigênio?",
-"options": ["O", "Ox", "Og", "Oc"],
-"answer": 0
+"answer": 0,
+"options": ["Sublimação inversa (ou Deposição)", "Solidificação clássica", "Condensação induzida", "Evaporação forçada"],
+"question": "Um dragão de gelo congela instantaneamente a umidade do ar, formando neve nas masmorras. A passagem do vapor de água diretamente para o estado sólido (gelo) é conhecida como:"
 }, {
-"question": "Uma substância pura é composta por:",
-"options": ["Dois ou mais elementos diferentes", "Apenas um tipo de molécula ou átomo", "Misturas de compostos", "Apenas metais"],
-"answer": 1
+"answer": 1,
+"options": ["Oxigenação", "Redução", "Neutralização", "Sublimação"],
+"question": "O Mago de Fogo utiliza o mineral rúnico Hematita (Fe₂O₃) para extrair Ferro puro por meio de uma reação onde o Ferro ganha elétrons e diminui seu número de oxidação. Esse processo de ganho de elétrons é chamado de:"
 }, {
-"question": "O pH neutro é igual a:",
-"options": ["0", "14", "7", "5"],
-"answer": 2
+"answer": 2,
+"options": ["Ag", "Fe", "Au", "Cu"],
+"question": "O \"Elixir do Voo\" contém ouro molecular (Au) disperso de forma homogênea em um solvente arcano. O ouro é um metal precioso de transição. Qual é o seu símbolo químico na tabela periódica clássica?"
 }, {
-"question": "Ácidos têm pH:",
-"options": ["Maior que 7", "Igual a 7", "Menor que 7", "Igual a 14"],
-"answer": 2
-}, {
-"question": "O símbolo químico do sódio é:",
-"options": ["So", "Sd", "Na", "Sn"],
-"answer": 2
-}, {
-"question": "Qual destes é um não-metal?",
-"options": ["Ferro", "Cobre", "Enxofre", "Alumínio"],
-"answer": 2
-}, {
-"question": "A densidade da água é aproximadamente:",
-"options": ["0,5 g/cm³", "2,0 g/cm³", "1,0 g/cm³", "0,1 g/cm³"],
-"answer": 2
-}, {
-"question": "O gelo é a água no estado:",
-"options": ["Gasoso", "Líquido", "Plasma", "Sólido"],
-"answer": 3
-}, {
-"question": "Qual é o símbolo químico do cálcio?",
-"options": ["C", "Cl", "Ca", "Co"],
-"answer": 2
+"answer": 2,
+"options": ["3 mols", "4 mols", "5 mols", "1 mol"],
+"question": "Para acender a Forja de Hefesto, o guerreiro queima propano mágico (C₃H₈) gerando calor. Na reação balanceada: C₃H₈ + 5 O₂ -> 3 CO₂ + 4 H₂O, quantos mols de oxigênio (O₂) são necessários para queimar completamente 1 mol de propano?"
 }]

@@ -98,6 +98,31 @@ script = ExtResource("2_trigger")
 num_questoes = 5
 duracao_batalha = 300.0
 andar_id = 1
+questoes_locais = [{
+"answer": 0,
+"options": ["Mitose", "Meiose", "Fissão binária", "Esporulação"],
+"question": "Um jovem mago percebeu que, ao conjurar um feitiço de cura, a energia regenerativa estimula a divisão de células somáticas da pele ferida do guerreiro. Que processo celular de divisão de células idênticas o feitiço acelerou?"
+}, {
+"answer": 1,
+"options": ["Autotrófica por fotossíntese", "Heterotrófica por absorção", "Quimiolitoautotrófica", "Autotrófica por quimiossíntese"],
+"question": "O Slime Verde da masmorra absorve nutrientes digerindo matéria orgânica externamente antes de a absorver. De acordo com a biologia, que tipo de nutrição esse ser compartilha com os fungos terrestres?"
+}, {
+"answer": 2,
+"options": ["Mitocôndria", "Complexo de Golgi", "Cloroplasto", "Lisossomo"],
+"question": "Nas estufas arcanas da torre, as plantas de mana purificam o ar utilizando a luz solar para sintetizar glicose a partir de dióxido de carbono gasoso e água. Que organela celular é responsável por essa conversão mágica?"
+}, {
+"answer": 3,
+"options": ["Ribossomo", "Lisossomo", "Retículo endoplasmático", "Mitocôndria"],
+"question": "Uma poção vigorizante atua fornecendo alta carga de energia celular direta na forma de ATP (Adenosina Trifosfato). Em qual organela celular a maior parte do ATP é sintetizada por meio da respiração celular?"
+}, {
+"answer": 0,
+"options": ["Ribossomo", "Nucléolo", "Peroxissomo", "Centríolo"],
+"question": "Um alquimista estuda o veneno de uma aranha da masmorra e descobre que ele bloqueia a síntese de proteínas nas células da vítima. Qual organela celular responsável pela tradução do RNAm foi paralisada pelo veneno?"
+}, {
+"answer": 1,
+"options": ["RNA mensageiro", "Ácido Desoxirribonucleico (DNA)", "Trifosfato de adenosina (ATP)", "Polipeptídeo cristalino"],
+"question": "Para criar um clone estável de um homúnculo, o mago precisa extrair a molécula dupla-hélice que carrega a informação genética completa da criatura. Qual é o nome dessa molécula biológica?"
+}]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger"]
 shape = SubResource("RectangleShape2D_trigger")
