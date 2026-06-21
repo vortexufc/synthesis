@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://b7n7dsee8y0a7"]
+
+[ext_resource type="Texture2D" uid="uid://d27lzx67ml5c1" path="res://assets/sprites/Characters/Robo_P/robo_p.png" id="1_robop"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="2_robop"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="3_robop"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rp01"]
+atlas = ExtResource("1_robop")
+region = Rect2(448, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rp02"]
+atlas = ExtResource("1_robop")
+region = Rect2(512, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rp03"]
+atlas = ExtResource("1_robop")
+region = Rect2(576, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rp04"]
+atlas = ExtResource("1_robop")
+region = Rect2(640, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rp05"]
+atlas = ExtResource("1_robop")
+region = Rect2(704, 192, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_robo_p_amarelo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rp01")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rp02")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rp03")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rp04")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rp05")
+}],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_robop"]
+radius = 24.0
+height = 74.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_robop"]
+radius = 28.0
+
+[node name="Robo_P_Amarelo" type="CharacterBody2D" unique_id=1200000011]
+script = ExtResource("2_robop")
+vida_maxima = 60.0
+velocidade = 55.0
+dano = 15.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1200000012]
+z_index = 4
+scale = Vector2(1.5, 1.5)
+sprite_frames = SubResource("SpriteFrames_robo_p_amarelo")
+autoplay = "default"
+
+[node name="EnemyTrigger" type="Area2D" parent="." unique_id=1200000013]
+script = ExtResource("3_robop")
+id_inimigo = "robo_p_amarelo"
+andar_id = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1200000014]
+position = Vector2(0, 10)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_robop")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1200000015]
+position = Vector2(0, 12)
+shape = SubResource("CircleShape2D_robop")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]
