@@ -19,6 +19,7 @@ extends CharacterBody2D
 # ──────────────────────────────────────────
 var vida_atual:      float
 var _em_batalha:     bool    = false
+var _sou_o_combatente: bool  = false
 var _em_pausa:       bool    = false
 var _direcao:        Vector2 = Vector2.RIGHT  ## Direção atual da patrulha (normalizada)
 var _timer_direcao:  float   = 0.0            ## Tempo restante nesta direção
@@ -39,6 +40,7 @@ var DIRECOES: Array = [
 ]
 
 func _ready() -> void:
+	add_to_group("inimigos")
 	vida_atual = vida_maxima
 	randomize()
 
@@ -101,7 +103,10 @@ func _sortear_nova_direcao() -> void:
 # ──────────────────────────────────────────
 # Reação aos Sinais de Batalha
 # ──────────────────────────────────────────
-func _on_batalha_iniciada(_enemy_data: Dictionary) -> void:
+func _on_batalha_iniciada(enemy_data: Dictionary) -> void:
+	# Compara se o node referenciado em enemy_data["inimigo_node"] é esta própria instância
+	_sou_o_combatente = (enemy_data.get("inimigo_node") == self)
+
 	## Para a patrulha imediatamente — desliga o physics process no nível do engine
 	_em_batalha = true
 	_em_pausa   = false
@@ -111,14 +116,22 @@ func _on_batalha_iniciada(_enemy_data: Dictionary) -> void:
 	print("[Dev-1] Inimigo pausou patrulha — batalha iniciada.")
 
 func _on_batalha_encerrada(vitoria: bool) -> void:
-	## Retoma patrulha somente se o jogador perdeu (inimigo sobreviveu)
-	if not vitoria:
+	if vitoria:
+		if not _sou_o_combatente:
+			# Se o jogador venceu a batalha, mas não foi contra este monstro específico,
+			# este monstro deve reaparecer e continuar a patrulha normalmente.
+			_em_batalha = false
+			show()
+			set_physics_process(true)
+			_sortear_nova_direcao()
+			print("[Prog-08] Inimigo secundário retomou patrulha — outro inimigo foi derrotado.")
+	else:
+		# Se o jogador perdeu a batalha, todos os inimigos voltam a patrulhar
 		_em_batalha = false
 		show()                      # Volta a exibir o inimigo no mapa
 		set_physics_process(true)   # Religa o movimento
 		_sortear_nova_direcao()
 		print("[Dev-1] Inimigo retomou patrulha aleatória — jogador derrotado.")
-	# Se vitoria=true: inimigo permanece oculto e imóvel (foi derrotado)
 
 # ──────────────────────────────────────────
 # Dano recebido (chamado pelo QuizManager via acerto do jogador)

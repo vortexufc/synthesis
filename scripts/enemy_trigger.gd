@@ -50,15 +50,16 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player":
+		var node_pai = get_parent()
+
 		# Monta enemy_data com andar_id para o QuizManager filtrar o banco
 		var enemy_data: Dictionary = {
 			"num_questoes":    num_questoes,
 			"duracao_batalha": duracao_batalha,
 			"andar_id":        andar_id,
 			"id_inimigo":      id_inimigo,
+			"inimigo_node":    node_pai,
 		}
-
-		var node_pai = get_parent()
 
 		# [Fix-9] Fallback inteligente do Sprite do inimigo
 		if QuizManager.sprite_frames_inimigos.has(id_inimigo):
