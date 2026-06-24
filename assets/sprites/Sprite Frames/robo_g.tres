@@ -2,22 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://piklg4jxrne5" path="res://assets/sprites/Characters/Robo_G/robo_g.png" id="1_rg"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_i1"]
-atlas = ExtResource("1_rg")
-region = Rect2(0, 0, 144, 144)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_i2"]
-atlas = ExtResource("1_rg")
-region = Rect2(144, 0, 144, 144)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_i3"]
-atlas = ExtResource("1_rg")
-region = Rect2(288, 0, 144, 144)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_i4"]
-atlas = ExtResource("1_rg")
-region = Rect2(432, 0, 144, 144)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_atk1"]
 atlas = ExtResource("1_rg")
 region = Rect2(0, 144, 144, 144)
@@ -34,25 +18,24 @@ region = Rect2(288, 144, 144, 144)
 atlas = ExtResource("1_rg")
 region = Rect2(432, 144, 144, 144)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_i1"]
+atlas = ExtResource("1_rg")
+region = Rect2(0, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2"]
+atlas = ExtResource("1_rg")
+region = Rect2(144, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i3"]
+atlas = ExtResource("1_rg")
+region = Rect2(288, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i4"]
+atlas = ExtResource("1_rg")
+region = Rect2(432, 0, 144, 144)
+
 [resource]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_i1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_i2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_i3")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_i4")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_atk1")
@@ -69,4 +52,21 @@ animations = [{
 "loop": false,
 "name": &"ataque",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
 }]

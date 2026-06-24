@@ -61,7 +61,17 @@ func _ready() -> void:
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
 	
-	# Muda para a cena do andar 1 (Corredor)
+	var som_global = get_node_or_null("/root/MusicManager")
+	
+	if som_global:
+		if som_global.has_method("parar_musica_menu"):
+			som_global.parar_musica_menu()
+		else:
+			print("ERRO CRÍTICO: O nó MusicManager foi achado, mas NÃO possui a função 'parar_musica_menu'!")
+	else:
+		print("AVISO: O nó global MusicManager não foi encontrado na raiz.")
+	
+	# O jogo segue o fluxo mesmo se o som falhar
 	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_btn_ranking_pressed() -> void:
@@ -106,4 +116,3 @@ func _atualizar_leaderboard() -> void:
 			# Sem dados suficientes — exibe placeholder
 			name_lbl.text = "---"
 			pts_lbl.text  = "PONTOS: 0"
-
