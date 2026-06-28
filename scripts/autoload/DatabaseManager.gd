@@ -165,7 +165,41 @@ func puxar_perguntas(andar_id: int = 1) -> void:
 	var query = "/rest/v1/perguntas?select=*"
 	if andar_id > 0:
 		query += "&andar_id=eq." + str(andar_id)
-	make_request(query, HTTPClient.METHOD_GET)
+	_puxar_perguntas_async(query, andar_id)
+
+func _puxar_perguntas_async(query: String, andar_id: int) -> void:
+	var res = await request_async(query, HTTPClient.METHOD_GET)
+	if res["success"] and res["data"] is Array and res["data"].size() > 0:
+		print("Perguntas carregadas do banco via async!")
+		perguntas_recebidas.emit(res["data"])
+	else:
+		print("Falha ao puxar perguntas online (offline?). Carregando fallback local...")
+		var locais = carregar_perguntas_locais(andar_id)
+		perguntas_recebidas.emit(locais)
+
+func carregar_perguntas_locais(andar_id: int = 0) -> Array:
+	var path = "res://data/questions.json"
+	if not FileAccess.file_exists(path):
+		push_error("Arquivo local de perguntas nao encontrado em: " + path)
+		return []
+		
+	var file = FileAccess.open(path, FileAccess.READ)
+	var content = file.get_as_text()
+	file.close()
+	
+	var json = JSON.new()
+	if json.parse(content) == OK and json.data is Array:
+		var todas: Array = json.data
+		if andar_id <= 0:
+			return todas
+		var filtradas = []
+		for p in todas:
+			if p is Dictionary and int(p.get("andar_id", 0)) == andar_id:
+				filtradas.append(p)
+		return filtradas
+	else:
+		push_error("Erro ao fazer parse de data/questions.json")
+		return []
 
 # --- FUNCOES DO CLÃ ---
 
