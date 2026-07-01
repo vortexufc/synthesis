@@ -1,10 +1,30 @@
-[gd_resource type="SpriteFrames" format=3 uid="uid://sfroboplaranja"]
+[gd_resource type="SpriteFrames" format=3 uid="uid://c8swvqf7x4h1o"]
 
-[ext_resource type="Texture2D" uid="uid://d27lzx67ml5c1" path="res://assets/sprites/Characters/Robo_P/robo_p.png" id="1_tex"]
+[ext_resource type="Texture2D" uid="uid://d27l0x67ml5c1" path="res://assets/sprites/Characters/Robo_P/robo_p.png" id="1_tex"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_idle"]
 atlas = ExtResource("1_tex")
 region = Rect2(0, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_down_0"]
+atlas = ExtResource("1_tex")
+region = Rect2(0, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_down_1"]
+atlas = ExtResource("1_tex")
+region = Rect2(64, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_down_2"]
+atlas = ExtResource("1_tex")
+region = Rect2(128, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_down_3"]
+atlas = ExtResource("1_tex")
+region = Rect2(192, 192, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_down_4"]
+atlas = ExtResource("1_tex")
+region = Rect2(256, 192, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_side_0"]
 atlas = ExtResource("1_tex")
@@ -45,26 +65,6 @@ region = Rect2(192, 128, 64, 64)
 [sub_resource type="AtlasTexture" id="AtlasTexture_up_4"]
 atlas = ExtResource("1_tex")
 region = Rect2(256, 128, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_down_0"]
-atlas = ExtResource("1_tex")
-region = Rect2(0, 192, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_down_1"]
-atlas = ExtResource("1_tex")
-region = Rect2(64, 192, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_down_2"]
-atlas = ExtResource("1_tex")
-region = Rect2(128, 192, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_down_3"]
-atlas = ExtResource("1_tex")
-region = Rect2(192, 192, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_down_4"]
-atlas = ExtResource("1_tex")
-region = Rect2(256, 192, 64, 64)
 
 [resource]
 animations = [{
