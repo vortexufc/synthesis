@@ -1,26 +1,26 @@
 [gd_scene format=4 uid="uid://de8vnqca6sm6n"]
 
-[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_q1d4w"]
-[ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_djeh6"]
-[ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="3_qs38v"]
-[ext_resource type="Texture2D" uid="uid://ddl5ei2h1o3s5" path="res://assets/sprites/tilesets/Alquimia/OBJETOS02.png" id="4_ohl3v"]
-[ext_resource type="Texture2D" uid="uid://c2gv0ps0w7lah" path="res://assets/sprites/tilesets/Alquimia/círculo.png" id="5_yi0cs"]
-[ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="6_vxq4y"]
-[ext_resource type="Texture2D" uid="uid://driu1lb30b4iw" path="res://assets/sprites/tilesets/Alquimia/untitled.png" id="7_o65yj"]
-[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="8_uxov3"]
-[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="9_82j3l"]
-[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="10_dvse7"]
-[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="11_ctnum"]
-[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="12_7qyig"]
-[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="13_p7ehb"]
-[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="14_f0mh0"]
-[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_05077"]
-[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="16_fcm5f"]
-[ext_resource type="PackedScene" uid="uid://c1kl1nfi3tcp2" path="res://scenes/Entidades/Slimes/slime_p04.tscn" id="17_djeh6"]
-[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="18_qs38v"]
+[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_glvar"]
+[ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_dxlyw"]
+[ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="3_r82os"]
+[ext_resource type="Texture2D" uid="uid://ddl5ei2h1o3s5" path="res://assets/sprites/tilesets/Alquimia/OBJETOS02.png" id="4_wdimy"]
+[ext_resource type="Texture2D" uid="uid://c2gv0ps0w7lah" path="res://assets/sprites/tilesets/Alquimia/círculo.png" id="5_8j88p"]
+[ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="6_bnuqo"]
+[ext_resource type="Texture2D" uid="uid://driu1lb30b4iw" path="res://assets/sprites/tilesets/Alquimia/untitled.png" id="7_qu12w"]
+[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="8_vvscj"]
+[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="9_fpai3"]
+[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="10_1xlbl"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="11_rauj5"]
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="12_f8om2"]
+[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="13_vvkqq"]
+[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="14_crdxd"]
+[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_e6vbf"]
+[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="16_0l3tc"]
+[ext_resource type="PackedScene" uid="uid://c1kl1nfi3tcp2" path="res://scenes/Entidades/Slimes/slime_p04.tscn" id="17_dj825"]
+[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="18_w18c1"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_djeh6"]
-texture = ExtResource("2_djeh6")
+texture = ExtResource("2_dxlyw")
 8:22/size_in_atlas = Vector2i(1, 2)
 8:22/0 = 0
 72:35/0 = 0
@@ -97,7 +97,7 @@ texture = ExtResource("2_djeh6")
 16:19/0/physics_layer_0/polygon_0/points = PackedVector2Array(-42.053303, -26.530273, 39.79541, -27.094746, 40.924355, 19.192108, -41.48883, 21.450005)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qs38v"]
-texture = ExtResource("3_qs38v")
+texture = ExtResource("3_r82os")
 32:0/0 = 0
 33:0/0 = 0
 34:0/0 = 0
@@ -1438,7 +1438,7 @@ texture = ExtResource("3_qs38v")
 59:39/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ohl3v"]
-texture = ExtResource("4_ohl3v")
+texture = ExtResource("4_wdimy")
 17:19/size_in_atlas = Vector2i(6, 5)
 17:19/0 = 0
 17:19/0/physics_layer_0/polygon_0/points = PackedVector2Array(-36.973038, -16.934216, -12.1361885, -33.86843, 8.749344, -17.498692, 4.233551, 20.885529, -12.700661, 26.530273, -34.71514, 16.934212)
@@ -1516,7 +1516,7 @@ texture = ExtResource("4_ohl3v")
 1:21/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yi0cs"]
-texture = ExtResource("5_yi0cs")
+texture = ExtResource("5_8j88p")
 6:0/size_in_atlas = Vector2i(6, 4)
 6:0/0 = 0
 6:0/0/texture_origin = Vector2i(8, 0)
@@ -1533,7 +1533,7 @@ sources/3 = SubResource("TileSetAtlasSource_yi0cs")
 sources/1 = SubResource("TileSetAtlasSource_qs38v")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vxq4y"]
-texture = ExtResource("3_qs38v")
+texture = ExtResource("3_r82os")
 32:0/size_in_atlas = Vector2i(4, 8)
 32:0/0 = 0
 34:12/0 = 0
@@ -1583,7 +1583,7 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_vxq4y")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_o65yj"]
-texture = ExtResource("3_qs38v")
+texture = ExtResource("3_r82os")
 44:20/size_in_atlas = Vector2i(2, 4)
 44:20/0 = 0
 44:20/0/texture_origin = Vector2i(8, 8)
@@ -1661,11 +1661,11 @@ texture = ExtResource("3_qs38v")
 58:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uxov3"]
-texture = ExtResource("6_vxq4y")
+texture = ExtResource("6_bnuqo")
 0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_82j3l"]
-texture = ExtResource("7_o65yj")
+texture = ExtResource("7_qu12w")
 1:5/size_in_atlas = Vector2i(2, 3)
 1:5/animation_separation = Vector2i(2, 0)
 1:5/animation_frame_0/duration = 1.0
@@ -1682,7 +1682,7 @@ sources/2 = SubResource("TileSetAtlasSource_82j3l")
 
 [node name="Node2D" type="Node2D" unique_id=701816259]
 
-[node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_q1d4w")]
+[node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_glvar")]
 z_index = 4
 position = Vector2(1587, 1166)
 
@@ -1707,17 +1707,17 @@ tile_map_data = PackedByteArray("AAAUAB8AAQAAAAAAAAD9/x4AAQAAAAAAAAD9/x8AAQAAAAA
 tile_set = SubResource("TileSet_s3xb7")
 
 [node name="Node" type="Node" parent="." unique_id=558127]
-script = ExtResource("8_uxov3")
+script = ExtResource("8_vvscj")
 
-[node name="HUD" parent="." unique_id=1610434182 instance=ExtResource("9_82j3l")]
+[node name="HUD" parent="." unique_id=1610434182 instance=ExtResource("9_fpai3")]
 visible = false
 
-[node name="InventarioUI" parent="." unique_id=685087251 instance=ExtResource("10_dvse7")]
+[node name="InventarioUI" parent="." unique_id=685087251 instance=ExtResource("10_1xlbl")]
 visible = false
 
 [node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=290582347]
 visible = false
-script = ExtResource("11_ctnum")
+script = ExtResource("11_rauj5")
 
 [node name="Control" type="Control" parent="ParchmentUI" unique_id=1226968523]
 layout_mode = 3
@@ -1734,7 +1734,7 @@ offset_left = 93.0
 offset_top = -97.0
 offset_right = 893.0
 offset_bottom = 703.0
-texture = ExtResource("12_7qyig")
+texture = ExtResource("12_f8om2")
 
 [node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=507674883]
 custom_minimum_size = Vector2(160, 80)
@@ -1760,21 +1760,21 @@ theme_override_constants/separation = 50
 [node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=58213989]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
-texture_normal = ExtResource("13_p7ehb")
+texture_normal = ExtResource("13_vvkqq")
 ignore_texture_size = true
 stretch_mode = 5
 
 [node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1985537138]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-texture_normal = ExtResource("14_f0mh0")
+texture_normal = ExtResource("14_crdxd")
 ignore_texture_size = true
 stretch_mode = 5
 
 [node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=176704350]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-texture_normal = ExtResource("15_05077")
+texture_normal = ExtResource("15_e6vbf")
 ignore_texture_size = true
 stretch_mode = 5
 
@@ -1793,15 +1793,15 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="CharacterBody2D" parent="." unique_id=1797331560 instance=ExtResource("16_fcm5f")]
+[node name="CharacterBody2D" parent="." unique_id=1797331560 instance=ExtResource("16_0l3tc")]
 position = Vector2(657, 498)
 
-[node name="CharacterBody2D2" parent="." unique_id=555386077 instance=ExtResource("17_djeh6")]
+[node name="CharacterBody2D2" parent="." unique_id=555386077 instance=ExtResource("17_dj825")]
 position = Vector2(1782, 874)
 
-[node name="PortaTransicao" parent="." unique_id=1754424379 instance=ExtResource("18_qs38v")]
+[node name="PortaTransicao" parent="." unique_id=1754424379 instance=ExtResource("18_w18c1")]
 position = Vector2(244, 232)
 
-[node name="PortaRetorno" parent="." unique_id=1272649650 instance=ExtResource("18_qs38v")]
+[node name="PortaRetorno" parent="." unique_id=1272649650 instance=ExtResource("18_w18c1")]
 position = Vector2(1588, 1300)
 porta_de_retorno = true
