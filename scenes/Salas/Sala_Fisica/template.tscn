@@ -423,10 +423,10 @@ offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
 [node name="PortaTransicao" parent="." unique_id=542836373 instance=ExtResource("14_e4d4v")]
-position = Vector2(336, 479)
+position = Vector2(642, 272)
 
 [node name="PortaRetorno" parent="." unique_id=19249675 instance=ExtResource("14_e4d4v")]
-position = Vector2(282, 712)
+position = Vector2(399, 928)
 porta_de_retorno = true
 
 [node name="Robo_G" parent="." unique_id=1200000031 instance=ExtResource("15_lrkok")]
@@ -434,7 +434,7 @@ position = Vector2(404, 361)
 scale = Vector2(1.3, 1.3)
 
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("16_bg4ak")]
-position = Vector2(1051, 722)
+position = Vector2(926, 588)
 scale = Vector2(1.2, 1.2)
 
 [node name="Robo_P_Ciano" parent="." unique_id=1200000021 instance=ExtResource("17_opsq0")]
