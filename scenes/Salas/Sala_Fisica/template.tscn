@@ -330,6 +330,7 @@ tile_set = SubResource("TileSet_qy7im")
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("5_iwxws")]
 z_index = 4
 position = Vector2(706, 949)
+scale = Vector2(2, 2)
 
 [node name="Node" type="Node" parent="." unique_id=583327044]
 script = ExtResource("6_qy7im")
@@ -433,9 +434,12 @@ scale = Vector2(2, 2)
 
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("16_bg4ak")]
 position = Vector2(1051, 722)
+scale = Vector2(1.5, 1.5)
 
 [node name="Robo_P_Ciano" parent="." unique_id=1200000021 instance=ExtResource("17_opsq0")]
 position = Vector2(905, 727)
+scale = Vector2(1.5, 1.5)
 
 [node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("18_7aocy")]
 position = Vector2(775, 732)
+scale = Vector2(1.5, 1.5)
