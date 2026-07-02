@@ -13,6 +13,8 @@ extends CharacterBody2D
 @export var tempo_min_direcao: float =  0.8   ## Mínimo de segundos antes de sortear nova direção
 @export var tempo_max_direcao: float =  2.2   ## Máximo de segundos antes de sortear nova direção
 @export var chance_pausa:      float =  0.2   ## 0.0‒1.0 — chance de parar por um instante ao trocar direção
+@export var distancia_perseguicao: float = 200.0 ## Distância máxima para começar a perseguir o Player
+@export var velocidade_perseguicao: float = 75.0  ## Velocidade ao perseguir o Player
 
 # ──────────────────────────────────────────
 # Estado interno
@@ -24,6 +26,8 @@ var _em_pausa:       bool    = false
 var _direcao:        Vector2 = Vector2.RIGHT  ## Direção atual da patrulha (normalizada)
 var _timer_direcao:  float   = 0.0            ## Tempo restante nesta direção
 var _timer_pausa:    float   = 0.0            ## Tempo de pausa (imóvel)
+var _player:         Node2D  = null
+var _perseguindo:    bool    = false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
@@ -58,32 +62,59 @@ func _ready() -> void:
 # Loop de Patrulha Aleatória
 # ──────────────────────────────────────────
 func _physics_process(delta: float) -> void:
-	# Contagem regressiva de pausa (inimigo fica parado por um instante)
-	if _em_pausa:
-		_timer_pausa -= delta
-		if _timer_pausa <= 0.0:
+	# Localiza o player dinamicamente se ainda não referenciado
+	if not _player:
+		var players = get_tree().get_nodes_in_group("player")
+		if players.size() > 0:
+			_player = players[0]
+
+	var no_alcance: bool = false
+	if _player and is_instance_valid(_player):
+		var distancia = global_position.distance_to(_player.global_position)
+		if distancia <= distancia_perseguicao:
+			no_alcance = true
+
+	if no_alcance:
+		if not _perseguindo:
+			print("[Inimigo] Jogador avistado! Iniciando perseguição.")
+			_perseguindo = true
 			_em_pausa = false
+		
+		# Define a direção apontando para o player
+		_direcao = (_player.global_position - global_position).normalized()
+		velocity = _direcao * velocidade_perseguicao
+	else:
+		if _perseguindo:
+			print("[Inimigo] Jogador perdeu-se de vista. Retornando à patrulha.")
+			_perseguindo = false
 			_sortear_nova_direcao()
-		velocity = Vector2.ZERO
-		move_and_slide()
-		if sprite:
-			sprite.play("default")
-		return
-
-	# Contagem regressiva para trocar de direção
-	_timer_direcao -= delta
-	if _timer_direcao <= 0.0:
-		# Chance de entrar em pausa antes de sortear nova direção
-		if randf() < chance_pausa:
-			_em_pausa     = true
-			_timer_pausa  = randf_range(0.3, 0.8)
-			velocity      = Vector2.ZERO
+		
+		# Contagem regressiva de pausa (inimigo fica parado por um instante)
+		if _em_pausa:
+			_timer_pausa -= delta
+			if _timer_pausa <= 0.0:
+				_em_pausa = false
+				_sortear_nova_direcao()
+			velocity = Vector2.ZERO
 			move_and_slide()
+			if sprite:
+				sprite.play("default")
 			return
-		_sortear_nova_direcao()
 
-	# Move na direção atual
-	velocity = _direcao * velocidade
+		# Contagem regressiva para trocar de direção
+		_timer_direcao -= delta
+		if _timer_direcao <= 0.0:
+			# Chance de entrar em pausa antes de sortear nova direção
+			if randf() < chance_pausa:
+				_em_pausa     = true
+				_timer_pausa  = randf_range(0.3, 0.8)
+				velocity      = Vector2.ZERO
+				move_and_slide()
+				return
+			_sortear_nova_direcao()
+
+		# Move na direção atual da patrulha
+		velocity = _direcao * velocidade
 
 	# Atualiza a animação dependendo da direção
 	if sprite:
@@ -104,8 +135,8 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-	# Se colidiu com parede (velocity zerou pelo move_and_slide), sorteia nova direção imediatamente
-	if velocity.length() < 1.0 and not _em_pausa:
+	# Se colidiu com parede (e não estiver perseguindo), sorteia nova direção imediatamente
+	if not no_alcance and velocity.length() < 1.0 and not _em_pausa:
 		_sortear_nova_direcao()
 
 # ──────────────────────────────────────────
