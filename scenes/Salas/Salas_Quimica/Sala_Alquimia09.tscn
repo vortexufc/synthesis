@@ -15,8 +15,8 @@
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="13_yow7n"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="14_1x5kv"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_d0uf7"]
-[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="16_nk5gw"]
-[ext_resource type="PackedScene" uid="uid://b2xv3dnkiuce8" path="res://scenes/Entidades/Slimes/Slime_G.tscn" id="17_cn46h"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala09.tscn" id="16_nk5gw"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_g_sala09.tscn" id="17_cn46h"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="18_vclng"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_m12ca"]
