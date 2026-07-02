@@ -1,626 +1,1952 @@
 [
   {
-	"id": 1,
-	"question": "Um jovem mago percebeu que, ao conjurar um feitiço de cura, a energia regenerativa estimula a divisão de células somáticas da pele ferida do guerreiro. Que processo celular de divisão de células idênticas o feitiço acelerou?",
-	"options": ["Mitose", "Meiose", "Fissão binária", "Esporulação"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 2,
-	"question": "O Slime Verde da masmorra absorve nutrientes digerindo matéria orgânica externamente antes de a absorver. De acordo com a biologia, que tipo de nutrição esse ser compartilha com os fungos terrestres?",
-	"options": ["Autotrófica por fotossíntese", "Heterotrófica por absorção", "Quimiolitoautotrófica", "Autotrófica por quimiossíntese"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 3,
-	"question": "Nas estufas arcanas da torre, as plantas de mana purificam o ar utilizando a luz solar para sintetizar glicose a partir de dióxido de carbono gasoso e água. Que organela celular é responsável por essa conversão mágica?",
-	"options": ["Mitocôndria", "Complexo de Golgi", "Cloroplasto", "Lisossomo"],
-	"answer": 2,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 4,
-	"question": "Uma poção vigorizante atua fornecendo alta carga de energia celular direta na forma de ATP (Adenosina Trifosfato). Em qual organela celular a maior parte do ATP é sintetizada por meio da respiração celular?",
-	"options": ["Ribossomo", "Lisossomo", "Retículo endoplasmático", "Mitocôndria"],
-	"answer": 3,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 5,
-	"question": "Um alquimista estuda o veneno de uma aranha da masmorra e descobre que ele bloqueia a síntese de proteínas nas células da vítima. Qual organela celular responsável pela tradução do RNAm foi paralisada pelo veneno?",
-	"options": ["Ribossomo", "Nucléolo", "Peroxissomo", "Centríolo"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 6,
-	"question": "Para criar um clone estável de um homúnculo, o mago precisa extrair a molécula dupla-hélice que carrega a informação genética completa da criatura. Qual é o nome dessa molécula biológica?",
-	"options": ["RNA mensageiro", "Ácido Desoxirribonucleico (DNA)", "Trifosfato de adenosina (ATP)", "Polipeptídeo cristalino"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 7,
-	"question": "Os slimes gigantes da torre se reproduzem dividindo-se ao meio em dois slimes idênticos menores, sem troca de material genético. Esse método de reprodução assexuada é análogo a qual processo de reprodução de bactérias?",
-	"options": ["Conjugação bacteriana", "Brotamento mitótico", "Divisão binária (ou cissiparidade)", "Partenogênese induzida"],
-	"answer": 2,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 8,
-	"question": "Em uma simulação de ecossistema na torre, o mago observa que os robôs coletores (consumidores secundários) acumulam toxinas de metais mágicos em maior concentração que os slimes coletores (consumidores primários). Esse fenômeno ecológico é chamado de:",
-	"options": ["Nicho ecológico", "Sucessão ecológica", "Eutrofização controlada", "Magnificação trófica (ou bioacumulação)"],
-	"answer": 3,
-	"andar_id": 1,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 9,
-	"question": "As células do Mago Negro possuem uma parede celular rígida externa que protege contra flutuações de pressão osmótica na água circundante. De acordo com a biologia celular vegetal, qual substância carboidrato compõe essa estrutura de proteção?",
-	"options": ["Celulose", "Glicogênio", "Quitina", "Amido"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 10,
-	"question": "O dragão de fogo da torre consome grandes quantidades de lipídios da masmorra para armazenar energia de longo prazo sob a forma de gordura térmica sob suas escamas. Qual das seguintes funções melhor descreve os lipídios na biologia?",
-	"options": ["Catalisadores enzimáticos exclusivos", "Reserva de energia e isolamento térmico", "Transportadores rápidos de oxigênio no sangue", "Estrutura básica do material genético principal"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 11,
-	"question": "Ao conjurar um feitiço de envelhecimento rápido sobre um troll, o mago altera a expressão do material genético sem modificar a sequência de bases nitrogenadas do DNA do troll. Esse ramo de estudo da genética é conhecido como:",
-	"options": ["Epigenética", "Mutagênese direcionada", "Clonagem molecular", "Transgênese cromossômica"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 12,
-	"question": "Uma poção de rejuvenescimento celular contém uma enzima que repara as extremidades repetitivas dos cromossomos, que encurtam a cada divisão celular rúnica. Qual o nome biológico dessas extremidades protetoras do DNA?",
-	"options": ["Cinetócoros", "Telômeros", "Centrômeros", "Histonas"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 13,
-	"question": "Um caçador arcano analisa o sangue azul de um caranguejo da masmorra e nota que ele transporta oxigênio usando cobre em vez de ferro. Que proteína respiratória de cor azulada realiza essa função na biologia?",
-	"options": ["Hemoglobina", "Mioglobina", "Hemocianina", "Clorofila"],
-	"answer": 2,
-	"andar_id": 1,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 14,
-	"question": "O mago observa que, após um incêndio florestal provocado por uma bola de fogo, liquens arcanos e briófitas (musgos) são os primeiros a colonizar as rochas expostas na masmorra. Qual o termo ecológico para essa primeira comunidade colonizadora?",
-	"options": ["Comunidade pioneira (ou ecese)", "Comunidade clímax", "Comunidade de transição (sere)", "Comunidade degradada"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 15,
-	"question": "Uma poção concentrada ativa um morcego da masmorra a usar ecolocalização para caçar no escuro, emitindo ondas sonoras que colidem em obstáculos e retornam. Qual o nome biológico desse sentido sensorial adaptativo?",
-	"options": ["Magnetorecepção", "Ecolocalização (ou biossonar)", "Quimiorecepção", "Eletrorecepção"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 16,
-	"question": "O veneno de uma serpente arcana dissolve a bainha de mielina dos neurônios do jogador, diminuindo drasticamente a velocidade de propagação dos impulsos nervosos. Qual a função da bainha de mielina na transmissão do impulso nervoso?",
-	"options": ["Gerar a sinapse química", "Atuar como isolante elétrico e acelerar o impulso", "Produzir neurotransmissores de contração", "Nutrir o corpo celular do neurônio"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 17,
-	"question": "Para desintoxicar o guerreiro envenenado por um esporo fúngico, o curandeiro estimula as células do fígado da vítima a realizar a metabolização de toxinas. Qual organela membranosa não-granulosa realiza a desintoxicação celular?",
-	"options": ["Retículo endoplasmático liso (não-granuloso)", "Retículo endoplasmático rugoso (granuloso)", "Complexo de Golgi", "Lisossomo"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 18,
-	"question": "O mago realiza cruzamentos genéticos entre slimes azuis dominantes (AA) e slimes amarelos recessivos (aa). De acordo com a Primeira Lei de Mendel, qual a proporção fenotípica esperada na geração F2 após a autofecundação dos híbridos F1?",
-	"options": ["3 dominantes para 1 recessivo", "1 dominante para 1 recessivo", "Todas recessivas", "9 dominantes para 7 recessivos"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 19,
-	"question": "O caçador arcano estuda uma planta carnívora da masmorra que fecha suas folhas rapidamente ao toque de um inseto. Que tipo de movimento vegetal não direcionado, desencadeado pelo toque físico, é esse?",
-	"options": ["Fotonastia", "Geotropismo", "Sismonastia (ou tigmonastia)", "Quimiotropismo"],
-	"answer": 2,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 20,
-	"question": "Um curandeiro prepara um soro contra o veneno de escorpião-golem injetando pequenas doses do veneno em um cavalo e depois extraindo os anticorpos prontos do sangue do animal. Essa imunização que fornece anticorpos prontos é classificada como:",
-	"options": ["Imunização ativa (vacina)", "Imunização passiva (soro)", "Imunização celular inata", "Terapia gênica retroviral"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 21,
-	"question": "Um necromante revive tecidos mortos bloqueando a ação dos lisossomos celulares das vítimas para evitar a autodestruição celular. Qual o nome biológico da autodestruição de uma célula por meio da ruptura de seus próprios lisossomos?",
-	"options": ["Autofagia", "Exocitose", "Autólise", "Plasmólise"],
-	"answer": 2,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 22,
-	"question": "O slime de gelo sobrevive a temperaturas extremas graças a proteínas anticongelantes em sua membrana plasmática. A membrana plasmática celular é constituída principalmente por qual bicamada macromolecular?",
-	"options": ["Bicamada fosfolipídica com proteínas inseridas", "Bicamada de carboidratos insolúveis", "Bicamada de ácidos nucleicos helicoidais", "Monocamada lipídica pura"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 23,
-	"question": "O mago da torre estuda vermes parasitas da masmorra que possuem corpo cilíndrico, triblásticos e pseudocelomados. A qual filo do reino animal esses vermes pertencem?",
-	"options": ["Platelmintos", "Anelídeos", "Nematódeos (Nematelmintos)", "Moluscos"],
-	"answer": 2,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 24,
-	"question": "Uma poção de super-oxigenação celular aumenta a taxa de respiração aeróbica celular. Qual molécula atua como aceitador final de elétrons na cadeia respiratória mitocondrial nas células humanas?",
-	"options": ["Oxigênio gasoso (O₂)", "Glicose (C₆H₁₂O₆)", "Dióxido de carbono (CO₂)", "Água (H₂O)"],
-	"answer": 0,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 25,
-	"question": "Para criar um mutante de rato-guerreiro gigante, o cientista manipula hormônios que aceleram o crescimento de ossos e cartilagens. Qual tecido conjuntivo é caracterizado por ser rígido, porém flexível, sem vasos sanguíneos nem nervos próprios?",
-	"options": ["Tecido ósseo", "Tecido cartilaginoso", "Tecido epitelial de revestimento", "Tecido muscular estriado"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 26,
-	"question": "Um veneno gasoso espalhado no andar de Biologia inibe a atividade dos estômatos das plantas de mana. Qual a principal função das estruturas estomáticas nas folhas das plantas?",
-	"options": ["Produzir clorofila para a fotossíntese", "Realizar trocas gasosas e transpiração", "Absorver água e sais minerais do solo", "Proteger a folha contra predadores herbívoros"],
-	"answer": 1,
-	"andar_id": 1,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 27,
-	"question": "Para neutralizar uma poção de ácido de slime (pH = 2) que corroeu as botas do guerreiro, qual reagente alquímico básico o curandeiro deve utilizar para aproximar o pH de 7 (neutro)?",
-	"options": ["Uma solução alcalina (básica) de pH alto", "Outra poção ácida de pH 1", "Água destilada purificada apenas", "Um sal altamente insolúvel e ácido"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 28,
-	"question": "O Golem de Cristal derrete sob calor extremo em um processo físico onde a estrutura ordenada de silício passa do estado sólido para o estado líquido. Qual o nome dessa transição física de estado da matéria?",
-	"options": ["Condensação", "Sublimação", "Fusão", "Vaporização"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 29,
-	"question": "Para sintetizar a lendária Pedra Filosofal, um alquimista mistura \"Sódio arcano\" (Na) altamente reativo com água mágica. O sódio puro reage violentamente liberando hidrogênio. Na tabela periódica, a qual família pertence o elemento Sódio?",
-	"options": ["Halogênios", "Metais alcalinos", "Gases nobres", "Metais alcalino-terrosos"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 30,
-	"question": "A poção \"Sopro de Névoa\" é criada misturando cristais azuis de sal marinho em água purificada. O sal dissolve-se completamente, formando uma mistura homogênea transparente de fase única. Que tipo de mistura é essa?",
-	"options": ["Mistura heterogênea", "Mistura coloidal", "Suspensão grosseira", "Mistura homogênea (solução)"],
-	"answer": 3,
-	"andar_id": 2,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 31,
-	"question": "O mago arremessa uma runa de fogo que desencadeia a oxidação violenta de carvão mágico na presença de oxigênio gasoso (O₂), gerando gás carbônico (CO₂). Como é classificado esse tipo de reação química exotérmica?",
-	"options": ["Reação de combustão", "Reação de eletrólise", "Reação de fotólise", "Reação de neutralização"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 32,
-	"question": "Uma poção ácida misteriosa possui alta concentração de íons de hidrogênio (H+). O que define o caráter ácido de uma substância de acordo com a teoria clássica de Arrhenius?",
-	"options": ["Liberação de íons hidróxido (OH-) em solução aquosa", "Liberação de íons hidrogênio (H+) em solução aquosa", "Doação de um par de elétrons em qualquer meio", "Neutralização instantânea de qualquer sal neutro"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 33,
-	"question": "Para forjar uma armadura de Mithril indestrutível, o ferreiro funde cobre e estanho mágicos, formando uma liga metálica em que os átomos compartilham elétrons livres em uma \"nuvem eletrônica\". Que tipo de ligação química une esses metais?",
-	"options": ["Ligação covalente", "Ligação iônica", "Ligação metálica", "Força de Van der Waals"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 34,
-	"question": "Um robô alquimista analisa o vapor condensado das masmorras e encontra monóxido de carbono (CO) e dióxido de carbono (CO₂). Ambos os gases são compostos por Carbono e Oxigênio, mas possuem diferentes propriedades. Qual lei ponderal explica que elementos combinam-se em proporções de números inteiros para formar diferentes compostos?",
-	"options": ["Lei das Proporções Múltiplas (Dalton)", "Lei da Conservação das Massas (Lavoisier)", "Lei das Proporções Constantes (Proust)", "Lei de Volumetria (Gay-Lussac)"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 35,
-	"question": "Os magos usam o elemento \"Gás de Hélio arcano\" para flutuar baús pesados. O hélio é um gás extremamente estável que não reage com quase nada devido à sua camada de valência completa. Em qual família da tabela periódica o hélio está localizado?",
-	"options": ["Metais de transição", "Halogênios", "Gases nobres", "Calcogênios"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 36,
-	"question": "O veneno corrosivo de um slime ácido é constituído por ácido clorídrico (HCl), em que o átomo de Hidrogênio e o de Cloro compartilham um par de elétrons devido à diferença de eletronegatividade entre eles. Que tipo de ligação química ocorre nessa molécula?",
-	"options": ["Ligação metálica pura", "Ligação iônica forte", "Ligação covalente polar", "Ligação de hidrogênio dipolar"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 37,
-	"question": "Um dragão de gelo congela instantaneamente a umidade do ar, formando neve nas masmorras. A passagem do vapor de água diretamente para o estado sólido (gelo) é conhecida como:",
-	"options": ["Sublimação inversa (ou Deposição)", "Solidificação clássica", "Condensação induzida", "Evaporação forçada"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 38,
-	"question": "O Mago de Fogo utiliza o mineral rúnico Hematita (Fe₂O₃) para extrair Ferro puro por meio de uma reação onde o Ferro ganha elétrons e diminui seu número de oxidação. Esse processo de ganho de elétrons é chamado de:",
-	"options": ["Oxidação", "Redução", "Neutralização", "Sublimação"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 39,
-	"question": "Para acender a Forja de Hefesto, o guerreiro queima propano mágico (C₃H₈) gerando calor. Na reação balanceada: C₃H₈ + 5 O₂ -> 3 CO₂ + 4 H₂O, quantos mols de oxigênio (O₂) são necessários para queimar completamente 1 mol de propano?",
-	"options": ["3 mols", "4 mols", "5 mols", "1 mol"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 3
-  },
-  {
-	"id": 40,
-	"question": "Para purificar um elixir mágico misturado com areia rúnica preta, o alquimista passa a solução por um papel de filtro arcano que retém a areia e deixa passar o líquido limpo. Qual o nome desse método físico de separação de misturas heterogêneas?",
-	"options": ["Filtração", "Destilação simples", "Decantação molecular", "Centrifugação"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 41,
-	"question": "O mago misturou álcool mágico e água destilada. Sabendo que ambos possuem pontos de ebulição diferentes (78°C e 100°C), qual processo físico baseado na vaporização seguida de condensação ele deve usar para separar esses líquidos miscíveis?",
-	"options": ["Filtração a vácuo", "Decantação fracionada", "Destilação fracionada", "Sublimação térmica"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 42,
-	"question": "Uma pedra rúnica de \"Cálcio arcano\" (Ca) reage com cloro para formar cloreto de cálcio. Sabendo que o cálcio é um metal alcalino-terroso que perde 2 elétrons e o cloro ganha 1 elétron, qual a fórmula molecular correta desse sal rúnico?",
-	"options": ["CaCl", "CaCl₂", "Ca₂Cl", "Ca₂Cl₂"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 43,
-	"question": "Uma criatura de ferro da masmorra começa a sofrer oxidação lenta sob a humidade do ar, formando ferrugem vermelha (Fe₂O₃). Nesse processo químico natural de corrosão, qual agente atua sofrendo redução?",
-	"options": ["O oxigênio do ar (O₂)", "O ferro metálico (Fe)", "A água das masmorras (H₂O)", "O dióxido de carbono (CO₂)"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 44,
-	"question": "Em um experimento de alquimia, o mago descobre que a adição de pó de ouro catalítico aumenta a velocidade da reação de síntese da poção sem ser consumido no processo. Qual a função de um catalisador em uma reação química?",
-	"options": ["Aumentar a energia de ativação e a temperatura", "Diminuir a velocidade da reação química", "Diminuir a energia de ativação de caminhos alternativos", "Alterar a constante de equilíbrio químico final"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 45,
-	"question": "Uma poção alcalina estabilizada possui uma concentração de íons hidróxido (OH-) muito maior que a de íons hidrogênio (H+). Qual o valor aproximado do pH dessa poção na escala padrão a 25°C?",
-	"options": ["pH menor que 7", "pH igual a 7", "pH maior que 7", "pH menor que 0"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 46,
-	"question": "O mago estuda o gás metano (CH₄) gerado pela decomposição de slimes orgânicos. A geometria molecular desse composto, em que o átomo de Carbono central liga-se covalentemente a 4 átomos de Hidrogênio, é descrita como:",
-	"options": ["Linear", "Trigonal plana", "Tetraédrica", "Piramidal"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 47,
-	"question": "Um pergaminho descreve o \"Carbono arcano\" (C) em sua forma de grafite e em sua forma de diamante indestrutível. Embora compostos pelo mesmo elemento químico puro, possuem estruturas cristalinas diferentes. Esse fenômeno químico é chamado de:",
-	"options": ["Isomeria espacial", "Alotropia", "Isotopia atômica", "Ressonância molecular"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 48,
-	"question": "Para resfriar uma poção fervente, o alquimista dissolve nitrato de amônio em água. O frasco fica extremamente gelado ao toque porque a dissolução absorve calor do ambiente. Reações que absorvem calor são classificadas como:",
-	"options": ["Exotérmicas", "Isotérmicas", "Endotérmicas", "Adiabáticas"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 49,
-	"question": "Um slime de ácido sulfúrico (H₂SO₄) ataca o guerreiro. Sendo um ácido forte de Arrhenius bi-protonado, quantos hidrogênios ionizáveis ele libera por molécula em solução aquosa?",
-	"options": ["1", "2", "3", "4"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 50,
-	"question": "A poção \"Luz de Fósforo\" brilha no escuro devido à combustão do fósforo branco (P₄). A ligação que ocorre entre os não-metais idênticos de fósforo se dá por compartilhamento equitativo de elétrons. Essa ligação é do tipo:",
-	"options": ["Ligação covalente apolar", "Ligação covalente polar", "Ligação iônica forte", "Ligação metálica instável"],
-	"answer": 0,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 51,
-	"question": "O mago da torre quer neutralizar 1 mol de ácido clorídrico (HCl) usando hidróxido de sódio (NaOH) na reação: HCl + NaOH -> NaCl + H₂O. Quantos mols de NaOH são necessários para neutralizar completamente o ácido?",
-	"options": ["0,5 mol", "1 mol", "2 mols", "3 mols"],
-	"answer": 1,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 52,
-	"question": "Uma liga rúnica leve para botas de voo é feita de Alumínio (Al). O átomo neutro de alumínio possui número atômico 13. Quantos elétrons ele possui em sua camada de valência (distribuição eletrônica 2, 8, 3)?",
-	"options": ["1 elétron", "2 elétrons", "3 elétrons", "8 elétrons"],
-	"answer": 2,
-	"andar_id": 2,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 53,
-	"question": "O mago lança uma bola de fogo (Fireball) horizontalmente do topo de uma plataforma com velocidade constante de 10 m/s. Se ela atinge o chão após 2 segundos (desconsiderando a resistência do ar), qual a distância horizontal percorrida pela bola de fogo?",
-	"options": ["5 metros", "10 metros", "20 metros", "40 metros"],
-	"answer": 2,
-	"andar_id": 3,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 54,
-	"question": "Para abrir um portal mágico de teletransporte, o mago canaliza energia elétrica através de runas dispostas em circuito paralelo. Se uma runa falha e se apaga (circuito aberto), o que acontece com a corrente elétrica nas outras runas do circuito paralelo?",
-	"options": ["A corrente zera em todas as runas", "As outras runas continuam funcionando de forma independente", "A corrente nas outras runas cai pela metade", "Todas as runas queimam instantaneamente"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 55,
-	"question": "Uma runa de gravidade reversa aplica uma força constante para cima de 15 N em um bloco rúnico de massa 1 kg. Sabendo que a aceleração da gravidade local é de 10 m/s² para baixo, qual a aceleração resultante do bloco para cima? (F_res = m * a)",
-	"options": ["5 m/s²", "15 m/s²", "10 m/s²", "25 m/s²"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 56,
-	"question": "O robô sentinela emite um feixe de luz mágica que reflete perfeitamente em um espelho de prata arcano. Se o ângulo de incidência do feixe luminoso em relação à normal é de 30°, qual o ângulo de reflexão do feixe segundo as leis da óptica geométrica?",
-	"options": ["60°", "30°", "90°", "0°"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 57,
-	"question": "Um mago usa telecinese para empurrar um baú de tesouro com uma força constante de 50 N por uma distância de 4 metros na mesma direção da força. Qual o trabalho físico (W = F * d) realizado pela telecinese do mago sobre o baú?",
-	"options": ["100 Joules", "12,5 Joules", "200 Joules", "50 Joules"],
-	"answer": 2,
-	"andar_id": 3,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 58,
-	"question": "A poção \"Congelamento Rápido\" funciona absorvendo calor rapidamente da água líquida ao redor até que ela solidifique em gelo. O calor que provoca a mudança de estado físico sem alterar a temperatura do sistema é chamado de:",
-	"options": ["Calor sensível", "Calor específico", "Calor de irradiação", "Calor latente"],
-	"answer": 3,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 59,
-	"question": "Uma criatura mecânica flutua na água mágica da fonte da masmorra. Segundo o princípio de Arquimedes, o empuxo vertical para cima que atua sobre a criatura flutuante é igual ao:",
-	"options": ["Volume total do corpo da criatura", "Peso do volume de líquido deslocado pela criatura", "Peso próprio da criatura no vácuo", "Dobro do volume submerso da criatura"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 60,
-	"question": "As bobinas de tesla da sala de robôs acumulam cargas elétricas estáticas de sinais opostos. De acordo com a Lei de Coulomb, se a distância entre duas cargas elétricas idênticas for duplicada, o que acontece com a força eletrostática entre elas?",
-	"options": ["Fica quatro vezes menor (dividida por 4)", "Fica duas vezes menor (dividida por 2)", "Fica quatro vezes maior (multiplicada por 4)", "Permanece exatamente igual"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 61,
-	"question": "A espada rúnica do guerreiro brilha com calor incandescente. A transferência desse calor térmico através do contato direto da lâmina de metal quente com a carapaça de gelo de um slime ocorre principalmente por qual mecanismo físico?",
-	"options": ["Radiação", "Convecção", "Condução", "Sublimação"],
-	"answer": 2,
-	"andar_id": 3,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 62,
-	"question": "Um sino mágico de cristal é golpeado e emite um som agudo de alta frequência que ressoa pela torre. O som é uma onda mecânica longitudinal. Qual das seguintes afirmações sobre ondas sonoras é correta sob a física clássica?",
-	"options": ["O som pode se propagar livremente no vácuo absoluto", "O som se propaga mais rapidamente em meios sólidos do que gasosos", "A velocidade do som independe da densidade do meio de propagação", "O som é uma onda eletromagnética de alta intensidade"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 63,
-	"question": "Uma flecha encantada é disparada com energia cinética inicial de 100 J. À medida que sobe para atingir um gárgula no topo da torre, ela perde velocidade e ganha altura. Desconsiderando atritos, em qual tipo de energia a energia cinética está se convertendo?",
-	"options": ["Energia potencial gravitacional", "Energia potencial elástica", "Energia térmica radiante", "Energia química armazenada"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 64,
-	"question": "O mago estuda um prisma de cristal que divide um feixe de luz mágica branca em todas as cores do arco-íris. Esse fenômeno físico de separação de cores devido à variação do índice de refração com a frequência é chamado de:",
-	"options": ["Reflexão total", "Difração rúnica", "Dispersão luminosa", "Polarização linear"],
-	"answer": 2,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 65,
-	"question": "Um robô de patrulha movimenta-se em linha reta de acordo com a função horária da posição S(t) = 5 + 3t (no Sistema Internacional). Qual a velocidade linear de patrulha desse robô?",
-	"options": ["5 m/s", "3 m/s", "8 m/s", "15 m/s"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 1
-  },
-  {
-	"id": 66,
-	"question": "Uma criatura robô do andar de Física colide elasticamente com outra criatura de mesma massa que estava parada. Segundo as leis de conservação física, o que ocorre com a quantidade de movimento total do sistema isolado após a colisão?",
-	"options": ["Permanece constante (conserva-se)", "Reduz-se a zero instantaneamente", "Duplica de valor devido ao impacto", "Fica reduzida pela metade"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 67,
-	"question": "O mago usa um espelho côncavo mágico para projetar uma imagem real e invertida de uma runa brilhante na parede oposta da masmorra. Qual o tipo de lente ou espelho que pode gerar uma imagem real de um objeto real?",
-	"options": ["Espelho côncavo (ou lente convergente)", "Espelho convexo (ou lente divergente)", "Espelho plano liso ordinário", "Lente divergente pura apenas"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 68,
-	"question": "Um robô sentinela carrega uma bateria de 12 Volts que alimenta seus circuitos com uma resistência elétrica de 4 Ohms. De acordo com a Primeira Lei de Ohm (U = R * I), qual a intensidade da corrente elétrica que flui pelo robô?",
-	"options": ["3 Ampères", "48 Ampères", "0,33 Ampères", "8 Ampères"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 69,
-	"question": "Um mago aplica uma força constante de 20 N sobre um bloco de pedra rúnica de 2 kg que estava em repouso. Desconsiderando o atrito do solo, qual a aceleração sofrida pelo bloco de acordo com a Segunda Lei de Newton? (a = F / m)",
-	"options": ["5 m/s²", "10 m/s²", "20 m/s²", "40 m/s²"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 70,
-	"question": "A bola de fogo lançada pelo mago viaja em linha reta com velocidade que aumenta uniformemente de 2 m/s para 14 m/s em um intervalo de tempo de 3 segundos. Qual a aceleração média dessa bola de fogo em Movimento Uniformemente Variado (MUV)?",
-	"options": ["2 m/s²", "4 m/s²", "6 m/s²", "12 m/s²"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 71,
-	"question": "Um portal de gravidade do andar 3 puxa o guerreiro com uma força gravitacional de atração. Se a massa da Terra mágica é M e a do guerreiro é m, de acordo com a Lei da Gravitação Universal de Newton, a força gravitacional é:",
-	"options": ["Inversamente proporcional ao quadrado da distância entre eles", "Diretamente proporcional à distância entre eles", "Independente do produto das massas", "Inversamente proporcional à distância simples"],
-	"answer": 0,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 72,
-	"question": "O mago usa um guindaste hidráulico rúnico para elevar um golem pesado de pedra. O princípio físico por trás do elevador hidráulico, onde a pressão aplicada a um fluido incompressível é transmitida igualmente em todas as direções, é o:",
-	"options": ["Princípio de Arquimedes", "Princípio de Pascal", "Princípio de Bernoulli", "Efeito Joule-Thomson"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 73,
-	"question": "A armadura eletrostática do mago repele flechas de energia metálica polarizadas. A lei física que define que cargas elétricas de mesmo sinal se repelem e de sinais opostos se atraem é a:",
-	"options": ["Lei de Ampère", "Lei de Faraday-Lenz", "Lei de Coulomb (ou forças eletrostáticas)", "Lei de Gauss do magnetismo"],
-	"answer": 2,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 74,
-	"question": "Um robô mecânico arrasta um baú pesado de 10 kg sobre o piso de pedra rugosa da masmorra. Se o coeficiente de atrito cinético entre o baú e o piso é 0,3 (adotando g = 10 m/s²), qual a força de atrito cinético oposta ao movimento? (F_at = mi * N)",
-	"options": ["3 N", "30 N", "100 N", "0,3 N"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 75,
-	"question": "O calor emitido por uma runa de fogo irradia energia térmica através do espaço vazio da câmara de testes, aquecendo o ar. A transferência de calor que ocorre por meio de ondas eletromagnéticas (infravermelho) sem contato material é a:",
-	"options": ["Condução", "Convecção", "Irradiação (ou Radiação térmica)", "Sublimação"],
-	"answer": 2,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 76,
-	"question": "Um guerreiro gira um mangual rúnico em um movimento circular uniforme acima de sua cabeça. A aceleração direcionada para o centro da trajetória circular que mantém o mangual em órbita é a:",
-	"options": ["Aceleração tangencial", "Aceleração centrípeta", "Aceleração gravitacional", "Aceleração angular"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 77,
-	"question": "Um feixe de luz de cura passa do ar para o cristal mágico da fonte. Ao mudar de meio, a luz sofre alteração em sua velocidade e direção de propagação. Esse fenômeno físico da luz é conhecido como:",
-	"options": ["Reflexão", "Refração", "Difração", "Dispersão"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
-  },
-  {
-	"id": 78,
-	"question": "Uma runa de eletrocussão gera uma corrente elétrica que passa pela armadura do inimigo, aquecendo-a devido à resistência elétrica do metal. Esse efeito de transformação de energia elétrica em energia térmica é chamado de:",
-	"options": ["Efeito Doppler", "Efeito Joule", "Efeito Fotoelétrico", "Efeito Hall"],
-	"answer": 1,
-	"andar_id": 3,
-	"nivel_progresso": 2
+    "id": 1,
+    "question": "Um jovem mago percebeu que, ao conjurar um feitiço de cura, a energia regenerativa estimula a divisão de células somáticas da pele ferida do guerreiro. Que processo celular de divisão de células idênticas o feitiço acelerou?",
+    "options": [
+      "Mitose",
+      "Meiose",
+      "Fissão binária",
+      "Esporulação"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 2,
+    "question": "O Slime Verde da masmorra absorve nutrientes digerindo matéria orgânica externamente antes de a absorver. De acordo com a biologia, que tipo de nutrição esse ser compartilha com os fungos terrestres?",
+    "options": [
+      "Autotrófica por fotossíntese",
+      "Heterotrófica por absorção",
+      "Quimiolitoautotrófica",
+      "Autotrófica por quimiossíntese"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 3,
+    "question": "Nas estufas arcanas da torre, as plantas de mana purificam o ar utilizando a luz solar para sintetizar glicose a partir de dióxido de carbono gasoso e água. Que organela celular é responsável por essa conversão mágica?",
+    "options": [
+      "Mitocôndria",
+      "Complexo de Golgi",
+      "Cloroplasto",
+      "Lisossomo"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 4,
+    "question": "Uma poção vigorizante atua fornecendo alta carga de energia celular direta na forma de ATP (Adenosina Trifosfato). Em qual organela celular a maior parte do ATP é sintetizada por meio da respiração celular?",
+    "options": [
+      "Ribossomo",
+      "Lisossomo",
+      "Retículo endoplasmático",
+      "Mitocôndria"
+    ],
+    "answer": 3,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 5,
+    "question": "Um alquimista estuda o veneno de uma aranha da masmorra e descobre que ele bloqueia a síntese de proteínas nas células da vítima. Qual organela celular responsável pela tradução do RNAm foi paralisada pelo veneno?",
+    "options": [
+      "Ribossomo",
+      "Nucléolo",
+      "Peroxissomo",
+      "Centríolo"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 6,
+    "question": "Para criar um clone estável de um homúnculo, o mago precisa extrair a molécula dupla-hélice que carrega a informação genética completa da criatura. Qual é o nome dessa molécula biológica?",
+    "options": [
+      "RNA mensageiro",
+      "Ácido Desoxirribonucleico (DNA)",
+      "Trifosfato de adenosina (ATP)",
+      "Polipeptídeo cristalino"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 7,
+    "question": "Os slimes gigantes da torre se reproduzem dividindo-se ao meio em dois slimes idênticos menores, sem troca de material genético. Esse método de reprodução assexuada é análogo a qual processo de reprodução de bactérias?",
+    "options": [
+      "Conjugação bacteriana",
+      "Brotamento mitótico",
+      "Divisão binária (ou cissiparidade)",
+      "Partenogênese induzida"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 8,
+    "question": "Em uma simulação de ecossistema na torre, o mago observa que os robôs coletores (consumidores secundários) acumulam toxinas de metais mágicos em maior concentração que os slimes coletores (consumidores primários). Esse fenômeno ecológico é chamado de:",
+    "options": [
+      "Nicho ecológico",
+      "Sucessão ecológica",
+      "Eutrofização controlada",
+      "Magnificação trófica (ou bioacumulação)"
+    ],
+    "answer": 3,
+    "andar_id": 3,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 9,
+    "question": "As células do Mago Negro possuem uma parede celular rígida externa que protege contra flutuações de pressão osmótica na água circundante. De acordo com a biologia celular vegetal, qual substância carboidrato compõe essa estrutura de proteção?",
+    "options": [
+      "Celulose",
+      "Glicogênio",
+      "Quitina",
+      "Amido"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 10,
+    "question": "O dragão de fogo da torre consome grandes quantidades de lipídios da masmorra para armazenar energia de longo prazo sob a forma de gordura térmica sob suas escamas. Qual das seguintes funções melhor descreve os lipídios na biologia?",
+    "options": [
+      "Catalisadores enzimáticos exclusivos",
+      "Reserva de energia e isolamento térmico",
+      "Transportadores rápidos de oxigênio no sangue",
+      "Estrutura básica do material genético principal"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 11,
+    "question": "Ao conjurar um feitiço de envelhecimento rápido sobre um troll, o mago altera a expressão do material genético sem modificar a sequência de bases nitrogenadas do DNA do troll. Esse ramo de estudo da genética é conhecido como:",
+    "options": [
+      "Epigenética",
+      "Mutagênese direcionada",
+      "Clonagem molecular",
+      "Transgênese cromossômica"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 12,
+    "question": "Uma poção de rejuvenescimento celular contém uma enzima que repara as extremidades repetitivas dos cromossomos, que encurtam a cada divisão celular rúnica. Qual o nome biológico dessas extremidades protetoras do DNA?",
+    "options": [
+      "Cinetócoros",
+      "Telômeros",
+      "Centrômeros",
+      "Histonas"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 13,
+    "question": "Um caçador arcano analisa o sangue azul de um caranguejo da masmorra e nota que ele transporta oxigênio usando cobre em vez de ferro. Que proteína respiratória de cor azulada realiza essa função na biologia?",
+    "options": [
+      "Hemoglobina",
+      "Mioglobina",
+      "Hemocianina",
+      "Clorofila"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 14,
+    "question": "O mago observa que, após um incêndio florestal provocado por uma bola de fogo, liquens arcanos e briófitas (musgos) são os primeiros a colonizar as rochas expostas na masmorra. Qual o termo ecológico para essa primeira comunidade colonizadora?",
+    "options": [
+      "Comunidade pioneira (ou ecese)",
+      "Comunidade clímax",
+      "Comunidade de transição (sere)",
+      "Comunidade degradada"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 15,
+    "question": "Uma poção concentrada ativa um morcego da masmorra a usar ecolocalização para caçar no escuro, emitindo ondas sonoras que colidem em obstáculos e retornam. Qual o nome biológico desse sentido sensorial adaptativo?",
+    "options": [
+      "Magnetorecepção",
+      "Ecolocalização (ou biossonar)",
+      "Quimiorecepção",
+      "Eletrorecepção"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 16,
+    "question": "O veneno de uma serpente arcana dissolve a bainha de mielina dos neurônios do jogador, diminuindo drasticamente a velocidade de propagação dos impulsos nervosos. Qual a função da bainha de mielina na transmissão do impulso nervoso?",
+    "options": [
+      "Gerar a sinapse química",
+      "Atuar como isolante elétrico e acelerar o impulso",
+      "Produzir neurotransmissores de contração",
+      "Nutrir o corpo celular do neurônio"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 17,
+    "question": "Para desintoxicar o guerreiro envenenado por um esporo fúngico, o curandeiro estimula as células do fígado da vítima a realizar a metabolização de toxinas. Qual organela membranosa não-granulosa realiza a desintoxicação celular?",
+    "options": [
+      "Retículo endoplasmático liso (não-granuloso)",
+      "Retículo endoplasmático rugoso (granuloso)",
+      "Complexo de Golgi",
+      "Lisossomo"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 18,
+    "question": "O mago realiza cruzamentos genéticos entre slimes azuis dominantes (AA) e slimes amarelos recessivos (aa). De acordo com a Primeira Lei de Mendel, qual a proporção fenotípica esperada na geração F2 após a autofecundação dos híbridos F1?",
+    "options": [
+      "3 dominantes para 1 recessivo",
+      "1 dominante para 1 recessivo",
+      "Todas recessivas",
+      "9 dominantes para 7 recessivos"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 19,
+    "question": "O caçador arcano estuda uma planta carnívora da masmorra que fecha suas folhas rapidamente ao toque de um inseto. Que tipo de movimento vegetal não direcionado, desencadeado pelo toque físico, é esse?",
+    "options": [
+      "Fotonastia",
+      "Geotropismo",
+      "Sismonastia (ou tigmonastia)",
+      "Quimiotropismo"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 20,
+    "question": "Um curandeiro prepara um soro contra o veneno de escorpião-golem injetando pequenas doses do veneno em um cavalo e depois extraindo os anticorpos prontos do sangue do animal. Essa imunização que fornece anticorpos prontos é classificada como:",
+    "options": [
+      "Imunização ativa (vacina)",
+      "Imunização passiva (soro)",
+      "Imunização celular inata",
+      "Terapia gênica retroviral"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 21,
+    "question": "Um necromante revive tecidos mortos bloqueando a ação dos lisossomos celulares das vítimas para evitar a autodestruição celular. Qual o nome biológico da autodestruição de uma célula por meio da ruptura de seus próprios lisossomos?",
+    "options": [
+      "Autofagia",
+      "Exocitose",
+      "Autólise",
+      "Plasmólise"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 22,
+    "question": "O slime de gelo sobrevive a temperaturas extremas graças a proteínas anticongelantes em sua membrana plasmática. A membrana plasmática celular é constituída principalmente por qual bicamada macromolecular?",
+    "options": [
+      "Bicamada fosfolipídica com proteínas inseridas",
+      "Bicamada de carboidratos insolúveis",
+      "Bicamada de ácidos nucleicos helicoidais",
+      "Monocamada lipídica pura"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 23,
+    "question": "O mago da torre estuda vermes parasitas da masmorra que possuem corpo cilíndrico, triblásticos e pseudocelomados. A qual filo do reino animal esses vermes pertencem?",
+    "options": [
+      "Platelmintos",
+      "Anelídeos",
+      "Nematódeos (Nematelmintos)",
+      "Moluscos"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 24,
+    "question": "Uma poção de super-oxigenação celular aumenta a taxa de respiração aeróbica celular. Qual molécula atua como aceitador final de elétrons na cadeia respiratória mitocondrial nas células humanas?",
+    "options": [
+      "Oxigênio gasoso (O₂)",
+      "Glicose (C₆H₁₂O₆)",
+      "Dióxido de carbono (CO₂)",
+      "Água (H₂O)"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 25,
+    "question": "Para criar um mutante de rato-guerreiro gigante, o cientista manipula hormônios que aceleram o crescimento de ossos e cartilagens. Qual tecido conjuntivo é caracterizado por ser rígido, porém flexível, sem vasos sanguíneos nem nervos próprios?",
+    "options": [
+      "Tecido ósseo",
+      "Tecido cartilaginoso",
+      "Tecido epitelial de revestimento",
+      "Tecido muscular estriado"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 26,
+    "question": "Um veneno gasoso espalhado no andar de Biologia inibe a atividade dos estômatos das plantas de mana. Qual a principal função das estruturas estomáticas nas folhas das plantas?",
+    "options": [
+      "Produzir clorofila para a fotossíntese",
+      "Realizar trocas gasosas e transpiração",
+      "Absorver água e sais minerais do solo",
+      "Proteger a folha contra predadores herbívoros"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 27,
+    "question": "Para neutralizar uma poção de ácido de slime (pH = 2) que corroeu as botas do guerreiro, qual reagente alquímico básico o curandeiro deve utilizar para aproximar o pH de 7 (neutro)?",
+    "options": [
+      "Uma solução alcalina (básica) de pH alto",
+      "Outra poção ácida de pH 1",
+      "Água destilada purificada apenas",
+      "Um sal altamente insolúvel e ácido"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 28,
+    "question": "O Golem de Cristal derrete sob calor extremo em um processo físico onde a estrutura ordenada de silício passa do estado sólido para o estado líquido. Qual o nome dessa transição física de estado da matéria?",
+    "options": [
+      "Condensação",
+      "Sublimação",
+      "Fusão",
+      "Vaporização"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 29,
+    "question": "Para sintetizar a lendária Pedra Filosofal, um alquimista mistura \"Sódio arcano\" (Na) altamente reativo com água mágica. O sódio puro reage violentamente liberando hidrogênio. Na tabela periódica, a qual família pertence o elemento Sódio?",
+    "options": [
+      "Halogênios",
+      "Metais alcalinos",
+      "Gases nobres",
+      "Metais alcalino-terrosos"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 30,
+    "question": "A poção \"Sopro de Névoa\" é criada misturando cristais azuis de sal marinho em água purificada. O sal dissolve-se completamente, formando uma mistura homogênea transparente de fase única. Que tipo de mistura é essa?",
+    "options": [
+      "Mistura heterogênea",
+      "Mistura coloidal",
+      "Suspensão grosseira",
+      "Mistura homogênea (solução)"
+    ],
+    "answer": 3,
+    "andar_id": 1,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 31,
+    "question": "O mago arremessa uma runa de fogo que desencadeia a oxidação violenta de carvão mágico na presença de oxigênio gasoso (O₂), gerando gás carbônico (CO₂). Como é classificado esse tipo de reação química exotérmica?",
+    "options": [
+      "Reação de combustão",
+      "Reação de eletrólise",
+      "Reação de fotólise",
+      "Reação de neutralização"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 32,
+    "question": "Uma poção ácida misteriosa possui alta concentração de íons de hidrogênio (H+). O que define o caráter ácido de uma substância de acordo com a teoria clássica de Arrhenius?",
+    "options": [
+      "Liberação de íons hidróxido (OH-) em solução aquosa",
+      "Liberação de íons hidrogênio (H+) em solução aquosa",
+      "Doação de um par de elétrons em qualquer meio",
+      "Neutralização instantânea de qualquer sal neutro"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 33,
+    "question": "Para forjar uma armadura de Mithril indestrutível, o ferreiro funde cobre e estanho mágicos, formando uma liga metálica em que os átomos compartilham elétrons livres em uma \"nuvem eletrônica\". Que tipo de ligação química une esses metais?",
+    "options": [
+      "Ligação covalente",
+      "Ligação iônica",
+      "Ligação metálica",
+      "Força de Van der Waals"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 34,
+    "question": "Um robô alquimista analisa o vapor condensado das masmorras e encontra monóxido de carbono (CO) e dióxido de carbono (CO₂). Ambos os gases são compostos por Carbono e Oxigênio, mas possuem diferentes propriedades. Qual lei ponderal explica que elementos combinam-se em proporções de números inteiros para formar diferentes compostos?",
+    "options": [
+      "Lei das Proporções Múltiplas (Dalton)",
+      "Lei da Conservação das Massas (Lavoisier)",
+      "Lei das Proporções Constantes (Proust)",
+      "Lei de Volumetria (Gay-Lussac)"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 35,
+    "question": "Os magos usam o elemento \"Gás de Hélio arcano\" para flutuar baús pesados. O hélio é um gás extremamente estável que não reage com quase nada devido à sua camada de valência completa. Em qual família da tabela periódica o hélio está localizado?",
+    "options": [
+      "Metais de transição",
+      "Halogênios",
+      "Gases nobres",
+      "Calcogênios"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 36,
+    "question": "O veneno corrosivo de um slime ácido é constituído por ácido clorídrico (HCl), em que o átomo de Hidrogênio e o de Cloro compartilham um par de elétrons devido à diferença de eletronegatividade entre eles. Que tipo de ligação química ocorre nessa molécula?",
+    "options": [
+      "Ligação metálica pura",
+      "Ligação iônica forte",
+      "Ligação covalente polar",
+      "Ligação de hidrogênio dipolar"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 37,
+    "question": "Um dragão de gelo congela instantaneamente a umidade do ar, formando neve nas masmorras. A passagem do vapor de água diretamente para o estado sólido (gelo) é conhecida como:",
+    "options": [
+      "Sublimação inversa (ou Deposição)",
+      "Solidificação clássica",
+      "Condensação induzida",
+      "Evaporação forçada"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 38,
+    "question": "O Mago de Fogo utiliza o mineral rúnico Hematita (Fe₂O₃) para extrair Ferro puro por meio de uma reação onde o Ferro ganha elétrons e diminui seu número de oxidação. Esse processo de ganho de elétrons é chamado de:",
+    "options": [
+      "Oxidação",
+      "Redução",
+      "Neutralização",
+      "Sublimação"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 39,
+    "question": "Para acender a Forja de Hefesto, o guerreiro queima propano mágico (C₃H₈) gerando calor. Na reação balanceada: C₃H₈ + 5 O₂ -> 3 CO₂ + 4 H₂O, quantos mols de oxigênio (O₂) são necessários para queimar completamente 1 mol de propano?",
+    "options": [
+      "3 mols",
+      "4 mols",
+      "5 mols",
+      "1 mol"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 3
+  },
+  {
+    "id": 40,
+    "question": "Para purificar um elixir mágico misturado com areia rúnica preta, o alquimista passa a solução por um papel de filtro arcano que retém a areia e deixa passar o líquido limpo. Qual o nome desse método físico de separação de misturas heterogêneas?",
+    "options": [
+      "Filtração",
+      "Destilação simples",
+      "Decantação molecular",
+      "Centrifugação"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 41,
+    "question": "O mago misturou álcool mágico e água destilada. Sabendo que ambos possuem pontos de ebulição diferentes (78°C e 100°C), qual processo físico baseado na vaporização seguida de condensação ele deve usar para separar esses líquidos miscíveis?",
+    "options": [
+      "Filtração a vácuo",
+      "Decantação fracionada",
+      "Destilação fracionada",
+      "Sublimação térmica"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 42,
+    "question": "Uma pedra rúnica de \"Cálcio arcano\" (Ca) reage com cloro para formar cloreto de cálcio. Sabendo que o cálcio é um metal alcalino-terroso que perde 2 elétrons e o cloro ganha 1 elétron, qual a fórmula molecular correta desse sal rúnico?",
+    "options": [
+      "CaCl",
+      "CaCl₂",
+      "Ca₂Cl",
+      "Ca₂Cl₂"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 43,
+    "question": "Uma criatura de ferro da masmorra começa a sofrer oxidação lenta sob a humidade do ar, formando ferrugem vermelha (Fe₂O₃). Nesse processo químico natural de corrosão, qual agente atua sofrendo redução?",
+    "options": [
+      "O oxigênio do ar (O₂)",
+      "O ferro metálico (Fe)",
+      "A água das masmorras (H₂O)",
+      "O dióxido de carbono (CO₂)"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 44,
+    "question": "Em um experimento de alquimia, o mago descobre que a adição de pó de ouro catalítico aumenta a velocidade da reação de síntese da poção sem ser consumido no processo. Qual a função de um catalisador em uma reação química?",
+    "options": [
+      "Aumentar a energia de ativação e a temperatura",
+      "Diminuir a velocidade da reação química",
+      "Diminuir a energia de ativação de caminhos alternativos",
+      "Alterar a constante de equilíbrio químico final"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 45,
+    "question": "Uma poção alcalina estabilizada possui uma concentração de íons hidróxido (OH-) muito maior que a de íons hidrogênio (H+). Qual o valor aproximado do pH dessa poção na escala padrão a 25°C?",
+    "options": [
+      "pH menor que 7",
+      "pH igual a 7",
+      "pH maior que 7",
+      "pH menor que 0"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 46,
+    "question": "O mago estuda o gás metano (CH₄) gerado pela decomposição de slimes orgânicos. A geometria molecular desse composto, em que o átomo de Carbono central liga-se covalentemente a 4 átomos de Hidrogênio, é descrita como:",
+    "options": [
+      "Linear",
+      "Trigonal plana",
+      "Tetraédrica",
+      "Piramidal"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 47,
+    "question": "Um pergaminho descreve o \"Carbono arcano\" (C) em sua forma de grafite e em sua forma de diamante indestrutível. Embora compostos pelo mesmo elemento químico puro, possuem estruturas cristalinas diferentes. Esse fenômeno químico é chamado de:",
+    "options": [
+      "Isomeria espacial",
+      "Alotropia",
+      "Isotopia atômica",
+      "Ressonância molecular"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 48,
+    "question": "Para resfriar uma poção fervente, o alquimista dissolve nitrato de amônio em água. O frasco fica extremamente gelado ao toque porque a dissolução absorve calor do ambiente. Reações que absorvem calor são classificadas como:",
+    "options": [
+      "Exotérmicas",
+      "Isotérmicas",
+      "Endotérmicas",
+      "Adiabáticas"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 49,
+    "question": "Um slime de ácido sulfúrico (H₂SO₄) ataca o guerreiro. Sendo um ácido forte de Arrhenius bi-protonado, quantos hidrogênios ionizáveis ele libera por molécula em solução aquosa?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 50,
+    "question": "A poção \"Luz de Fósforo\" brilha no escuro devido à combustão do fósforo branco (P₄). A ligação que ocorre entre os não-metais idênticos de fósforo se dá por compartilhamento equitativo de elétrons. Essa ligação é do tipo:",
+    "options": [
+      "Ligação covalente apolar",
+      "Ligação covalente polar",
+      "Ligação iônica forte",
+      "Ligação metálica instável"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 51,
+    "question": "O mago da torre quer neutralizar 1 mol de ácido clorídrico (HCl) usando hidróxido de sódio (NaOH) na reação: HCl + NaOH -> NaCl + H₂O. Quantos mols de NaOH são necessários para neutralizar completamente o ácido?",
+    "options": [
+      "0,5 mol",
+      "1 mol",
+      "2 mols",
+      "3 mols"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 52,
+    "question": "Uma liga rúnica leve para botas de voo é feita de Alumínio (Al). O átomo neutro de alumínio possui número atômico 13. Quantos elétrons ele possui em sua camada de valência (distribuição eletrônica 2, 8, 3)?",
+    "options": [
+      "1 elétron",
+      "2 elétrons",
+      "3 elétrons",
+      "8 elétrons"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 53,
+    "question": "O mago lança uma bola de fogo (Fireball) horizontalmente do topo de uma plataforma com velocidade constante de 10 m/s. Se ela atinge o chão após 2 segundos (desconsiderando a resistência do ar), qual a distância horizontal percorrida pela bola de fogo?",
+    "options": [
+      "5 metros",
+      "10 metros",
+      "20 metros",
+      "40 metros"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 54,
+    "question": "Para abrir um portal mágico de teletransporte, o mago canaliza energia elétrica através de runas dispostas em circuito paralelo. Se uma runa falha e se apaga (circuito aberto), o que acontece com a corrente elétrica nas outras runas do circuito paralelo?",
+    "options": [
+      "A corrente zera em todas as runas",
+      "As outras runas continuam funcionando de forma independente",
+      "A corrente nas outras runas cai pela metade",
+      "Todas as runas queimam instantaneamente"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 55,
+    "question": "Uma runa de gravidade reversa aplica uma força constante para cima de 15 N em um bloco rúnico de massa 1 kg. Sabendo que a aceleração da gravidade local é de 10 m/s² para baixo, qual a aceleração resultante do bloco para cima? (F_res = m * a)",
+    "options": [
+      "5 m/s²",
+      "15 m/s²",
+      "10 m/s²",
+      "25 m/s²"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 56,
+    "question": "O robô sentinela emite um feixe de luz mágica que reflete perfeitamente em um espelho de prata arcano. Se o ângulo de incidência do feixe luminoso em relação à normal é de 30°, qual o ângulo de reflexão do feixe segundo as leis da óptica geométrica?",
+    "options": [
+      "60°",
+      "30°",
+      "90°",
+      "0°"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 57,
+    "question": "Um mago usa telecinese para empurrar um baú de tesouro com uma força constante de 50 N por uma distância de 4 metros na mesma direção da força. Qual o trabalho físico (W = F * d) realizado pela telecinese do mago sobre o baú?",
+    "options": [
+      "100 Joules",
+      "12,5 Joules",
+      "200 Joules",
+      "50 Joules"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 58,
+    "question": "A poção \"Congelamento Rápido\" funciona absorvendo calor rapidamente da água líquida ao redor até que ela solidifique em gelo. O calor que provoca a mudança de estado físico sem alterar a temperatura do sistema é chamado de:",
+    "options": [
+      "Calor sensível",
+      "Calor específico",
+      "Calor de irradiação",
+      "Calor latente"
+    ],
+    "answer": 3,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 59,
+    "question": "Uma criatura mecânica flutua na água mágica da fonte da masmorra. Segundo o princípio de Arquimedes, o empuxo vertical para cima que atua sobre a criatura flutuante é igual ao:",
+    "options": [
+      "Volume total do corpo da criatura",
+      "Peso do volume de líquido deslocado pela criatura",
+      "Peso próprio da criatura no vácuo",
+      "Dobro do volume submerso da criatura"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 60,
+    "question": "As bobinas de tesla da sala de robôs acumulam cargas elétricas estáticas de sinais opostos. De acordo com a Lei de Coulomb, se a distância entre duas cargas elétricas idênticas for duplicada, o que acontece com a força eletrostática entre elas?",
+    "options": [
+      "Fica quatro vezes menor (dividida por 4)",
+      "Fica duas vezes menor (dividida por 2)",
+      "Fica quatro vezes maior (multiplicada por 4)",
+      "Permanece exatamente igual"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 61,
+    "question": "A espada rúnica do guerreiro brilha com calor incandescente. A transferência desse calor térmico através do contato direto da lâmina de metal quente com a carapaça de gelo de um slime ocorre principalmente por qual mecanismo físico?",
+    "options": [
+      "Radiação",
+      "Convecção",
+      "Condução",
+      "Sublimação"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 62,
+    "question": "Um sino mágico de cristal é golpeado e emite um som agudo de alta frequência que ressoa pela torre. O som é uma onda mecânica longitudinal. Qual das seguintes afirmações sobre ondas sonoras é correta sob a física clássica?",
+    "options": [
+      "O som pode se propagar livremente no vácuo absoluto",
+      "O som se propaga mais rapidamente em meios sólidos do que gasosos",
+      "A velocidade do som independe da densidade do meio de propagação",
+      "O som é uma onda eletromagnética de alta intensidade"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 63,
+    "question": "Uma flecha encantada é disparada com energia cinética inicial de 100 J. À medida que sobe para atingir um gárgula no topo da torre, ela perde velocidade e ganha altura. Desconsiderando atritos, em qual tipo de energia a energia cinética está se convertendo?",
+    "options": [
+      "Energia potencial gravitacional",
+      "Energia potencial elástica",
+      "Energia térmica radiante",
+      "Energia química armazenada"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 64,
+    "question": "O mago estuda um prisma de cristal que divide um feixe de luz mágica branca em todas as cores do arco-íris. Esse fenômeno físico de separação de cores devido à variação do índice de refração com a frequência é chamado de:",
+    "options": [
+      "Reflexão total",
+      "Difração rúnica",
+      "Dispersão luminosa",
+      "Polarização linear"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 65,
+    "question": "Um robô de patrulha movimenta-se em linha reta de acordo com a função horária da posição S(t) = 5 + 3t (no Sistema Internacional). Qual a velocidade linear de patrulha desse robô?",
+    "options": [
+      "5 m/s",
+      "3 m/s",
+      "8 m/s",
+      "15 m/s"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 1
+  },
+  {
+    "id": 66,
+    "question": "Uma criatura robô do andar de Física colide elasticamente com outra criatura de mesma massa que estava parada. Segundo as leis de conservação física, o que ocorre com a quantidade de movimento total do sistema isolado após a colisão?",
+    "options": [
+      "Permanece constante (conserva-se)",
+      "Reduz-se a zero instantaneamente",
+      "Duplica de valor devido ao impacto",
+      "Fica reduzida pela metade"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 67,
+    "question": "O mago usa um espelho côncavo mágico para projetar uma imagem real e invertida de uma runa brilhante na parede oposta da masmorra. Qual o tipo de lente ou espelho que pode gerar uma imagem real de um objeto real?",
+    "options": [
+      "Espelho côncavo (ou lente convergente)",
+      "Espelho convexo (ou lente divergente)",
+      "Espelho plano liso ordinário",
+      "Lente divergente pura apenas"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 68,
+    "question": "Um robô sentinela carrega uma bateria de 12 Volts que alimenta seus circuitos com uma resistência elétrica de 4 Ohms. De acordo com a Primeira Lei de Ohm (U = R * I), qual a intensidade da corrente elétrica que flui pelo robô?",
+    "options": [
+      "3 Ampères",
+      "48 Ampères",
+      "0,33 Ampères",
+      "8 Ampères"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 69,
+    "question": "Um mago aplica uma força constante de 20 N sobre um bloco de pedra rúnica de 2 kg que estava em repouso. Desconsiderando o atrito do solo, qual a aceleração sofrida pelo bloco de acordo com a Segunda Lei de Newton? (a = F / m)",
+    "options": [
+      "5 m/s²",
+      "10 m/s²",
+      "20 m/s²",
+      "40 m/s²"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 70,
+    "question": "A bola de fogo lançada pelo mago viaja em linha reta com velocidade que aumenta uniformemente de 2 m/s para 14 m/s em um intervalo de tempo de 3 segundos. Qual a aceleração média dessa bola de fogo em Movimento Uniformemente Variado (MUV)?",
+    "options": [
+      "2 m/s²",
+      "4 m/s²",
+      "6 m/s²",
+      "12 m/s²"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 71,
+    "question": "Um portal de gravidade do andar 3 puxa o guerreiro com uma força gravitacional de atração. Se a massa da Terra mágica é M e a do guerreiro é m, de acordo com a Lei da Gravitação Universal de Newton, a força gravitacional é:",
+    "options": [
+      "Inversamente proporcional ao quadrado da distância entre eles",
+      "Diretamente proporcional à distância entre eles",
+      "Independente do produto das massas",
+      "Inversamente proporcional à distância simples"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 72,
+    "question": "O mago usa um guindaste hidráulico rúnico para elevar um golem pesado de pedra. O princípio físico por trás do elevador hidráulico, onde a pressão aplicada a um fluido incompressível é transmitida igualmente em todas as direções, é o:",
+    "options": [
+      "Princípio de Arquimedes",
+      "Princípio de Pascal",
+      "Princípio de Bernoulli",
+      "Efeito Joule-Thomson"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 73,
+    "question": "A armadura eletrostática do mago repele flechas de energia metálica polarizadas. A lei física que define que cargas elétricas de mesmo sinal se repelem e de sinais opostos se atraem é a:",
+    "options": [
+      "Lei de Ampère",
+      "Lei de Faraday-Lenz",
+      "Lei de Coulomb (ou forças eletrostáticas)",
+      "Lei de Gauss do magnetismo"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 74,
+    "question": "Um robô mecânico arrasta um baú pesado de 10 kg sobre o piso de pedra rugosa da masmorra. Se o coeficiente de atrito cinético entre o baú e o piso é 0,3 (adotando g = 10 m/s²), qual a força de atrito cinético oposta ao movimento? (F_at = mi * N)",
+    "options": [
+      "3 N",
+      "30 N",
+      "100 N",
+      "0,3 N"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 75,
+    "question": "O calor emitido por uma runa de fogo irradia energia térmica através do espaço vazio da câmara de testes, aquecendo o ar. A transferência de calor que ocorre por meio de ondas eletromagnéticas (infravermelho) sem contato material é a:",
+    "options": [
+      "Condução",
+      "Convecção",
+      "Irradiação (ou Radiação térmica)",
+      "Sublimação"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 76,
+    "question": "Um guerreiro gira um mangual rúnico em um movimento circular uniforme acima de sua cabeça. A aceleração direcionada para o centro da trajetória circular que mantém o mangual em órbita é a:",
+    "options": [
+      "Aceleração tangencial",
+      "Aceleração centrípeta",
+      "Aceleração gravitacional",
+      "Aceleração angular"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 77,
+    "question": "Um feixe de luz de cura passa do ar para o cristal mágico da fonte. Ao mudar de meio, a luz sofre alteração em sua velocidade e direção de propagação. Esse fenômeno físico da luz é conhecido como:",
+    "options": [
+      "Reflexão",
+      "Refração",
+      "Difração",
+      "Dispersão"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "id": 78,
+    "question": "Uma runa de eletrocussão gera uma corrente elétrica que passa pela armadura do inimigo, aquecendo-a devido à resistência elétrica do metal. Esse efeito de transformação de energia elétrica em energia térmica é chamado de:",
+    "options": [
+      "Efeito Doppler",
+      "Efeito Joule",
+      "Efeito Fotoelétrico",
+      "Efeito Hall"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2
+  },
+  {
+    "question": "Uma poção de cura evapora quando aquecida, passando do estado líquido para o estado gasoso. Qual o nome dessa mudança de estado físico?",
+    "options": [
+      "Vaporização",
+      "Condensação",
+      "Fusão",
+      "Sublimação"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 79
+  },
+  {
+    "question": "Ao misturar pó de esmeralda e água rúnica, o pó deposita-se no fundo sem se dissolver. Que tipo de mistura heterogênea é essa?",
+    "options": [
+      "Mistura homogênea",
+      "Solução gasosa",
+      "Suspensão",
+      "Coloide"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 80
+  },
+  {
+    "question": "Qual destas substâncias mágicas é considerada um elemento químico puro, não podendo ser decomposta por meios químicos?",
+    "options": [
+      "Água pura",
+      "Ouro arcano (Au)",
+      "Sal de rocha",
+      "Bronze rúnico"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 81
+  },
+  {
+    "question": "O fogo de um dragão consome madeira mágica, transformando-a em cinzas e fumaça. Esse processo é considerado:",
+    "options": [
+      "Uma transformação física",
+      "Uma transformação química",
+      "Uma fusão simples",
+      "Um processo reversível"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 82
+  },
+  {
+    "question": "Um aprendiz de alquimista usa uma escala de pH para medir a acidez de um slime de fogo (pH = 1). Essa poção é altamente:",
+    "options": [
+      "Ácida",
+      "Básica",
+      "Neutra",
+      "Alcalina"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 83
+  },
+  {
+    "question": "Qual é o símbolo químico rúnico que representa o elemento Oxigênio na tabela periódica de alquimia?",
+    "options": [
+      "Ox",
+      "O",
+      "Op",
+      "On"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 84
+  },
+  {
+    "question": "Que propriedade da água mágica permite que insetos da masmorra caminhem sobre ela sem afundar?",
+    "options": [
+      "Tensão superficial",
+      "Viscosidade extrema",
+      "Densidade nula",
+      "Capilaridade reversa"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 85
+  },
+  {
+    "question": "Se misturarmos óleo de dragão e água purificada, eles não se misturam e formam duas fases. Essa mistura é classificada como:",
+    "options": [
+      "Homogênea",
+      "Solução",
+      "Heterogênea",
+      "Azeotrópica"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 1,
+    "id": 86
+  },
+  {
+    "question": "Uma ligação química ocorre quando dois átomos compartilham elétrons de valência de forma igualitária para obter estabilidade. Essa ligação é chamada de:",
+    "options": [
+      "Ligação iônica",
+      "Ligação metálica",
+      "Ligação covalente",
+      "Força de dispersão"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 87
+  },
+  {
+    "question": "Qual partícula subatômica, localizada no núcleo do átomo rúnico, possui carga elétrica positiva?",
+    "options": [
+      "Elétron",
+      "Próton",
+      "Nêutron",
+      "Pósitron"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 88
+  },
+  {
+    "question": "Na reação química de combustão de mana, reagentes se transformam em produtos. A Lei de Lavoisier afirma que, em um sistema fechado:",
+    "options": [
+      "A massa total se conserva",
+      "A massa dos produtos dobra",
+      "A energia vira matéria pura",
+      "O volume permanece fixo"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 89
+  },
+  {
+    "question": "A distribuição eletrônica de um átomo de mana determina suas propriedades. Em qual camada do átomo ocorrem as ligações químicas?",
+    "options": [
+      "Camada interna K",
+      "Núcleo atômico",
+      "Camada de valência",
+      "Nuvem de nêutrons"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 90
+  },
+  {
+    "question": "Uma solução mágica tem concentração de 20 g/L de sal rúnico. Se evaporarmos metade da água, a nova concentração será:",
+    "options": [
+      "10 g/L",
+      "20 g/L",
+      "40 g/L",
+      "80 g/L"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 91
+  },
+  {
+    "question": "Que família de elementos na tabela periódica possui a camada de valência completa e é extremamente estável quimicamente?",
+    "options": [
+      "Metais alcalinos",
+      "Halogênios",
+      "Gases nobres",
+      "Calcogênios"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 92
+  },
+  {
+    "question": "Qual é o pH de uma poção perfeitamente neutra, como a água destilada rúnica usada para diluir venenos?",
+    "options": [
+      "pH = 0",
+      "pH = 7",
+      "pH = 14",
+      "pH = 5"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 93
+  },
+  {
+    "question": "A atração que um átomo exerce sobre os elétrons em uma ligação química covalente é conhecida como:",
+    "options": [
+      "Eletronegatividade",
+      "Potencial de ionização",
+      "Afinidade eletrônica",
+      "Raio atômico"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 2,
+    "id": 94
+  },
+  {
+    "question": "A síntese de mana azul libera grande quantidade de calor para o ambiente. Esse tipo de reação química é classificada como:",
+    "options": [
+      "Exotérmica",
+      "Endotérmica",
+      "Isotérmica",
+      "Catalítica"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 95
+  },
+  {
+    "question": "Em uma reação de oxirredução rúnica, o agente redutor é a espécie química que:",
+    "options": [
+      "Ganha elétrons e se reduz",
+      "Perde elétrons e sofre oxidação",
+      "Não sofre alteração no NOX",
+      "Catalisa a velocidade da reação"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 96
+  },
+  {
+    "question": "De acordo com a estequiometria alquímica, se 1 mol de reagente A produz 2 mols de produto B, quantos mols de B são produzidos com 3 mols de A?",
+    "options": [
+      "3 mols",
+      "4 mols",
+      "6 mols",
+      "9 mols"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 97
+  },
+  {
+    "question": "Qual das seguintes fórmulas moleculares representa um hidrocarboneto alcano simples na química orgânica?",
+    "options": [
+      "C2H4",
+      "CH4 (Metano)",
+      "C2H2",
+      "CH3OH"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 98
+  },
+  {
+    "question": "O princípio de Le Chatelier afirma que, se aplicarmos uma perturbação a um sistema em equilíbrio químico, o sistema se deslocará para:",
+    "options": [
+      "Minimizar a perturbação aplicada",
+      "Maximizar a perturbação aplicada",
+      "Cessar qualquer reação direta",
+      "Aumentar a constante de equilíbrio"
+    ],
+    "answer": 0,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 99
+  },
+  {
+    "question": "Qual o nome da constante que relaciona a velocidade das reações direta e inversa quando um sistema rúnico atinge o equilíbrio químico?",
+    "options": [
+      "Constante de Faraday",
+      "Constante de Avogadro",
+      "Constante de equilíbrio (Kc)",
+      "Constante de Planck"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 100
+  },
+  {
+    "question": "A lei dos gases ideais (P * V = n * R * T) indica que, mantendo a temperatura constante, se duplicarmos a pressão de um gás de mana, seu volume:",
+    "options": [
+      "Duplicará também",
+      "Cairá pela metade",
+      "Aumentará quatro vezes",
+      "Permanecerá constante"
+    ],
+    "answer": 1,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 101
+  },
+  {
+    "question": "Qual é a hibridização do átomo de carbono na molécula de dióxido de carbono (CO₂), que possui duas ligações duplas?",
+    "options": [
+      "sp3",
+      "sp2",
+      "sp",
+      "sp3d"
+    ],
+    "answer": 2,
+    "andar_id": 1,
+    "nivel_progresso": 3,
+    "id": 102
+  },
+  {
+    "question": "Um guerreiro corre com velocidade constante de 5 m/s. Qual a distância percorrida por ele após 10 segundos de corrida?",
+    "options": [
+      "2 metros",
+      "15 metros",
+      "50 metros",
+      "100 metros"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 103
+  },
+  {
+    "question": "Qual a força que atrai todos os objetos na masmorra em direção ao centro da terra mágica, dando-lhes peso?",
+    "options": [
+      "Força centrífuga",
+      "Força gravitacional",
+      "Força magnética",
+      "Força elástica"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 104
+  },
+  {
+    "question": "Uma runa de aceleração aumenta a velocidade do jogador uniformemente. A taxa de variação da velocidade no tempo é chamada de:",
+    "options": [
+      "Velocidade média",
+      "Deslocamento",
+      "Aceleração",
+      "Trabalho mecânico"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 105
+  },
+  {
+    "question": "Se um bloco de pedra mágica tem massa de 10 kg na masmorra, qual será a sua massa se for levado para a Lua rúnica?",
+    "options": [
+      "Zero",
+      "10 kg",
+      "1,6 kg",
+      "60 kg"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 106
+  },
+  {
+    "question": "Uma pedra de fogo possui energia armazenada devido à sua posição elevada no topo de uma torre. Essa energia é classificada como:",
+    "options": [
+      "Energia cinética",
+      "Energia térmica pura",
+      "Energia potencial gravitacional",
+      "Energia química rúnica"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 107
+  },
+  {
+    "question": "O fluxo ordenado de elétrons através de um fio condutor rúnico é a definição de qual grandeza física?",
+    "options": [
+      "Tensão elétrica",
+      "Resistência",
+      "Corrente elétrica",
+      "Potência rúnica"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 108
+  },
+  {
+    "question": "O eco em uma caverna ocorre quando as ondas sonoras colidem com a parede e retornam ao emissor. Esse fenômeno é a:",
+    "options": [
+      "Reflexão",
+      "Refração",
+      "Difração",
+      "Polarização"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 109
+  },
+  {
+    "question": "Qual unidade do Sistema Internacional (SI) é utilizada para medir a força aplicada por um guerreiro ao empurrar um bloco?",
+    "options": [
+      "Joule (J)",
+      "Newton (N)",
+      "Watt (W)",
+      "Pascal (Pa)"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 1,
+    "id": 110
+  },
+  {
+    "question": "A Primeira Lei de Newton, também conhecida como Lei da Inércia, afirma que um objeto em repouso tende a:",
+    "options": [
+      "Mover-se aceleradamente",
+      "Permanecer em repouso",
+      "Desacelerar aos poucos",
+      "Mudar sua trajetória"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 111
+  },
+  {
+    "question": "Um circuito rúnico possui duas resistências ligadas em série. Se uma das resistências queimar, o que ocorre com a corrente elétrica no circuito?",
+    "options": [
+      "A corrente é interrompida por completo",
+      "A corrente continua funcionando normal",
+      "A corrente duplica de intensidade",
+      "A corrente passa a piscar"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 112
+  },
+  {
+    "question": "A Primeira Lei de Ohm estabelece que a diferença de potencial (U) é igual ao produto da resistência (R) pela:",
+    "options": [
+      "Potência elétrica",
+      "Frequência de oscilação",
+      "Corrente elétrica (I)",
+      "Capacitância rúnica"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 113
+  },
+  {
+    "question": "O calor gerado por uma poção de fogo se espalha pela sala através do movimento de massas de ar quente subindo e ar frio descendo. Esse processo é a:",
+    "options": [
+      "Condução",
+      "Irradiação",
+      "Convecção",
+      "Sublimação"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 114
+  },
+  {
+    "question": "A velocidade da luz rúnica diminui ao passar do ar para a água de uma fonte, alterando sua direção. Esse fenômeno é a:",
+    "options": [
+      "Reflexão",
+      "Refração",
+      "Difração",
+      "Dispersão"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 115
+  },
+  {
+    "question": "De acordo com a Segunda Lei de Newton (F = m * a), se aplicarmos uma força de 30 N em um bloco de 5 kg, qual a aceleração resultante?",
+    "options": [
+      "6 m/s²",
+      "150 m/s²",
+      "25 m/s²",
+      "35 m/s²"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 116
+  },
+  {
+    "question": "A distância entre dois picos consecutivos de uma onda eletromagnética rúnica é chamada de:",
+    "options": [
+      "Período de onda",
+      "Frequência linear",
+      "Comprimento de onda",
+      "Amplitude rúnica"
+    ],
+    "answer": 2,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 117
+  },
+  {
+    "question": "O trabalho realizado por um golem para empurrar um baú por uma distância de 5 metros com uma força constante de 20 N é de:",
+    "options": [
+      "4 Joules",
+      "100 Joules",
+      "25 Joules",
+      "15 Joules"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 2,
+    "id": 118
+  },
+  {
+    "question": "Em uma colisão perfeitamente inelástica entre dois carrinhos de mina de mesma massa, após o impacto os carrinhos se movem:",
+    "options": [
+      "Em direções opostas",
+      "Juntos com a mesma velocidade final",
+      "Parados imediatamente",
+      "Uma velocidade que dobra de valor"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 119
+  },
+  {
+    "question": "A força necessária para manter um robô de patrulha em movimento circular uniforme em uma pista arredondada é a força:",
+    "options": [
+      "Força tangencial",
+      "Força centrípeta",
+      "Força eletrostática",
+      "Força elástica de tração"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 120
+  },
+  {
+    "question": "A Lei da Gravitação Universal de Newton afirma que a força de atração entre duas massas é inversamente proporcional a:",
+    "options": [
+      "Ao quadrado da distância entre elas",
+      "À distância simples linear",
+      "Ao produto de suas massas",
+      "À constante de gravidade"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 121
+  },
+  {
+    "question": "De acordo com a Lei de Faraday-Lenz do eletromagnetismo, uma variação no fluxo magnético através de uma bobina rúnica induz uma:",
+    "options": [
+      "Resistência elétrica alta",
+      "Força eletromotriz (tensão)",
+      "Carga estática de prótons",
+      "Frequência de ressonância"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 122
+  },
+  {
+    "question": "A equação de Bernoulli para fluidos mágicos em movimento baseia-se em qual princípio físico fundamental?",
+    "options": [
+      "Conservação da energia mecânica",
+      "Conservação de cargas elétricas",
+      "Inércia das massas viscosas",
+      "Princípio da conservação de massa"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 123
+  },
+  {
+    "question": "Qual o tipo de espelho esférico rúnico que sempre produz imagens virtuais, direitas e menores que o objeto real?",
+    "options": [
+      "Espelho côncavo",
+      "Espelho convexo",
+      "Espelho plano",
+      "Espelho parabólico"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 124
+  },
+  {
+    "question": "Uma onda rúnica de rádio tem frequência de 100 MHz. Sabendo que a velocidade da onda é 300.000 km/s, qual seu comprimento de onda?",
+    "options": [
+      "3 metros",
+      "300 metros",
+      "30 metros",
+      "0,3 metros"
+    ],
+    "answer": 0,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 125
+  },
+  {
+    "question": "Se um circuito em paralelo possui três runas de luz idênticas e uma delas queima, o que ocorre com o brilho das outras duas runas?",
+    "options": [
+      "Apagam-se instantaneamente",
+      "Permanecem brilhando com a mesma intensidade",
+      "Ficam mais fracas",
+      "Brilham com o dobro da força"
+    ],
+    "answer": 1,
+    "andar_id": 2,
+    "nivel_progresso": 3,
+    "id": 126
+  },
+  {
+    "question": "Qual organela celular rúnica, presente nas células dos magos, é responsável pela geração de energia na forma de ATP?",
+    "options": [
+      "Ribossomo",
+      "Lisossomo",
+      "Mitocôndria",
+      "Peroxissomo"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 127
+  },
+  {
+    "question": "O menor nível de organização biológica que é considerado vivo por si só e possui membrana, citoplasma e material genético é a:",
+    "options": [
+      "Molécula",
+      "Célula",
+      "Organela",
+      "Tecido rúnico"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 128
+  },
+  {
+    "question": "De acordo com a biologia celular, as células que possuem núcleo delimitado por membrana carioteca são classificadas como:",
+    "options": [
+      "Procarióticas",
+      "Eucarióticas",
+      "Arqueas",
+      "Vírus"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 129
+  },
+  {
+    "question": "Qual molécula de fita dupla armazena a informação genética hereditária dos seres da masmorra?",
+    "options": [
+      "RNA mensageiro",
+      "Ácido Desoxirribonucleico (DNA)",
+      "Trifosfato de adenosina (ATP)",
+      "Polipeptídeo cristalino"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 130
+  },
+  {
+    "question": "Em uma cadeia alimentar simples, as plantas de mana que produzem seu próprio alimento através da luz solar são os:",
+    "options": [
+      "Consumidores",
+      "Produtores",
+      "Decompositores",
+      "Predadores"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 131
+  },
+  {
+    "question": "O processo pelo qual as plantas de mana convertem água e gás carbônico em glicose usando luz solar é a:",
+    "options": [
+      "Respiração celular",
+      "Fotossíntese",
+      "Fermentação lática",
+      "Transpiração estomática"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 132
+  },
+  {
+    "question": "Qual organela rúnica realiza a síntese de proteínas a partir das instruções do RNA mensageiro?",
+    "options": [
+      "Ribossomo",
+      "Nucléolo",
+      "Peroxissomo",
+      "Lisossomo"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 133
+  },
+  {
+    "question": "Qual sistema do corpo do guerreiro é responsável por bombear o sangue e distribuir oxigênio para os músculos?",
+    "options": [
+      "Sistema nervoso",
+      "Sistema respiratório",
+      "Sistema cardiovascular (circulatório)",
+      "Sistema digestório"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 1,
+    "id": 134
+  },
+  {
+    "question": "Que processo de divisão celular gera quatro células-filhas haploides (com metade do número de cromossomos) para a reprodução sexuada?",
+    "options": [
+      "Mitose",
+      "Meiose",
+      "Fissão binária",
+      "Esporulação"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 135
+  },
+  {
+    "question": "A Primeira Lei de Mendel, ou Lei da Segregação dos Fatores, afirma que cada característica hereditária é determinada por:",
+    "options": [
+      "Dois alelos que se separam na formação dos gametas",
+      "Múltiplos genes que interagem de forma epistática",
+      "Um único alelo materno sempre dominante",
+      "Fatores adquiridos durante a vida do troll"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 136
+  },
+  {
+    "question": "O mecanismo evolucionário proposto por Charles Darwin, em que os indivíduos mais adaptados ao ambiente sobrevivem e se reproduzem, é a:",
+    "options": [
+      "Deriva genética",
+      "Seleção natural",
+      "Mutação induzida",
+      "Lei do uso e desuso"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 137
+  },
+  {
+    "question": "Qual das seguintes organelas celulares é responsável por realizar a digestão intracelular e reciclagem de componentes velhos?",
+    "options": [
+      "Mitocôndria",
+      "Retículo endoplasmático",
+      "Lisossomo",
+      "Ribossomo"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 138
+  },
+  {
+    "question": "Durante a respiração celular aeróbica, em qual etapa ocorre a maior parte da produção de ATP dentro da mitocôndria?",
+    "options": [
+      "Glicólise citoplasmática",
+      "Ciclo de Krebs",
+      "Fosforilação oxidativa (cadeia respiratória)",
+      "Fermentação alcoólica"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 139
+  },
+  {
+    "question": "As bactérias da masmorra se reproduzem assexuadamente dividindo-se em duas células idênticas. Esse processo é a:",
+    "options": [
+      "Conjugação",
+      "Partenogênese",
+      "Bipartição (ou fissão binária)",
+      "Esporulação"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 140
+  },
+  {
+    "question": "Qual tecido do corpo humano é responsável por transmitir sinais elétricos rápidos e coordenar os movimentos do guerreiro?",
+    "options": [
+      "Tecido epitelial",
+      "Tecido conjuntivo",
+      "Tecido nervoso",
+      "Tecido muscular liso"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 141
+  },
+  {
+    "question": "Que classe de macromoléculas biológicas atua como catalisadores de reações químicas, acelerando processos vitais?",
+    "options": [
+      "Enzimas (proteínas)",
+      "Lipídios saturados",
+      "Polissacarídeos fibrosos",
+      "Ácidos nucleicos puros"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 2,
+    "id": 142
+  },
+  {
+    "question": "O estudo de modificações na expressão gênica que não alteram a sequência de bases do DNA é conhecido como:",
+    "options": [
+      "Epigenética",
+      "Mutagênese",
+      "Clonagem molecular",
+      "Hibridização cromossômica"
+    ],
+    "answer": 0,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 143
+  },
+  {
+    "question": "Qual enzima rúnica é responsável por abrir a dupla-hélice de DNA durante o processo de replicação celular?",
+    "options": [
+      "DNA ligase",
+      "Helicase",
+      "DNA polimerase",
+      "Amilase"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 144
+  },
+  {
+    "question": "No processo de síntese proteica, o RNA transportador carrega aminoácidos até o ribossomo pareando seu anticódon com o:",
+    "options": [
+      "Promotor rúnico",
+      "Histona do DNA",
+      "Códon do RNA mensageiro",
+      "Ribozima citoplasmática"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 145
+  },
+  {
+    "question": "A bioacumulação de toxinas de metal mágico ao longo dos níveis tróficos de uma cadeia alimentar é maior em qual nível?",
+    "options": [
+      "Produtores primários",
+      "Consumidores primários",
+      "Consumidores terciários (predadores de topo)",
+      "Decompositores biológicos"
+    ],
+    "answer": 2,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 146
+  },
+  {
+    "question": "Qual tipo de imunidade é ativada quando o corpo do guerreiro produz seus próprios anticorpos em resposta a uma vacina ou antígeno?",
+    "options": [
+      "Imunidade passiva",
+      "Imunidade ativa",
+      "Imunidade cruzada inata",
+      "Terapia celular adaptativa"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 147
+  },
+  {
+    "question": "As histonas são proteínas fundamentais no núcleo celular eucariótico que têm a função de:",
+    "options": [
+      "Realizar a síntese de peptídeos",
+      "Compactar e organizar a molécula de DNA em cromatina",
+      "Degradar toxinas citoplasmáticas",
+      "Atuar como canais de membrana"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 148
+  },
+  {
+    "question": "Qual tecido conjuntivo humano é caracterizado por possuir matriz extracelular calcificada e alta rigidez estrutural?",
+    "options": [
+      "Tecido cartilaginoso",
+      "Tecido ósseo",
+      "Tecido epitelial",
+      "Tecido muscular estriado"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 149
+  },
+  {
+    "question": "No ciclo celular, em qual subfase da intérfase ocorre a duplicação completa do material genético (DNA) da célula?",
+    "options": [
+      "Fase G1",
+      "Fase S",
+      "Fase G2",
+      "Mitose (Fase M)"
+    ],
+    "answer": 1,
+    "andar_id": 3,
+    "nivel_progresso": 3,
+    "id": 150
   }
 ]
