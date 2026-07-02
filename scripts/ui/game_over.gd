@@ -123,6 +123,10 @@ func _on_tentar_novamente_pressed() -> void:
 	get_tree().paused = false
 	PlayerStats.resetar_vida()
 	QuizManager.fechar_ui_batalha()
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.resetar_masmorra()
+	if get_node_or_null("/root/QuizManager"):
+		QuizManager.resetar_historico_perguntas()
 	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_menu_principal_pressed() -> void:

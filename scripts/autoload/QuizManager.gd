@@ -350,3 +350,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
 	else:
 		_nova_rodada()
+
+func resetar_historico_perguntas() -> void:
+	perguntas_usadas.clear()
+	print("[QuizManager] Histórico de perguntas usadas resetado.")

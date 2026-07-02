@@ -60,7 +60,10 @@ func _ready() -> void:
 
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
-	
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.resetar_masmorra()
+	if get_node_or_null("/root/QuizManager"):
+		QuizManager.resetar_historico_perguntas()
 	# Muda para a cena do andar 1 (Corredor)
 	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
