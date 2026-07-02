@@ -367,7 +367,7 @@ script = ExtResource("1_uhc0a")
 shape = SubResource("CapsuleShape2D_2lcu3")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2105837662]
-limit_left = 0
+limit_left = -2048
 limit_top = 0
 limit_right = 2048
 limit_bottom = 1410
