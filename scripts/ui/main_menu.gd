@@ -5,7 +5,14 @@ extends Control
 @onready var btn_clas = $MarginContainer/VBoxButtons/BtnClas
 @onready var btn_config = $MarginContainer/VBoxButtons/BtnConfig
 
+# Carregar musica para ser utilizada na cena
+# Musica importada (com loop)
+var menu_music = preload("res://assets/audio/music/musica_teste_menu.wav")
+
 func _ready() -> void:
+	# Musica da cena começa a tocar
+	AudioManager.play_music(menu_music)
+	
 	# Conectando os sinais 'pressed' aos seus respectivos callbacks
 	btn_jogar.pressed.connect(_on_btn_jogar_pressed)
 	btn_ranking.pressed.connect(_on_btn_ranking_pressed)
@@ -61,19 +68,35 @@ func _ready() -> void:
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
 	
+	# Efeito do botao jogar
+	AudioManager.play_sfx("ui-1")
+	
 	# Muda para a cena do andar 1 (Corredor)
+	AudioManager.play_sfx("transicao-1")
 	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
+	
+	# Efeito do botao do ranking
+	AudioManager.play_sfx("ui-1")
+	
 	TransitionScreen.change_scene("res://scenes/ui/ranking_ui.tscn")
 
 func _on_btn_clas_pressed() -> void:
 	print("Botão CLÃS pressionado - abrindo TelaClas")
+	
+	# Efeito do botao dos clas
+	AudioManager.play_sfx("ui-1")
+	
 	TransitionScreen.change_scene("res://scenes/ui/TelaClas.tscn")
 
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")
+	
+	# Efeito do botao de configuraçoes
+	AudioManager.play_sfx("ui-1")
+	
 	TransitionScreen.change_scene("res://scenes/ui/configuracoes.tscn")
 
 # ---------------------------------------------------------
@@ -106,4 +129,3 @@ func _atualizar_leaderboard() -> void:
 			# Sem dados suficientes — exibe placeholder
 			name_lbl.text = "---"
 			pts_lbl.text  = "PONTOS: 0"
-

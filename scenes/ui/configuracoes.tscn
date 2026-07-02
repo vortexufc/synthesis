@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c74j7d22qxx"]
 
-[ext_resource type="Script" path="res://scripts/ui/configuracoes.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://06askmrygn0k" path="res://scripts/ui/configuracoes.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://tm5vxiwpt18v" path="res://fundomenuinicial.png" id="2_bg"]
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_font"]
 [ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="4_font"]
@@ -69,7 +69,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 anti_aliasing = false
 
-[node name="Configuracoes" type="Control"]
+[node name="Configuracoes" type="Control" unique_id=1251833727]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -78,7 +78,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=530103953]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -89,7 +89,7 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="BlurOverlay" type="ColorRect" parent="."]
+[node name="BlurOverlay" type="ColorRect" parent="." unique_id=754047734]
 material = SubResource("ShaderMaterial_blur")
 layout_mode = 1
 anchors_preset = 15
@@ -98,7 +98,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1726101260]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -113,7 +113,7 @@ theme_override_font_sizes/font_size = 32
 text = "CONFIGURAÇÕES"
 horizontal_alignment = 1
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=518266607]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -123,54 +123,52 @@ offset_bottom = -100.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+[node name="Panel" type="PanelContainer" parent="CenterContainer" unique_id=766278706]
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel" unique_id=1071762123]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="VBoxMusic" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+[node name="VBoxMusic" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=1347706746]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic"]
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic" unique_id=1696853754]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 16
 text = "MÚSICA"
 
-[node name="HSliderMusic" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic"]
+[node name="HSliderMusic" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic" unique_id=1394328694]
 layout_mode = 2
-min_value = 0.0
 max_value = 1.0
 step = 0.1
 value = 0.5
 
-[node name="VBoxSfx" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+[node name="VBoxSfx" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=462765115]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx"]
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx" unique_id=181310200]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 16
 text = "EFEITOS SONOROS"
 
-[node name="HSliderSfx" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx"]
+[node name="HSliderSfx" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx" unique_id=470504719]
 layout_mode = 2
-min_value = 0.0
 max_value = 1.0
 step = 0.1
 value = 0.5
 
-[node name="HBoxConta" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+[node name="HBoxConta" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=1170035619]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxConta"]
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxConta" unique_id=362227960]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
@@ -178,21 +176,21 @@ theme_override_font_sizes/font_size = 16
 text = "CONTA"
 vertical_alignment = 1
 
-[node name="BtnDeslogar" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxConta"]
+[node name="BtnDeslogar" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxConta" unique_id=1485061309]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 text = "DESCONECTAR"
 
-[node name="HBoxJoystick" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer"]
+[node name="HBoxJoystick" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=776804254]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick"]
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick" unique_id=132690023]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -201,12 +199,12 @@ theme_override_font_sizes/font_size = 16
 text = "JOYSTICK VIRTUAL"
 vertical_alignment = 1
 
-[node name="CheckJoystick" type="CheckButton" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick"]
+[node name="CheckJoystick" type="CheckButton" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick" unique_id=942994873]
 layout_mode = 2
 size_flags_horizontal = 8
 button_pressed = true
 
-[node name="BtnVoltar" type="Button" parent="."]
+[node name="BtnVoltar" type="Button" parent="." unique_id=1617425864]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 1
 anchors_preset = 7
@@ -223,6 +221,6 @@ grow_vertical = 0
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 text = "VOLTAR"
