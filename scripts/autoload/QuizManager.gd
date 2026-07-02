@@ -86,36 +86,32 @@ func reset_questions():
 	var disponiveis: Array = []
 	for q in base_list:
 		var q_text = q.get("question", "")
-		var q_nivel = q.get("nivel_progresso", 1)
-		if q_nivel == target_nivel and q_text != "" and not (q_text in perguntas_usadas):
+		var q_nivel = int(q.get("nivel_progresso", 1))
+		if q_nivel == int(target_nivel) and q_text != "" and not (q_text in perguntas_usadas):
 			disponiveis.append(q)
 			
-	# Se esgotaram as do nível alvo, limpa o histórico daquele nível
+	# Se esgotaram as do nível alvo, tenta pegar qualquer nível não usado do mesmo andar
 	if disponiveis.size() == 0 and base_list.size() > 0:
-		print("[QuizManager] Esgotaram as perguntas do nível %d. Resetando histórico do nível." % target_nivel)
-		for q in base_list:
-			if q.get("nivel_progresso", 1) == target_nivel:
-				perguntas_usadas.erase(q.get("question", ""))
-		for q in base_list:
-			var q_text = q.get("question", "")
-			var q_nivel = q.get("nivel_progresso", 1)
-			if q_nivel == target_nivel and q_text != "" and not (q_text in perguntas_usadas):
-				disponiveis.append(q)
-				
-	# Se ainda assim não houver, tenta pegar qualquer nível não usado
-	if disponiveis.size() == 0 and base_list.size() > 0:
-		print("[QuizManager] Nenhuma pergunta encontrada para o nível %d. Buscando de outros níveis." % target_nivel)
+		print("[QuizManager] Esgotadas as perguntas do nível %d. Buscando de outros níveis não usados." % target_nivel)
 		for q in base_list:
 			var q_text = q.get("question", "")
 			if q_text != "" and not (q_text in perguntas_usadas):
 				disponiveis.append(q)
 				
-	# Se todas as perguntas de todos os níveis foram usadas, reseta o histórico total
+	# Se todas as perguntas do andar inteiro foram usadas, reseta o histórico total do andar
 	if disponiveis.size() == 0 and base_list.size() > 0:
-		print("[QuizManager] Todas as perguntas disponíveis foram usadas. Resetando histórico total.")
+		print("[QuizManager] Todas as perguntas do andar foram usadas. Resetando histórico total.")
 		for q in base_list:
 			perguntas_usadas.erase(q.get("question", ""))
-		disponiveis = base_list.duplicate()
+		# Tenta pegar novamente do nível alvo
+		for q in base_list:
+			var q_text = q.get("question", "")
+			var q_nivel = int(q.get("nivel_progresso", 1))
+			if q_nivel == int(target_nivel) and q_text != "" and not (q_text in perguntas_usadas):
+				disponiveis.append(q)
+		# Se ainda assim estiver vazio (ex: andar sem perguntas do nível alvo), pega tudo
+		if disponiveis.size() == 0:
+			disponiveis = base_list.duplicate()
 		
 	# Sorteia as perguntas de forma aleatória para a batalha
 	if disponiveis.size() > 0:
@@ -203,7 +199,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# [Dev-1] Se o andar mudou, re-busca as perguntas do novo andar antes de começar
 	var novo_andar: int = enemy_data.get("andar_id", 1)
 	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
-	if id_do_inimigo.begins_with("slime"):
+	if id_do_inimigo.to_lower().begins_with("slime"):
 		novo_andar = 1
 
 	if _questoes_locais_ativas.size() > 0:
