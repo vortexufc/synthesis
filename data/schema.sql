@@ -7,7 +7,7 @@ CREATE TABLE perguntas (
     question        TEXT     NOT NULL,                  -- Texto da pergunta
     options         JSONB    NOT NULL,                  -- Array JSON com as 4 alternativas
     answer          SMALLINT NOT NULL,                  -- Índice (0-3) da resposta correta em options
-    andar_id        INT      NOT NULL DEFAULT 1,        -- Andar: 1=Biologia, 2=Química, 3=Física
+    andar_id        INT      NOT NULL DEFAULT 1,        -- Andar: 1=Química, 2=Física, 3=Biologia
     nivel_progresso INT      NOT NULL DEFAULT 1         -- Dificuldade: 1=Fácil, 2=Médio, 3=Difícil
 );
 
