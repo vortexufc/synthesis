@@ -15,7 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_wjkwu"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="14_n8ijl"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j8j2g"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_n8ijl"]
 texture = ExtResource("2_q58dl")
 32:19/0 = 0
 8:22/0 = 0
@@ -27,7 +27,7 @@ texture = ExtResource("2_q58dl")
 77:35/0 = 0
 78:35/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cvuar"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wlvpg"]
 texture = ExtResource("3_j8j2g")
 0:0/size_in_atlas = Vector2i(2, 2)
 0:0/animation_columns = 7
@@ -42,8 +42,8 @@ texture = ExtResource("3_j8j2g")
 0:0/0/texture_origin = Vector2i(0, 8)
 
 [sub_resource type="TileSet" id="TileSet_cvuar"]
-sources/0 = SubResource("TileSetAtlasSource_j8j2g")
-sources/2 = SubResource("TileSetAtlasSource_cvuar")
+sources/0 = SubResource("TileSetAtlasSource_n8ijl")
+sources/2 = SubResource("TileSetAtlasSource_wlvpg")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_oiana"]
 texture = ExtResource("3_r6rlg")

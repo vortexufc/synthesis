@@ -109,4 +109,3 @@ func _atualizar_leaderboard() -> void:
 			# Sem dados suficientes — exibe placeholder
 			name_lbl.text = "---"
 			pts_lbl.text  = "PONTOS: 0"
-
