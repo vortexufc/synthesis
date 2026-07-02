@@ -41,11 +41,19 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 		if is_instance_valid(self):
 			set_deferred("monitoring", true)
 	else:
-		# Se venceu, deleta o inimigo do mapa
+		# Se venceu, deleta o inimigo do mapa e registra como derrotado
 		var pai = get_parent()
 		if pai:
+			if get_node_or_null("/root/DungeonGenerator"):
+				var room_path = get_tree().current_scene.scene_file_path
+				var key = room_path + "::" + pai.name
+				DungeonGenerator.registrar_inimigo_derrotado(key)
 			pai.queue_free()
 		else:
+			if get_node_or_null("/root/DungeonGenerator"):
+				var room_path = get_tree().current_scene.scene_file_path
+				var key = room_path + "::" + self.name
+				DungeonGenerator.registrar_inimigo_derrotado(key)
 			queue_free()
 
 func _on_body_entered(body: Node2D) -> void:

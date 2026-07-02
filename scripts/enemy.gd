@@ -44,6 +44,15 @@ var DIRECOES: Array = [
 ]
 
 func _ready() -> void:
+	# Se este inimigo já foi derrotado nesta masmorra, remove ele imediatamente
+	if get_node_or_null("/root/DungeonGenerator"):
+		var room_path = get_tree().current_scene.scene_file_path
+		var key = room_path + "::" + self.name
+		if DungeonGenerator.is_inimigo_derrotado(key):
+			print("[Inimigo] Já derrotado anteriormente nesta masmorra, removendo: ", key)
+			queue_free()
+			return
+
 	add_to_group("inimigos")
 	vida_atual = vida_maxima
 	randomize()
