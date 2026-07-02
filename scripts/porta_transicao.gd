@@ -1,7 +1,12 @@
 extends Area2D
 
+@export_category("Configurações de Rota")
 @export var proxima_cena: String = ""
 @export var porta_de_retorno: bool = false
+
+@export_category("Configurações do Hub")
+@export var esta_trancada: bool = false
+@export var mensagem_customizada: String = ""
 
 # Cooldown para evitar teletransporte imediato ao carregar a cena (loop infinito)
 var _cooldown_ativo: bool = true
@@ -15,7 +20,6 @@ func _ready() -> void:
 	_cooldown_ativo = false
 	
 	# Após o cooldown, verifica se o player já está dentro da área
-	# (necessário se o player spawnou dentro da zona de colisão)
 	for body in get_overlapping_bodies():
 		if body.name == "Player":
 			_on_body_entered(body)
@@ -28,7 +32,8 @@ func _tem_inimigos_vivos() -> bool:
 			return true
 	return false
 
-func _mostrar_feedback_bloqueio() -> void:
+# Agora a função aceita Texto e Cor de Borda dinamicamente!
+func _mostrar_feedback_hub(mensagem: String, cor_borda: Color) -> void:
 	# Evita acumular múltiplas mensagens se o jogador ficar colidindo repetidamente
 	if get_node_or_null("FeedbackMensagem"):
 		return
@@ -38,7 +43,7 @@ func _mostrar_feedback_bloqueio() -> void:
 	add_child(canvas)
 	
 	var label = Label.new()
-	label.text = "Portão selado! Derrote todos os monstros da sala."
+	label.text = mensagem
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
@@ -51,7 +56,7 @@ func _mostrar_feedback_bloqueio() -> void:
 	# Usar painel com estilo premium integrado à lore
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.1, 0.85) # Escuro translúcido com toque azulado/arcano
+	style.bg_color = Color(0.08, 0.08, 0.1, 0.85) # Escuro translúcido arcano
 	style.corner_radius_top_left = 6
 	style.corner_radius_top_right = 6
 	style.corner_radius_bottom_left = 6
@@ -61,7 +66,7 @@ func _mostrar_feedback_bloqueio() -> void:
 	style.border_width_left = 2
 	style.border_width_right = 2
 	style.border_width_top = 2
-	style.border_color = Color(0.85, 0.25, 0.25, 0.9) # Vermelho mágico vibrante
+	style.border_color = cor_borda # Cor injetada dinamicamente
 	
 	panel.add_theme_stylebox_override("panel", style)
 	panel.add_child(label)
@@ -77,7 +82,7 @@ func _mostrar_feedback_bloqueio() -> void:
 	panel.offset_left = 340
 	panel.offset_right = -340
 	
-	# Efeito de Fade In / Intervalo / Fade Out usando Tween do Godot 4
+	# Efeito de Fade In / Intervalo / Fade Out usando Tween
 	panel.modulate.a = 0.0
 	var tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.tween_property(panel, "modulate:a", 1.0, 0.2)
@@ -90,27 +95,37 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 		
 	if body.name == "Player":
+		# REGRA 1: Se a porta for do Hub e estiver marcada como trancada
+		if esta_trancada:
+			var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
+			_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9)) # Borda Vermelha
+			return
+			
+		# REGRA 2: Bloqueio antigo por conter inimigos na sala
 		if _tem_inimigos_vivos():
-			_mostrar_feedback_bloqueio()
+			_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
 			return
 			
 		var cena_alvo = proxima_cena
 		
-		# SEMPRE marca se o jogador acabou de usar uma porta de retorno
 		if get_node_or_null("/root/DungeonGenerator"):
 			DungeonGenerator.vindo_de_porta_de_retorno = porta_de_retorno
 		
-		# Se nenhuma cena foi definida no Editor, puxa do Gerador de Masmorra
 		if cena_alvo == "" and get_node_or_null("/root/DungeonGenerator"):
 			var arquivo_sala = get_tree().current_scene.scene_file_path
-			
 			if porta_de_retorno:
 				cena_alvo = DungeonGenerator.get_sala_anterior(arquivo_sala)
 			else:
 				cena_alvo = DungeonGenerator.get_proxima_sala(arquivo_sala)
 		
-		print("[PortaTransicao] porta_de_retorno=", porta_de_retorno, " | Indo para: ", cena_alvo)
+		print("[PortaTransicao] Indo para: ", cena_alvo)
 			
-		if cena_alvo != "":
-			_cooldown_ativo = true  # Evita duplo disparo
+		if cena_alvo != "": 
+			_cooldown_ativo = true 
+			
+			# REGRA 3: Se tiver mensagem de entrada (Porta Aberta do Hub)
+			if mensagem_customizada != "":
+				_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul Alquimia
+				await get_tree().create_timer(0.4).timeout # Aguarda o jogador ler antes da tela escurecer
+				
 			TransitionScreen.change_scene(cena_alvo)
