@@ -5,18 +5,18 @@ var sala_01 = "res://scenes/Salas/Salas_BuildTGXP/Sala01.tscn"
 
 # Pool das 12 novas salas aleatórias
 var salas_alquimia: Array = [
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia01.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia02.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia03.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia04.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia05.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia06.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia07.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia08.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia09.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia10.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia11.tscn",
-	"res://scenes/Salas/Salas_Geral/Sala_Alquimia12.tscn"
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia01.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia02.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia03.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia04.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia05.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia06.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia07.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia08.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia09.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia10.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia11.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia12.tscn"
 ]
 
 # O percurso completo gerado para a corrida atual (da primeira à última sala)
