@@ -102,7 +102,7 @@ func _on_body_entered(body: Node2D) -> void:
 			return
 			
 		# REGRA 2: Bloqueio antigo por conter inimigos na sala
-		if _tem_inimigos_vivos():
+		if not porta_de_retorno and _tem_inimigos_vivos():
 			_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
 			return
 			
