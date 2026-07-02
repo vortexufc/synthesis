@@ -90,7 +90,7 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 		
 	if body.name == "Player":
-		if _tem_inimigos_vivos():
+		if not porta_de_retorno and _tem_inimigos_vivos():
 			_mostrar_feedback_bloqueio()
 			return
 			
