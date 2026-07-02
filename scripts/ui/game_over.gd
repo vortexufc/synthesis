@@ -8,6 +8,7 @@ extends CanvasLayer
 @onready var color_rect = $ColorRect
 
 var particulas: CPUParticles2D
+var _pode_pular_vitoria: bool = false
 
 func _ready() -> void:
 	hide()
@@ -42,12 +43,28 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		color_rect.color = Color(0, 0, 0, 0.8) # Fundo escuro simples
 		btn_container.hide() # Esconde botões para voltar rápido ao jogo
 		particulas.emitting = true
+		
+		# Cria mensagem discreta para pular a animação de vitória
+		var lbl_skip = Label.new()
+		lbl_skip.name = "LblSkip"
+		lbl_skip.text = "( Pressione ESPAÇO para pular )"
+		lbl_skip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl_skip.add_theme_font_size_override("font_size", 14)
+		lbl_skip.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 0.8)) # Cinza discreto
+		
+		var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+		if font:
+			lbl_skip.add_theme_font_override("font", font)
+			
+		$ColorRect/VBoxContainer.add_child(lbl_skip)
+		_pode_pular_vitoria = true
 	else:
 		titulo.text = "DERROTA..."
 		titulo.add_theme_color_override("font_color", Color.RED)
 		color_rect.color = Color(0.2, 0, 0, 0.8) # Fundo vermelho escuro
 		btn_container.show() # Mostra botões
 		particulas.emitting = false
+		_pode_pular_vitoria = false
 	
 	if dict_stats.is_empty():
 		stats.text = "Tempo de Batalha: --s\nPrecisão: --%\nDano Causado: --"
@@ -83,10 +100,23 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 	if vitoria:
 		# usar process_always no timer pra funcionar com o jogo pausado
 		await get_tree().create_timer(3.0, true).timeout
-		hide()
-		particulas.emitting = false
-		get_tree().paused = false
-		QuizManager.fechar_ui_batalha()
+		if _pode_pular_vitoria:
+			_finalizar_vitoria()
+
+func _input(event: InputEvent) -> void:
+	if _pode_pular_vitoria:
+		if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
+			get_viewport().set_input_as_handled()
+			_finalizar_vitoria()
+
+func _finalizar_vitoria() -> void:
+	_pode_pular_vitoria = false
+	hide()
+	particulas.emitting = false
+	get_tree().paused = false
+	QuizManager.fechar_ui_batalha()
+	if $ColorRect/VBoxContainer.has_node("LblSkip"):
+		$ColorRect/VBoxContainer.get_node("LblSkip").queue_free()
 
 func _on_tentar_novamente_pressed() -> void:
 	hide()
