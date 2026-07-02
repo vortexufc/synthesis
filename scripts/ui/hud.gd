@@ -14,7 +14,7 @@ func _ready() -> void:
 	
 	# esconde a barra na batalha
 	GlobalSignals.iniciar_batalha.connect(func(_enemy_data): self.hide())
-	GlobalSignals.batalha_encerrada.connect(func(): self.show())
+	GlobalSignals.batalha_encerrada.connect(func(_vitoria: bool): self.show())
 
 func atualizar_vida(atual: float, maxima: float) -> void:
 	var pct = clamp(atual / maxima, 0.0, 1.0)

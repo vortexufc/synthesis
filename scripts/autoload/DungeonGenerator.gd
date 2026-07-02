@@ -25,6 +25,10 @@ var percurso_salas: Array = []
 # Diz se o jogador acabou de voltar para a sala anterior
 var vindo_de_porta_de_retorno: bool = false
 
+# Array contendo identificadores de inimigos derrotados nesta masmorra.
+# Formato: "nome_da_cena_da_sala::nome_do_no_inimigo"
+var inimigos_derrotados: Array = []
+
 func _ready():
 	randomize()
 	resetar_masmorra()
@@ -62,8 +66,17 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 		
 	return sala_inicial
 
+func registrar_inimigo_derrotado(key: String) -> void:
+	if not (key in inimigos_derrotados):
+		inimigos_derrotados.append(key)
+		print("[DungeonGenerator] Inimigo registrado como derrotado: ", key)
+
+func is_inimigo_derrotado(key: String) -> bool:
+	return key in inimigos_derrotados
+
 func resetar_masmorra() -> void:
 	percurso_salas.clear()
+	inimigos_derrotados.clear()
 	percurso_salas.append(sala_inicial)
 	percurso_salas.append(sala_01)
 	

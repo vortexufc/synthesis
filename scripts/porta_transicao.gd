@@ -108,9 +108,11 @@ func _on_body_entered(body: Node2D) -> void:
 			
 		var cena_alvo = proxima_cena
 		
+		# Marca se o jogador veio de uma porta de retorno
 		if get_node_or_null("/root/DungeonGenerator"):
 			DungeonGenerator.vindo_de_porta_de_retorno = porta_de_retorno
 		
+		# Se nenhuma cena foi definida, puxa do Gerador de Masmorra
 		if cena_alvo == "" and get_node_or_null("/root/DungeonGenerator"):
 			var arquivo_sala = get_tree().current_scene.scene_file_path
 			if porta_de_retorno:
@@ -121,11 +123,11 @@ func _on_body_entered(body: Node2D) -> void:
 		print("[PortaTransicao] Indo para: ", cena_alvo)
 			
 		if cena_alvo != "": 
-			_cooldown_ativo = true 
+			_cooldown_ativo = true  # Evita duplo disparo
 			
-			# REGRA 3: Se tiver mensagem de entrada (Porta Aberta do Hub)
+			# Se tiver mensagem de entrada (Ex: Porta Aberta do Hub)
 			if mensagem_customizada != "":
-				_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul Alquimia
-				await get_tree().create_timer(0.4).timeout # Aguarda o jogador ler antes da tela escurecer
+				_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul
+				await get_tree().create_timer(0.4).timeout
 				
 			TransitionScreen.change_scene(cena_alvo)

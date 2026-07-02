@@ -15,9 +15,9 @@
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="13_5tf05"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="14_gs5ku"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_x31dj"]
-[ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="16_ad8wp"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala08.tscn" id="16_ad8wp"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="18_il4ey"]
-[ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/Slimes/slime_p01.tscn" id="18_w60sk"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala08.tscn" id="18_w60sk"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w60sk"]
 texture = ExtResource("3_cpqrk")
