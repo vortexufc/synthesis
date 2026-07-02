@@ -6,6 +6,7 @@ var current_index = 0
 
 ## [Local] Questões específicas do inimigo atual (sobrescrevem o banco)
 var _questoes_locais_ativas: Array = []
+var perguntas_usadas: Array = []
 
 # Referências da Interface
 var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
@@ -53,15 +54,73 @@ func _on_perguntas_chegaram(dados: Array) -> void:
 func reset_questions():
 	# Garante seed diferente a cada chamada (autoload não reinicia com a cena)
 	randomize()
-	# [Local] Se houver questões locais ativas, recicla elas — sem progressão de dificuldade
+	
+	var base_list: Array = []
 	if _questoes_locais_ativas.size() > 0:
-		shuffled_questions = _questoes_locais_ativas.duplicate()
+		base_list = _questoes_locais_ativas.duplicate()
+	else:
+		base_list = questions.duplicate()
+		
+	# Determina a dificuldade alvo com base no progresso das salas ou se é a sala do Boss
+	var target_nivel: int = 1
+	var current_scene_path = ""
+	if get_tree() and get_tree().current_scene:
+		current_scene_path = get_tree().current_scene.scene_file_path
+		
+	if current_scene_path.to_lower().find("boss") != -1:
+		target_nivel = 3
+	else:
+		var sala_idx = DungeonGenerator.get_index_da_cena(current_scene_path)
+		if sala_idx != -1:
+			if sala_idx <= 4:
+				target_nivel = 1
+			elif sala_idx <= 9:
+				target_nivel = 2
+			else:
+				target_nivel = 3
+		else:
+			target_nivel = 1
+		
+	print("[QuizManager] Sala: %s (index: %d), Dificuldade alvo: %d" % [current_scene_path.get_file(), DungeonGenerator.get_index_da_cena(current_scene_path), target_nivel])
+	
+	var disponiveis: Array = []
+	for q in base_list:
+		var q_text = q.get("question", "")
+		var q_nivel = q.get("nivel_progresso", 1)
+		if q_nivel == target_nivel and q_text != "" and not (q_text in perguntas_usadas):
+			disponiveis.append(q)
+			
+	# Se esgotaram as do nível alvo, limpa o histórico daquele nível
+	if disponiveis.size() == 0 and base_list.size() > 0:
+		print("[QuizManager] Esgotaram as perguntas do nível %d. Resetando histórico do nível." % target_nivel)
+		for q in base_list:
+			if q.get("nivel_progresso", 1) == target_nivel:
+				perguntas_usadas.erase(q.get("question", ""))
+		for q in base_list:
+			var q_text = q.get("question", "")
+			var q_nivel = q.get("nivel_progresso", 1)
+			if q_nivel == target_nivel and q_text != "" and not (q_text in perguntas_usadas):
+				disponiveis.append(q)
+				
+	# Se ainda assim não houver, tenta pegar qualquer nível não usado
+	if disponiveis.size() == 0 and base_list.size() > 0:
+		print("[QuizManager] Nenhuma pergunta encontrada para o nível %d. Buscando de outros níveis." % target_nivel)
+		for q in base_list:
+			var q_text = q.get("question", "")
+			if q_text != "" and not (q_text in perguntas_usadas):
+				disponiveis.append(q)
+				
+	# Se todas as perguntas de todos os níveis foram usadas, reseta o histórico total
+	if disponiveis.size() == 0 and base_list.size() > 0:
+		print("[QuizManager] Todas as perguntas disponíveis foram usadas. Resetando histórico total.")
+		for q in base_list:
+			perguntas_usadas.erase(q.get("question", ""))
+		disponiveis = base_list.duplicate()
+		
+	# Sorteia as perguntas de forma aleatória para a batalha
+	if disponiveis.size() > 0:
+		shuffled_questions = disponiveis
 		shuffled_questions.shuffle()
-		current_index = 0
-	elif questions.size() > 0:
-		# [PROG-02] Progressão Didática: organiza por nivel_progresso (se disponível)
-		# Perguntas sem o campo nivel_progresso são tratadas como nível 1 (sem quebrar)
-		shuffled_questions = _ordenar_por_progressao(questions)
 		current_index = 0
 
 ## [PROG-02] Agrupa as perguntas por nível de dificuldade e embaralha dentro de cada grupo.
@@ -97,6 +156,12 @@ func get_random_question():
 		reset_questions() # Reseta pra nunca acabar as perguntas no protótipo
 	var q = shuffled_questions[current_index]
 	current_index += 1
+	
+	# Registra como usada pelo texto da pergunta para não repetir no decorrer do jogo
+	var q_text = q.get("question", "")
+	if q_text != "" and not (q_text in perguntas_usadas):
+		perguntas_usadas.append(q_text)
+		
 	return shuffle_questions(q)
 
 # ================================
@@ -137,19 +202,22 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 
 	# [Dev-1] Se o andar mudou, re-busca as perguntas do novo andar antes de começar
 	var novo_andar: int = enemy_data.get("andar_id", 1)
+	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
+	if id_do_inimigo.begins_with("slime"):
+		novo_andar = 1
 
 	if _questoes_locais_ativas.size() > 0:
 		# Usa as questões locais — ignora banco para esta batalha (funciona offline)
 		print("[Local] Batalha com questões locais (%d questões)" % _questoes_locais_ativas.size())
-		shuffled_questions = _questoes_locais_ativas.duplicate()
-		shuffled_questions.shuffle()
-		current_index = 0
+		reset_questions()
 	elif novo_andar != _andar_atual or questions.size() == 0:
 		_andar_atual = novo_andar
 		print("[Dev-1] Carregando perguntas do Andar %d..." % _andar_atual)
 		DatabaseManager.puxar_perguntas(_andar_atual)
-		if questions.size() == 0:
-			await DatabaseManager.perguntas_recebidas
+		await DatabaseManager.perguntas_recebidas
+	else:
+		# Mesmo andar, filtra e embaralha as perguntas restantes para a batalha
+		reset_questions()
 
 	print("[Dev-1 / Combat-4] Batalha: %d questões / %.0fs — Andar %d" % [_num_questoes, _duracao_batalha, _andar_atual])
 
@@ -210,7 +278,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	_jogador_batalha.get_node("sprite").call_deferred("play", "idle_direita")
 	
 	# Reinicia Barras visuais
-	ui_instancia.atualizar_vida(1.0, 1.0)
+	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador / PlayerStats.vida_maxima_jogador, 1.0)
 
 	# [Combat-4] Inicia o timer com a duração do inimigo (não resetado entre rodadas)
 	ui_instancia.iniciar_timer(_duracao_batalha)
@@ -219,30 +287,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	_nova_rodada()
 
 func _nova_rodada() -> void:
-	# [Combat-4] Verifica se atingiu o limite de rodadas do inimigo
 	_rodada_atual += 1
-	if _rodada_atual > _num_questoes:
-		print("[Combat-4] Todas as %d questões respondidas. Batalha encerrada!" % _num_questoes)
-		ui_instancia.ocultar_interface()
-		
-		# Se acabaram as perguntas, vence quem tiver mais vida (percentualmente) ou se acertou a maioria.
-		var pct_vida_jogador = PlayerStats.vida_atual_jogador / float(PlayerStats.vida_maxima_jogador)
-		var pct_vida_inimigo = vida_atual_inimigo / float(vida_maxima_inimigo)
-		var vitoria = (vida_atual_inimigo <= 0) or (_acertos_batalha >= _erros_batalha) or (pct_vida_jogador > pct_vida_inimigo)
-		var tempo_decorrido = (Time.get_ticks_msec() - _tempo_inicio_batalha) / 1000.0
-		var precisao = 0
-		if (_acertos_batalha + _erros_batalha) > 0:
-			precisao = float(_acertos_batalha) / float(_acertos_batalha + _erros_batalha) * 100.0
-		var stats = {
-			"tempo": tempo_decorrido,
-			"precisao": int(precisao),
-			"dano": _dano_causado
-		}
-		
-		GlobalSignals.batalha_encerrada.emit(vitoria)
-		PlayerStats.salvar()
-		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
-		return
 	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
 	pergunta_atual = get_random_question()
 	ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
