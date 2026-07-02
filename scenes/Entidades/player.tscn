@@ -5,8 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://bb58dqe3i4i1p" path="res://assets/sprites/Characters/Maguinho/idle.png" id="3_r0kh6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
-radius = 25.0
-height = 74.0
+radius = 19.0
+height = 66.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qhqgy"]
 atlas = ExtResource("2_qhqgy")
@@ -370,12 +370,13 @@ shape = SubResource("CapsuleShape2D_2lcu3")
 limit_left = -2048
 limit_top = 0
 limit_right = 2048
-limit_bottom = 1410
+limit_bottom = 2048
 position_smoothing_enabled = true
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1020740764]
 
 [node name="sprite" type="AnimatedSprite2D" parent="." unique_id=738586530]
+z_index = 4
 position = Vector2(-2, -29)
 scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_iy05v")
