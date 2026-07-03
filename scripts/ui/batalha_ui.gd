@@ -26,7 +26,10 @@ var _duracao_batalha: float = 300.0 ## Espelho da duração do inimigo (para exi
 var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
 
+var battle_music = preload("res://assets/audio/ost/2.wav")
+
 func _ready() -> void:
+	AudioManager.play_battle_music(battle_music)
 	# garante que os botoes funcionem mesmo com o jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
@@ -122,6 +125,7 @@ func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 
 func _on_botao_pressionado(indice: int) -> void:
 	# [BugFix] Ignora cliques duplicados ou re-entrada do timer
+	AudioManager.play_sfx("ui_1")
 	if _processando_resposta:
 		return
 	_processando_resposta = true
@@ -189,6 +193,7 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 	
 	if acertou:
 		# Texto saindo de cima do inimigo
+		AudioManager.tocar_som_ataque()
 		lbl.position = health_enemy.position + Vector2(50, -20)
 	else:
 		# Texto saindo de cima do player

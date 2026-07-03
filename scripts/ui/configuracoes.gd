@@ -44,6 +44,10 @@ func _on_sfx_value_changed(value: float) -> void:
 func _on_deslogar_pressed() -> void:
 	print("Deslogando usuário...")
 	# Limpa os dados do usuário no DatabaseManager
+	
+	# Efeito do botao deslogar
+	AudioManager.play_sfx("ui_4")
+	
 	DatabaseManager.user_token = ""
 	DatabaseManager.user_nick = ""
 	DatabaseManager.user_cla = "Nenhum"
@@ -62,7 +66,7 @@ func _on_voltar_pressed() -> void:
 	print("Botão VOLTAR pressionado")
 	
 	# Efeito do botao voltar
-	AudioManager.play_sfx("ui-1")
+	AudioManager.play_sfx("ui_5")
 	
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 

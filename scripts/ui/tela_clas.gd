@@ -13,6 +13,9 @@ func _ready() -> void:
 	_atualizar_tela()
 
 func _on_btn_voltar_pressed() -> void:
+	# Efeito do botao voltar
+	AudioManager.play_sfx("ui_5")
+	
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
 var _is_loading: bool = false
