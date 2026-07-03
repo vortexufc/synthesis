@@ -25,13 +25,29 @@ func _ready() -> void:
 
 func _on_music_value_changed(value: float) -> void:
 	print("Volume da MÚSICA alterado para: ", value)
+	
+	var bus_idx = AudioServer.get_bus_index("Music")	
+	AudioServer.set_bus_volume_db(
+		bus_idx,
+		_slider_to_db(value)
+	)
 
 func _on_sfx_value_changed(value: float) -> void:
 	print("Volume dos EFEITOS SONOROS alterado para: ", value)
+	
+	var bus_idx = AudioServer.get_bus_index("SFX")
+	AudioServer.set_bus_volume_db(
+		bus_idx,
+		_slider_to_db(value)
+	)
 
 func _on_deslogar_pressed() -> void:
 	print("Deslogando usuário...")
 	# Limpa os dados do usuário no DatabaseManager
+	
+	# Efeito do botao deslogar
+	AudioManager.play_sfx("ui_4")
+	
 	DatabaseManager.user_token = ""
 	DatabaseManager.user_nick = ""
 	DatabaseManager.user_cla = "Nenhum"
@@ -42,7 +58,21 @@ func _on_deslogar_pressed() -> void:
 
 func _on_joystick_toggled(button_pressed: bool) -> void:
 	print("Joystick Virtual alterado para: ", "LIGADO" if button_pressed else "DESLIGADO")
+	
+	# Efeito do botao on_joystick
+	AudioManager.play_sfx("ui-1")
 
 func _on_voltar_pressed() -> void:
 	print("Botão VOLTAR pressionado")
+	
+	# Efeito do botao voltar
+	AudioManager.play_sfx("ui_5")
+	
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+
+# Funçao usada para usar decibeis e não porcentagem
+func _slider_to_db(value: float) -> float:
+	if value <= 0:
+		return -80.0
+
+	return linear_to_db(value)

@@ -79,6 +79,7 @@ func resetar_vida() -> void:
 
 # funcao de tomar dano
 func sofrer_dano(valor: float) -> void:
+	AudioManager.tocar_som_dano()
 	vida_atual_jogador -= valor
 	if vida_atual_jogador < 0:
 		vida_atual_jogador = 0

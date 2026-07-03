@@ -6,6 +6,9 @@ extends Control
 @onready var btn_config = $MarginContainer/VBoxButtons/BtnConfig
 
 func _ready() -> void:
+	# Musica da cena começa a tocar
+	AudioManager.play_menu_music()
+	
 	# Conectando os sinais 'pressed' aos seus respectivos callbacks
 	btn_jogar.pressed.connect(_on_btn_jogar_pressed)
 	btn_ranking.pressed.connect(_on_btn_ranking_pressed)
@@ -58,24 +61,41 @@ func _ready() -> void:
 
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
+	
+	# Efeito do botao jogar
+	AudioManager.play_sfx("ui_5")
+	
 	if get_node_or_null("/root/DungeonGenerator"):
 		DungeonGenerator.resetar_masmorra()
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
 		
-	# CORREÇÃO: Altera a rota inicial para o Hub Geral
+	# Efeito de transicao
+	AudioManager.play_sfx("transicao-1")
 	TransitionScreen.change_scene("res://scenes/Salas/Hub_Geral.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
+	
+	# Efeito do botao do ranking
+	AudioManager.play_sfx("ui_5")
+	
 	TransitionScreen.change_scene("res://scenes/ui/ranking_ui.tscn")
 
 func _on_btn_clas_pressed() -> void:
 	print("Botão CLÃS pressionado - abrindo TelaClas")
+	
+	# Efeito do botao dos clas
+	AudioManager.play_sfx("ui_5")
+	
 	TransitionScreen.change_scene("res://scenes/ui/TelaClas.tscn")
 
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")
+	
+	# Efeito do botao de configuraçoes
+	AudioManager.play_sfx("ui_5")
+	
 	TransitionScreen.change_scene("res://scenes/ui/configuracoes.tscn")
 
 # ---------------------------------------------------------
