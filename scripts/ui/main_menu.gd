@@ -52,9 +52,7 @@ func _ready() -> void:
 	# =================================================
 	
 	# ========= LEADERBOARD DE CLÃS (ONLINE) =========
-	# Atualiza imediatamente com o cache atual (pode estar vazio no primeiro frame)
 	_atualizar_leaderboard()
-	# Re-atualiza automaticamente quando o ClanManager terminar de carregar do Supabase
 	ClanManager.clan_list_updated.connect(_atualizar_leaderboard)
 	# ================================================
 
@@ -64,8 +62,9 @@ func _on_btn_jogar_pressed() -> void:
 		DungeonGenerator.resetar_masmorra()
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
-	# Muda para a cena do andar 1 (Corredor)
-	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
+		
+	# CORREÇÃO: Altera a rota inicial para o Hub Geral
+	TransitionScreen.change_scene("res://scenes/Salas/Hub_Geral.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
@@ -106,6 +105,5 @@ func _atualizar_leaderboard() -> void:
 			name_lbl.text = clan.get("name", "---").to_upper()
 			pts_lbl.text  = "PONTOS: " + str(clan.get("score", 0))
 		else:
-			# Sem dados suficientes — exibe placeholder
 			name_lbl.text = "---"
 			pts_lbl.text  = "PONTOS: 0"

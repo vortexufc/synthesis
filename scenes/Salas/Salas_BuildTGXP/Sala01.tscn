@@ -203,6 +203,10 @@ tile_set = SubResource("TileSet_mtpeg")
 z_index = 3
 position = Vector2(605, 541)
 
+[node name="Slime_G2" parent="." unique_id=1927535335 instance=ExtResource("4_tjhdw")]
+z_index = 3
+position = Vector2(426.78, 376.745)
+
 [node name="Node" type="Node" parent="." unique_id=518638340]
 script = ExtResource("5_arpr6")
 
