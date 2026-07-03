@@ -98,6 +98,64 @@ border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.6, 0.4, 0.1, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot_red"]
+bg_color = Color(0.9, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot_red_dim"]
+bg_color = Color(0.4, 0.1, 0.1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot_yellow"]
+bg_color = Color(1, 0.8, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot_yellow_dim"]
+bg_color = Color(0.5, 0.4, 0.0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot_green"]
+bg_color = Color(0.2, 0.8, 0.3, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dot_green_dim"]
+bg_color = Color(0.1, 0.4, 0.15, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_arrow"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_arrow_hover"]
+bg_color = Color(1, 1, 1, 0.15)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+anti_aliasing = false
+
 [node name="MainMenu" type="Control" unique_id=1947850292]
 layout_mode = 3
 anchors_preset = 15
@@ -230,9 +288,10 @@ layout_mode = 2
 
 [node name="LabelTitle" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox" unique_id=467015824]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 14
-text = "🏆 LIDERANÇA DA SEMANA"
+text = "LIDERANÇA DA SEMANA"
 
 [node name="Spacer" type="Control" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox" unique_id=157866586]
 layout_mode = 2
@@ -240,25 +299,38 @@ size_flags_horizontal = 3
 
 [node name="HBoxDots" type="HBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox" unique_id=115254899]
 layout_mode = 2
-theme_override_constants/separation = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 2
 
-[node name="RedDot" type="ColorRect" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=17819633]
-custom_minimum_size = Vector2(10, 10)
+[node name="BtnPrev" type="Button" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=17819633]
+custom_minimum_size = Vector2(50, 36)
 layout_mode = 2
 size_flags_vertical = 4
-color = Color(0.9, 0.2, 0.2, 1)
+tooltip_text = "Período anterior"
+text = "◄"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.5, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxEmpty_arrow")
+theme_override_styles/hover = SubResource("StyleBoxFlat_arrow_hover")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_arrow")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_arrow")
 
-[node name="YellowDot" type="ColorRect" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=983464826]
-custom_minimum_size = Vector2(10, 10)
+[node name="BtnNext" type="Button" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=1276364033]
+custom_minimum_size = Vector2(50, 36)
 layout_mode = 2
 size_flags_vertical = 4
-color = Color(1, 0.8, 0, 1)
-
-[node name="GreenDot" type="ColorRect" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=1276364033]
-custom_minimum_size = Vector2(10, 10)
-layout_mode = 2
-size_flags_vertical = 4
-color = Color(0.2, 0.8, 0.3, 1)
+tooltip_text = "Próximo período"
+text = "►"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 0.5, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.6)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxEmpty_arrow")
+theme_override_styles/hover = SubResource("StyleBoxFlat_arrow_hover")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_arrow")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_arrow")
 
 [node name="Clan1" type="HBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer" unique_id=1452115181]
 layout_mode = 2

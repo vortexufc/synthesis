@@ -9,6 +9,9 @@ signal ranking_atualizado
 
 var ranking_geral: Array = []   # [{ "name": "Andin", "score": 1500 }, ...]
 var ranking_clas: Array = []    # populado pelo ClanManager via get_top_clans()
+var ranking_diario: Array = []   # score_diario
+var ranking_semanal: Array = [] # score_semanal
+var ranking_mensal: Array = []  # score_mensal
 
 # ---- ARQUIVO LOCAL (Fallback offline) ----
 const RANKING_FILE = "user://ranking.json"
@@ -21,6 +24,9 @@ var local_guest_nick: String = ""
 func _ready() -> void:
 	await get_tree().create_timer(0.3).timeout
 	await load_ranking()
+	await load_ranking_periodo("diario")
+	await load_ranking_periodo("semanal")
+	await load_ranking_periodo("mensal")
 
 # ============================================================
 # CARREGAR DO SUPABASE
@@ -57,6 +63,47 @@ func load_ranking() -> void:
 		# Supabase falhou → carrega o cache local como fallback
 		print("[RankingManager] ERRO: %s — usando cache local." % res.get("message", "sem detalhes"))
 		_carregar_local()
+
+# ============================================================
+# CARREGAR DO SUPABASE — RANKINGS DE PERÍODO
+# ============================================================
+func load_ranking_periodo(periodo: String) -> void:
+	var coluna: String
+	match periodo:
+		"diario":  coluna = "score_diario"
+		"semanal": coluna = "score_semanal"
+		"mensal":  coluna = "score_mensal"
+		_: return
+	
+	var res = await DatabaseManager.request_async(
+		"/rest/v1/rankinggeral?select=player_name,%s&order=%s.desc&limit=20" % [coluna, coluna],
+		HTTPClient.METHOD_GET
+	)
+	if not (res["success"] and res["data"] is Array):
+		return
+	
+	var lista: Array = []
+	for row in res["data"]:
+		var pts = int(row.get(coluna, 0))
+		if pts > 0:
+			lista.append({"name": row.get("player_name", "?"), "score": pts})
+	
+	match periodo:
+		"diario":  ranking_diario  = lista
+		"semanal": ranking_semanal = lista
+		"mensal":  ranking_mensal  = lista
+	
+	ranking_atualizado.emit()
+	
+# ============================================================
+# BUSCAR RANKING CONFORME PERÍODO
+# ============================================================
+func get_ranking_por_periodo(periodo: String) -> Array:
+	match periodo:
+		"diario":  return ranking_diario
+		"semanal": return ranking_semanal
+		"mensal":  return ranking_mensal
+		_: return ranking_geral
 
 # ============================================================
 # SALVAR / ATUALIZAR PONTUAÇÃO DO PLAYER
@@ -97,28 +144,42 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		return false
 
 	var score_atual: int = 0
+	var score_diario_atual: int = 0
+	var score_semanal_atual: int = 0
+	var score_mensal_atual: int = 0
 	var existe: bool = false
 
 	if res["data"] is Array and res["data"].size() > 0:
-		score_atual = int(res["data"][0].get("score", 0))
+		var row = res["data"][0]
+		score_atual         = int(row.get("score", 0))
+		score_diario_atual  = int(row.get("score_diario", 0))
+		score_semanal_atual = int(row.get("score_semanal", 0))
+		score_mensal_atual  = int(row.get("score_mensal", 0))
 		existe = true
 
-	var novo_score: int = score_atual + pontos_novos
+	var novo_score:         int = score_atual + pontos_novos
+	var novo_score_diario:  int = score_diario_atual + pontos_novos
+	var novo_score_semanal: int = score_semanal_atual + pontos_novos
+	var novo_score_mensal:  int = score_mensal_atual + pontos_novos
 	var res_update: Dictionary
 
 	if existe:
-		# PATCH: atualiza
+		# PATCH: atualiza geral + períodos
 		res_update = await DatabaseManager.request_async(
 			"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
 			HTTPClient.METHOD_PATCH,
-			{"score": novo_score, "updated_at": "now()"}
+			{"score": novo_score, "score_diario": novo_score_diario,
+			 "score_semanal": novo_score_semanal, "score_mensal": novo_score_mensal,
+			 "updated_at": "now()"}
 		)
 	else:
 		# POST: insere novo jogador
 		res_update = await DatabaseManager.request_async(
 			"/rest/v1/rankinggeral",
 			HTTPClient.METHOD_POST,
-			{"player_name": player_name, "score": novo_score}
+			{"player_name": player_name, "score": novo_score,
+			 "score_diario": novo_score_diario, "score_semanal": novo_score_semanal,
+			 "score_mensal": novo_score_mensal}
 		)
 
 	if res_update["success"]:
