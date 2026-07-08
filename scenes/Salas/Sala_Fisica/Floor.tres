@@ -1,0 +1,74 @@
+[gd_resource type="TileSet" format=3 uid="uid://ms6t05hijfja"]
+
+[ext_resource type="Texture2D" uid="uid://bxcfqixmux3ga" path="res://assets/sprites/tilesets/Física/física.png" id="1_v4k7k"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lrkok"]
+texture = ExtResource("1_v4k7k")
+72:8/size_in_atlas = Vector2i(4, 4)
+72:8/0 = 0
+72:8/0/texture_origin = Vector2i(8, 8)
+76:8/size_in_atlas = Vector2i(4, 4)
+76:8/0 = 0
+76:8/0/texture_origin = Vector2i(8, 8)
+0:12/size_in_atlas = Vector2i(4, 4)
+0:12/0 = 0
+0:12/0/texture_origin = Vector2i(8, 8)
+4:12/size_in_atlas = Vector2i(4, 4)
+4:12/0 = 0
+4:12/0/texture_origin = Vector2i(8, 8)
+10:12/size_in_atlas = Vector2i(2, 4)
+10:12/0 = 0
+10:12/0/texture_origin = Vector2i(8, 8)
+12:12/size_in_atlas = Vector2i(2, 4)
+12:12/0 = 0
+12:12/0/texture_origin = Vector2i(8, 8)
+0:2/size_in_atlas = Vector2i(4, 2)
+0:2/0 = 0
+0:2/0/texture_origin = Vector2i(8, 8)
+74:4/size_in_atlas = Vector2i(2, 4)
+74:4/0 = 0
+74:4/0/texture_origin = Vector2i(8, 8)
+76:4/size_in_atlas = Vector2i(2, 4)
+76:4/0 = 0
+76:4/0/texture_origin = Vector2i(8, 8)
+2:8/size_in_atlas = Vector2i(2, 2)
+2:8/0 = 0
+2:8/0/texture_origin = Vector2i(8, 8)
+2:6/size_in_atlas = Vector2i(2, 2)
+2:6/0 = 0
+2:6/0/texture_origin = Vector2i(8, 8)
+6:6/size_in_atlas = Vector2i(2, 2)
+6:6/0 = 0
+6:6/0/texture_origin = Vector2i(8, 8)
+6:8/size_in_atlas = Vector2i(2, 2)
+6:8/0 = 0
+6:8/0/texture_origin = Vector2i(8, 8)
+10:6/size_in_atlas = Vector2i(2, 2)
+10:6/0 = 0
+10:6/0/texture_origin = Vector2i(8, 8)
+10:8/size_in_atlas = Vector2i(2, 2)
+10:8/0 = 0
+10:8/0/texture_origin = Vector2i(8, 8)
+12:8/size_in_atlas = Vector2i(2, 2)
+12:8/0 = 0
+12:8/0/texture_origin = Vector2i(8, 8)
+14:6/size_in_atlas = Vector2i(2, 2)
+14:6/0 = 0
+14:6/0/texture_origin = Vector2i(8, 8)
+16:6/size_in_atlas = Vector2i(2, 2)
+16:6/0 = 0
+16:6/0/texture_origin = Vector2i(8, 8)
+16:8/size_in_atlas = Vector2i(2, 2)
+16:8/0 = 0
+16:8/0/texture_origin = Vector2i(8, 8)
+40:0/size_in_atlas = Vector2i(4, 2)
+40:0/0 = 0
+22:6/size_in_atlas = Vector2i(2, 2)
+22:6/0 = 0
+22:6/0/texture_origin = Vector2i(8, 8)
+24:6/size_in_atlas = Vector2i(2, 2)
+24:6/0 = 0
+24:6/0/texture_origin = Vector2i(8, 8)
+
+[resource]
+sources/0 = SubResource("TileSetAtlasSource_lrkok")

@@ -1,0 +1,148 @@
+[gd_scene format=4 uid="uid://t8gpsxrrom0d"]
+
+[ext_resource type="TileSet" uid="uid://ms6t05hijfja" path="res://scenes/Salas/Sala_Fisica/Floor.tres" id="1_hijjy"]
+[ext_resource type="TileSet" uid="uid://d04gtlciy4pe8" path="res://scenes/Salas/Sala_Fisica/Wall.tres" id="2_j1l0s"]
+[ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Sala_Fisica/Decoration.tres" id="3_k67vx"]
+[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_x1nty"]
+[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_hxln4"]
+[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="6_arp0c"]
+[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="7_6nuwt"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="8_m8k0c"]
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="9_47v2f"]
+[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="10_shoje"]
+[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_dhpq6"]
+[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_bdsvj"]
+[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="13_4nt2p"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robo_P_Laranja.tscn" id="14_x0j4i"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robo_P_Ciano.tscn" id="15_nou8m"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robo_P_Amarelo.tscn" id="16_2275d"]
+
+[node name="Node2D" type="Node2D" unique_id=797917603]
+
+[node name="Floor" type="TileMapLayer" parent="." unique_id=1574742702]
+scale = Vector2(2, 2)
+tile_map_data = PackedByteArray("AAALAAwAAAAAAAIAAAAXAAwAAAAAAAIAAAALAA8AAAAAAAwAAAALABMAAAAAAAwAAAALABcAAABMAAgAAAAOABYAAAAEAAwAADAPAAwAAAAAAAIAAAAPAA8AAAAEAAwAAAAPABMAAABMAAgAAAASABMAAAAAAAwAAFASABcAAABMAAgAAFATAAwAAAAAAAIAAAATAA8AAAAAAAwAAAAWABIAAABMAAgAADAXAA8AAABMAAgAAAAXABcAAAAEAAwAAAAPABsAAABIAAgAAAATABsAAABMAAgAAAALABsAAABMAAgAAAAXABsAAAAEAAwAAAALAB8AAAAEAAwAAAAPAB4AAAAEAAwAAGAXAB8AAABMAAgAAAASAB8AAABMAAgAAFALACMAAAAEAAwAAAAPACIAAAAEAAwAAGASACMAAABMAAgAAFAXACMAAABMAAgAAAALACcAAAAEAAwAAAAPACYAAAAEAAwAAGASACcAAABMAAgAAFAXACcAAABMAAgAAAALACsAAAAEAAwAAAAPACoAAAAEAAwAAGASACsAAABMAAgAAFAXACsAAABMAAgAAAALAC8AAAAEAAwAAAALADMAAAAEAAwAAAALADcAAAAEAAwAAAAPAC4AAAAEAAwAAGAPADIAAAAEAAwAAGAPADYAAAAEAAwAAGASAC8AAABMAAgAAFASADMAAABMAAgAAFASADcAAABMAAgAAFAXAC8AAABMAAgAAAAXADMAAABMAAgAAAAXADcAAABMAAgAAAALADsAAAAEAAwAAAAPADoAAAAEAAwAAGASADsAAABMAAgAAFAXADsAAABMAAgAAAD7/wwAAAAAAAIAAAD7/w8AAAAAAAwAAAD7/xMAAAAAAAwAAAD7/xcAAABMAAgAAAD7/xsAAABMAAgAAAD7/x8AAAAEAAwAAAD7/yMAAAAEAAwAAAD7/ycAAAAEAAwAAAD7/ysAAAAEAAwAAAD7/y8AAAAEAAwAAAD7/zMAAAAEAAwAAAD7/zcAAAAEAAwAAAD7/zsAAAAEAAwAAAD+/xYAAAAEAAwAADD//wwAAAAAAAIAAAD//w8AAAAEAAwAAAD//xMAAABMAAgAAAD//xsAAABIAAgAAAD//x4AAAAEAAwAAGD//yIAAAAEAAwAAGD//yYAAAAEAAwAAGD//yoAAAAEAAwAAGD//y4AAAAEAAwAAGD//zIAAAAEAAwAAGD//zYAAAAEAAwAAGD//zoAAAAEAAwAAGACABMAAAAAAAwAAFACABcAAABMAAgAAFACAB8AAABMAAgAAFACACMAAABMAAgAAFACACcAAABMAAgAAFACACsAAABMAAgAAFACAC8AAABMAAgAAFACADMAAABMAAgAAFACADcAAABMAAgAAFACADsAAABMAAgAAFADAAwAAAAAAAIAAAADAA8AAAAAAAwAAAADABsAAABMAAgAAAAGABIAAABMAAgAADAHAAwAAAAAAAIAAAAHAA8AAABMAAgAAAAHABcAAAAEAAwAAAAHABsAAAAEAAwAAAAHAB8AAABMAAgAAAAHACMAAABMAAgAAAAHACcAAABMAAgAAAAHACsAAABMAAgAAAAHAC8AAABMAAgAAAAHADMAAABMAAgAAAAHADcAAABMAAgAAAAHADsAAABMAAgAAADy/xMAAAAAAAwAAFDy/xcAAABMAAgAAFDy/x8AAABMAAgAAFDy/yMAAABMAAgAAFDy/ycAAABMAAgAAFDy/ysAAABMAAgAAFDy/y8AAABMAAgAAFDy/zMAAABMAAgAAFDy/zcAAABMAAgAAFDy/zsAAABMAAgAAFDz/wwAAAAAAAIAAADz/w8AAAAAAAwAAADz/xsAAABMAAgAAAD2/xIAAABMAAgAADD3/wwAAAAAAAIAAAD3/w8AAABMAAgAAAD3/xcAAAAEAAwAAAD3/xsAAAAEAAwAAAD3/x8AAABMAAgAAAD3/yMAAABMAAgAAAD3/ycAAABMAAgAAAD3/ysAAABMAAgAAAD3/y8AAABMAAgAAAD3/zMAAABMAAgAAAD3/zcAAABMAAgAAAD3/zsAAABMAAgAAADy/z8AAABMAAgAAFDy/0MAAABMAAgAAFD3/z8AAABMAAgAAAD3/0MAAABMAAgAAAD7/z8AAAAEAAwAAAD7/0MAAAAEAAwAAAD//z4AAAAEAAwAAGD//0IAAAAEAAwAAGACAD8AAABMAAgAAFACAEMAAABMAAgAAFAHAD8AAABMAAgAAAAHAEMAAABMAAgAAAALAD8AAAAEAAwAAAALAEMAAAAEAAwAAAAPAD4AAAAEAAwAAGAPAEIAAAAEAAwAAGASAD8AAABMAAgAAFASAEMAAABMAAgAAFAXAD8AAABMAAgAAAAXAEMAAABMAAgAAADw/0MAAABKAAQAAADw/z8AAABKAAQAAADw/zsAAABKAAQAAADw/zcAAABKAAQAAADw/zMAAABKAAQAAADw/y8AAABKAAQAAADw/ysAAABKAAQAAADw/ycAAABKAAQAAADw/yMAAABKAAQAAADw/x8AAABKAAQAAADw/xsAAABKAAQAAADw/xcAAABKAAQAAADw/xMAAABKAAQAAADw/w8AAABKAAQAAADw/wwAAAAGAAYAAAA=")
+tile_set = ExtResource("1_hijjy")
+
+[node name="Wall" type="TileMapLayer" parent="." unique_id=1377858746]
+scale = Vector2(2, 2)
+tile_map_data = PackedByteArray("AAALAAAAAAA0AAIAAAAPAAAAAAAwAAIAAAAPAAMAAAA4AAgAAAAPAAcAAAAwAAgAAAAPAAoAAAAUAAAAAAATAAAAAAA4AAIAAAATAAMAAABEAAgAAAATAAcAAAA8AAgAAAATAAoAAAAcAAAAAAANAP7/AAAmAAwAAAARAP7/AAAmAAwAAAAXAP7/AAAmAAwAAAAXAAAAAAA0AAIAAAAXAAMAAABAAAgAAAAXAAcAAAAwAAgAAAAXAAoAAAAcAAAAAAAaAP7/AAAqAAwAAAAaAAAAAAAOAAgAAAAaAAMAAABOAAQAAAAaAAcAAABOAAQAAAAaAAsAAABOAAQAAAAaAA8AAABOAAQAAAAaABMAAABOAAQAAAAaABcAAABOAAQAAAAaABsAAABOAAQAAAATAP7/AAAmAAwAAAAOAAUAAABIAAQAAAAOAAkAAABIAAQAAAARAAgAAQAAAAAAAAAaAC4AAABOAAQAAAAaADIAAABOAAQAAAAaADYAAABOAAQAAAAaADoAAABOAAQAAAAaACAAAABOAAQAAAAaACQAAABOAAQAAAAaACgAAABOAAQAAAAaAB4AAABOAAQAAAAaACIAAABOAAQAAAAaACYAAABOAAQAAAAaACMAAABOAAQAAAAaACcAAABOAAQAAAAaACsAAABOAAQAAAALAAMAAABAAAgAAAALAAcAAAAwAAgAAAALAAoAAAAcAAAAAAALAP7/AAAmAAwAAADw/0MAAAAAAAoAAAD9/0UAAAA0AA4AAADw/0UAAAAQAA4AAADw/0gAAAAYAAgAAADw/0wAAAAYAAgAAADz/0MAAAAKAAoAAAD0/0MAAAAKAAoAAAD0/0UAAAAQAA4AAAD0/0gAAAAoAAgAAAD0/0wAAAAkAAgAAAD1/0MAAAAfAAwAAAD3/0EAAAAkAAwAAAD3/0MAAAA6AA4AAAD3/0UAAAA6AA4AAAD3/0cAAAA6AA4AAAD3/0kAAAAAAAoAAAD4/0UAAAAwAAQAADD4/0wAAAAYAAgAAAD5/0MAAAAmAA4AAAD6/0EAAAAmAAwAAAD6/0kAAAAKAAoAAAD7/0MAAAAoAA4AAAD7/0YAAAAwAAQAAAD8/0wAAAAcAAgAAAD9/0EAAAAqAAwAAAD9/0MAAAA0AA4AAAD9/0cAAAA0AA4AAAD9/0kAAAAOAAoAAAAAAEMAAAAKAAoAAAAAAEUAAAAQAA4AAAAAAEgAAAAsAAgAAAAAAEwAAAAgAAgAAAAHAP7/AAAmAAwAAAAHAAAAAAA0AAIAAAAHAAMAAABAAAgAAAAHAAcAAAAwAAgAAAAHAAoAAAAcAAAAAAADAP7/AAAmAAwAAAADAAAAAAA0AAIAAAADAAMAAABAAAgAAAADAAcAAAAwAAgAAAADAAoAAAAcAAAAAAD///7/AAAmAAwAAAD//wAAAAA0AAIAAAD//wMAAABAAAgAAAD//wcAAAAwAAgAAAD//woAAAAcAAAAAAD7//7/AAAmAAwAAAD7/wAAAAA0AAIAAAD7/wMAAABAAAgAAAD7/wcAAAAwAAgAAAD7/woAAAAcAAAAAAD3//7/AAAmAAwAAAD3/wAAAAA0AAIAAAD3/wMAAABAAAgAAAD3/wcAAAAwAAgAAAD3/woAAAAcAAAAAADz//7/AAAmAAwAAADz/wAAAAA0AAIAAADz/wMAAABAAAgAAADz/wcAAAAwAAgAAADz/woAAAAcAAAAAADw//7/AAAkAAwAAADw/wEAAABIAAQAAADw/wUAAABIAAQAAADw/wYAAABIAAQAAADw/woAAABIAAQAAADw/w4AAABIAAQAAADw/xIAAABIAAQAAADw/xYAAABIAAQAAADw/xoAAABIAAQAAADw/x4AAABIAAQAAADw/yEAAABIAAQAAADw/yUAAABIAAQAAADw/ykAAABIAAQAAADw/y0AAABIAAQAAADw/zEAAABIAAQAAADw/zUAAABIAAQAAADw/zkAAABIAAQAAADw/zwAAAAAAAgAAADw/zsAAABIAAQAAADw/z8AAABIAAQAAAAJAEMAAAAKAAoAAAAEAEMAAAAKAAoAAAAHAEMAAAAKAAoAAAANAEMAAAAKAAoAAAAQAEMAAAAKAAoAAAATAEMAAAAKAAoAAAAXAEMAAAAKAAoAAAAEAEUAAAAQAA4AAAAEAEgAAAAsAAgAAAAEAEwAAAAYAAgAAAAaAEMAAAAOAAoAAAAaADwAAABOAAQAAAAaAEAAAABOAAQAAAAIAEUAAAAQAA4AAAAIAEgAAAAsAAgAAAAIAEwAAAAgAAgAAAAMAEUAAAAQAA4AAAAMAEgAAAAsAAgAAAAMAEwAAAAYAAgAAAAQAEUAAAAQAA4AAAAQAEgAAAAsAAgAAAAQAEwAAAAgAAgAAAAUAEUAAAAQAA4AAAAUAEgAAAAsAAgAAAAUAEwAAAAYAAgAAAAYAEUAAAAQAA4AAAAYAEgAAAAsAAgAAAAYAEwAAAAgAAgAAAAcAEUAAAAQAA4AAAAcAEgAAAAsAAgAAAAcAEwAAAAYAAgAAADw/0AAAABIAAQAAAA=")
+tile_set = ExtResource("2_j1l0s")
+
+[node name="Decoration" type="TileMapLayer" parent="." unique_id=883868135]
+scale = Vector2(2, 2)
+tile_map_data = PackedByteArray("AAAEAEgAAAADAA8AAAAFAEoAAAAEACgAAAAGAEkAAAAEADQAAAAQAEgAAQAEAAQAAAAYAEwAAQAEAAQAAAAMAEwAAQAEABAAAADw/0gAAQAEABAAAAD3/wMAAQAEABAAAAALAAYAAQAEABAAAAAAAAQAAgA0AAoAAAAAAAYAAgA3AAwAAAACAAYAAgA5AAwAAAAFAAYAAgA8AAwAAAAAAAgAAgA3AA4AAAD2/xQAAwAAAAsAAAAUACEAAwAAAAAAAAD3/y4AAwAeAAMAAAARADMAAwAoABIAAAAFAB8AAwAoABIAAAAFACMAAwAoABIAAAAFACcAAwAoABIAAAAFACsAAwAoABIAAAD5/x8AAwAoAA0AAAAJAD8AAwAoAA0AAAAYAEcAAwAyABAAAAAVAD4AAwBLAAUAAAAVAC0AAwBGAAUAAAD1/yEAAwBQAAAAAAD1/yUAAwBQAAAAAAASADUAAwBQAAsAABASADgAAwBQAAsAABD3/zYAAwAKAAsAAAAFAA8AAwAKAAAAAAA=")
+tile_set = ExtResource("3_k67vx")
+
+[node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_x1nty")]
+z_index = 4
+position = Vector2(554, 1778)
+scale = Vector2(1.2, 1.2)
+
+[node name="Node" type="Node" parent="." unique_id=1823176868]
+script = ExtResource("5_hxln4")
+
+[node name="HUD" parent="." unique_id=181397880 instance=ExtResource("6_arp0c")]
+visible = false
+
+[node name="InventarioUI" parent="." unique_id=1728412810 instance=ExtResource("7_6nuwt")]
+visible = false
+
+[node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=175692244]
+visible = false
+script = ExtResource("8_m8k0c")
+
+[node name="Control" type="Control" parent="ParchmentUI" unique_id=742444592]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 6
+size_flags_vertical = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="BackgroundPapel" type="TextureRect" parent="ParchmentUI/Control" unique_id=1892910218]
+layout_mode = 0
+offset_left = 93.0
+offset_top = -97.0
+offset_right = 893.0
+offset_bottom = 703.0
+texture = ExtResource("9_47v2f")
+
+[node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=2124834814]
+custom_minimum_size = Vector2(160, 80)
+layout_mode = 0
+offset_left = 174.0
+offset_top = 273.0
+offset_right = 334.0
+offset_bottom = 353.0
+
+[node name="BotoesContainer" type="HBoxContainer" parent="ParchmentUI/Control/BackgroundPapel" unique_id=1472294654]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 137.0
+offset_right = -96.0
+offset_bottom = 177.0
+grow_horizontal = 0
+theme_override_constants/separation = 50
+
+[node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1135454737]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+texture_normal = ExtResource("10_shoje")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=975578115]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+texture_normal = ExtResource("11_dhpq6")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=397680820]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+texture_normal = ExtResource("12_bdsvj")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1353963076]
+
+[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=716367857]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=795079586]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+metadata/_edit_use_anchors_ = true
+
+[node name="PortaTransicao" parent="." unique_id=59993840 instance=ExtResource("13_4nt2p")]
+position = Vector2(559, 360)
+
+[node name="PortaRetorno" parent="." unique_id=1852392474 instance=ExtResource("13_4nt2p")]
+position = Vector2(-175, 2089)
+porta_de_retorno = true
+
+[node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("14_x0j4i")]
+position = Vector2(485, 1374)
+scale = Vector2(1.2, 1.2)
+
+[node name="Robo_P_Ciano" parent="." unique_id=1200000021 instance=ExtResource("15_nou8m")]
+position = Vector2(-304, 850)
+scale = Vector2(1.2, 1.2)
+
+[node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("16_2275d")]
+position = Vector2(223, 836)
+scale = Vector2(1.2, 1.2)

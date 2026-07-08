@@ -370,7 +370,7 @@ shape = SubResource("CapsuleShape2D_2lcu3")
 limit_left = -4096
 limit_top = 0
 limit_right = 4096
-limit_bottom = 2048
+limit_bottom = 4096
 position_smoothing_enabled = true
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1020740764]
