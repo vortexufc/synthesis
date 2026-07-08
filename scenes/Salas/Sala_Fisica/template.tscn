@@ -3,6 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://bxcfqixmux3ga" path="res://assets/sprites/tilesets/Física/física.png" id="1_hp1x7"]
 [ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="2_776tk"]
 [ext_resource type="Texture2D" uid="uid://b2436qm2fcyfr" path="res://assets/sprites/tilesets/Física/canos2.png" id="3_lrkok"]
+[ext_resource type="Texture2D" uid="uid://bmwwkvv04kuq2" path="res://assets/sprites/tilesets/Física/engrenagens.png" id="3_opsq0"]
+[ext_resource type="Texture2D" uid="uid://bve56en1wkc02" path="res://assets/sprites/tilesets/Física/ventiladores.png" id="4_7aocy"]
 [ext_resource type="Texture2D" uid="uid://h5a5murvq0n5" path="res://assets/sprites/tilesets/Física/objetos.png" id="4_y6gkg"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="5_iwxws"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="6_qy7im"]
@@ -327,6 +329,71 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_bg4ak")
 sources/1 = SubResource("TileSetAtlasSource_opsq0")
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e4d4v"]
+texture = ExtResource("3_opsq0")
+3:3/size_in_atlas = Vector2i(6, 6)
+3:3/animation_separation = Vector2i(6, 0)
+3:3/animation_frame_0/duration = 1.0
+3:3/animation_frame_1/duration = 1.0
+3:3/animation_frame_2/duration = 1.0
+3:3/animation_frame_3/duration = 1.0
+3:3/animation_frame_4/duration = 1.0
+3:3/0 = 0
+3:3/0/texture_origin = Vector2i(8, 8)
+3:15/size_in_atlas = Vector2i(6, 6)
+3:15/animation_separation = Vector2i(6, 0)
+3:15/animation_frame_0/duration = 1.0
+3:15/animation_frame_1/duration = 1.0
+3:15/animation_frame_2/duration = 1.0
+3:15/animation_frame_3/duration = 1.0
+3:15/animation_frame_4/duration = 1.0
+3:15/0 = 0
+3:15/0/texture_origin = Vector2i(8, 8)
+4:40/size_in_atlas = Vector2i(4, 4)
+4:40/animation_separation = Vector2i(8, 0)
+4:40/animation_frame_0/duration = 1.0
+4:40/animation_frame_1/duration = 1.0
+4:40/animation_frame_2/duration = 1.0
+4:40/animation_frame_3/duration = 1.0
+4:40/animation_frame_4/duration = 1.0
+4:40/0 = 0
+4:40/0/texture_origin = Vector2i(8, 8)
+4:52/size_in_atlas = Vector2i(4, 4)
+4:52/animation_separation = Vector2i(8, 0)
+4:52/animation_frame_0/duration = 1.0
+4:52/animation_frame_1/duration = 1.0
+4:52/animation_frame_2/duration = 1.0
+4:52/animation_frame_3/duration = 1.0
+4:52/animation_frame_4/duration = 1.0
+4:52/0 = 0
+4:52/0/texture_origin = Vector2i(8, 8)
+4:28/size_in_atlas = Vector2i(4, 4)
+4:28/animation_separation = Vector2i(8, 0)
+4:28/animation_frame_0/duration = 1.0
+4:28/animation_frame_1/duration = 1.0
+4:28/animation_frame_2/duration = 1.0
+4:28/animation_frame_3/duration = 1.0
+4:28/animation_frame_4/duration = 1.0
+4:28/0 = 0
+4:28/0/texture_origin = Vector2i(8, 8)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_10pey"]
+texture = ExtResource("4_7aocy")
+4:16/size_in_atlas = Vector2i(4, 4)
+4:16/animation_separation = Vector2i(8, 0)
+4:16/animation_frame_0/duration = 1.0
+4:16/animation_frame_1/duration = 1.0
+4:16/animation_frame_2/duration = 1.0
+4:16/0 = 0
+4:16/0/texture_origin = Vector2i(8, 8)
+4:4/size_in_atlas = Vector2i(4, 4)
+4:4/animation_separation = Vector2i(8, 0)
+4:4/animation_frame_0/duration = 1.0
+4:4/animation_frame_1/duration = 1.0
+4:4/animation_frame_2/duration = 1.0
+4:4/0 = 0
+4:4/0/texture_origin = Vector2i(8, 8)
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7aocy"]
 texture = ExtResource("3_lrkok")
 52:10/size_in_atlas = Vector2i(9, 2)
@@ -602,6 +669,8 @@ texture_region_size = Vector2i(18, 16)
 physics_layer_0/collision_layer = 1
 sources/2 = SubResource("TileSetAtlasSource_7aocy")
 sources/3 = SubResource("TileSetAtlasSource_kdwrc")
+sources/0 = SubResource("TileSetAtlasSource_e4d4v")
+sources/1 = SubResource("TileSetAtlasSource_10pey")
 
 [node name="Node2D" type="Node2D" unique_id=379435556]
 
@@ -617,7 +686,7 @@ tile_set = SubResource("TileSet_ksd1m")
 
 [node name="Decoration" type="TileMapLayer" parent="." unique_id=1679908683]
 scale = Vector2(2, 2)
-tile_map_data = PackedByteArray("AAAsAA4AAwAeAAMAAAARAAgAAwAyAAUAAAAXAAgAAwA3AAUAAAAxAAEAAwAsAAcAAAAtAAEAAwAoAAcAAAAeAAQAAwA8AAAAAAAhAAYAAwBCAAYAAAAiAAMAAwBBAAAAAAAjAAwAAwBLAAUAAAAuAB0AAwAoAA0AAAAuABcAAwAoABIAAAAPABQAAwBaAAAAAAAbABQAAwBaAAsAAAAdAAwAAwBLAAUAAAAnABwAAwBBABEAAAAoABoAAwBMAA0AAAA=")
+tile_map_data = PackedByteArray("AAAsAA4AAwAeAAMAAAARAAgAAwAyAAUAAAAXAAgAAwA3AAUAAAAjAAwAAwBLAAUAAAAuAB0AAwAoAA0AAAAuABcAAwAoABIAAAAPABQAAwBaAAAAAAAbABQAAwBaAAsAAAAdAAwAAwBLAAUAAAAnABwAAwBBABEAAAAoABoAAwBMAA0AAAAwAAIAAQAEABAAAAAsAAIAAQAEAAQAAAAeAAQAAAAEABwAAAAhAAQAAAAEACgAAAAfAAYAAAAEADQAAAAnAAMAAAADAA8AAAAoAAYAAAADAAMAAAA=")
 tile_set = SubResource("TileSet_qy7im")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("5_iwxws")]
