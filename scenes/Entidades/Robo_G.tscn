@@ -1,24 +1,8 @@
 [gd_scene format=3 uid="uid://robogfisica"]
 
-[ext_resource type="Texture2D" uid="uid://6mrjbwhkhenha" path="res://assets/sprites/Characters/Robo_G/robo_g.png" id="1_robog"]
+[ext_resource type="Texture2D" uid="uid://piklg4jxrne5" path="res://assets/sprites/Characters/Robo_G/robo_g.png" id="1_robog"]
 [ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="2_robog"]
 [ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="3_robog"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
-atlas = ExtResource("1_robog")
-region = Rect2(0, 0, 144, 144)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle2"]
-atlas = ExtResource("1_robog")
-region = Rect2(144, 0, 144, 144)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle3"]
-atlas = ExtResource("1_robog")
-region = Rect2(288, 0, 144, 144)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_idle4"]
-atlas = ExtResource("1_robog")
-region = Rect2(432, 0, 144, 144)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_atk1"]
 atlas = ExtResource("1_robog")
@@ -36,25 +20,24 @@ region = Rect2(288, 144, 144, 144)
 atlas = ExtResource("1_robog")
 region = Rect2(432, 144, 144, 144)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle1"]
+atlas = ExtResource("1_robog")
+region = Rect2(0, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle2"]
+atlas = ExtResource("1_robog")
+region = Rect2(144, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle3"]
+atlas = ExtResource("1_robog")
+region = Rect2(288, 0, 144, 144)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle4"]
+atlas = ExtResource("1_robog")
+region = Rect2(432, 0, 144, 144)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_robo_g"]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_idle1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_idle2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_idle3")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_idle4")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_atk1")
@@ -71,6 +54,23 @@ animations = [{
 "loop": false,
 "name": &"ataque",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idle4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_robog"]
@@ -81,6 +81,7 @@ height = 160.0
 size = Vector2(100, 40)
 
 [node name="Robo_G" type="CharacterBody2D" unique_id=1200000031]
+scale = Vector2(2, 2)
 script = ExtResource("2_robog")
 vida_maxima = 150.0
 velocidade = 30.0
