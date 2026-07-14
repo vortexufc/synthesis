@@ -353,7 +353,7 @@ texture_region_size = Vector2i(18, 16)
 
 [resource]
 physics_layer_0/collision_layer = 1
-sources/2 = SubResource("TileSetAtlasSource_7aocy")
 sources/3 = SubResource("TileSetAtlasSource_kdwrc")
-sources/0 = SubResource("TileSetAtlasSource_e4d4v")
+sources/2 = SubResource("TileSetAtlasSource_7aocy")
 sources/1 = SubResource("TileSetAtlasSource_10pey")
+sources/0 = SubResource("TileSetAtlasSource_e4d4v")

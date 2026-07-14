@@ -237,5 +237,5 @@ margins = Vector2i(25, 3)
 
 [resource]
 physics_layer_0/collision_layer = 1
-sources/0 = SubResource("TileSetAtlasSource_bg4ak")
 sources/1 = SubResource("TileSetAtlasSource_opsq0")
+sources/0 = SubResource("TileSetAtlasSource_bg4ak")
