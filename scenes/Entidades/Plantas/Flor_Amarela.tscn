@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://bxcq27yjlcmta"]
+
+[ext_resource type="Texture2D" uid="uid://dml4ed26rhgq3" path="res://assets/sprites/Characters/Flor/Florzinha.png" id="1_0fdx4"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_a510q"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lpidp"]
+atlas = ExtResource("1_0fdx4")
+region = Rect2(0, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_omh53"]
+atlas = ExtResource("1_0fdx4")
+region = Rect2(64, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpg85"]
+atlas = ExtResource("1_0fdx4")
+region = Rect2(128, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e84b7"]
+atlas = ExtResource("1_0fdx4")
+region = Rect2(192, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tg7m3"]
+atlas = ExtResource("1_0fdx4")
+region = Rect2(256, 192, 64, 96)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_x02el"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lpidp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_omh53")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cpg85")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e84b7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tg7m3")
+}],
+"loop": true,
+"name": &"default",
+"speed": 3.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fykve"]
+radius = 27.0
+height = 54.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_f4f4b"]
+radius = 28.0
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=1993884800]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1474491736]
+sprite_frames = SubResource("SpriteFrames_x02el")
+autoplay = "default"
+
+[node name="EnemyTrigger" type="Area2D" parent="." unique_id=1173862754]
+script = ExtResource("2_a510q")
+id_inimigo = "robo_p_amarelo"
+andar_id = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1411535437]
+position = Vector2(-1, 15)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fykve")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1874291168]
+position = Vector2(-1, 14)
+shape = SubResource("CircleShape2D_f4f4b")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

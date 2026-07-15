@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0lft226afsts"
-path="res://.godot/imported/porta.png-97479c880c1c1a04fa8aa4f353f53317.ctex"
+uid="uid://cspjrbidaybsw"
+path="res://.godot/imported/cogumelo.png-014e8eed350d800f5b290b3ba90cd44a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tilesets/Biologia/porta.png"
-dest_files=["res://.godot/imported/porta.png-97479c880c1c1a04fa8aa4f353f53317.ctex"]
+source_file="res://assets/sprites/Characters/Cogumelo/cogumelo.png"
+dest_files=["res://.godot/imported/cogumelo.png-014e8eed350d800f5b290b3ba90cd44a.ctex"]
 
 [params]
 
