@@ -13,9 +13,9 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_fy1hl"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_t5r6j"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="14_wc52u"]
-[ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robo_G.tscn" id="15_f6uyh"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robo_P_Ciano.tscn" id="17_s4iix"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robo_P_Laranja.tscn" id="18_fho2y"]
+[ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robos/Robo_G.tscn" id="15_f6uyh"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="17_s4iix"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="18_fho2y"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lhf62"]
 texture = ExtResource("1_qcono")

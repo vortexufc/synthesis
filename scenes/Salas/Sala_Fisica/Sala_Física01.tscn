@@ -13,8 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_6mut1"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_t3e3b"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="14_um6bs"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robo_P_Amarelo.tscn" id="15_imiam"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robo_P_Laranja.tscn" id="16_ijptx"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="15_imiam"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_ijptx"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdngi"]
 texture = ExtResource("1_3407d")

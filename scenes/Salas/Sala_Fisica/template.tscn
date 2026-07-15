@@ -13,10 +13,10 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_7aocy"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_kdwrc"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="14_e4d4v"]
-[ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robo_G.tscn" id="15_lrkok"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robo_P_Amarelo.tscn" id="16_bg4ak"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robo_P_Ciano.tscn" id="17_opsq0"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robo_P_Laranja.tscn" id="18_7aocy"]
+[ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robos/Robo_G.tscn" id="15_lrkok"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="16_bg4ak"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="17_opsq0"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="18_7aocy"]
 
 [node name="Node2D" type="Node2D" unique_id=379435556]
 
