@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://b8txw21gc8e2h"]
+
+[ext_resource type="SpriteFrames" uid="uid://c8swvp4khl733" path="res://assets/sprites/Sprite Frames/robo_p_amarelo.tres" id="1_2dggt"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_e4kgq"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_aiw76"]
+radius = 24.0
+height = 74.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fbnk4"]
+radius = 28.0
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=1698167466]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=199337993]
+z_index = 4
+scale = Vector2(1.5, 1.5)
+sprite_frames = ExtResource("1_2dggt")
+autoplay = "default"
+
+[node name="EnemyTrigger" type="Area2D" parent="." unique_id=584325763]
+script = ExtResource("2_e4kgq")
+id_inimigo = "robo_p_amarelo"
+andar_id = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1348016517]
+position = Vector2(0, 10)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_aiw76")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1148734232]
+position = Vector2(0, 12)
+shape = SubResource("CircleShape2D_fbnk4")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]
