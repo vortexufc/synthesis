@@ -260,7 +260,14 @@ func _transacionar_porta() -> void:
 			else:
 				cena_alvo = DungeonGenerator.get_proxima_sala(arquivo_sala)
 			
+		print("[PortaTransicao] Indo para: ", cena_alvo)
+			
 	if cena_alvo != "":
+		# Se tiver mensagem de entrada (Ex: Porta Aberta do Hub)
+		if mensagem_customizada != "":
+			_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul
+			await get_tree().create_timer(0.4).timeout
+			
 		TransitionScreen.change_scene(cena_alvo)
 
 func _on_body_entered(body: Node2D) -> void:
