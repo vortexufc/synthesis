@@ -3,6 +3,7 @@ extends Node
 var hub_geral = "res://scenes/Salas/Hub_Geral.tscn"
 var sala_inicial = "res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn"
 var sala_01 = "res://scenes/Salas/Salas_BuildTGXP/Sala01.tscn"
+var sala_boss_alquimia = "res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"
 
 # Pool das 12 novas salas aleatórias
 var salas_alquimia: Array = [
@@ -108,6 +109,9 @@ func resetar_masmorra() -> void:
 	# 3. Consolida o restante do trajeto de forma aleatória
 	percurso_salas.append_array(rooms_embaralhadas)
 	
+	# 4. A Sala do Boss de Alquimia é sempre a última sala da masmorra
+	percurso_salas.append(sala_boss_alquimia)
+	
 	print("[DungeonGenerator] Nova Masmorra Gerada com Sucesso!")
-	print("[DungeonGenerator] Sequência: Hub Geral -> Corredor -> Corredor -> Sala01 -> [12 Salas de Alquimia Aleatórias]")
+	print("[DungeonGenerator] Sequência: Hub Geral -> Corredor -> Corredor -> Sala01 -> [12 Salas de Alquimia Aleatórias] -> Sala Boss Alquimia")
 	print("[DungeonGenerator] Total de estágios na fila: ", percurso_salas.size())

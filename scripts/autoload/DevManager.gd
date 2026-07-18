@@ -30,7 +30,7 @@ var _salas_teleporte = [
 	{"nome": "⚡ Física - Sala 02", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física02.tscn"},
 	{"nome": "⚡ Física - Sala 06", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física06.tscn"},
 	{"nome": "⚡ Física - Sala 12", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn"},
-	{"nome": "👑 Sala do Boss", "path": "res://scenes/Salas/Sala_Boss.tscn"}
+	{"nome": "👑 Sala do Boss (Alquimia)", "path": "res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"}
 ]
 
 func _ready() -> void:
