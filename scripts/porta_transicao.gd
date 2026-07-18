@@ -49,7 +49,7 @@ func _ready() -> void:
 	
 	# Após o cooldown, verifica se o player já está dentro da área
 	for body in get_overlapping_bodies():
-		if body.name == "Player":
+		if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
 			_on_body_entered(body)
 			break
 
@@ -267,15 +267,22 @@ func _on_body_entered(body: Node2D) -> void:
 	if _cooldown_ativo:
 		return
 		
-	if body.name == "Player":
-		if esta_trancada:
-			var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
-			_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9))
-			return
-			
-		if not porta_de_retorno and _tem_inimigos_vivos():
-			_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
-			return
+	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
+		# [DEV TOOL] Verifica se o cheat de ignorar portas trancadas está ativo
+		var dev_mgr = get_node_or_null("/root/DevManager")
+		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
+
+		if not ignorar_bloqueio:
+			# REGRA 1: Se a porta for do Hub e estiver marcada como trancada
+			if esta_trancada:
+				var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
+				_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9)) # Borda Vermelha
+				return
+				
+			# REGRA 2: Bloqueio antigo por conter inimigos na sala
+			if not porta_de_retorno and _tem_inimigos_vivos():
+				_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
+				return
 			
 		# Lógica de porta de Hub
 		if is_hub_door:

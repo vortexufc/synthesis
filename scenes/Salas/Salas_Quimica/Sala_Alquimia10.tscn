@@ -1927,7 +1927,7 @@ position = Vector2(402, 386)
 position = Vector2(244, 237)
 
 [node name="PortaRetorno" parent="." unique_id=1088863754 instance=ExtResource("18_33aqr")]
-position = Vector2(1579, 1302)
+position = Vector2(1579, 1240)
 porta_de_retorno = true
 
 [node name="Slime_P" parent="." unique_id=2088489146 instance=ExtResource("16_6ejdj")]

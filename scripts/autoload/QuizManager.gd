@@ -13,6 +13,7 @@ var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
 var game_over_cena = preload("res://scenes/ui/game_over.tscn")
 var ui_instancia = null
 var pergunta_atual = null
+var _processando_resposta: bool = false
 
 var sprite_frames_inimigos = {
 	"slime_p": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
@@ -143,9 +144,28 @@ func _ordenar_por_progressao(lista: Array) -> Array:
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
 	var correct_answer = new_q["options"][new_q["answer"]]
+	
+	# [GOD MODE / DEV TOOL] Resposta A sempre correta para apresentações rápidas
+	var dev_mgr = get_node_or_null("/root/DevManager")
+	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.god_mode_resposta_a:
+		new_q["options"].erase(correct_answer)
+		new_q["options"].shuffle()
+		new_q["options"].insert(0, correct_answer)
+		new_q["answer"] = 0
+		return new_q
+		
 	new_q["options"].shuffle()
 	new_q["answer"] = new_q["options"].find(correct_answer)
 	return new_q
+
+## [GOD MODE / DEV TOOL] Derrota instantânea para apresentações
+func derrotar_inimigo_atual() -> void:
+	if _processando_resposta:
+		return
+	if ui_instancia != null and is_instance_valid(ui_instancia) and pergunta_atual != null:
+		print("[DevManager] Auto-Win ativado! Vencendo monstro atual...")
+		vida_atual_inimigo = 0
+		_on_resposta_recebida(pergunta_atual["answer"], _duracao_batalha)
 
 func get_random_question():
 	if current_index >= shuffled_questions.size():
@@ -294,6 +314,10 @@ func fechar_ui_batalha() -> void:
 		ui_instancia = null
 
 func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
+	if _processando_resposta:
+		return
+	_processando_resposta = true
+
 	var acertou = (indice_botao == pergunta_atual["answer"])
 	var dano_final = 0
 	
@@ -306,7 +330,8 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	resultado_batalha.emit(acertou)
 	
 	# aguarda o fim da animação
-	await ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final)
+	if is_instance_valid(ui_instancia):
+		await ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final)
 	
 	if acertou:
 		_acertos_batalha += 1
@@ -325,14 +350,16 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
 			tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
 			
-	# atualiza as barras na interface
-	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
+	# atualiza as barras na interface se ainda for válida
+	if is_instance_valid(ui_instancia):
+		ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
 	
 	# delay antes da proxima pergunta
 	await get_tree().create_timer(1.2, true).timeout
 	
 	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
-		ui_instancia.ocultar_interface()
+		if is_instance_valid(ui_instancia):
+			ui_instancia.ocultar_interface()
 		
 		var vitoria = (vida_atual_inimigo <= 0)
 		var tempo_decorrido = (Time.get_ticks_msec() - _tempo_inicio_batalha) / 1000.0
@@ -345,10 +372,12 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			"dano": _dano_causado
 		}
 		
+		_processando_resposta = false
 		GlobalSignals.batalha_encerrada.emit(vitoria)
 		PlayerStats.salvar()
 		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
 	else:
+		_processando_resposta = false
 		_nova_rodada()
 
 func resetar_historico_perguntas() -> void:
