@@ -95,16 +95,21 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 		
 	if body.name == "Player":
-		# REGRA 1: Se a porta for do Hub e estiver marcada como trancada
-		if esta_trancada:
-			var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
-			_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9)) # Borda Vermelha
-			return
-			
-		# REGRA 2: Bloqueio antigo por conter inimigos na sala
-		if not porta_de_retorno and _tem_inimigos_vivos():
-			_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
-			return
+		# [DEV TOOL] Verifica se o cheat de ignorar portas trancadas está ativo
+		var dev_mgr = get_node_or_null("/root/DevManager")
+		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
+
+		if not ignorar_bloqueio:
+			# REGRA 1: Se a porta for do Hub e estiver marcada como trancada
+			if esta_trancada:
+				var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
+				_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9)) # Borda Vermelha
+				return
+				
+			# REGRA 2: Bloqueio antigo por conter inimigos na sala
+			if not porta_de_retorno and _tem_inimigos_vivos():
+				_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
+				return
 			
 		var cena_alvo = proxima_cena
 		

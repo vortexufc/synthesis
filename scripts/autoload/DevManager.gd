@@ -8,6 +8,7 @@ var god_mode_resposta_a: bool = true      ## Resposta A sempre será a opção c
 var invencivel: bool = true               ## Jogador não toma dano
 var super_velocidade: bool = true         ## Acelera o jogador em 2.5x
 var multiplicador_velocidade: float = 2.5
+var passar_portas_trancadas: bool = true   ## Permite passar por portas trancadas/seladas por inimigos
 
 # Referências da UI
 var _canvas_layer: CanvasLayer = null
@@ -118,6 +119,13 @@ func _criar_interface_dev() -> void:
 	chk_velocidade.button_pressed = super_velocidade
 	chk_velocidade.toggled.connect(func(t): super_velocidade = t)
 	vbox.add_child(chk_velocidade)
+	
+	# Checkbox 4: Passar por Portas Trancadas / Seladas
+	var chk_portas = CheckBox.new()
+	chk_portas.text = "🚪 Ignorar Portas Trancadas / Seladas"
+	chk_portas.button_pressed = passar_portas_trancadas
+	chk_portas.toggled.connect(func(t): passar_portas_trancadas = t)
+	vbox.add_child(chk_portas)
 	
 	var hs2 = HSeparator.new()
 	vbox.add_child(hs2)
