@@ -161,7 +161,7 @@ sources/0 = SubResource("TileSetAtlasSource_6co4c")
 script = ExtResource("1_level_script")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_6co4c")]
-position = Vector2(620, 1320)
+position = Vector2(626, 1159)
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=21609982]
 position = Vector2(0, -1)
@@ -266,3 +266,7 @@ offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=200828411 instance=ExtResource("14_n8ijl")]
 position = Vector2(628, 269)
+
+[node name="PortaRetorno" parent="." unique_id=1640528937 instance=ExtResource("14_n8ijl")]
+position = Vector2(628, 1237)
+porta_de_retorno = true

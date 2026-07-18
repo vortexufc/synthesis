@@ -132,7 +132,7 @@ func _on_tentar_novamente_pressed() -> void:
 		DungeonGenerator.resetar_masmorra()
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
-	TransitionScreen.change_scene("res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn")
+	TransitionScreen.change_scene("res://scenes/Salas/Hub_Geral.tscn")
 
 func _on_menu_principal_pressed() -> void:
 	hide()

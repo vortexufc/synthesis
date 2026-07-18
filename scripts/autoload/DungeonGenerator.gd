@@ -101,8 +101,7 @@ func resetar_masmorra() -> void:
 	# 1. Injeta a sequência fixa e linear do Hub nas primeiras posições
 	percurso_salas.append(hub_geral)      # Índice 0
 	percurso_salas.append(sala_inicial)   # Índice 1 (Corredor)
-	percurso_salas.append(sala_inicial)   # Índice 2 (Corredor novamente)
-	percurso_salas.append(sala_01)        # Índice 3 (Sala 01)
+	percurso_salas.append(sala_01)        # Índice 2 (Sala 01)
 	
 	# 2. Pega as 12 salas arcanas e embaralha para o resto do percurso
 	var rooms_embaralhadas = salas_alquimia.duplicate()
