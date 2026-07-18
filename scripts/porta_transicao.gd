@@ -21,7 +21,7 @@ func _ready() -> void:
 	
 	# Após o cooldown, verifica se o player já está dentro da área
 	for body in get_overlapping_bodies():
-		if body.name == "Player":
+		if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
 			_on_body_entered(body)
 			break
 
@@ -94,7 +94,7 @@ func _on_body_entered(body: Node2D) -> void:
 	if _cooldown_ativo:
 		return
 		
-	if body.name == "Player":
+	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
 		# [DEV TOOL] Verifica se o cheat de ignorar portas trancadas está ativo
 		var dev_mgr = get_node_or_null("/root/DevManager")
 		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas

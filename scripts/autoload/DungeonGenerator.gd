@@ -38,6 +38,8 @@ func _ready():
 	resetar_masmorra()
 
 func get_index_da_cena(cena: String) -> int:
+	if percurso_salas.is_empty():
+		resetar_masmorra()
 	var cena_lower = cena.to_lower()
 	for i in range(percurso_salas.size()):
 		if percurso_salas[i].to_lower() == cena_lower:
