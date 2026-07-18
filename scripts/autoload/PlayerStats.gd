@@ -79,6 +79,12 @@ func resetar_vida() -> void:
 
 # funcao de tomar dano
 func sofrer_dano(valor: float) -> void:
+	# [GOD MODE / DEV TOOL] Ignora dano se o modo invencível estiver ativo
+	var dev_mgr = get_node_or_null("/root/DevManager")
+	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.invencivel:
+		print("[DevManager] Dano de %.0f bloqueado pela invencibilidade!" % valor)
+		return
+
 	AudioManager.tocar_som_dano()
 	vida_atual_jogador -= valor
 	if vida_atual_jogador < 0:

@@ -143,9 +143,26 @@ func _ordenar_por_progressao(lista: Array) -> Array:
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
 	var correct_answer = new_q["options"][new_q["answer"]]
+	
+	# [GOD MODE / DEV TOOL] Resposta A sempre correta para apresentações rápidas
+	var dev_mgr = get_node_or_null("/root/DevManager")
+	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.god_mode_resposta_a:
+		new_q["options"].erase(correct_answer)
+		new_q["options"].shuffle()
+		new_q["options"].insert(0, correct_answer)
+		new_q["answer"] = 0
+		return new_q
+		
 	new_q["options"].shuffle()
 	new_q["answer"] = new_q["options"].find(correct_answer)
 	return new_q
+
+## [GOD MODE / DEV TOOL] Derrota instantânea para apresentações
+func derrotar_inimigo_atual() -> void:
+	if ui_instancia != null and is_instance_valid(ui_instancia) and pergunta_atual != null:
+		print("[DevManager] Auto-Win ativado! Vencendo monstro atual...")
+		vida_atual_inimigo = 0
+		_on_resposta_recebida(pergunta_atual["answer"], _duracao_batalha)
 
 func get_random_question():
 	if current_index >= shuffled_questions.size():

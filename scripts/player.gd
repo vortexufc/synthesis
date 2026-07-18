@@ -59,8 +59,13 @@ func _physics_process(_delta: float) -> void:
 
 	velocity = Vector2.ZERO
 	
+	var vel_atual = VELOCIDADE
+	var dev_mgr = get_node_or_null("/root/DevManager")
+	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.super_velocidade:
+		vel_atual *= dev_mgr.multiplicador_velocidade
+	
 	if not direcao_vertical == 0:
-		velocity.y = direcao_vertical * VELOCIDADE
+		velocity.y = direcao_vertical * vel_atual
 		if direcao_vertical < 0:
 			AudioManager.tocar_som_caminhada()
 			ultima_direcao = "cima"
@@ -70,7 +75,7 @@ func _physics_process(_delta: float) -> void:
 			ultima_direcao = "baixo"
 			$sprite.play("correr_baixo")
 	elif not direcao_horizontal == 0:
-		velocity.x = direcao_horizontal * VELOCIDADE
+		velocity.x = direcao_horizontal * vel_atual
 		if direcao_horizontal < 0:
 			AudioManager.tocar_som_caminhada()
 			ultima_direcao = "esquerda"
