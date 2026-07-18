@@ -9,6 +9,7 @@ var supabase_key: String = ProjectSettings.get_setting("application/config/supab
 var user_token: String = ""
 var user_nick: String = ""
 var user_cla: String = "Nenhum"
+var active_dungeon: String = "" # Registra a masmorra escolhida no hub
 # ---------------------------------
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
@@ -29,7 +30,31 @@ func _ready() -> void:
 	add_child(http_request)
 	http_request.request_completed.connect(_on_request_completed)
 	
+	carregar_progresso()
 	print("banco carregado!")
+
+# --- FUNCOES DE PROGRESSO LOCAL ---
+const SAVE_FILE = "user://progresso.json"
+
+func salvar_progresso() -> void:
+	var file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
+	var data = {
+		"active_dungeon": active_dungeon
+	}
+	file.store_string(JSON.stringify(data))
+	file.close()
+
+func carregar_progresso() -> void:
+	if not FileAccess.file_exists(SAVE_FILE):
+		return
+	var file = FileAccess.open(SAVE_FILE, FileAccess.READ)
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) == OK:
+		var data = json.data
+		if data is Dictionary:
+			active_dungeon = data.get("active_dungeon", "")
+	file.close()
+
 
 # funcao pra montar o header e mandar o get/post...
 # endpoint tipo: "/rest/v1/alunos"

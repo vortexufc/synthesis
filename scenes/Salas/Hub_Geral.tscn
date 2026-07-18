@@ -17,6 +17,9 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="13_fnpip"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="14_stkeo"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="15_ct47e"]
+[ext_resource type="Texture2D" uid="uid://d0lft226afsts" path="res://assets/sprites/tilesets/Biologia/porta.png" id="tex_biologia"]
+[ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="tex_fisica"]
+[ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="tex_quimica"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e6d1q"]
 texture = ExtResource("4_eqav8")
@@ -1812,16 +1815,75 @@ offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=1254393895 instance=ExtResource("15_ct47e")]
 position = Vector2(343, 259)
+is_hub_door = true
+hub_dungeon_name = "Química"
+textura_porta = ExtResource("tex_quimica")
+frames_animacao = 5
+stride_animacao = 32
+
+[node name="FundoPreto" type="ColorRect" parent="PortaTransicao" unique_id=987654321]
+z_index = 1
+offset_left = -64.0
+offset_top = -179.0
+offset_right = 61.0
+offset_bottom = 50.0
+color = Color(0.08, 0.09, 0.11, 1)
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=538194382]
+z_index = 2
+position = Vector2(-0.49999046, -65.50001)
+scale = Vector2(5.761906, 5.9736843)
+texture = ExtResource("tex_quimica")
+region_enabled = true
+region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 
 [node name="PortaTransicao2" parent="." unique_id=199363741 instance=ExtResource("15_ct47e")]
-position = Vector2(818, 256)
-esta_trancada = true
-mensagem_customizada = "TRANCADA"
+position = Vector2(818, 259)
+is_hub_door = true
+hub_dungeon_name = "Biologia"
+textura_porta = ExtResource("tex_biologia")
+frames_animacao = 4
+stride_animacao = 128
+
+[node name="FundoPreto" type="ColorRect" parent="PortaTransicao2" unique_id=987654322]
+z_index = 1
+offset_left = -59.0
+offset_top = -181.0
+offset_right = 66.0
+offset_bottom = 45.0
+color = Color(0.08, 0.09, 0.11, 1)
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao2" unique_id=748291048]
+z_index = 2
+position = Vector2(4.0000157, -65.625015)
+scale = Vector2(1.854167, 1.8580729)
+texture = ExtResource("tex_biologia")
+region_enabled = true
+region_rect = Rect2(16, 0, 96, 192)
 
 [node name="PortaTransicao3" parent="." unique_id=2019376781 instance=ExtResource("15_ct47e")]
-position = Vector2(584, 255)
-esta_trancada = true
-mensagem_customizada = "TRANCADA"
+position = Vector2(584, 259)
+is_hub_door = true
+hub_dungeon_name = "Física"
+textura_porta = ExtResource("tex_fisica")
+frames_animacao = 4
+stride_animacao = 192
+
+[node name="FundoPreto" type="ColorRect" parent="PortaTransicao3" unique_id=987654323]
+z_index = 1
+offset_left = -64.0
+offset_top = -178.0
+offset_right = 56.0
+offset_bottom = 42.0
+color = Color(0.08, 0.09, 0.11, 1)
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao3" unique_id=819273940]
+z_index = 2
+position = Vector2(-3.5, -70)
+scale = Vector2(1.921875, 1.734375)
+texture = ExtResource("tex_fisica")
+region_enabled = true
+region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="PortaRetorno" parent="." unique_id=1989116557 instance=ExtResource("15_ct47e")]
 position = Vector2(585, 1076)

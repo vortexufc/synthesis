@@ -36,6 +36,10 @@ func _reposicionar_na_porta_correta() -> void:
 		# Ao VOLTAR, nasce perto da porta de AVANÇO desta sala (porta de cima/norte)
 		for porta in portas:
 			if not porta.porta_de_retorno:
+				# No Hub, precisamos nascer na porta específica que o jogador entrou!
+				if porta.get("is_hub_door") and porta.get("hub_dungeon_name") != DatabaseManager.active_dungeon:
+					continue
+					
 				global_position = porta.global_position
 				global_position.y += 180 # Nasce mais abaixo (escapando de colisão)
 				break
