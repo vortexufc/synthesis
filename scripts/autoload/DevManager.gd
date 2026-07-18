@@ -1,4 +1,3 @@
-class_name DevManager
 extends Node
 
 ## FLAG MESTRE — Para desativar na versão final do jogo, basta mudar para false!
