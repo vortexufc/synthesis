@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
 config/supabase_key="sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
 
+[audio]
+
+buses/default_bus_layout="uid://bw16niqeh6a2w"
+
 [autoload]
 
 GlobalSignals="*res://scripts/autoload/GlobalSignals.gd"

@@ -38,6 +38,8 @@ func _ready() -> void:
 func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 	show()
 	if vitoria:
+		AudioManager.restore_previous_music()
+		AudioManager.play_sfx("fail")
 		titulo.text = "VITÓRIA!"
 		titulo.add_theme_color_override("font_color", Color.GOLD)
 		color_rect.color = Color(0, 0, 0, 0.8) # Fundo escuro simples
@@ -59,6 +61,8 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		$ColorRect/VBoxContainer.add_child(lbl_skip)
 		_pode_pular_vitoria = true
 	else:
+		AudioManager.stop_battle_music()
+		AudioManager.play_sfx("win")
 		titulo.text = "DERROTA..."
 		titulo.add_theme_color_override("font_color", Color.RED)
 		color_rect.color = Color(0.2, 0, 0, 0.8) # Fundo vermelho escuro
@@ -121,6 +125,7 @@ func _finalizar_vitoria() -> void:
 func _on_tentar_novamente_pressed() -> void:
 	hide()
 	get_tree().paused = false
+	AudioManager.play_sfx("ui-2")
 	PlayerStats.resetar_vida()
 	QuizManager.fechar_ui_batalha()
 	if get_node_or_null("/root/DungeonGenerator"):
@@ -132,7 +137,7 @@ func _on_tentar_novamente_pressed() -> void:
 func _on_menu_principal_pressed() -> void:
 	hide()
 	get_tree().paused = false
+	AudioManager.play_sfx("ui-2")
 	PlayerStats.resetar_vida()
 	QuizManager.fechar_ui_batalha()
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
-

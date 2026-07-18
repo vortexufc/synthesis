@@ -107,16 +107,25 @@ func _atualizar_botoes():
 		btn_clas.add_theme_color_override("font_hover_color", Color.WHITE)
 
 func _on_btn_geral_pressed():
+	# Efeito do botao geral
+	AudioManager.play_sfx("ui-1")
+	
 	modo_atual = ModoRanking.GERAL
 	_atualizar_lista()
 	_atualizar_botoes()
 
 func _on_btn_clas_pressed():
+	# Efeito do botao clas
+	AudioManager.play_sfx("ui-1")
+	
 	modo_atual = ModoRanking.CLAS
 	_atualizar_lista()
 	_atualizar_botoes()
 
 func _on_btn_voltar_pressed():
+	# Efeito do botao voltar
+	AudioManager.play_sfx("ui_5")
+	
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
 func _atualizar_lista():

@@ -22,8 +22,14 @@ func _on_btn_show_password_toggled(button_pressed: bool) -> void:
 	password_input.secret = !button_pressed
 	
 	if button_pressed:
+		# Efeito do botao show_password
+		AudioManager.play_sfx("ui-1")
+		
 		btn_show_password.text = " - "
 	else:
+		# Efeito do botao show_password
+		AudioManager.play_sfx("ui-1")
+		
 		btn_show_password.text = " O "
 
 func _on_btn_create_pressed() -> void:

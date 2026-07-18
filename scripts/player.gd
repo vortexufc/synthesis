@@ -62,17 +62,21 @@ func _physics_process(_delta: float) -> void:
 	if not direcao_vertical == 0:
 		velocity.y = direcao_vertical * VELOCIDADE
 		if direcao_vertical < 0:
+			AudioManager.tocar_som_caminhada()
 			ultima_direcao = "cima"
 			$sprite.play("correr_cima")
 		else:
+			AudioManager.tocar_som_caminhada()
 			ultima_direcao = "baixo"
 			$sprite.play("correr_baixo")
 	elif not direcao_horizontal == 0:
 		velocity.x = direcao_horizontal * VELOCIDADE
 		if direcao_horizontal < 0:
+			AudioManager.tocar_som_caminhada()
 			ultima_direcao = "esquerda"
 			$sprite.play("correr_esquerda")
 		else:
+			AudioManager.tocar_som_caminhada()
 			ultima_direcao = "direita"
 			$sprite.play("correr_direita")
 	else:
@@ -90,7 +94,7 @@ func receber_dano_mimico() -> void:
 	# [Fix-1] Delega o dano ao autoload centralizado (emite vida_alterada → HUD atualiza)
 	PlayerStats.sofrer_dano(15.0)
 	print("[Mímico] HP restante: %.0f / %.0f" % [PlayerStats.vida_atual_jogador, PlayerStats.vida_maxima_jogador])
-
+	
 	# Flash vermelho no sprite (feedback visual mantido)
 	var tween = create_tween()
 	tween.tween_property($sprite, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
