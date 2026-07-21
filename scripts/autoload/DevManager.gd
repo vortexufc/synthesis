@@ -1,7 +1,7 @@
 extends Node
 
 ## FLAG MESTRE — Para desativar na versão final do jogo, basta mudar para false!
-const DEV_MODE_ENABLED: bool = true
+var DEV_MODE_ENABLED: bool = true
 
 # Opções do GodMode / Dev Menu
 var god_mode_resposta_a: bool = true      ## Resposta A sempre será a opção correta no Quiz
