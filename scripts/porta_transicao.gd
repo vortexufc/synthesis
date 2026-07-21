@@ -19,6 +19,8 @@ extends Area2D
 var _sprite_porta: Sprite2D = null
 var _aguardando_confirmacao: bool = false
 var _base_region_rect: Rect2
+var _porta_aberta: bool = false
+var _checagem_timer: float = 0.0
 
 # Cooldown para evitar teletransporte imediato ao carregar a cena (loop infinito)
 var _cooldown_ativo: bool = true
@@ -56,6 +58,21 @@ func _ready() -> void:
 func _on_body_exited(body: Node2D) -> void:
 	if body.name == "Player":
 		_fechar_prompt_hub()
+
+func _process(delta: float) -> void:
+	# Apenas portas de avanço em salas de combate precisam abrir automaticamente
+	if is_hub_door or porta_de_retorno or _porta_aberta:
+		return
+		
+	# Fazemos a checagem a cada 0.5 segundos para não pesar o processamento
+	_checagem_timer += delta
+	if _checagem_timer >= 0.5:
+		_checagem_timer = 0.0
+		
+		# Se não houver mais inimigos, abre a porta!
+		if not _tem_inimigos_vivos():
+			_porta_aberta = true
+			_abrir_porta_animacao()
 
 func _tem_inimigos_vivos() -> bool:
 	var inimigos = get_tree().get_nodes_in_group("inimigos")
@@ -240,7 +257,8 @@ func _transacionar_porta() -> void:
 	if _cooldown_ativo: return
 	_cooldown_ativo = true
 	
-	await _abrir_porta_animacao()
+	if not _porta_aberta:
+		await _abrir_porta_animacao()
 	
 	var cena_alvo = proxima_cena
 	if get_node_or_null("/root/DungeonGenerator"):
