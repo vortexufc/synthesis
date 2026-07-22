@@ -671,4 +671,4 @@ position = Vector2(671, 804)
 position = Vector2(787, 806)
 
 [node name="Robo_G" parent="." unique_id=2051560931 instance=ExtResource("23_robog")]
-position = Vector2(565, 592)
+position = Vector2(294, 845)
