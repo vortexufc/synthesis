@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cbau_pergaminho_01"]
+
+[ext_resource type="Script" path="res://scripts/bau.gd" id="1_bau"]
+[ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="2_chest"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bau"]
+size = Vector2(28, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_chest_closed"]
+atlas = ExtResource("2_chest")
+region = Rect2(0, 128, 32, 32)
+
+[node name="Bau" type="Area2D"]
+scale = Vector2(2, 2)
+script = ExtResource("1_bau")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_bau")
+
+[node name="BauSprite" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_chest_closed")

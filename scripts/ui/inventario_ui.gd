@@ -144,7 +144,21 @@ func _on_btn_acao_pressionado() -> void:
 			_atualizar_listas()
 	elif tipo == "grimorio":
 		var doc = PlayerStats.grimorio[idx]
-		_abrir_leitura(doc["titulo"], doc["texto"])
+		if doc.has("paginas") and doc["paginas"] is Array and doc["paginas"].size() > 0:
+			var paginas_cast: Array[String] = []
+			for p in doc["paginas"]:
+				paginas_cast.append(str(p))
+			var ui = get_tree().get_first_node_in_group("parchment_ui")
+			if ui == null and get_tree().current_scene:
+				ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
+			if ui and ui.has_method("abrir_pergaminho"):
+				visible = false
+				ui.abrir_pergaminho(paginas_cast, null)
+			else:
+				_abrir_leitura(doc["titulo"], doc["texto"])
+		else:
+			_abrir_leitura(doc["titulo"], doc["texto"])
+
 
 func _abrir_leitura(titulo: String, texto: String) -> void:
 	label_titulo_leitura.text = titulo

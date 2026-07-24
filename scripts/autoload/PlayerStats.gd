@@ -71,6 +71,30 @@ func curar_vida(valor: float) -> void:
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	salvar()
 
+## Adiciona um pergaminho coletado ao Grimório do jogador
+func adicionar_pergaminho(titulo: String, paginas: Array[String], desc: String = "") -> void:
+	# Verifica se já possui o pergaminho para não duplicar
+	for item in grimorio:
+		if item.get("titulo") == titulo:
+			# Atualiza as páginas se já existia
+			item["paginas"] = paginas
+			salvar()
+			return
+			
+	var texto_completo = ""
+	for i in range(paginas.size()):
+		texto_completo += "── PÁGINA " + str(i + 1) + " ──\n" + paginas[i] + "\n\n"
+		
+	grimorio.append({
+		"titulo": titulo,
+		"texto": texto_completo,
+		"paginas": paginas,
+		"desc": desc if desc != "" else "Um pergaminho antigo contendo dicas arcanas."
+	})
+	salvar()
+	print("[PlayerStats] Pergaminho adicionado ao Grimório: ", titulo)
+
+
 # funcao para resetar a vida após Game Over
 func resetar_vida() -> void:
 	vida_atual_jogador = vida_maxima_jogador

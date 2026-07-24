@@ -16,24 +16,33 @@ var pagina_atual: int = 0
 var player_ref: Node2D = null
 
 func _ready() -> void:
+	add_to_group("parchment_ui")
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	# O pergaminho começa invisível
 	hide()
 	
 	# Conecta os botões do pergaminho automaticamente
-	btn_esquerda.pressed.connect(_voltar_pagina)
-	btn_direita.pressed.connect(_avancar_pagina)
-	btn_fechar.pressed.connect(_fechar_pergaminho)
+	if btn_esquerda and not btn_esquerda.pressed.is_connected(_voltar_pagina):
+		btn_esquerda.pressed.connect(_voltar_pagina)
+	if btn_direita and not btn_direita.pressed.is_connected(_avancar_pagina):
+		btn_direita.pressed.connect(_avancar_pagina)
+	if btn_fechar and not btn_fechar.pressed.is_connected(_fechar_pergaminho):
+		btn_fechar.pressed.connect(_fechar_pergaminho)
 
 # ==========================================
-# 2. A FUNÇÃO QUE É CHAMADA PELO PERGAMINHO DO CHÃO
+# 2. A FUNÇÃO QUE É CHAMADA PELO PERGAMINHO DO CHÃO OU INVENTÁRIO
 # ==========================================
-func abrir_pergaminho(paginas: Array[String], player: Node2D) -> void:
+func abrir_pergaminho(paginas: Array[String], player: Node2D = null) -> void:
 	paginas_do_texto = paginas
 	player_ref = player  # Guardamos quem é o player para destravar ele depois
+	if player_ref:
+		player_ref.travado = true
+		
 	pagina_atual = 0     # Sempre começa na primeira página
 	
 	atualizar_tela()
 	show() # Faz a interface aparecer na tela!
+
 
 # ==========================================
 # 3. LÓGICA DE ATUALIZAR O TEXTO E BOTÕES
