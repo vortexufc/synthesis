@@ -104,15 +104,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 		
-	if event.is_action_just_pressed("ui_cancel"):
+	if event.is_action_pressed("ui_cancel") and not event.is_echo():
 		_fechar_pergaminho()
 		get_viewport().set_input_as_handled()
-	elif event.is_action_just_pressed("ui_left") or event.is_action_just_pressed("esquerda"):
+	elif (event.is_action_pressed("ui_left") or event.is_action_pressed("esquerda")) and not event.is_echo():
 		_voltar_pagina()
 		get_viewport().set_input_as_handled()
-	elif event.is_action_just_pressed("ui_right") or event.is_action_just_pressed("direita"):
+	elif (event.is_action_pressed("ui_right") or event.is_action_pressed("direita")) and not event.is_echo():
 		_avancar_pagina()
 		get_viewport().set_input_as_handled()
+
 
 func abrir_pergaminho(paginas: Array[String], player: Node2D = null) -> void:
 	paginas_do_texto = paginas
