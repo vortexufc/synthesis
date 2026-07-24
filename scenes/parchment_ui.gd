@@ -1,12 +1,12 @@
 extends CanvasLayer
 
 ## Interface do Pergaminho Arcano com estilo Pixel Art
-## Exibe até 4 páginas de dicas com fonte pixelada, controles responsivos e salvamento no inventário.
+## Exibe até 4 páginas de anotações com fonte pixelada, navegação limpa e salvamento no inventário.
 
 # Fonte pixelada oficial do jogo
 var font_pixel: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 
-# Nós da interface gerados com estilo pixel-art
+# Nós da interface
 var backdrop: ColorRect
 var painel_pergaminho: PanelContainer
 var lbl_titulo: Label
@@ -14,7 +14,6 @@ var texto_dica: RichTextLabel
 var lbl_pagina: Label
 var btn_esquerda: Button
 var btn_direita: Button
-var btn_fechar: Button
 var btn_fechar_topo: Button
 
 # Estado da leitura
@@ -23,20 +22,20 @@ var pagina_atual: int = 0
 var player_ref: Node2D = null
 
 func _ready() -> void:
-	layer = 100 # Mantém o pergaminho no topo absoluto de qualquer HUD/Batalha
+	layer = 100 # Mantém o pergaminho no topo de qualquer HUD/Batalha
 	add_to_group("parchment_ui")
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	_construir_interface_pixel()
 	hide()
 
-## Constrói um painel de pergaminho limpo, bonito e 100% pixel-art
+## Constrói um painel de pergaminho limpo, bonito e pixel-art sem emojis
 func _construir_interface_pixel() -> void:
-	# Limpa nós antigos herdados da cena para evitar bugs de layout
+	# Limpa nós antigos para evitar bugs de layout
 	for c in get_children():
 		c.queue_free()
 		
-	# 1. Fundo escuro semi-transparente que cobre toda a tela
+	# 1. Fundo escuro semi-transparente
 	backdrop = ColorRect.new()
 	backdrop.name = "Backdrop"
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -44,7 +43,7 @@ func _construir_interface_pixel() -> void:
 	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(backdrop)
 	
-	# 2. Painel Central do Pergaminho (Proporção equilibrada)
+	# 2. Painel Central do Pergaminho
 	painel_pergaminho = PanelContainer.new()
 	painel_pergaminho.name = "PainelPergaminho"
 	painel_pergaminho.anchor_left = 0.5
@@ -52,37 +51,37 @@ func _construir_interface_pixel() -> void:
 	painel_pergaminho.anchor_right = 0.5
 	painel_pergaminho.anchor_bottom = 0.5
 	painel_pergaminho.offset_left = -390
-	painel_pergaminho.offset_top = -240
+	painel_pergaminho.offset_top = -230
 	painel_pergaminho.offset_right = 390
-	painel_pergaminho.offset_bottom = 240
+	painel_pergaminho.offset_bottom = 230
 	backdrop.add_child(painel_pergaminho)
 	
 	# Estilo visual do papel pergaminho em Pixel Art
 	var style_papel = StyleBoxFlat.new()
-	style_papel.bg_color = Color(0.92, 0.84, 0.68) # Cor quente de papel pergaminho
+	style_papel.bg_color = Color(0.92, 0.84, 0.68) # Papel pergaminho amarelado
 	style_papel.border_color = Color(0.35, 0.20, 0.08) # Borda escura estilo madeira/tinta
 	style_papel.set_border_width_all(5)
 	style_papel.set_corner_radius_all(6)
 	style_papel.content_margin_left = 25
-	style_papel.content_margin_top = 20
+	style_papel.content_margin_top = 18
 	style_papel.content_margin_right = 25
-	style_papel.content_margin_bottom = 20
+	style_papel.content_margin_bottom = 18
 	painel_pergaminho.add_theme_stylebox_override("panel", style_papel)
 	
 	# Layout vertical principal
 	var vbox_main = VBoxContainer.new()
-	vbox_main.add_theme_constant_override("separation", 12)
+	vbox_main.add_theme_constant_override("separation", 10)
 	painel_pergaminho.add_child(vbox_main)
 	
-	# --- CABAÇALHO / TÍTULO ---
+	# --- CABEÇALHO / TÍTULO ---
 	var hbox_header = HBoxContainer.new()
 	vbox_main.add_child(hbox_header)
 	
 	lbl_titulo = Label.new()
-	lbl_titulo.text = "📜 PERGAMINHO ARCANO"
+	lbl_titulo.text = "PERGAMINHO ARCANO"
 	if font_pixel:
 		lbl_titulo.add_theme_font_override("font", font_pixel)
-	lbl_titulo.add_theme_font_size_override("font_size", 24)
+	lbl_titulo.add_theme_font_size_override("font_size", 22)
 	lbl_titulo.add_theme_color_override("font_color", Color(0.35, 0.18, 0.05))
 	hbox_header.add_child(lbl_titulo)
 	
@@ -90,18 +89,19 @@ func _construir_interface_pixel() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hbox_header.add_child(spacer)
 	
+	# ÚNICO botão de fechar: o "X" no canto superior direito
 	btn_fechar_topo = Button.new()
-	btn_fechar_topo.text = " ✖ "
+	btn_fechar_topo.text = " X "
 	if font_pixel:
 		btn_fechar_topo.add_theme_font_override("font", font_pixel)
-	btn_fechar_topo.add_theme_font_size_override("font_size", 20)
+	btn_fechar_topo.add_theme_font_size_override("font_size", 18)
 	btn_fechar_topo.pressed.connect(_fechar_pergaminho)
 	_estilar_botao(btn_fechar_topo, true)
 	hbox_header.add_child(btn_fechar_topo)
 	
-	# Linha divisora rúnica
+	# Linha divisora
 	var linha_divisora = ColorRect.new()
-	linha_divisora.custom_minimum_size = Vector2(0, 3)
+	linha_divisora.custom_minimum_size = Vector2(0, 2)
 	linha_divisora.color = Color(0.55, 0.38, 0.18, 0.6)
 	vbox_main.add_child(linha_divisora)
 	
@@ -114,8 +114,8 @@ func _construir_interface_pixel() -> void:
 	if font_pixel:
 		texto_dica.add_theme_font_override("normal_font", font_pixel)
 		texto_dica.add_theme_font_override("bold_font", font_pixel)
-	texto_dica.add_theme_font_size_override("normal_font_size", 19)
-	texto_dica.add_theme_font_size_override("bold_font_size", 20)
+	texto_dica.add_theme_font_size_override("normal_font_size", 18)
+	texto_dica.add_theme_font_size_override("bold_font_size", 19)
 	texto_dica.add_theme_color_override("default_color", Color(0.18, 0.10, 0.04))
 	vbox_main.add_child(texto_dica)
 	
@@ -125,17 +125,17 @@ func _construir_interface_pixel() -> void:
 	linha_divisora2.color = Color(0.55, 0.38, 0.18, 0.4)
 	vbox_main.add_child(linha_divisora2)
 	
-	# --- BARRA DE NAVEGAÇÃO E RODAPÉ ---
+	# --- BARRA DE NAVEGAÇÃO ---
 	var hbox_footer = HBoxContainer.new()
 	hbox_footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox_footer.add_theme_constant_override("separation", 20)
+	hbox_footer.add_theme_constant_override("separation", 25)
 	vbox_main.add_child(hbox_footer)
 	
 	btn_esquerda = Button.new()
-	btn_esquerda.text = "◄ Anterior"
+	btn_esquerda.text = "< Anterior"
 	if font_pixel:
 		btn_esquerda.add_theme_font_override("font", font_pixel)
-	btn_esquerda.add_theme_font_size_override("font_size", 18)
+	btn_esquerda.add_theme_font_size_override("font_size", 17)
 	btn_esquerda.pressed.connect(_voltar_pagina)
 	_estilar_botao(btn_esquerda)
 	hbox_footer.add_child(btn_esquerda)
@@ -144,29 +144,20 @@ func _construir_interface_pixel() -> void:
 	lbl_pagina.text = "Página 1 de 1"
 	if font_pixel:
 		lbl_pagina.add_theme_font_override("font", font_pixel)
-	lbl_pagina.add_theme_font_size_override("font_size", 18)
+	lbl_pagina.add_theme_font_size_override("font_size", 17)
 	lbl_pagina.add_theme_color_override("font_color", Color(0.35, 0.18, 0.05))
 	hbox_footer.add_child(lbl_pagina)
 	
 	btn_direita = Button.new()
-	btn_direita.text = "Próxima ►"
+	btn_direita.text = "Próxima >"
 	if font_pixel:
 		btn_direita.add_theme_font_override("font", font_pixel)
-	btn_direita.add_theme_font_size_override("font_size", 18)
+	btn_direita.add_theme_font_size_override("font_size", 17)
 	btn_direita.pressed.connect(_avancar_pagina)
 	_estilar_botao(btn_direita)
 	hbox_footer.add_child(btn_direita)
-	
-	btn_fechar = Button.new()
-	btn_fechar.text = "Fechar"
-	if font_pixel:
-		btn_fechar.add_theme_font_override("font", font_pixel)
-	btn_fechar.add_theme_font_size_override("font_size", 18)
-	btn_fechar.pressed.connect(_fechar_pergaminho)
-	_estilar_botao(btn_fechar, true)
-	hbox_footer.add_child(btn_fechar)
 
-## Aplica estilização de botão pixel art com suporte a hover
+## Aplica estilização de botão pixel art
 func _estilar_botao(btn: Button, destaque: bool = false) -> void:
 	var style_normal = StyleBoxFlat.new()
 	style_normal.bg_color = Color(0.35, 0.20, 0.08) if not destaque else Color(0.55, 0.15, 0.10)
@@ -175,8 +166,8 @@ func _estilar_botao(btn: Button, destaque: bool = false) -> void:
 	style_normal.set_corner_radius_all(4)
 	style_normal.content_margin_left = 14
 	style_normal.content_margin_right = 14
-	style_normal.content_margin_top = 6
-	style_normal.content_margin_bottom = 6
+	style_normal.content_margin_top = 5
+	style_normal.content_margin_bottom = 5
 	
 	var style_hover = style_normal.duplicate()
 	style_hover.bg_color = Color(0.48, 0.28, 0.12) if not destaque else Color(0.70, 0.20, 0.15)
