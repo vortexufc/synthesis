@@ -10,6 +10,7 @@ var user_token: String = ""
 var user_nick: String = ""
 var user_cla: String = "Nenhum"
 var active_dungeon: String = "" # Registra a masmorra escolhida no hub
+var is_admin: bool = false # Define se a conta atual é um professor/pesquisador
 # ---------------------------------
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
@@ -108,6 +109,13 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				# Funde o progresso de Convidado assim que logar ou se registrar!
 				if RankingManager.has_method("fundir_conta_guest"):
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
+				
+				# Checa se é conta de admin
+				if dados.user.has("email") and dados.user.email == "admin@synthesis.com":
+					is_admin = true
+					print("👑 Bem-vindo, Administrador!")
+				else:
+					is_admin = false
 				
 			auth_sucesso.emit(user_token)
 		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
