@@ -19,6 +19,14 @@ func _ready() -> void:
 	btn_clas.pressed.connect(_on_btn_clas_pressed)
 	btn_config.pressed.connect(_on_btn_config_pressed)
 	
+	if DatabaseManager.is_admin:
+		var btn_admin = btn_jogar.duplicate()
+		btn_admin.text = "PAINEL ADMIN"
+		btn_admin.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/painel_admin.tscn"))
+		var vbox = $MarginContainer/VBoxButtons
+		vbox.add_child(btn_admin)
+		vbox.move_child(btn_admin, 0) # Coloca no topo
+	
 	# ========= SISTEMA DE PERFIL (BACKEND-6) =========
 	var hbox_perfil = HBoxContainer.new()
 	hbox_perfil.set_anchors_preset(Control.PRESET_TOP_LEFT)
