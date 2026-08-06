@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game de introdução quando o jogador clica em Jogar no Menu Principal.
+## Executa a cutscene in-game ao clicar em Jogar: desloca o mago ate a mesa, coleta o pergaminho e o remove da mesa.
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -27,38 +27,45 @@ func _executar_cutscene_inicial() -> void:
 	# Trava a movimentação e os inputs do jogador durante a cena
 	player.travado = true
 	
-	# Ponto inicial do jogador (entrada inferior da sala)
+	# Ponto inicial do jogador na entrada da sala
 	player.global_position = Vector2(580, 750)
 	
 	var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
 	if sprite:
 		sprite.play("correr_cima")
 		
-	# 1. Deslocamento vertical para CIMA até a altura da mesa superior (Y: 750 -> 450)
+	# 1. Deslocamento vertical para CIMA até Y=300
 	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween.tween_property(player, "global_position:y", 450.0, 2.0)
+	tween.tween_property(player, "global_position:y", 300.0, 2.2)
 	await tween.finished
 	
-	# 2. Mudança de direção para a ESQUERDA até a mesa (X: 580 -> 280)
+	# 2. Mudança de direção para a ESQUERDA até a mesa (X=250, Y=300)
 	if sprite:
 		sprite.play("correr_esquerda")
 		
 	var tween2 = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween2.tween_property(player, "global_position:x", 280.0, 1.8)
+	tween2.tween_property(player, "global_position:x", 250.0, 2.0)
 	await tween2.finished
 	
-	# 3. Animação Idle em frente à mesa do pergaminho
+	# 3. Mago para em frente à mesa olhado para CIMA
 	if sprite:
 		sprite.play("idle_cima")
 		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# 4. Salva o pergaminho de introdução no Grimório do jogador
+	# 4. Remove o pergaminho visual da mesa (pois ele foi coletado pelo mago!)
+	var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
+	if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
+		if pergaminho_mesa.has_method("_remover_prompt_tela"):
+			pergaminho_mesa._remover_prompt_tela()
+		pergaminho_mesa.queue_free()
+		
+	# 5. Salva no Inventário (Grimório) do jogador
 	if get_node_or_null("/root/PlayerStats"):
-		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "Pergaminho com as instruções iniciais da Masmorra Arcana.")
+		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
 
-	# 5. Abre a interface do Pergaminho na tela com os textos de lore
+	# 6. Abre a interface do Pergaminho na tela com os textos de lore
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
