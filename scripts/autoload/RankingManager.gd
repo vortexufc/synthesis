@@ -24,9 +24,9 @@ var local_guest_nick: String = ""
 func _ready() -> void:
 	await get_tree().create_timer(0.3).timeout
 	await load_ranking()
-	await load_ranking_periodo("diario")
-	await load_ranking_periodo("semanal")
-	await load_ranking_periodo("mensal")
+	await load_ranking_periodo("quimica")
+	await load_ranking_periodo("fisica")
+	await load_ranking_periodo("biologia")
 
 # ============================================================
 # CARREGAR DO SUPABASE
@@ -70,9 +70,9 @@ func load_ranking() -> void:
 func load_ranking_periodo(periodo: String) -> void:
 	var coluna: String
 	match periodo:
-		"diario":  coluna = "score_diario"
-		"semanal": coluna = "score_semanal"
-		"mensal":  coluna = "score_mensal"
+		"quimica":  coluna = "score_diario"
+		"fisica": coluna = "score_semanal"
+		"biologia":  coluna = "score_mensal"
 		_: return
 	
 	var res = await DatabaseManager.request_async(
@@ -89,9 +89,9 @@ func load_ranking_periodo(periodo: String) -> void:
 			lista.append({"name": row.get("player_name", "?"), "score": pts})
 	
 	match periodo:
-		"diario":  ranking_diario  = lista
-		"semanal": ranking_semanal = lista
-		"mensal":  ranking_mensal  = lista
+		"quimica":  ranking_diario  = lista
+		"fisica": ranking_semanal = lista
+		"biologia":  ranking_mensal  = lista
 	
 	ranking_atualizado.emit()
 	
@@ -100,9 +100,9 @@ func load_ranking_periodo(periodo: String) -> void:
 # ============================================================
 func get_ranking_por_periodo(periodo: String) -> Array:
 	match periodo:
-		"diario":  return ranking_diario
-		"semanal": return ranking_semanal
-		"mensal":  return ranking_mensal
+		"quimica":  return ranking_diario
+		"fisica": return ranking_semanal
+		"biologia":  return ranking_mensal
 		_: return ranking_geral
 
 # ============================================================
@@ -157,10 +157,14 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		score_mensal_atual  = int(row.get("score_mensal", 0))
 		existe = true
 
+	var subj = ""
+	if DatabaseManager.has_property("active_dungeon"):
+		subj = DatabaseManager.active_dungeon
+		
 	var novo_score:         int = score_atual + pontos_novos
-	var novo_score_diario:  int = score_diario_atual + pontos_novos
-	var novo_score_semanal: int = score_semanal_atual + pontos_novos
-	var novo_score_mensal:  int = score_mensal_atual + pontos_novos
+	var novo_score_diario:  int = score_diario_atual + (pontos_novos if subj == "Química" else 0)
+	var novo_score_semanal: int = score_semanal_atual + (pontos_novos if subj == "Física" else 0)
+	var novo_score_mensal:  int = score_mensal_atual + (pontos_novos if subj == "Biologia" else 0)
 	var res_update: Dictionary
 
 	if existe:
