@@ -7,8 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://c2gv0ps0w7lah" path="res://assets/sprites/tilesets/Alquimia/círculo.png" id="4_nvn6x"]
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="4_o3jcq"]
 [ext_resource type="Texture2D" uid="uid://drgcc38q17q7r" path="res://assets/sprites/tilesets/Alquimia/preto.png" id="5_vd8j2"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala02.tscn" id="6b_upxhh"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala02.tscn" id="6c_upxhh"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="6_2hl56"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala02.tscn" id="6_upxhh"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="11_o7ard"]
@@ -18,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="15_8j5tm"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="16_0ilb8"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="17_ybsj0"]
+[ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="18_5jaf4"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="19_e6l1b"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1exg0"]
@@ -246,11 +245,11 @@ tile_set = SubResource("TileSet_e6l1b")
 z_index = 3
 position = Vector2(832, 711)
 
-[node name="Slime_P2" parent="." unique_id=944160757 instance=ExtResource("6b_upxhh")]
+[node name="Slime_P2" parent="." unique_id=944160757 instance=ExtResource("6_upxhh")]
 z_index = 3
 position = Vector2(501, 679)
 
-[node name="Slime_P3" parent="." unique_id=1637608024 instance=ExtResource("6c_upxhh")]
+[node name="Slime_P3" parent="." unique_id=1637608024 instance=ExtResource("6_upxhh")]
 z_index = 3
 position = Vector2(652, 523)
 
@@ -343,6 +342,16 @@ offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=1421186438 instance=ExtResource("19_e6l1b")]
 position = Vector2(577, 249)
+frames_animacao = 4
+stride_animacao = 32
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=1601936715]
+z_index = 2
+position = Vector2(-1.3053417e-05, -64.50001)
+scale = Vector2(5.809523, 6.0263157)
+texture = ExtResource("18_5jaf4")
+region_enabled = true
+region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 
 [node name="PortaRetorno" parent="." unique_id=1599429262 instance=ExtResource("19_e6l1b")]
 position = Vector2(585, 1077)

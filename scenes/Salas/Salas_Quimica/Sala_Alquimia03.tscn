@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="14_od83f"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala03.tscn" id="16_eg616"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="17_5hgrd"]
+[ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="17_65pgi"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4oytm"]
 texture = ExtResource("2_5hgrd")
@@ -1808,6 +1809,16 @@ position = Vector2(1686, 732)
 
 [node name="PortaTransicao" parent="." unique_id=1665332896 instance=ExtResource("17_5hgrd")]
 position = Vector2(1486, 262)
+frames_animacao = 4
+stride_animacao = 32
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=2090455933]
+z_index = 2
+position = Vector2(5, -69)
+scale = Vector2(5.761906, 5.9736843)
+texture = ExtResource("17_65pgi")
+region_enabled = true
+region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 
 [node name="PortaRetorno" parent="." unique_id=1463863620 instance=ExtResource("17_5hgrd")]
 position = Vector2(580, 828)
