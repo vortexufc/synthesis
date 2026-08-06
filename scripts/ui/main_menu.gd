@@ -93,6 +93,7 @@ func _on_btn_jogar_pressed() -> void:
 	
 	if get_node_or_null("/root/DungeonGenerator"):
 		DungeonGenerator.resetar_masmorra()
+		DungeonGenerator.tocar_cutscene_inicial = true
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
 		

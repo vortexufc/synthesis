@@ -30,6 +30,9 @@ var indice_atual: int = 0
 # Diz se o jogador acabou de voltar para a sala anterior
 var vindo_de_porta_de_retorno: bool = false
 
+# Flag que indica se deve reproduzir a cutscene de introdução no Hub
+var tocar_cutscene_inicial: bool = false
+
 # Array contendo identificadores de inimigos derrotados nesta masmorra
 var inimigos_derrotados: Array = []
 

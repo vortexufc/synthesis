@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://bq0pcjdki7iy3"]
 
-[ext_resource type="Script" uid="uid://bu2kwtcyegw0r" path="res://scripts/levels/sala01.gd" id="1_lyghg"]
+[ext_resource type="Script" path="res://scripts/levels/hub_geral.gd" id="1_hub_script"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="ext_pergaminho_hub"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="2_ssnwm"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="3_u414r"]
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="4_eqav8"]
@@ -1693,7 +1694,11 @@ sources/2 = SubResource("TileSetAtlasSource_kvtps")
 
 [node name="Node2D2" type="Node2D" unique_id=1559116760]
 y_sort_enabled = true
-script = ExtResource("1_lyghg")
+script = ExtResource("1_hub_script")
+
+[node name="PergaminhoMesa" parent="." instance=ExtResource("ext_pergaminho_hub")]
+position = Vector2(250, 410)
+titulo_pergaminho = "Boas-Vindas à Masmorra Arcana"
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("2_ssnwm")]
 z_index = 4
