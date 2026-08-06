@@ -254,6 +254,8 @@ func _avancar_pagina() -> void:
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-1")
 
+signal pergaminho_fechado
+
 func _fechar_pergaminho() -> void:
 	hide()
 	if player_ref and is_instance_valid(player_ref):
@@ -261,3 +263,5 @@ func _fechar_pergaminho() -> void:
 		player_ref = null
 	if get_tree().paused:
 		get_tree().paused = false
+	pergaminho_fechado.emit()
+
