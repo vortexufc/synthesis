@@ -264,4 +264,3 @@ func _fechar_pergaminho() -> void:
 	if get_tree().paused:
 		get_tree().paused = false
 	pergaminho_fechado.emit()
-

@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game ao clicar em Jogar com efeito de iluminação misteriosa (fade dark) durante a leitura do pergaminho.
+## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa instantânea e transição para normal ao fechar o pergaminho.
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -17,6 +17,8 @@ var _overlay_escuro: ColorRect = null
 func _ready() -> void:
 	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.tocar_cutscene_inicial:
 		DungeonGenerator.tocar_cutscene_inicial = false
+		# Aplica a iluminação escura imediatamente no _ready() para a cena já nascer escura desde a transição
+		_aplicar_iluminacao_escura(true)
 		call_deferred("_executar_cutscene_inicial")
 
 func _executar_cutscene_inicial() -> void:
@@ -26,9 +28,6 @@ func _executar_cutscene_inicial() -> void:
 		
 	if player == null:
 		return
-
-	# 1. Aplica o efeito de iluminação escura e misteriosa (Fade Dark)
-	_aplicar_iluminacao_escura()
 
 	# Trava a movimentação do jogador
 	player.travado = true
@@ -82,7 +81,7 @@ func _executar_cutscene_inicial() -> void:
 		player.travado = false
 		_restaurar_iluminacao_normal()
 
-func _aplicar_iluminacao_escura() -> void:
+func _aplicar_iluminacao_escura(instantanea: bool = false) -> void:
 	if _canvas_iluminacao and is_instance_valid(_canvas_iluminacao):
 		return
 		
@@ -94,13 +93,16 @@ func _aplicar_iluminacao_escura() -> void:
 	_overlay_escuro = ColorRect.new()
 	_overlay_escuro.name = "OverlayEscuro"
 	_overlay_escuro.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_overlay_escuro.color = Color(0.03, 0.03, 0.07, 0.0) # Começa transparente
 	_overlay_escuro.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_canvas_iluminacao.add_child(_overlay_escuro)
 	
-	# Transição suave para o tom escuro misterioso (alpha 0.65)
-	var tween = create_tween().set_trans(Tween.TRANS_SINE)
-	tween.tween_property(_overlay_escuro, "color:a", 0.65, 0.9)
+	if instantanea:
+		_overlay_escuro.color = Color(0.03, 0.03, 0.07, 0.65) # Já nasce 100% escuro no primeiro frame
+	else:
+		_overlay_escuro.color = Color(0.03, 0.03, 0.07, 0.0)
+		var tween = create_tween().set_trans(Tween.TRANS_SINE)
+		tween.tween_property(_overlay_escuro, "color:a", 0.65, 0.9)
+		
+	_canvas_iluminacao.add_child(_overlay_escuro)
 
 func _restaurar_iluminacao_normal() -> void:
 	if _overlay_escuro and is_instance_valid(_overlay_escuro):
