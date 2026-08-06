@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="14_xi80r"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_kcd51"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="16_1cllm"]
+[ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="17_v6gia"]
 [ext_resource type="PackedScene" uid="uid://c1kl1nfi3tcp2" path="res://scenes/Entidades/Slimes/slime_p04.tscn" id="17_wjfue"]
 [ext_resource type="PackedScene" uid="uid://52rne1evn6oj" path="res://scenes/Entidades/Slimes/slime_p03.tscn" id="18_v6gia"]
 
@@ -1772,7 +1773,17 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=1362576015 instance=ExtResource("16_1cllm")]
-position = Vector2(576, 244)
+position = Vector2(576, 210)
+frames_animacao = 4
+stride_animacao = 32
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=1835703223]
+z_index = 2
+position = Vector2(-0.24999845, -98.75)
+scale = Vector2(5.880954, 6.118421)
+texture = ExtResource("17_v6gia")
+region_enabled = true
+region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 
 [node name="PortaRetorno" parent="." unique_id=677165342 instance=ExtResource("16_1cllm")]
 position = Vector2(575, 797)
