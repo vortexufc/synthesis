@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa instantânea e caminhada mais lenta/dramática.
+## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa, passos sincronizados e transição ao fechar o pergaminho.
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -37,17 +37,19 @@ func _executar_cutscene_inicial() -> void:
 	if sprite:
 		sprite.play("correr_cima")
 		
-	# 1. Deslocamento vertical para CIMA até Y=710 (caminhada lenta de 3 segundos)
+	# 1. Deslocamento vertical para CIMA até Y=710 com som de passos
 	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 	tween.tween_property(player, "global_position:y", 710.0, 3.0)
+	_tocar_passos_cutscene(3.0)
 	await tween.finished
 	
-	# 2. Mudança de direção para a ESQUERDA até a mesa (X=263, Y=710) (caminhada lenta de 4 segundos)
+	# 2. Mudança de direção para a ESQUERDA até a mesa (X=263, Y=710) com som de passos
 	if sprite:
 		sprite.play("correr_esquerda")
 		
 	var tween2 = create_tween().set_trans(Tween.TRANS_LINEAR)
 	tween2.tween_property(player, "global_position:x", 263.0, 4.0)
+	_tocar_passos_cutscene(4.0)
 	await tween2.finished
 	
 	# 3. Mago para em frente à mesa olhado para CIMA
@@ -80,6 +82,14 @@ func _executar_cutscene_inicial() -> void:
 	else:
 		player.travado = false
 		_restaurar_iluminacao_normal()
+
+func _tocar_passos_cutscene(duracao: float) -> void:
+	var tempo_decorrido: float = 0.0
+	while tempo_decorrido < duracao:
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.tocar_som_caminhada()
+		await get_tree().create_timer(0.35).timeout
+		tempo_decorrido += 0.35
 
 func _aplicar_iluminacao_escura(instantanea: bool = false) -> void:
 	if _canvas_iluminacao and is_instance_valid(_canvas_iluminacao):
