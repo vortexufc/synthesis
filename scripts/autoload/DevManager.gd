@@ -26,11 +26,19 @@ var _salas_teleporte = [
 	{"nome": "🧪 Química - Sala 10", "path": "res://scenes/Salas/Salas_Quimica/Sala_Alquimia10.tscn"},
 	{"nome": "🧪 Química - Sala 11", "path": "res://scenes/Salas/Salas_Quimica/Sala_Alquimia11.tscn"},
 	{"nome": "🧪 Química - Sala 12", "path": "res://scenes/Salas/Salas_Quimica/Sala_Alquimia12.tscn"},
+	{"nome": "👑 Sala do Boss (Alquimia)", "path": "res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"},
 	{"nome": "⚡ Física - Sala 01", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn"},
 	{"nome": "⚡ Física - Sala 02", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física02.tscn"},
+	{"nome": "⚡ Física - Sala 03", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física03.tscn"},
+	{"nome": "⚡ Física - Sala 04", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física04.tscn"},
+	{"nome": "⚡ Física - Sala 05", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física05.tscn"},
 	{"nome": "⚡ Física - Sala 06", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física06.tscn"},
-	{"nome": "⚡ Física - Sala 12", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn"},
-	{"nome": "👑 Sala do Boss (Alquimia)", "path": "res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"}
+	{"nome": "⚡ Física - Sala 07", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física07.tscn"},
+	{"nome": "⚡ Física - Sala 08", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física08.tscn"},
+	{"nome": "⚡ Física - Sala 09", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física09.tscn"},
+	{"nome": "⚡ Física - Sala 10", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física10.tscn"},
+	{"nome": "⚡ Física - Sala 11", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física11.tscn"},
+	{"nome": "⚡ Física - Sala 12", "path": "res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn"}
 ]
 
 func _ready() -> void:
@@ -54,14 +62,6 @@ func _criar_interface_dev() -> void:
 	_canvas_layer = CanvasLayer.new()
 	_canvas_layer.layer = 120 # Fica por cima de qualquer outra UI
 	add_child(_canvas_layer)
-	
-	# Botão flutuante no canto superior direito
-	_btn_toggle = Button.new()
-	_btn_toggle.text = "🛠️ DEV MENU"
-	_btn_toggle.position = Vector2(1130, 10)
-	_btn_toggle.custom_minimum_size = Vector2(130, 36)
-	_btn_toggle.pressed.connect(_toggle_menu)
-	_canvas_layer.add_child(_btn_toggle)
 	
 	# Painel Modal do Dev Menu
 	_panel_container = PanelContainer.new()
@@ -175,12 +175,6 @@ func _criar_interface_dev() -> void:
 				get_tree().change_scene_to_file(cena_path)
 	)
 	vbox.add_child(btn_teleport)
-	
-	# Botão Fechar
-	var btn_close = Button.new()
-	btn_close.text = "❌ Fechar Painel (F1)"
-	btn_close.pressed.connect(_toggle_menu)
-	vbox.add_child(btn_close)
 	
 	_canvas_layer.add_child(_panel_container)
 

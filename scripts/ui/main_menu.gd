@@ -130,8 +130,8 @@ func _on_btn_config_pressed() -> void:
 # ---------------------------------------------------------
 
 # Período atual exibido no painel
-var _periodo_atual: String = "semanal"
-var _periodos: Array = ["diario", "semanal", "mensal"]
+var _periodo_atual: String = "quimica"
+var _periodos: Array = ["quimica", "fisica", "biologia"]
 
 # Referências aos nós do leaderboard (cacheadas para não re-buscar toda hora)
 var _leaderboard_panel: PanelContainer = null
@@ -173,9 +173,9 @@ func _atualizar_leaderboard() -> void:
 	# Atualiza o título
 	if _lbl_title:
 		match _periodo_atual:
-			"diario":  _lbl_title.text = "LIDERANÇA DO DIA"
-			"semanal": _lbl_title.text = "LIDERANÇA DA SEMANA"
-			"mensal":  _lbl_title.text = "LIDERANÇA DO MÊS"
+			"quimica":  _lbl_title.text = "LIDERANÇA QUIMICA"
+			"fisica": _lbl_title.text = "LIDERANÇA FISICA"
+			"biologia":  _lbl_title.text = "LIDERANÇA BIOLOGIA"
 	
 	# Atualiza o ranking de acordo com o período
 	var lista: Array = RankingManager.get_ranking_por_periodo(_periodo_atual)
