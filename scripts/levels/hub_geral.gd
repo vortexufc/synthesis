@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa instantânea e transição para normal ao fechar o pergaminho.
+## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa instantânea e caminhada mais lenta/dramática.
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -37,38 +37,38 @@ func _executar_cutscene_inicial() -> void:
 	if sprite:
 		sprite.play("correr_cima")
 		
-	# Deslocamento vertical para CIMA até Y=710
+	# 1. Deslocamento vertical para CIMA até Y=710 (caminhada lenta de 3 segundos)
 	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween.tween_property(player, "global_position:y", 710.0, 1.2)
+	tween.tween_property(player, "global_position:y", 710.0, 3.0)
 	await tween.finished
 	
-	# Mudança de direção para a ESQUERDA até a mesa (X=263, Y=710)
+	# 2. Mudança de direção para a ESQUERDA até a mesa (X=263, Y=710) (caminhada lenta de 4 segundos)
 	if sprite:
 		sprite.play("correr_esquerda")
 		
 	var tween2 = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween2.tween_property(player, "global_position:x", 263.0, 1.8)
+	tween2.tween_property(player, "global_position:x", 263.0, 4.0)
 	await tween2.finished
 	
-	# Mago para em frente à mesa olhado para CIMA
+	# 3. Mago para em frente à mesa olhado para CIMA
 	if sprite:
 		sprite.play("idle_cima")
 		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# Remove o pergaminho visual da mesa (pois foi coletado!)
+	# 4. Remove o pergaminho visual da mesa (pois foi coletado!)
 	var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
 	if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
 		if pergaminho_mesa.has_method("_remover_prompt_tela"):
 			pergaminho_mesa._remover_prompt_tela()
 		pergaminho_mesa.queue_free()
 		
-	# Salva no Inventário (Grimório)
+	# 5. Salva no Inventário (Grimório)
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
 
-	# Abre a interface do Pergaminho na tela com os textos de lore
+	# 6. Abre a interface do Pergaminho na tela com os textos de lore
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
