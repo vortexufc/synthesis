@@ -15,7 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_mgcqj"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_yo20j"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="15_gt6bf"]
-[ext_resource type="PackedScene" uid="uid://cbau_pergaminho_01" path="res://scenes/bau.tscn" id="16_bau"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="16_pergaminho"]
 
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dpstn"]
@@ -320,6 +320,6 @@ position = Vector2(195, 249)
 position = Vector2(585, 1076)
 porta_de_retorno = true
 
-[node name="BauPergaminho" parent="." instance=ExtResource("16_bau")]
+[node name="pergaminho" parent="." instance=ExtResource("16_pergaminho")]
 position = Vector2(400, 350)
 

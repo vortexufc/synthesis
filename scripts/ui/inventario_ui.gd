@@ -87,6 +87,13 @@ func _process(_delta: float) -> void:
 		_toggle_inventario()
 
 func _toggle_inventario() -> void:
+	var ui_pergaminho = get_tree().get_first_node_in_group("parchment_ui")
+	if ui_pergaminho and ui_pergaminho.visible:
+		if ui_pergaminho.has_method("_fechar_pergaminho"):
+			ui_pergaminho._fechar_pergaminho()
+		else:
+			ui_pergaminho.hide()
+
 	visible = !visible
 	
 	var em_batalha = (QuizManager.ui_instancia != null and QuizManager.ui_instancia.visible)
@@ -217,6 +224,7 @@ func _on_btn_acao_pressionado() -> void:
 				ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
 			if ui and ui.has_method("abrir_pergaminho"):
 				visible = false
+				get_tree().paused = false
 				ui.abrir_pergaminho(paginas_cast, null)
 			else:
 				_abrir_leitura(doc["titulo"], doc["texto"])

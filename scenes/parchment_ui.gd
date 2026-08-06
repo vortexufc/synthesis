@@ -209,7 +209,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func abrir_pergaminho(paginas: Array[String], player: Node2D = null) -> void:
 	paginas_do_texto = paginas
 	player_ref = player
-	if player_ref:
+	if player_ref == null:
+		player_ref = get_tree().get_first_node_in_group("player") as Node2D
+		
+	if player_ref and is_instance_valid(player_ref):
 		player_ref.travado = true
 		
 	pagina_atual = 0
@@ -253,6 +256,8 @@ func _avancar_pagina() -> void:
 
 func _fechar_pergaminho() -> void:
 	hide()
-	if player_ref:
+	if player_ref and is_instance_valid(player_ref):
 		player_ref.travado = false
 		player_ref = null
+	if get_tree().paused:
+		get_tree().paused = false

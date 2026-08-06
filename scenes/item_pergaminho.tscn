@@ -1,17 +1,22 @@
 [gd_scene format=3 uid="uid://dbwrhq475e5aa"]
 
-[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="1_7kjbd"]
+[ext_resource type="Texture2D" uid="uid://iwhsatj38hml" path="res://assets/sprites/pergaminho.png" id="1_7kjbd"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fechado"]
+atlas = ExtResource("1_7kjbd")
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_30uds"]
-size = Vector2(145, 80)
+size = Vector2(64, 64)
 
 [node name="ItemPergaminho" type="Area2D" unique_id=5566512]
+scale = Vector2(0.75, 0.75)
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=612083815]
-position = Vector2(579.5, 307)
-scale = Vector2(0.14355467, 0.07617189)
-texture = ExtResource("1_7kjbd")
+position = Vector2(0, 0)
+texture = SubResource("AtlasTexture_fechado")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=410914071]
-position = Vector2(579, 307)
+position = Vector2(0, 0)
 shape = SubResource("RectangleShape2D_30uds")
+

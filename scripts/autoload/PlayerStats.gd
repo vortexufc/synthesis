@@ -27,12 +27,8 @@ func _inicializar_dados_padrao():
 	itens.clear()
 	grimorio.clear()
 	
-	# itens iniciais pra testar
+	# itens iniciais pra testar (apenas pocoes, grimorio comeca totalmente vazio)
 	pocoes.append({"nome": "Poção de Vida", "qtd": 2, "cura": 50, "desc": "Cura 50 HP"})
-	grimorio.append({
-		"titulo": "Anotação de um Aluno", 
-		"texto": "Pelo visto, a magia dessa torre tem muito a ver com a Física do colégio... Percebi que os Golems de pedra ficam mais lentos quando a gravidade aumenta. Preciso revisar minhas anotações de Dinâmica antes de subir pro próximo andar!"
-	})
 	salvar()
 
 func salvar():
@@ -56,12 +52,23 @@ func carregar():
 			vida_atual_jogador = vida_maxima_jogador # reseta hp inicial
 			pocoes = data.get("pocoes", [])
 			itens = data.get("itens", [])
-			grimorio = data.get("grimorio", [])
+			
+			# Limpa o grimório para remover quaisquer pergaminhos antigos salvos anteriormente
+			grimorio.clear()
+			salvar()
+			
 			vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 		else:
 			_inicializar_dados_padrao()
 	else:
 		_inicializar_dados_padrao()
+
+
+## Limpa todos os pergaminhos salvos no Grimório
+func limpar_grimorio() -> void:
+	grimorio.clear()
+	salvar()
+
 
 # funcao pra healar
 func curar_vida(valor: float) -> void:
