@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa, passos sincronizados e transição ao fechar o pergaminho.
+## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa, tochas destacadas e transição para normal ao fechar o pergaminho.
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -13,11 +13,12 @@ extends Node2D
 
 var _canvas_iluminacao: CanvasLayer = null
 var _overlay_escuro: ColorRect = null
+var _canvas_tochas_destaque: CanvasLayer = null
 
 func _ready() -> void:
 	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.tocar_cutscene_inicial:
 		DungeonGenerator.tocar_cutscene_inicial = false
-		# Aplica a iluminação escura imediatamente no _ready() para a cena já nascer escura desde a transição
+		# Aplica a iluminação escura e o destaque das tochas imediatamente no _ready()
 		_aplicar_iluminacao_escura(true)
 		call_deferred("_executar_cutscene_inicial")
 
@@ -113,14 +114,38 @@ func _aplicar_iluminacao_escura(instantanea: bool = false) -> void:
 		tween.tween_property(_overlay_escuro, "color:a", 0.65, 0.9)
 		
 	_canvas_iluminacao.add_child(_overlay_escuro)
+	
+	# Destaca as tochas sobre o filtro escuro
+	_destacar_tochas()
+
+func _destacar_tochas() -> void:
+	var node_tochas = find_child("Tochas", true, false)
+	if node_tochas and node_tochas is TileMapLayer:
+		_canvas_tochas_destaque = CanvasLayer.new()
+		_canvas_tochas_destaque.name = "TochasDestaque"
+		_canvas_tochas_destaque.layer = 6 # Acima do overlay escuro (layer 5)
+		add_child(_canvas_tochas_destaque)
+		
+		var tochas_clone = node_tochas.duplicate() as TileMapLayer
+		tochas_clone.modulate = Color(1.5, 1.2, 0.7, 1.0) # Brilho quente alaranjado
+		_canvas_tochas_destaque.add_child(tochas_clone)
 
 func _restaurar_iluminacao_normal() -> void:
 	if _overlay_escuro and is_instance_valid(_overlay_escuro):
 		var tween = create_tween().set_trans(Tween.TRANS_SINE)
 		tween.tween_property(_overlay_escuro, "color:a", 0.0, 0.8)
+		
+		if _canvas_tochas_destaque and is_instance_valid(_canvas_tochas_destaque):
+			var tween_tochas = create_tween().set_trans(Tween.TRANS_SINE)
+			tween_tochas.tween_property(_canvas_tochas_destaque, "modulate:a", 0.0, 0.8)
+			
 		await tween.finished
 		
 	if _canvas_iluminacao and is_instance_valid(_canvas_iluminacao):
 		_canvas_iluminacao.queue_free()
 		_canvas_iluminacao = null
 		_overlay_escuro = null
+		
+	if _canvas_tochas_destaque and is_instance_valid(_canvas_tochas_destaque):
+		_canvas_tochas_destaque.queue_free()
+		_canvas_tochas_destaque = null
