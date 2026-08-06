@@ -1,7 +1,7 @@
 extends Node2D
 
 ## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game ao clicar em Jogar: desloca o mago ate a mesa, coleta o pergaminho e o remove da mesa.
+## Executa a cutscene in-game ao clicar em Jogar: desloca o mago ate a mesa em (263, 670), coleta o pergaminho e o remove da mesa.
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -28,26 +28,26 @@ func _executar_cutscene_inicial() -> void:
 	player.travado = true
 	
 	# Ponto inicial do jogador na entrada da sala
-	player.global_position = Vector2(580, 750)
+	player.global_position = Vector2(580, 946)
 	
 	var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
 	if sprite:
 		sprite.play("correr_cima")
 		
-	# 1. Deslocamento vertical para CIMA até Y=300
+	# 1. Deslocamento vertical para CIMA até Y=710
 	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween.tween_property(player, "global_position:y", 300.0, 2.2)
+	tween.tween_property(player, "global_position:y", 710.0, 1.2)
 	await tween.finished
 	
-	# 2. Mudança de direção para a ESQUERDA até a mesa (X=250, Y=300)
+	# 2. Mudança de direção para a ESQUERDA até a mesa (X=263, Y=710)
 	if sprite:
 		sprite.play("correr_esquerda")
 		
 	var tween2 = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween2.tween_property(player, "global_position:x", 250.0, 2.0)
+	tween2.tween_property(player, "global_position:x", 263.0, 1.8)
 	await tween2.finished
 	
-	# 3. Mago para em frente à mesa olhado para CIMA
+	# 3. Mago para em frente à mesa olhado para CIMA (em direção a 263, 670)
 	if sprite:
 		sprite.play("idle_cima")
 		
