@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_b0m00"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_7pd2d"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="13_xjwd6"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="14_a7t4o"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="15_k6hmh"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_6h2v4"]
 
@@ -447,6 +448,9 @@ scale = Vector2(1.921875, 1.734375)
 texture = ExtResource("2_70kuw")
 region_enabled = true
 region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
+
+[node name="pergaminho" parent="PortaTransicao" unique_id=706257676 instance=ExtResource("14_a7t4o")]
+position = Vector2(-666, 585)
 
 [node name="PortaRetorno" parent="." unique_id=926234218 instance=ExtResource("13_xjwd6")]
 position = Vector2(738, 1935)

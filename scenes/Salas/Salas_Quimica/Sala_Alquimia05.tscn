@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="16_dx6ka"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="17_70m7x"]
 [ext_resource type="PackedScene" uid="uid://dr2arlg1ikn1s" path="res://scenes/Entidades/Slimes/slime_p01.tscn" id="17_np3qt"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="19_ygk28"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k0jjw"]
 texture = ExtResource("2_dx6ka")
@@ -1802,3 +1803,6 @@ porta_de_retorno = true
 
 [node name="Slime_P" parent="." unique_id=2088489146 instance=ExtResource("17_np3qt")]
 position = Vector2(902, 477)
+
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_ygk28")]
+position = Vector2(129, 344)

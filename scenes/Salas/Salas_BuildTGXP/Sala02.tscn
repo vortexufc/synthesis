@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="17_ybsj0"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="18_5jaf4"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="19_e6l1b"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="19_lc3mn"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1exg0"]
 texture = ExtResource("2_jfcty")
@@ -356,3 +357,6 @@ region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 [node name="PortaRetorno" parent="." unique_id=1599429262 instance=ExtResource("19_e6l1b")]
 position = Vector2(585, 1077)
 porta_de_retorno = true
+
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_lc3mn")]
+position = Vector2(324, 863)

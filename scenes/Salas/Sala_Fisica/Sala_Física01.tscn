@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_t3e3b"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="14_um6bs"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="15_imiam"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="16_3407d"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_ijptx"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdngi"]
@@ -470,3 +471,6 @@ scale = Vector2(1.2, 1.2)
 [node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("16_ijptx")]
 position = Vector2(303, 558)
 scale = Vector2(1.2, 1.2)
+
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_3407d")]
+position = Vector2(757, 1269)
