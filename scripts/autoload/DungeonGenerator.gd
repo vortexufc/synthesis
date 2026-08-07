@@ -5,7 +5,7 @@ var sala_inicial = "res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn"
 var sala_01 = "res://scenes/Salas/Salas_BuildTGXP/Sala01.tscn"
 var sala_boss_alquimia = "res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"
 
-# Pool das 12 novas salas aleatórias
+# Pool das 12 novas salas aleatórias de Química
 var salas_alquimia: Array = [
 	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia01.tscn",
 	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia02.tscn",
@@ -19,6 +19,22 @@ var salas_alquimia: Array = [
 	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia10.tscn",
 	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia11.tscn",
 	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia12.tscn"
+]
+
+# Pool das 12 salas de Física
+var salas_fisica: Array = [
+	"res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física02.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física03.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física04.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física05.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física06.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física07.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física08.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física09.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física10.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física11.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn"
 ]
 
 # O percurso completo gerado para a corrida atual
@@ -101,21 +117,24 @@ func resetar_masmorra() -> void:
 	inimigos_derrotados.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
 	
-	# 1. Injeta a sequência fixa e linear do Hub nas primeiras posições
-	percurso_salas.append(hub_geral)      # Índice 0
-	percurso_salas.append(sala_inicial)   # Índice 1 (Corredor)
-	percurso_salas.append(sala_01)        # Índice 2 (Sala 01)
+	var active = "Química"
+	if get_node_or_null("/root/DatabaseManager"):
+		active = DatabaseManager.active_dungeon
 	
-	# 2. Pega as 12 salas arcanas e embaralha para o resto do percurso
-	var rooms_embaralhadas = salas_alquimia.duplicate()
-	rooms_embaralhadas.shuffle()
+	# 1. Injeta a sequência fixa do Hub nas primeiras posições
+	percurso_salas.append(hub_geral)
 	
-	# 3. Consolida o restante do trajeto de forma aleatória
-	percurso_salas.append_array(rooms_embaralhadas)
-	
-	# 4. A Sala do Boss de Alquimia é sempre a última sala da masmorra
-	percurso_salas.append(sala_boss_alquimia)
-	
-	print("[DungeonGenerator] Nova Masmorra Gerada com Sucesso!")
-	print("[DungeonGenerator] Sequência: Hub Geral -> Corredor -> Corredor -> Sala01 -> [12 Salas de Alquimia Aleatórias] -> Sala Boss Alquimia")
-	print("[DungeonGenerator] Total de estágios na fila: ", percurso_salas.size())
+	if active == "Física":
+		var rooms_embaralhadas = salas_fisica.duplicate()
+		rooms_embaralhadas.shuffle()
+		percurso_salas.append_array(rooms_embaralhadas)
+		print("[DungeonGenerator] Masmorra de Física gerada com ", percurso_salas.size(), " salas.")
+	else:
+		# Padrão: Química (Alquimia)
+		percurso_salas.append(sala_inicial)   # Corredor
+		percurso_salas.append(sala_01)        # Sala 01 fixa
+		var rooms_embaralhadas = salas_alquimia.duplicate()
+		rooms_embaralhadas.shuffle()
+		percurso_salas.append_array(rooms_embaralhadas)
+		percurso_salas.append(sala_boss_alquimia)
+		print("[DungeonGenerator] Masmorra de Química gerada com ", percurso_salas.size(), " salas.")

@@ -15,8 +15,8 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_mgcqj"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_yo20j"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="15_gt6bf"]
-[ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="16_spvc0"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="16_pergaminho"]
+[ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="16_spvc0"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dpstn"]
 texture = ExtResource("2_tjhdw")
@@ -273,8 +273,8 @@ offset_right = 180.0
 offset_bottom = -25.0
 grow_horizontal = 2
 grow_vertical = 0
-alignment = 1
 theme_override_constants/separation = 25
+alignment = 1
 
 [node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1005528021]
 custom_minimum_size = Vector2(48, 48)
@@ -296,7 +296,6 @@ layout_mode = 2
 texture_normal = ExtResource("13_yo20j")
 ignore_texture_size = true
 stretch_mode = 5
-
 
 [node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1178254248]
 
@@ -330,6 +329,5 @@ region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 position = Vector2(585, 1076)
 porta_de_retorno = true
 
-[node name="pergaminho" parent="." instance=ExtResource("16_pergaminho")]
-position = Vector2(400, 350)
-
+[node name="pergaminho" parent="." unique_id=1127676117 instance=ExtResource("16_pergaminho")]
+position = Vector2(599, 847)

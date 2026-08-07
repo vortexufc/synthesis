@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="14_bdb5g"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="15_h1yly"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="16_iq703"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="17_hrefx"]
 
 [node name="Node2D" type="Node2D" unique_id=2118207864]
 
@@ -152,3 +153,6 @@ scale = Vector2(1.2, 1.2)
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("16_iq703")]
 position = Vector2(-1877, 1949)
 scale = Vector2(1.2, 1.2)
+
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("17_hrefx")]
+position = Vector2(-1077, 2355)

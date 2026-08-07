@@ -34,7 +34,6 @@ ClanManager="*res://scripts/autoload/ClanManager.gd"
 DevManager="*res://scripts/autoload/DevManager.gd"
 PergaminhoManager="*res://scripts/autoload/PergaminhoManager.gd"
 
-
 [display]
 
 window/size/viewport_width=1280

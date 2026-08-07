@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="17_b77qy"]
 [ext_resource type="PackedScene" uid="uid://c1kl1nfi3tcp2" path="res://scenes/Entidades/Slimes/slime_p04.tscn" id="17_dl6tq"]
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="17_nlicr"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="19_n1eg3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uh2dq"]
 texture = ExtResource("2_nlicr")
@@ -1885,3 +1886,6 @@ position = Vector2(1117, 484)
 
 [node name="CharacterBody2D4" parent="." unique_id=951135507 instance=ExtResource("17_dl6tq")]
 position = Vector2(1464, 633)
+
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_n1eg3")]
+position = Vector2(1849, 806)
