@@ -56,8 +56,20 @@ func _gerar_dicas_dinamicas() -> void:
 	
 	# Se as perguntas ainda não foram preparadas para esta sala, força a preparação
 	if q_manager.has_method("reset_questions"):
+		var precisa_sortear = false
 		var current_shuffled = q_manager.get("shuffled_questions")
 		if typeof(current_shuffled) != TYPE_ARRAY or current_shuffled.size() == 0:
+			precisa_sortear = true
+			
+		var sala_atual = ""
+		if get_tree() and get_tree().current_scene:
+			sala_atual = get_tree().current_scene.scene_file_path
+		
+		# Se o pergaminho estiver numa sala nova que ainda não sorteou as questões, a gente força o sorteio!
+		if q_manager.get("ultima_sala_sorteada") != sala_atual:
+			precisa_sortear = true
+			
+		if precisa_sortear:
 			q_manager.reset_questions()
 			
 	var sorteados = q_manager.get("shuffled_questions")

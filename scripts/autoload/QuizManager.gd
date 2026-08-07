@@ -3,6 +3,7 @@ extends Node
 var questions = []
 var shuffled_questions = []
 var current_index = 0
+var ultima_sala_sorteada: String = ""
 
 ## [Local] Questões específicas do inimigo atual (sobrescrevem o banco)
 var _questoes_locais_ativas: Array = []
@@ -119,6 +120,9 @@ func reset_questions():
 		shuffled_questions = disponiveis
 		shuffled_questions.shuffle()
 		current_index = 0
+		
+	if get_tree() and get_tree().current_scene:
+		ultima_sala_sorteada = get_tree().current_scene.scene_file_path
 
 ## [PROG-02] Agrupa as perguntas por nível de dificuldade e embaralha dentro de cada grupo.
 ## Se a pergunta não tiver o campo nivel_progresso (perguntas antigas), usa nível 1.
@@ -232,8 +236,15 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		DatabaseManager.puxar_perguntas(_andar_atual)
 		await DatabaseManager.perguntas_recebidas
 	else:
-		# Mesmo andar, filtra e embaralha as perguntas restantes para a batalha
-		reset_questions()
+		# Mesmo andar. Se já sorteamos as perguntas quando o pergaminho dessa sala foi lido, não sorteamos de novo pra não desalinhar as dicas!
+		var sala_atual = ""
+		if get_tree() and get_tree().current_scene:
+			sala_atual = get_tree().current_scene.scene_file_path
+			
+		if ultima_sala_sorteada != sala_atual:
+			reset_questions()
+		else:
+			print("[QuizManager] As perguntas desta sala já haviam sido sorteadas pelo Pergaminho. Mantendo-as.")
 
 	print("[Dev-1 / Combat-4] Batalha: %d questões / %.0fs — Andar %d" % [_num_questoes, _duracao_batalha, _andar_atual])
 
