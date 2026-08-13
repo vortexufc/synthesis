@@ -286,7 +286,7 @@ func _transacionar_porta() -> void:
 			_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul
 			await get_tree().create_timer(0.4).timeout
 			
-		TransitionScreen.change_scene(cena_alvo)
+		TransitionScreen.change_scene(cena_alvo, porta_de_retorno)
 
 func _on_body_entered(body: Node2D) -> void:
 	if _cooldown_ativo:
