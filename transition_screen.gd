@@ -35,13 +35,13 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 		await _tocar_animacao_corredor(vp_size, porta_de_retorno)
 	else:
 		# Pausa super rápida enquanto a tela tá preta
-		await get_tree().create_timer(0.3, false, false, true).timeout
+		await get_tree().create_timer(0.3, true, false, true).timeout
 
 	# Muda a cena de verdade no jogo
 	get_tree().change_scene_to_file(target_scene)
 	
 	# Faz um tempinho pro novo mapa carregar
-	await get_tree().create_timer(0.1, false, false, true).timeout
+	await get_tree().create_timer(0.1, true, false, true).timeout
 	
 	# Fade Out (voltando a clarear)
 	var tween_out = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -49,6 +49,9 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	await tween_out.finished
 	
 	black_bg.queue_free()
+	
+	# Garante que, ao carregar a nova sala, o jogo não fique pausado (caso algum monstro tenha pausado durante o fade)
+	get_tree().paused = false
 	get_tree().get_root().set_disable_input(false)
 
 func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:

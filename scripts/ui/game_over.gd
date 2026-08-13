@@ -124,7 +124,6 @@ func _finalizar_vitoria() -> void:
 
 func _on_tentar_novamente_pressed() -> void:
 	hide()
-	get_tree().paused = false
 	AudioManager.play_sfx("ui-2")
 	PlayerStats.resetar_vida()
 	QuizManager.fechar_ui_batalha()
@@ -136,7 +135,6 @@ func _on_tentar_novamente_pressed() -> void:
 
 func _on_menu_principal_pressed() -> void:
 	hide()
-	get_tree().paused = false
 	AudioManager.play_sfx("ui-2")
 	PlayerStats.resetar_vida()
 	QuizManager.fechar_ui_batalha()
