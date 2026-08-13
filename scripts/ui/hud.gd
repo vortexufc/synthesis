@@ -20,8 +20,15 @@ func _ready() -> void:
 
 func atualizar_vida(atual: float, maxima: float) -> void:
 	var pct = clamp(atual / maxima, 0.0, 1.0)
+	var target_w = max(0.0, max_width * pct)
 	
+	if target_w > 0:
+		fill.visible = true
+		
 	var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tween.tween_property(fill, "size:x", max(0.0, max_width * pct), 0.3)
+	tween.tween_property(fill, "size:x", target_w, 0.3)
 	
-	text_label.text = str(int(atual)) + " / " + str(int(maxima))
+	if target_w <= 0:
+		tween.finished.connect(func(): fill.visible = false, CONNECT_ONE_SHOT)
+	
+	text_label.text = str(max(0, int(atual))) + " / " + str(int(maxima))

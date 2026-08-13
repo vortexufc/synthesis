@@ -72,9 +72,14 @@ func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 		else:
 			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true
 func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
-	var pct = atual / maxima
+	var pct = clamp(atual / maxima, 0.0, 1.0)
+	var target_w = max(0.0, 200.0 * pct)
+	if target_w > 0:
+		health_player_fill.visible = true
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	t.tween_property(health_player_fill, "size:x", max(0.0, 200.0 * pct), 0.5)
+	t.tween_property(health_player_fill, "size:x", target_w, 0.5)
+	if target_w <= 0:
+		t.finished.connect(func(): health_player_fill.visible = false, CONNECT_ONE_SHOT)
 
 func _process(delta: float) -> void:
 	if self.visible and tempo_rodando:
@@ -118,12 +123,27 @@ func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 			_botoes[i].hide()
 
 func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
+	pct_player = clamp(pct_player, 0.0, 1.0)
+	pct_enemy = clamp(pct_enemy, 0.0, 1.0)
+	var target_p = max(0.0, 200.0 * pct_player)
+	var target_e = max(0.0, 230.0 * pct_enemy)
+	
+	if target_p > 0:
+		health_player_fill.visible = true
+	if target_e > 0:
+		health_enemy_fill.visible = true
+		
 	# tween de pausa senao a animacao nao toca
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
 	
 	# tamanho do retangulo (200px / 230px)
-	t.tween_property(health_player_fill, "size:x", max(0.0, 200.0 * pct_player), 0.5)
-	t.tween_property(health_enemy_fill, "size:x", max(0.0, 230.0 * pct_enemy), 0.5)
+	t.tween_property(health_player_fill, "size:x", target_p, 0.5)
+	t.tween_property(health_enemy_fill, "size:x", target_e, 0.5)
+	
+	if target_p <= 0:
+		t.finished.connect(func(): health_player_fill.visible = false, CONNECT_ONE_SHOT)
+	if target_e <= 0:
+		t.finished.connect(func(): health_enemy_fill.visible = false, CONNECT_ONE_SHOT)
 
 func _on_botao_pressionado(indice: int) -> void:
 	# [BugFix] Ignora cliques duplicados ou re-entrada do timer
