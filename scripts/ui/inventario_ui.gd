@@ -12,8 +12,18 @@ extends CanvasLayer
 @onready var label_titulo_leitura = $Control/PainelLeitura/Margem/VBox/LabelTitulo
 @onready var label_texto_leitura = $Control/PainelLeitura/Margem/VBox/LabelTexto
 @onready var btn_fechar_leitura = $Control/PainelLeitura/Margem/VBox/BtnFecharLeitura
+@onready var margem_leitura = $Control/PainelLeitura/Margem
 
 var item_selecionado: Dictionary = {}
+var paginas_leitura: Array[String] = []
+var pagina_atual: int = 0
+var btn_anterior: Button
+var btn_proxima: Button
+
+var tex_pocao = preload("res://assets/sprites/vida.png")
+var tex_pergaminho = preload("res://assets/sprites/pergaminho.png")
+var atlas_pergaminho_fechado: AtlasTexture
+var atlas_pergaminho_aberto: AtlasTexture
 
 func _ready() -> void:
 	visible = false
@@ -22,6 +32,52 @@ func _ready() -> void:
 	
 	btn_acao.pressed.connect(_on_btn_acao_pressionado)
 	_limpar_detalhes()
+	
+	atlas_pergaminho_fechado = AtlasTexture.new()
+	atlas_pergaminho_fechado.atlas = tex_pergaminho
+	atlas_pergaminho_fechado.region = Rect2(0, 0, 64, 64)
+	
+	atlas_pergaminho_aberto = AtlasTexture.new()
+	atlas_pergaminho_aberto.atlas = tex_pergaminho
+	atlas_pergaminho_aberto.region = Rect2(64, 0, 64, 64)
+	
+	# Adiciona o fundo de pergaminho aberto dinamicamente
+	var fundo_pergaminho = TextureRect.new()
+	fundo_pergaminho.texture = atlas_pergaminho_aberto
+	fundo_pergaminho.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fundo_pergaminho.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	fundo_pergaminho.modulate = Color(1.0, 1.0, 1.0, 0.4) # Retorna a transparência que você gostou
+	fundo_pergaminho.set_anchors_preset(Control.PRESET_FULL_RECT)
+	painel_leitura.add_child(fundo_pergaminho)
+	painel_leitura.move_child(fundo_pergaminho, 1) # Logo acima do ColorRect de fundo escuro
+	
+	# Ajusta as margens para o texto ficar DENTRO da parte clara do pergaminho desenhado
+	margem_leitura.add_theme_constant_override("margin_left", 380)
+	margem_leitura.add_theme_constant_override("margin_right", 380)
+	margem_leitura.add_theme_constant_override("margin_top", 170)
+	margem_leitura.add_theme_constant_override("margin_bottom", 170)
+	
+	# Cria botões de paginação dinamicamente
+	var hbox_nav = HBoxContainer.new()
+	hbox_nav.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox_nav.add_theme_constant_override("separation", 20)
+	
+	btn_anterior = Button.new()
+	btn_anterior.text = " < Anterior "
+	btn_anterior.pressed.connect(_pagina_anterior)
+	
+	btn_proxima = Button.new()
+	btn_proxima.text = " Próxima > "
+	btn_proxima.pressed.connect(_pagina_proxima)
+	
+	var vbox = btn_fechar_leitura.get_parent()
+	vbox.remove_child(btn_fechar_leitura)
+	
+	hbox_nav.add_child(btn_anterior)
+	hbox_nav.add_child(btn_fechar_leitura)
+	hbox_nav.add_child(btn_proxima)
+	
+	vbox.add_child(hbox_nav)
 	
 	# faz o menu funcionar com jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS 
@@ -56,6 +112,10 @@ func _atualizar_listas() -> void:
 			var btn = Button.new()
 			btn.custom_minimum_size = Vector2(100, 100)
 			btn.text = po["nome"] + "\n(x" + str(po["qtd"]) + ")"
+			btn.icon = tex_pocao
+			btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			btn.expand_icon = true
 			# quando clica, mostra os detalhes na direita
 			btn.pressed.connect(func(): _selecionar_item(po, "pocao", i))
 			grid_pocoes.add_child(btn)
@@ -80,7 +140,11 @@ func _atualizar_listas() -> void:
 			var doc = PlayerStats.grimorio[i]
 			var btn = Button.new()
 			btn.custom_minimum_size = Vector2(100, 100)
-			btn.text = "📖\n" + doc["titulo"]
+			btn.text = doc["titulo"]
+			btn.icon = atlas_pergaminho_fechado
+			btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			btn.expand_icon = true
 			btn.pressed.connect(func(): _selecionar_item(doc, "grimorio", i))
 			grid_grimorio.add_child(btn)
 
@@ -148,8 +212,36 @@ func _on_btn_acao_pressionado() -> void:
 
 func _abrir_leitura(titulo: String, texto: String) -> void:
 	label_titulo_leitura.text = titulo
-	label_texto_leitura.text = texto
+	
+	# Divide o texto em páginas usando "|" ou quebras grandes se necessário
+	# Caso os designers queiram quebrar página manualmente, eles usarão "|"
+	if texto.contains("|"):
+		paginas_leitura = Array(texto.split("|", false))
+	else:
+		# Se não tiver separador manual, coloca tudo na página 1 (no futuro pode usar lógica de limite de chars)
+		paginas_leitura = [texto]
+		
+	pagina_atual = 0
+	_atualizar_pagina()
 	painel_leitura.visible = true
+
+func _atualizar_pagina() -> void:
+	if paginas_leitura.is_empty(): return
+	
+	label_texto_leitura.text = paginas_leitura[pagina_atual].strip_edges()
+	
+	btn_anterior.visible = (pagina_atual > 0)
+	btn_proxima.visible = (pagina_atual < paginas_leitura.size() - 1)
+
+func _pagina_anterior() -> void:
+	if pagina_atual > 0:
+		pagina_atual -= 1
+		_atualizar_pagina()
+
+func _pagina_proxima() -> void:
+	if pagina_atual < paginas_leitura.size() - 1:
+		pagina_atual += 1
+		_atualizar_pagina()
 
 func _fechar_leitura() -> void:
 	painel_leitura.visible = false

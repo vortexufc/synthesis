@@ -321,6 +321,17 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
 	var dano_final = 0
 	
+	# POST RESPOSTA PARA ESTATÍSTICA DO PAINEL ADMIN
+	if pergunta_atual.has("id"):
+		var data_resp = {
+			"pergunta_id": int(pergunta_atual["id"]),
+			"acertou": acertou,
+			"andar_id": int(pergunta_atual.get("andar_id", 1)),
+			"aluno_nick": DatabaseManager.user_nick
+		}
+		# Fogo e esquece (fire and forget)
+		DatabaseManager.request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, data_resp)
+	
 	if acertou:
 		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)
 		dano_final = 10 + int(25 * rapidez)
