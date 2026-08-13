@@ -7,6 +7,10 @@
 [ext_resource type="Texture2D" uid="uid://bxnoitoqop8gj" path="res://assets/sprites/Particles/projetil_magia_rastro.png" id="5_kepm2"]
 [ext_resource type="Texture2D" uid="uid://d20kl4h5r0lcj" path="res://assets/sprites/Particles/projetil_magia.png" id="6_su8ar"]
 [ext_resource type="Texture2D" uid="uid://ba6y2xhk7xul2" path="res://assets/sprites/Particles/projetil_magia_rastro2.png" id="7_su8ar"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_heart.png" id="8_heart"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_bg.png" id="9_barbg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_green.png" id="10_fillgreen"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_red.png" id="11_fillred"]
 
 [sub_resource type="Animation" id="Animation_iggoh"]
 length = 0.001
@@ -282,21 +286,103 @@ sprite_frames = ExtResource("3_su8ar")
 autoplay = "default"
 flip_h = true
 
-[node name="HealthPlayer" type="ColorRect" parent="Control" unique_id=1149034248]
+[node name="HealthPlayer" type="Control" parent="Control" unique_id=1149034248]
 layout_mode = 0
 offset_left = 130.0
 offset_top = 170.0
 offset_right = 330.0
-offset_bottom = 190.0
-color = Color(0, 0.8, 0.100001, 1)
+offset_bottom = 194.0
+mouse_filter = 2
 
-[node name="HealthEnemy" type="ColorRect" parent="Control" unique_id=1733765942]
+[node name="HeartIcon" type="TextureRect" parent="Control/HealthPlayer"]
+texture_filter = 1
+layout_mode = 0
+offset_left = -34.0
+offset_top = -3.0
+offset_right = -4.0
+offset_bottom = 27.0
+texture = ExtResource("8_heart")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="HealthBarBG" type="NinePatchRect" parent="Control/HealthPlayer"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_barbg")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+mouse_filter = 2
+
+[node name="HealthBarFill" type="NinePatchRect" parent="Control/HealthPlayer"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 200.0
+grow_vertical = 2
+texture = ExtResource("10_fillgreen")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+mouse_filter = 2
+
+[node name="HealthEnemy" type="Control" parent="Control" unique_id=1733765942]
 layout_mode = 0
 offset_left = 750.0
 offset_top = 233.0
 offset_right = 980.0
-offset_bottom = 253.0
-color = Color(0.8, 0, 0.100001, 1)
+offset_bottom = 257.0
+mouse_filter = 2
+
+[node name="HeartIcon" type="TextureRect" parent="Control/HealthEnemy"]
+texture_filter = 1
+layout_mode = 0
+offset_left = -34.0
+offset_top = -3.0
+offset_right = -4.0
+offset_bottom = 27.0
+texture = ExtResource("8_heart")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="HealthBarBG" type="NinePatchRect" parent="Control/HealthEnemy"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_barbg")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+mouse_filter = 2
+
+[node name="HealthBarFill" type="NinePatchRect" parent="Control/HealthEnemy"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 230.0
+grow_vertical = 2
+texture = ExtResource("11_fillred")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+mouse_filter = 2
 
 [node name="TimerPainel" type="ColorRect" parent="Control" unique_id=1340639034]
 layout_mode = 1

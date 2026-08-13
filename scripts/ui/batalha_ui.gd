@@ -10,8 +10,10 @@ signal resposta_escolhida(indice: int, tempo_usado: float)
 @onready var btn_e: Button = $Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons/BtnE
 @onready var label_tempo: Label = $Control/TimerPainel/TextoTempo
 
-@onready var health_player: ColorRect = $Control/HealthPlayer
-@onready var health_enemy: ColorRect = $Control/HealthEnemy
+@onready var health_player: Control = $Control/HealthPlayer
+@onready var health_enemy: Control = $Control/HealthEnemy
+@onready var health_player_fill: NinePatchRect = $Control/HealthPlayer/HealthBarFill
+@onready var health_enemy_fill: NinePatchRect = $Control/HealthEnemy/HealthBarFill
 
 var _botoes: Array = []
 
@@ -72,7 +74,7 @@ func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 	var pct = atual / maxima
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	t.tween_property(health_player, "size:x", max(0.0, 200.0 * pct), 0.5)
+	t.tween_property(health_player_fill, "size:x", max(0.0, 200.0 * pct), 0.5)
 
 func _process(delta: float) -> void:
 	if self.visible and tempo_rodando:
@@ -120,8 +122,8 @@ func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
 	
 	# tamanho do retangulo (200px / 230px)
-	t.tween_property(health_player, "size:x", max(0.0, 200.0 * pct_player), 0.5)
-	t.tween_property(health_enemy, "size:x", max(0.0, 230.0 * pct_enemy), 0.5)
+	t.tween_property(health_player_fill, "size:x", max(0.0, 200.0 * pct_player), 0.5)
+	t.tween_property(health_enemy_fill, "size:x", max(0.0, 230.0 * pct_enemy), 0.5)
 
 func _on_botao_pressionado(indice: int) -> void:
 	# [BugFix] Ignora cliques duplicados ou re-entrada do timer

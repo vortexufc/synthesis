@@ -1,7 +1,9 @@
 extends CanvasLayer
 
-@onready var fill: ColorRect = $Control/HealthBarFill
+@onready var fill: NinePatchRect = $Control/HealthBarContainer/HealthBarFill
 @onready var text_label: Label = $Control/HealthText
+
+var max_width: float = 200.0
 
 func _ready() -> void:
 	# liga a barra quando der play
@@ -20,6 +22,6 @@ func atualizar_vida(atual: float, maxima: float) -> void:
 	var pct = clamp(atual / maxima, 0.0, 1.0)
 	
 	var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tween.tween_property(fill, "size:x", 200.0 * pct, 0.3)
+	tween.tween_property(fill, "size:x", max(0.0, max_width * pct), 0.3)
 	
 	text_label.text = str(int(atual)) + " / " + str(int(maxima))

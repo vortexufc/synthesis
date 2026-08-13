@@ -17,9 +17,51 @@ var panel_prompt: PanelContainer = null
 signal dicas_geradas
 var _gerando_dicas: bool = false
 
+var _tween_brilho: Tween
+var _tween_glow: Tween
+var _tween_bob: Tween
+
 func _ready() -> void:
 	body_entered.connect(_quando_corpo_entra)
 	body_exited.connect(_quando_corpo_sai)
+	_iniciar_efeito_brilho()
+
+func _iniciar_efeito_brilho() -> void:
+	var sprite: Sprite2D = get_node_or_null("PergaminhoSprite") as Sprite2D
+	if sprite == null:
+		sprite = get_node_or_null("Sprite2D") as Sprite2D
+	if sprite == null:
+		for child in get_children():
+			if child is Sprite2D and child.name != "GlowSprite":
+				sprite = child as Sprite2D
+				break
+				
+	var glow: Sprite2D = get_node_or_null("GlowSprite") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "GlowSprite"
+		var tex_glow = load("res://assets/sprites/ui/glow_yellow.png") as Texture2D
+		if tex_glow:
+			glow.texture = tex_glow
+			glow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			add_child(glow)
+			move_child(glow, 0)
+			
+	if glow:
+		glow.modulate = Color(1.0, 0.9, 0.3, 0.5)
+		_tween_glow = create_tween().set_loops()
+		_tween_glow.tween_property(glow, "modulate:a", 0.85, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_tween_glow.tween_property(glow, "modulate:a", 0.35, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		
+	if sprite:
+		_tween_brilho = create_tween().set_loops()
+		_tween_brilho.tween_property(sprite, "modulate", Color(1.7, 1.45, 0.35, 1.0), 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_tween_brilho.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		
+		var pos_y = sprite.position.y
+		_tween_bob = create_tween().set_loops()
+		_tween_bob.tween_property(sprite, "position:y", pos_y - 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_tween_bob.tween_property(sprite, "position:y", pos_y + 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _gerar_dicas_dinamicas() -> void:
 	if not eh_pergaminho_de_dicas: return
