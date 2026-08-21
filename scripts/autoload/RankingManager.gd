@@ -158,7 +158,7 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		existe = true
 
 	var subj = ""
-	if DatabaseManager.has_property("active_dungeon"):
+	if "active_dungeon" in DatabaseManager:
 		subj = DatabaseManager.active_dungeon
 		
 	var novo_score:         int = score_atual + pontos_novos
@@ -437,12 +437,12 @@ func fundir_conta_guest(nick_real: String, cla_real: String) -> void:
 			if ClanManager.has_method("adicionar_pontos_cla"):
 				await ClanManager.adicionar_pontos_cla(cla_real, nick_real, score_acumulado)
 
-	# [Segurança] Destrói o Guest para evitar duplicação
-	local_guest_nick = ""
-	if FileAccess.file_exists(GUEST_FILE):
-		DirAccess.remove_absolute(GUEST_FILE)
-	
 	# E remove a entrada do guest do RANKING_FILE, mas mantém o resto!
 	_remover_player_local(local_guest_nick)
+
+	# [Segurança] Destrói o Guest para evitar duplicação
+	if FileAccess.file_exists(GUEST_FILE):
+		DirAccess.remove_absolute(GUEST_FILE)
+	local_guest_nick = ""
 
 	await load_ranking()
