@@ -3,6 +3,7 @@ extends Control
 var tabela_dados: VBoxContainer
 var lbl_total_alunos: Label
 var lbl_taxa_acerto: Label
+var lbl_total_jogadores: Label
 var lbl_disciplina: Label
 
 var disciplinas = ["Física", "Química", "Biologia"]
@@ -48,6 +49,16 @@ func _ready() -> void:
 	separador.custom_minimum_size = Vector2(20, 0)
 	cabecalho_hbox.add_child(separador)
 	
+	var btn_add = Button.new()
+	btn_add.text = " ➕ Adicionar Questões "
+	btn_add.add_theme_color_override("font_color", Color.GREEN)
+	btn_add.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/adicionar_perguntas.tscn"))
+	cabecalho_hbox.add_child(btn_add)
+	
+	var separador2 = Control.new()
+	separador2.custom_minimum_size = Vector2(20, 0)
+	cabecalho_hbox.add_child(separador2)
+	
 	var btn_voltar = Button.new()
 	btn_voltar.text = "Voltar ao Jogo"
 	btn_voltar.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn"))
@@ -58,12 +69,13 @@ func _ready() -> void:
 	hbox_dash.add_theme_constant_override("separation", 30)
 	vbox_principal.add_child(hbox_dash)
 	
-	lbl_total_alunos = _criar_card(hbox_dash, "Total de Jogadores", "Carregando...")
+	lbl_total_alunos = _criar_card(hbox_dash, "Total de Perguntas", "Carregando...")
 	lbl_taxa_acerto = _criar_card(hbox_dash, "Taxa de Acerto (Geral)", "Carregando...")
+	lbl_total_jogadores = _criar_card(hbox_dash, "Total de Jogadores", "Carregando...")
 	
 	# Raio-X das Questões
 	var lbl_raio_x = Label.new()
-	lbl_raio_x.text = "Raio-X das Questões (Mais Erradas para Acertadas)"
+	lbl_raio_x.text = "Desempenho por Questão (Das Mais Erradas para as Mais Acertadas)"
 	lbl_raio_x.add_theme_font_size_override("font_size", 20)
 	vbox_principal.add_child(lbl_raio_x)
 	
@@ -105,20 +117,40 @@ func _ready() -> void:
 func _criar_card(parent: Control, titulo: String, valor: String) -> Label:
 	var panel = PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.15, 0.16, 0.22, 1.0)
+	style.corner_radius_top_left = 15
+	style.corner_radius_top_right = 15
+	style.corner_radius_bottom_left = 15
+	style.corner_radius_bottom_right = 15
+	style.shadow_color = Color(0, 0, 0, 0.4)
+	style.shadow_size = 5
+	style.shadow_offset = Vector2(0, 4)
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 15
+	style.content_margin_bottom = 15
+	panel.add_theme_stylebox_override("panel", style)
+	
 	parent.add_child(panel)
 	
 	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 10)
 	panel.add_child(vbox)
 	
 	var lbl_tit = Label.new()
 	lbl_tit.text = titulo
 	lbl_tit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_tit.add_theme_color_override("font_color", Color(0.7, 0.7, 0.8))
+	lbl_tit.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(lbl_tit)
 	
 	var lbl_val = Label.new()
 	lbl_val.text = valor
 	lbl_val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl_val.add_theme_font_size_override("font_size", 24)
+	lbl_val.add_theme_font_size_override("font_size", 32)
+	lbl_val.add_theme_color_override("font_color", Color(1, 1, 1))
 	vbox.add_child(lbl_val)
 	
 	return lbl_val
@@ -137,10 +169,18 @@ func _mudar_disciplina(direcao: int) -> void:
 func _carregar_dados_simulados() -> void:
 	lbl_total_alunos.text = "Carregando..."
 	lbl_taxa_acerto.text = "..."
+	lbl_total_jogadores.text = "..."
 	
 	# Limpa a tabela atual
 	for child in tabela_dados.get_children():
 		child.queue_free()
+	
+	# Busca o total de jogadores
+	var res_jogadores = await DatabaseManager.request_async("/rest/v1/rankinggeral?select=player_name", HTTPClient.METHOD_GET)
+	if res_jogadores.has("success") and res_jogadores["success"] and res_jogadores.has("data"):
+		lbl_total_jogadores.text = str(res_jogadores["data"].size())
+	else:
+		lbl_total_jogadores.text = "Erro"
 	
 	# Mapeando a disciplina para o Andar correto do Banco
 	var id_andar = 1
@@ -320,14 +360,14 @@ func _confirmar_reset() -> void:
 			dir.remove("progresso.json")
 			
 		# Zera variáveis na memória dos Managers
-		if RankingManager.has_method("forcar_atualizacao"):
-			RankingManager.lista_jogadores.clear()
-			RankingManager.ranking_atualizado.emit()
+		RankingManager.ranking_geral.clear()
+		RankingManager.ranking_diario.clear()
+		RankingManager.ranking_semanal.clear()
+		RankingManager.ranking_mensal.clear()
+		RankingManager.ranking_atualizado.emit()
 		
-		if "clans_list" in ClanManager:
-			ClanManager.clans_list.clear()
-			if ClanManager.has_user_signal("clan_list_updated"):
-				ClanManager.clan_list_updated.emit()
+		ClanManager.clans_list.clear()
+		ClanManager.clan_list_updated.emit()
 			
 		print("WIPE CONCLUÍDO!")
 		popup_reset.queue_free()
