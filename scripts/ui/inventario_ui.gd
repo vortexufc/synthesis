@@ -128,16 +128,37 @@ func _atualizar_listas() -> void:
 			grid_pocoes.add_child(btn)
 			
 	# carrega os itens
-	if PlayerStats.itens.is_empty():
+	var tem_qualquer_item = false
+	
+	# Exibe as chaves separadamente se houver
+	if get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0:
+		tem_qualquer_item = true
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(100, 100)
+		btn.text = "Chave de Porta\n(x" + str(PlayerStats.chaves) + ")"
+		
+		var icone = load("res://assets/sprites/ui/icon_key.jpg")
+		if icone:
+			btn.icon = icone
+			btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			btn.expand_icon = true
+			
+		var dic_chave = {"nome": "Chave de Porta", "descricao": "Uma chave dourada brilhante capaz de abrir portas mágicas seladas."}
+		btn.pressed.connect(func(): _selecionar_item(dic_chave, "item", -1))
+		grid_itens.add_child(btn)
+		
+	for i in range(PlayerStats.itens.size()):
+		tem_qualquer_item = true
+		var item = PlayerStats.itens[i]
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(100, 100)
+		btn.text = item["nome"]
+		btn.pressed.connect(func(): _selecionar_item(item, "item", i))
+		grid_itens.add_child(btn)
+		
+	if not tem_qualquer_item:
 		_add_label_vazia(grid_itens, "Você não tem itens importantes.")
-	else:
-		for i in range(PlayerStats.itens.size()):
-			var item = PlayerStats.itens[i]
-			var btn = Button.new()
-			btn.custom_minimum_size = Vector2(100, 100)
-			btn.text = item["nome"]
-			btn.pressed.connect(func(): _selecionar_item(item, "item", i))
-			grid_itens.add_child(btn)
 			
 	# carrega as paginas do grimorio
 	if PlayerStats.grimorio.is_empty():
