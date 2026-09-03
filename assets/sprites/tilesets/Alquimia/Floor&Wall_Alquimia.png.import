@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d06rnbcrd544y"
-path="res://.godot/imported/Floor&Wall.png-9ab335c7cd617f91960571566cd2af67.ctex"
+uid="uid://cx6vlhxkagp4u"
+path="res://.godot/imported/Floor&Wall_Alquimia.png-b06acac40be93bcf18dd597556fcc199.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png"
-dest_files=["res://.godot/imported/Floor&Wall.png-9ab335c7cd617f91960571566cd2af67.ctex"]
+source_file="res://assets/sprites/tilesets/Alquimia/Floor&Wall_Alquimia.png"
+dest_files=["res://.godot/imported/Floor&Wall_Alquimia.png-b06acac40be93bcf18dd597556fcc199.ctex"]
 
 [params]
 
