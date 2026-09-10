@@ -394,6 +394,9 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			"dano": _dano_causado
 		}
 		
+		if vitoria:
+			print("[Combate] Você venceu o quiz!")
+			
 		_processando_resposta = false
 		GlobalSignals.batalha_encerrada.emit(vitoria)
 		PlayerStats.salvar()

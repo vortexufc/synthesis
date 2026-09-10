@@ -17,6 +17,10 @@
 [ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="15_gt6bf"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="16_pergaminho"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="16_spvc0"]
+[ext_resource type="PackedScene" uid="uid://cy8k7baf" path="res://scenes/Entidades/ItemChave.tscn" id="18_mgcqj"]
+[ext_resource type="PackedScene" uid="uid://b88fskp86tqc2" path="res://scenes/Entidades/ItemMoeda.tscn" id="19_yo20j"]
+[ext_resource type="PackedScene" uid="uid://crfyxl12t7qm0" path="res://scenes/Entidades/ItemLivroFormula.tscn" id="20_qyqlx"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="21_71yqb"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dpstn"]
 texture = ExtResource("2_tjhdw")
@@ -177,7 +181,7 @@ physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_74uva")
 sources/1 = SubResource("TileSetAtlasSource_5tlg5")
 
-[node name="Node2D2" type="Node2D" unique_id=1559116760]
+[node name="Node2D" type="Node2D" unique_id=1559116760]
 script = ExtResource("1_level_script")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_oxtvn")]
@@ -192,7 +196,7 @@ tile_set = SubResource("TileSet_pj2sm")
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=985691524]
 scale = Vector2(3, 3)
-tile_map_data = PackedByteArray("AAAEAAcAAAAAACQAAAAEAAsAAAAAACQAAAAEAA8AAAAAACQAAAAIAA8AAAAAACQAAAAMAA8AAAAAACQAAAAQAA8AAAAAACQAAAAUAA8AAAAAACQAAAAUAAsAAAAAACQAAAAUAAcAAAAAACQAAAAQAAcAAAAAACQAAAAMAAcAAAAAACQAAAAIAAcAAAAAACQAAAAIAAsAAAAAACQAAAAMAAsAAAAAACQAAAAQAAsAAAAAACQAAAAEABMAAAAAACQAAAAIABMAAAAAACQAAAAMABMAAAAAACQAAAAQABMAAAAAACQAAAAUABMAAAAAACQAAAACABUAAAAIACYAAAADABUAAAAIACYAAAAEABUAAAAIACYAAAAGABUAAAAIACYAAAAHABUAAAAIACYAAAAIABUAAAAIACYAAAAJABUAAAAIACYAAAAKABUAAAAIACYAAAALABUAAAAIACYAAAAMABUAAAAIACYAAAANABUAAAAIACYAAAAOABUAAAAIACYAAAAPABUAAAAIACYAAAAQABUAAAAIACYAAAARABUAAAAIACYAAAASABUAAAAIACYAAAATABUAAAAIACYAAAAUABUAAAAIACYAAAAVABUAAAAIACYAAAAFABQAAAANACQAAAAQABQAAAANACQAAAATABQAAAANACQAAAAQABIAAAANACQAAAATABIAAAANACQAAAAHABMAAAANACQAAAADABIAAAANACQAAAA=")
+tile_map_data = PackedByteArray("AAAEAAcAAAAAACQAAAAEAAsAAAAAACQAAAAEAA8AAAAAACQAAAAIAA8AAAAAACQAAAAMAA8AAAAAACQAAAAQAA8AAAAAACQAAAAUAA8AAAAAACQAAAAUAAsAAAAAACQAAAAUAAcAAAAAACQAAAAQAAcAAAAAACQAAAAMAAcAAAAAACQAAAAIAAcAAAAAACQAAAAIAAsAAAAAACQAAAAMAAsAAAAAACQAAAAQAAsAAAAAACQAAAAIABMAAAAAACQAAAAMABMAAAAAACQAAAAUABMAAAAAACQAAAACABUAAAAIACYAAAADABUAAAAIACYAAAAEABUAAAAIACYAAAAHABUAAAAIACYAAAAIABUAAAAIACYAAAAJABUAAAAIACYAAAAKABUAAAAIACYAAAALABUAAAAIACYAAAAMABUAAAAIACYAAAANABUAAAAIACYAAAAOABUAAAAIACYAAAAPABUAAAAIACYAAAAQABUAAAAIACYAAAARABUAAAAIACYAAAASABUAAAAIACYAAAATABUAAAAIACYAAAAUABUAAAAIACYAAAAVABUAAAAIACYAAAAEABMAAAAAACQAAAAGABUAAAAIACYAAAAFABQAAAANACQAAAAQABMAAAAAACQAAAAFABUAAAAIACYAAAA=")
 tile_set = SubResource("TileSet_5tlg5")
 
 [node name="Wall" type="TileMapLayer" parent="." unique_id=143540103]
@@ -327,7 +331,54 @@ region_rect = Rect2(5.178149, 12.845329, 21.942768, 38.309914)
 
 [node name="PortaRetorno" parent="." unique_id=1989116557 instance=ExtResource("15_gt6bf")]
 position = Vector2(585, 1076)
+proxima_cena = "res://scenes/Salas/Salas_BuildTGXP/Corredor.tscn"
 porta_de_retorno = true
 
 [node name="pergaminho" parent="." unique_id=1127676117 instance=ExtResource("16_pergaminho")]
 position = Vector2(599, 847)
+scale = Vector2(0.74600893, 0.68015295)
+
+[node name="ItemMoeda" parent="." unique_id=1086862922 instance=ExtResource("19_yo20j")]
+position = Vector2(328, 842)
+
+[node name="ItemMoeda2" parent="." unique_id=551682299 instance=ExtResource("19_yo20j")]
+position = Vector2(909, 399)
+
+[node name="ItemMoeda3" parent="." unique_id=14407109 instance=ExtResource("19_yo20j")]
+position = Vector2(1021, 739)
+
+[node name="ItemLivroFormula" parent="." unique_id=332044640 instance=ExtResource("20_qyqlx")]
+position = Vector2(966, 292)
+
+[node name="Tocha" parent="." unique_id=272830461 instance=ExtResource("21_71yqb")]
+position = Vector2(1054, 923)
+rotation = -0.61086524
+
+[node name="Tocha2" parent="." unique_id=1267392876 instance=ExtResource("21_71yqb")]
+position = Vector2(1047, 451)
+rotation = -0.61086524
+
+[node name="Tocha3" parent="." unique_id=1986408434 instance=ExtResource("21_71yqb")]
+position = Vector2(622, 206)
+
+[node name="Tocha4" parent="." unique_id=36539113 instance=ExtResource("21_71yqb")]
+position = Vector2(983, 207)
+rotation = -0.06981317
+
+[node name="Tocha5" parent="." unique_id=995698598 instance=ExtResource("21_71yqb")]
+position = Vector2(109, 936)
+rotation = -5.2359877
+
+[node name="Tocha6" parent="." unique_id=1955335715 instance=ExtResource("21_71yqb")]
+position = Vector2(115.00003, 630)
+rotation = -5.2359877
+
+[node name="Tocha7" parent="." unique_id=952558187 instance=ExtResource("21_71yqb")]
+position = Vector2(114.000015, 365)
+rotation = -5.2359877
+
+[node name="ItemChave2" parent="." unique_id=1207849736 instance=ExtResource("18_mgcqj")]
+position = Vector2(802, 885)
+
+[node name="ItemLivroFormula2" parent="." unique_id=91493795 instance=ExtResource("20_qyqlx")]
+position = Vector2(128, 434)

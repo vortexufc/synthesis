@@ -63,6 +63,21 @@ func get_index_da_cena(cena: String) -> int:
 	for i in range(percurso_salas.size()):
 		if percurso_salas[i].to_lower() == cena_lower:
 			return i
+			
+	# Se a cena não estiver no percurso atual, verifica e troca para a masmorra correspondente
+	if "corredor.tscn" in cena_lower or "sala01.tscn" in cena_lower or "alquimia" in cena_lower or "quimica" in cena_lower:
+		print("[DungeonGenerator] Cena de Química detectada fora do percurso. Regenerando percurso para Química...")
+		resetar_masmorra("Química")
+		for i in range(percurso_salas.size()):
+			if percurso_salas[i].to_lower() == cena_lower:
+				return i
+	elif "física" in cena_lower or "fisica" in cena_lower:
+		print("[DungeonGenerator] Cena de Física detectada fora do percurso. Regenerando percurso para Física...")
+		resetar_masmorra("Física")
+		for i in range(percurso_salas.size()):
+			if percurso_salas[i].to_lower() == cena_lower:
+				return i
+				
 	return -1
 
 func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
@@ -70,8 +85,18 @@ func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 	if cena_atual == "" and get_tree().current_scene:
 		cena_atual = get_tree().current_scene.scene_file_path
 		
+	var cena_lower = cena_atual.to_lower()
+	
+	# Se a cena atual for o Corredor, a próxima sala é SEMPRE a Sala 01 fixa de Química
+	if "corredor.tscn" in cena_lower:
+		if not (sala_01.to_lower() in percurso_salas):
+			resetar_masmorra("Química")
+		indice_atual = get_index_da_cena(sala_01)
+		print("[DungeonGenerator] Corredor -> Avançando garantidamente para Sala01 (Índice: ", indice_atual, ")")
+		return sala_01
+		
 	# Proteção para salas repetidas: se o índice atual bate com a cena onde o player está, mantemos a sincronia
-	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_atual.to_lower():
+	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_lower:
 		print("[DungeonGenerator] Avanço sincronizado no índice: ", indice_atual)
 	else:
 		# Fallback de segurança caso o jogador mude de cena por fora do sistema de portas
@@ -90,8 +115,22 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 	if cena_atual == "" and get_tree().current_scene:
 		cena_atual = get_tree().current_scene.scene_file_path
 		
+	var cena_lower = cena_atual.to_lower()
+	
+	# Se estiver no Corredor e voltar, vai sempre para o Hub Geral
+	if "corredor.tscn" in cena_lower:
+		indice_atual = 0
+		return hub_geral
+
+	# Se estiver na Sala 01 de Química e voltar, vai sempre para o Corredor
+	if "sala01.tscn" in cena_lower:
+		if not (sala_inicial.to_lower() in percurso_salas):
+			resetar_masmorra("Química")
+		indice_atual = get_index_da_cena(sala_inicial)
+		return sala_inicial
+
 	# Sincronia de índice para o retorno seguro pelas portas
-	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_atual.to_lower():
+	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_lower:
 		print("[DungeonGenerator] Retorno sincronizado no índice: ", indice_atual)
 	else:
 		indice_atual = get_index_da_cena(cena_atual)
@@ -104,6 +143,12 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 		
 	return hub_geral
 
+func sincronizar_cena(cena: String) -> void:
+	var idx = get_index_da_cena(cena)
+	if idx != -1:
+		indice_atual = idx
+		print("[DungeonGenerator] Sincronizado para: ", cena, " no índice: ", indice_atual)
+
 func registrar_inimigo_derrotado(key: String) -> void:
 	if not (key in inimigos_derrotados):
 		inimigos_derrotados.append(key)
@@ -112,13 +157,17 @@ func registrar_inimigo_derrotado(key: String) -> void:
 func is_inimigo_derrotado(key: String) -> bool:
 	return key in inimigos_derrotados
 
-func resetar_masmorra() -> void:
+func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	percurso_salas.clear()
 	inimigos_derrotados.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
 	
 	var active = "Química"
-	if get_node_or_null("/root/DatabaseManager"):
+	if forcar_dungeon != "":
+		active = forcar_dungeon
+		if get_node_or_null("/root/DatabaseManager"):
+			DatabaseManager.active_dungeon = forcar_dungeon
+	elif get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
 		active = DatabaseManager.active_dungeon
 	
 	# 1. Injeta a sequência fixa do Hub nas primeiras posições
@@ -131,8 +180,8 @@ func resetar_masmorra() -> void:
 		print("[DungeonGenerator] Masmorra de Física gerada com ", percurso_salas.size(), " salas.")
 	else:
 		# Padrão: Química (Alquimia)
-		percurso_salas.append(sala_inicial)   # Corredor
-		percurso_salas.append(sala_01)        # Sala 01 fixa
+		percurso_salas.append(sala_inicial)   # Corredor (índice 1)
+		percurso_salas.append(sala_01)        # Sala 01 fixa (índice 2)
 		var rooms_embaralhadas = salas_alquimia.duplicate()
 		rooms_embaralhadas.shuffle()
 		percurso_salas.append_array(rooms_embaralhadas)

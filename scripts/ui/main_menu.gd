@@ -5,13 +5,28 @@ extends Control
 @onready var btn_clas = $MarginContainer/VBoxButtons/BtnClas
 @onready var btn_config = $MarginContainer/VBoxButtons/BtnConfig
 
+@onready var bg = find_child("Background", true, false) as TextureRect
+@onready var logo = find_child("Logo", true, false) as TextureRect
+@onready var vbox_buttons = find_child("VBoxButtons", true, false) as VBoxContainer
+@onready var leaderboard_panel_node = find_child("LeaderboardPanel", true, false) as PanelContainer
+
 # Guardamos referências para poder atualizar dinamicamente
 var _lbl_nome: Label = null
 var _btn_avatar: TextureButton = null
 
+var _tempo_menu: float = 0.0
+var _logo_base_y: float = 0.0
+var _bg_base_pos: Vector2 = Vector2.ZERO
+var _parallax_offset: Vector2 = Vector2.ZERO
+
 func _ready() -> void:
 	# Musica da cena começa a tocar
 	AudioManager.play_menu_music()
+	
+	if logo:
+		_logo_base_y = logo.position.y
+	if bg:
+		_bg_base_pos = bg.position
 	
 	# Conectando os sinais 'pressed' aos seus respectivos callbacks
 	btn_jogar.pressed.connect(_on_btn_jogar_pressed)
@@ -26,6 +41,11 @@ func _ready() -> void:
 		var vbox = $MarginContainer/VBoxButtons
 		vbox.add_child(btn_admin)
 		vbox.move_child(btn_admin, 0) # Coloca no topo
+		
+	# Efeitos visuais modernos: partículas no fundo, animações nos botões e entrada suave
+	_criar_particulas_magicas()
+	_configurar_animacoes_botoes()
+	_animar_entrada_menu()
 	
 	# ========= SISTEMA DE PERFIL (BACKEND-6) =========
 	var hbox_perfil = HBoxContainer.new()
@@ -199,4 +219,135 @@ func _atualizar_leaderboard() -> void:
 		else:
 			name_lbl.text = "---"
 			pts_lbl.text  = "PONTOS: 0"
+
+func _process(delta: float) -> void:
+	_tempo_menu += delta
+	
+	# 1. Flutuação mágica e suave do Logo do jogo
+	if logo and is_instance_valid(logo):
+		logo.position.y = _logo_base_y + sin(_tempo_menu * 1.7) * 5.5
+		logo.rotation = sin(_tempo_menu * 0.85) * 0.012
+		
+	# 2. Efeito Parallax sutil do fundo reagindo à posição do mouse
+	if bg and is_instance_valid(bg):
+		var vp_rect = get_viewport_rect()
+		var mouse_pos = get_viewport().get_mouse_position()
+		var center = vp_rect.size * 0.5
+		if center.x > 0 and center.y > 0:
+			var norm = Vector2(
+				clamp((mouse_pos.x - center.x) / center.x, -1.0, 1.0),
+				clamp((mouse_pos.y - center.y) / center.y, -1.0, 1.0)
+			)
+			_parallax_offset = _parallax_offset.lerp(norm * 14.0, delta * 3.5)
+			bg.position = _bg_base_pos - _parallax_offset
+
+func _configurar_animacoes_botoes() -> void:
+	if vbox_buttons:
+		for child in vbox_buttons.get_children():
+			if child is Button:
+				_animar_botao(child)
+
+func _animar_botao(btn: Button) -> void:
+	# Centraliza o pivot no botão para que a escala cresça harmonicamente
+	btn.resized.connect(func(): btn.pivot_offset = btn.size * 0.5)
+	btn.pivot_offset = btn.size * 0.5
+	
+	btn.mouse_entered.connect(func():
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.play_sfx("ui-1")
+		var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "scale", Vector2(1.04, 1.04), 0.16)
+		tw.tween_property(btn, "position:x", 8.0, 0.16)
+	)
+	
+	btn.mouse_exited.connect(func():
+		var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "scale", Vector2(1.0, 1.0), 0.18)
+		tw.tween_property(btn, "position:x", 0.0, 0.18)
+	)
+	
+	btn.button_down.connect(func():
+		var tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "scale", Vector2(0.96, 0.96), 0.08)
+	)
+	
+	btn.button_up.connect(func():
+		var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn, "scale", Vector2(1.04, 1.04), 0.1)
+	)
+
+func _animar_entrada_menu() -> void:
+	# Entrada suave dos botões com leve efeito escalonado (stagger)
+	if vbox_buttons:
+		var delay = 0.04
+		for child in vbox_buttons.get_children():
+			if child is Button:
+				child.modulate.a = 0.0
+				child.position.x = -25.0
+				var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+				tw.tween_property(child, "modulate:a", 1.0, 0.35).set_delay(delay)
+				tw.tween_property(child, "position:x", 0.0, 0.35).set_delay(delay)
+				delay += 0.06
+				
+	# Entrada suave do Leaderboard
+	if leaderboard_panel_node:
+		var base_x = leaderboard_panel_node.position.x
+		leaderboard_panel_node.modulate.a = 0.0
+		leaderboard_panel_node.position.x = base_x + 30.0
+		var tw_lb = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw_lb.tween_property(leaderboard_panel_node, "modulate:a", 1.0, 0.45).set_delay(0.12)
+		tw_lb.tween_property(leaderboard_panel_node, "position:x", base_x, 0.45).set_delay(0.12)
+
+func _criar_textura_particula() -> Texture2D:
+	var grad_tex = GradientTexture2D.new()
+	var grad = Gradient.new()
+	grad.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CUBIC
+	grad.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	grad.colors = PackedColorArray([
+		Color(1.0, 1.0, 1.0, 1.0),
+		Color(1.0, 1.0, 1.0, 0.5),
+		Color(1.0, 1.0, 1.0, 0.0)
+	])
+	grad_tex.gradient = grad
+	grad_tex.fill = GradientTexture2D.FILL_RADIAL
+	grad_tex.fill_from = Vector2(0.5, 0.5)
+	grad_tex.fill_to = Vector2(1.0, 0.5)
+	grad_tex.width = 24
+	grad_tex.height = 24
+	return grad_tex
+
+func _criar_particulas_magicas() -> void:
+	var particles = CPUParticles2D.new()
+	particles.name = "ParticulasMagicasMenu"
+	particles.texture = _criar_textura_particula()
+	particles.amount = 42
+	particles.lifetime = 6.5
+	particles.preprocess = 4.0
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particles.emission_rect_extents = Vector2(1000, 560)
+	particles.position = Vector2(960, 540)
+	particles.direction = Vector2(0.15, -1.0)
+	particles.spread = 45.0
+	particles.gravity = Vector2(0, -8)
+	particles.initial_velocity_min = 18.0
+	particles.initial_velocity_max = 48.0
+	particles.scale_amount_min = 0.35
+	particles.scale_amount_max = 0.85
+	
+	var grad = Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.25, 0.75, 1.0])
+	grad.colors = PackedColorArray([
+		Color(0.2, 0.75, 1.0, 0.0),
+		Color(0.3, 0.85, 1.0, 0.75),
+		Color(1.0, 0.88, 0.45, 0.75),
+		Color(0.85, 0.4, 1.0, 0.0)
+	])
+	particles.color_ramp = grad
+	
+	if bg:
+		bg.add_sibling(particles)
+	else:
+		add_child(particles)
+		move_child(particles, 1)
+
 

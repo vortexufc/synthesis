@@ -48,13 +48,19 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 				var room_path = get_tree().current_scene.scene_file_path
 				var key = room_path + "::" + pai.name
 				DungeonGenerator.registrar_inimigo_derrotado(key)
-			pai.queue_free()
+			if pai.has_method("derrotar"):
+				pai.derrotar()
+			else:
+				pai.queue_free()
 		else:
 			if get_node_or_null("/root/DungeonGenerator"):
 				var room_path = get_tree().current_scene.scene_file_path
 				var key = room_path + "::" + self.name
 				DungeonGenerator.registrar_inimigo_derrotado(key)
-			queue_free()
+			if has_method("derrotar"):
+				call("derrotar")
+			else:
+				queue_free()
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.name == "Player":

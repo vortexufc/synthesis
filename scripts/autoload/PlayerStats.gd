@@ -13,7 +13,18 @@ var itens: Array = []
 # paginas do livro
 var grimorio: Array = []
 
+var chaves: int = 0
+var moedas: int = 0
+
+# registro de quests concluidas (ex: {"cientista_quest1": true})
+var quests_concluidas: Dictionary = {}
+
+# registro de quests aceitas mas nao concluidas
+var quests_ativas: Dictionary = {}
+
 signal vida_alterada(atual, maxima)
+@warning_ignore("unused_signal")
+signal quests_atualizadas()
 
 const SAVE_PATH = "user://save.json"
 
@@ -26,9 +37,13 @@ func _inicializar_dados_padrao():
 	pocoes.clear()
 	itens.clear()
 	grimorio.clear()
+	chaves = 0
+	moedas = 0
+	quests_concluidas.clear()
+	quests_ativas.clear()
 	
 	# itens iniciais pra testar (apenas pocoes, grimorio comeca totalmente vazio)
-	pocoes.append({"nome": "Poção de Vida", "qtd": 2, "cura": 50, "desc": "Cura 50 HP"})
+	pocoes.append({"nome": "Poção Grande", "qtd": 2, "cura": 50, "desc": "Cura 50 HP"})
 	salvar()
 
 func salvar():
@@ -36,7 +51,11 @@ func salvar():
 		"vida_atual_jogador": vida_atual_jogador,
 		"pocoes": pocoes,
 		"itens": itens,
-		"grimorio": grimorio
+		"grimorio": grimorio,
+		"chaves": chaves,
+		"moedas": moedas,
+		"quests_concluidas": quests_concluidas,
+		"quests_ativas": quests_ativas
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -52,6 +71,11 @@ func carregar():
 			vida_atual_jogador = vida_maxima_jogador # reseta hp inicial
 			pocoes = data.get("pocoes", [])
 			itens = data.get("itens", [])
+			grimorio = data.get("grimorio", [])
+			chaves = int(data.get("chaves", 0))
+			moedas = int(data.get("moedas", 0))
+			quests_concluidas = data.get("quests_concluidas", {})
+			quests_ativas = data.get("quests_ativas", {})
 			
 			# Limpa o grimório para remover quaisquer pergaminhos antigos salvos anteriormente
 			grimorio.clear()
@@ -68,6 +92,17 @@ func carregar():
 func limpar_grimorio() -> void:
 	grimorio.clear()
 	salvar()
+
+## [DEV / GOD MODE] Limpa completamente o inventário (itens, poções, grimório, chaves e moedas)
+func limpar_inventario_e_moedas() -> void:
+	itens.clear()
+	pocoes.clear()
+	grimorio.clear()
+	chaves = 0
+	moedas = 0
+	salvar()
+	quests_atualizadas.emit()
+	print("[PlayerStats] Inventário, grimório, chaves e moedas foram completamente esvaziados!")
 
 
 # funcao pra healar

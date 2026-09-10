@@ -132,9 +132,9 @@ func _gerar_dicas_dinamicas() -> void:
 			
 			# Se não vier nada do Supabase, tenta resgatar a dica que a IA salvou no arquivo JSON local!
 			if dica == "" or dica == null:
-				var file = FileAccess.open("res://data/questions.json", FileAccess.READ)
-				if file:
-					var local_data = JSON.parse_string(file.get_as_text())
+				var file_questions = FileAccess.open("res://data/questions.json", FileAccess.READ)
+				if file_questions:
+					var local_data = JSON.parse_string(file_questions.get_as_text())
 					if typeof(local_data) == TYPE_ARRAY:
 						for local_q in local_data:
 							if str(local_q.get("id")) == str(q.get("id")):

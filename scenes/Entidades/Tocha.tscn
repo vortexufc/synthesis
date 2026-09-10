@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3 uid="uid://tocha_entidade_01"]
+
+[ext_resource type="Script" path="res://scripts/Tocha.gd" id="1_tocha_script"]
+[ext_resource type="Texture2D" uid="uid://htjac61qk8ai" path="res://assets/sprites/tilesets/Alquimia/tochas (1).png" id="2_tocha_tex"]
+
+[sub_resource type="Gradient" id="Gradient_tocha"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.4, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_tocha"]
+gradient = SubResource("Gradient_tocha")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Tocha" type="Node2D" groups=["tochas"]]
+z_index = 2
+script = ExtResource("1_tocha_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(2, 2)
+texture = ExtResource("2_tocha_tex")
+hframes = 7
+vframes = 4
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+position = Vector2(0, -18)
+color = Color(1, 0.7, 0.35, 1)
+energy = 0.55
+texture = SubResource("GradientTexture2D_tocha")
+texture_scale = 1.55

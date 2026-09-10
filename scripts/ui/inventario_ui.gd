@@ -25,12 +25,34 @@ var tex_pergaminho = preload("res://assets/sprites/pergaminho.png")
 var atlas_pergaminho_fechado: AtlasTexture
 var atlas_pergaminho_aberto: AtlasTexture
 
+var lbl_moedas_inv: Button
+var box_descarte: HBoxContainer
+var spin_descarte: SpinBox
+var btn_descartar: Button
+
 func _ready() -> void:
 	visible = false
 	painel_leitura.visible = false
 	btn_fechar_leitura.pressed.connect(_fechar_leitura)
 	
 	btn_acao.pressed.connect(_on_btn_acao_pressionado)
+	
+	box_descarte = HBoxContainer.new()
+	box_descarte.alignment = BoxContainer.ALIGNMENT_CENTER
+	
+	spin_descarte = SpinBox.new()
+	spin_descarte.min_value = 1
+	spin_descarte.max_value = 1
+	box_descarte.add_child(spin_descarte)
+	
+	btn_descartar = Button.new()
+	btn_descartar.text = "JOGAR FORA"
+	btn_descartar.add_theme_color_override("font_color", Color(1, 0.4, 0.4))
+	btn_descartar.pressed.connect(_on_btn_descartar_pressionado)
+	box_descarte.add_child(btn_descartar)
+	
+	btn_acao.get_parent().add_child(box_descarte)
+	
 	_limpar_detalhes()
 	
 	atlas_pergaminho_fechado = AtlasTexture.new()
@@ -81,6 +103,23 @@ func _ready() -> void:
 	
 	# faz o menu funcionar com jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS 
+	add_to_group("inventario_ui") 
+	
+	# Adiciona o label de moedas como botão para ser selecionável
+	lbl_moedas_inv = Button.new()
+	lbl_moedas_inv.flat = true
+	lbl_moedas_inv.add_theme_color_override("font_color", Color(1, 0.8, 0.2)) # Dourado
+	lbl_moedas_inv.add_theme_color_override("font_hover_color", Color(1, 0.9, 0.5))
+	lbl_moedas_inv.add_theme_font_size_override("font_size", 22)
+	lbl_moedas_inv.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	lbl_moedas_inv.pressed.connect(func(): _selecionar_item({"nome": "Moedas", "qtd": PlayerStats.moedas}, "moeda", -1))
+	
+	var painel_principal = $Control/MarginContainer/Panel
+	painel_principal.add_child(lbl_moedas_inv)
+	lbl_moedas_inv.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	lbl_moedas_inv.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	lbl_moedas_inv.offset_top = 25
+	lbl_moedas_inv.offset_right = -35
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("inventory"):
@@ -104,11 +143,42 @@ func _toggle_inventario() -> void:
 		painel_leitura.visible = false
 		_limpar_detalhes()
 		_atualizar_listas()
+		PlayerStats.salvar()
+
+func _on_btn_descartar_pressionado() -> void:
+	if item_selecionado.is_empty(): return
+	
+	var tipo = item_selecionado["tipo"]
+	var idx = item_selecionado["index"]
+	var qtd_descarte = int(spin_descarte.value)
+	
+	if tipo == "pocao":
+		var po = PlayerStats.pocoes[idx]
+		po["qtd"] -= qtd_descarte
+		if po["qtd"] <= 0:
+			PlayerStats.pocoes.remove_at(idx)
+	elif tipo == "item":
+		if item_selecionado["nome"] == "Chave de Porta":
+			PlayerStats.chaves = max(0, PlayerStats.chaves - qtd_descarte)
+		else:
+			PlayerStats.itens.remove_at(idx)
+	elif tipo == "grimorio":
+		PlayerStats.grimorio.remove_at(idx)
+	elif tipo == "moeda":
+		if PlayerStats.moedas > 0:
+			PlayerStats.moedas = max(0, PlayerStats.moedas - qtd_descarte)
+	
+	_atualizar_listas()
+	_limpar_detalhes()
+	PlayerStats.salvar()
 
 func _atualizar_listas() -> void:
 	_limpar_filhos(grid_pocoes)
 	_limpar_filhos(grid_itens)
 	_limpar_filhos(grid_grimorio)
+	
+	if get_node_or_null("/root/PlayerStats") and lbl_moedas_inv:
+		lbl_moedas_inv.text = "Moedas: " + str(PlayerStats.moedas)
 	
 	# carrega as pocoes
 	if PlayerStats.pocoes.is_empty():
@@ -128,16 +198,67 @@ func _atualizar_listas() -> void:
 			grid_pocoes.add_child(btn)
 			
 	# carrega os itens
-	if PlayerStats.itens.is_empty():
+	var tem_qualquer_item = false
+	
+	# Exibe as chaves separadamente se houver
+	if get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0:
+		tem_qualquer_item = true
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(100, 100)
+		btn.text = "Chave de Porta\n(x" + str(PlayerStats.chaves) + ")"
+		
+		var icone = load("res://assets/sprites/ui/icon_key_transparent.png")
+		if icone:
+			btn.icon = icone
+			btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+			btn.expand_icon = true
+			
+		var dic_chave = {"nome": "Chave de Porta", "descricao": "Uma chave dourada brilhante capaz de abrir portas mágicas seladas."}
+		btn.pressed.connect(func(): _selecionar_item(dic_chave, "item", -1))
+		grid_itens.add_child(btn)
+		
+	for i in range(PlayerStats.itens.size()):
+		tem_qualquer_item = true
+		var item = PlayerStats.itens[i]
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(100, 100)
+		btn.text = item["nome"]
+		
+		if item["nome"] == "Livro de Fórmulas":
+			var icone = load("res://assets/sprites/ui/item_livro_formulas.png")
+			if icone:
+				btn.icon = icone
+				btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+				btn.expand_icon = true
+		elif item["nome"] == "Fragmento de Gelatina":
+			var icone = load("res://assets/sprites/ui/item_fragmento_gelatina.png")
+			if icone:
+				btn.icon = icone
+				btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+				btn.expand_icon = true
+		elif item["nome"] == "Bateria Elétrica":
+			var icone = load("res://assets/sprites/ui/item_bateria.png")
+			if icone:
+				btn.icon = icone
+				btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+				btn.expand_icon = true
+		elif item["nome"] == "Fragmento de Chip":
+			var icone = load("res://assets/sprites/ui/item_chip.png")
+			if icone:
+				btn.icon = icone
+				btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+				btn.expand_icon = true
+				
+		btn.pressed.connect(func(): _selecionar_item(item, "item", i))
+		grid_itens.add_child(btn)
+		
+	if not tem_qualquer_item:
 		_add_label_vazia(grid_itens, "Você não tem itens importantes.")
-	else:
-		for i in range(PlayerStats.itens.size()):
-			var item = PlayerStats.itens[i]
-			var btn = Button.new()
-			btn.custom_minimum_size = Vector2(100, 100)
-			btn.text = item["nome"]
-			btn.pressed.connect(func(): _selecionar_item(item, "item", i))
-			grid_itens.add_child(btn)
 			
 	# carrega as paginas do grimorio
 	if PlayerStats.grimorio.is_empty():
@@ -169,6 +290,7 @@ func _limpar_detalhes() -> void:
 	lbl_detalhe_titulo.text = "Selecione um item"
 	lbl_detalhe_desc.text = "Detalhes aparecerão aqui."
 	btn_acao.visible = false
+	if box_descarte: box_descarte.visible = false
 	item_selecionado = {}
 
 func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
@@ -181,15 +303,29 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		lbl_detalhe_desc.text = item.get("desc", "Cura " + str(item.get("cura", 0)) + " PV.\nQuantidade: " + str(item["qtd"]))
 		btn_acao.text = "USAR"
 		btn_acao.visible = true
+		box_descarte.visible = true
+		spin_descarte.max_value = max(1, item["qtd"])
 	elif tipo == "item":
 		lbl_detalhe_titulo.text = item["nome"]
 		lbl_detalhe_desc.text = item.get("descricao", "Um item misterioso.")
 		btn_acao.visible = false
+		box_descarte.visible = true
+		spin_descarte.max_value = max(1, PlayerStats.chaves) if item["nome"] == "Chave de Porta" else 1
 	elif tipo == "grimorio":
 		lbl_detalhe_titulo.text = item["titulo"]
 		lbl_detalhe_desc.text = "Um pedaço de conhecimento.\nLeia para desvendar."
 		btn_acao.text = "LER"
 		btn_acao.visible = true
+		box_descarte.visible = true
+		spin_descarte.max_value = 1
+	elif tipo == "moeda":
+		lbl_detalhe_titulo.text = "Moedas"
+		lbl_detalhe_desc.text = "Dinheiro utilizado para comprar itens e poções no Mercador.\nTotal: " + str(PlayerStats.moedas)
+		btn_acao.visible = false
+		box_descarte.visible = true
+		spin_descarte.max_value = max(1, PlayerStats.moedas)
+	
+	spin_descarte.value = 1
 
 func _on_btn_acao_pressionado() -> void:
 	if item_selecionado.is_empty(): return

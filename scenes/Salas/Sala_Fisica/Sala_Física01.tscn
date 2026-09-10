@@ -16,6 +16,9 @@
 [ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="15_imiam"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="16_3407d"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_ijptx"]
+[ext_resource type="PackedScene" uid="uid://bavvcg7n5masf" path="res://scenes/Entidades/ItemBateria.tscn" id="17_wbf8q"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/NPCFisica.tscn" id="18_uglgd"]
+[ext_resource type="PackedScene" uid="uid://bwg5w1f6gk1sk" path="res://scenes/Entidades/ItemChip.tscn" id="19_osp8w"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdngi"]
 texture = ExtResource("1_3407d")
@@ -474,3 +477,36 @@ scale = Vector2(1.2, 1.2)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_3407d")]
 position = Vector2(757, 1269)
+
+[node name="ItemBateria" parent="." unique_id=469130166 instance=ExtResource("17_wbf8q")]
+position = Vector2(266, 1047)
+
+[node name="NPCFisica" parent="." unique_id=1810303523 instance=ExtResource("18_uglgd")]
+position = Vector2(158, 1015)
+
+[node name="ItemChip" parent="." unique_id=77967649 instance=ExtResource("19_osp8w")]
+position = Vector2(713, 736)
+
+[node name="ItemChip2" parent="." unique_id=2141493503 instance=ExtResource("19_osp8w")]
+position = Vector2(218, 780)
+
+[node name="ItemBateria2" parent="." unique_id=856295331 instance=ExtResource("17_wbf8q")]
+position = Vector2(1232, 727)
+
+[node name="ItemBateria3" parent="." unique_id=32658850 instance=ExtResource("17_wbf8q")]
+position = Vector2(686, 477)
+
+[node name="ItemBateria4" parent="." unique_id=300429796 instance=ExtResource("17_wbf8q")]
+position = Vector2(1357, 396)
+
+[node name="ItemBateria5" parent="." unique_id=10106257 instance=ExtResource("17_wbf8q")]
+position = Vector2(775, 1395)
+
+[node name="ItemChip3" parent="." unique_id=1603472439 instance=ExtResource("19_osp8w")]
+position = Vector2(1563, 751)
+
+[node name="ItemChip4" parent="." unique_id=631665641 instance=ExtResource("19_osp8w")]
+position = Vector2(130, 1224)
+
+[node name="ItemChip5" parent="." unique_id=1082860603 instance=ExtResource("19_osp8w")]
+position = Vector2(849, 402)

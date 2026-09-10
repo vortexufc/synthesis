@@ -53,7 +53,7 @@ func _formatar_anotacao_detalhada(q: Dictionary, andar_id: int) -> String:
 	
 	return texto
 
-func _gerar_explicacao_conceitual(pergunta: String, resposta: String, andar_id: int) -> String:
+func _gerar_explicacao_conceitual(pergunta: String, resposta: String, _andar_id: int) -> String:
 	var p_lower = pergunta.to_lower()
 	var r_lower = resposta.to_lower()
 	

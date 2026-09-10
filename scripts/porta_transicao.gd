@@ -33,7 +33,7 @@ func _ready() -> void:
 	_sprite_porta = get_node_or_null("SpritePorta")
 	if _sprite_porta and _sprite_porta.region_enabled:
 		_base_region_rect = _sprite_porta.region_rect
-		
+
 	if not _sprite_porta and textura_porta:
 		_sprite_porta = Sprite2D.new()
 		_sprite_porta.texture = textura_porta
@@ -231,6 +231,8 @@ func _mostrar_prompt_hub() -> void:
 		DatabaseManager.active_dungeon = hub_dungeon_name
 		if DatabaseManager.has_method("salvar_progresso"):
 			DatabaseManager.salvar_progresso()
+		if get_node_or_null("/root/DungeonGenerator"):
+			DungeonGenerator.resetar_masmorra(hub_dungeon_name)
 		_transacionar_porta()
 	)
 	
@@ -281,6 +283,10 @@ func _transacionar_porta() -> void:
 		print("[PortaTransicao] Indo para: ", cena_alvo)
 			
 	if cena_alvo != "":
+		# Sincronizar o índice do percurso no DungeonGenerator para a cena de destino
+		if get_node_or_null("/root/DungeonGenerator"):
+			DungeonGenerator.sincronizar_cena(cena_alvo)
+
 		# Se tiver mensagem de entrada (Ex: Porta Aberta do Hub)
 		if mensagem_customizada != "":
 			_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul

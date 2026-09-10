@@ -13,7 +13,6 @@ var passar_portas_trancadas: bool = true   ## Permite passar por portas trancada
 # Referências da UI
 var _canvas_layer: CanvasLayer = null
 var _panel_container: PanelContainer = null
-var _btn_toggle: Button = null
 
 # Lista de salas disponíveis para teleporte
 var _salas_teleporte = [
@@ -145,6 +144,24 @@ func _criar_interface_dev() -> void:
 	)
 	vbox.add_child(btn_heal)
 	
+	# Botão 3: Resetar Quests
+	var btn_reset = Button.new()
+	btn_reset.text = "🔄 Resetar Todas as Quests"
+	btn_reset.pressed.connect(func():
+		if get_node_or_null("/root/PlayerStats"):
+			PlayerStats.quests_concluidas.clear()
+			PlayerStats.quests_ativas.clear()
+			PlayerStats.salvar()
+			PlayerStats.quests_atualizadas.emit()
+	)
+	vbox.add_child(btn_reset)
+	
+	# Botão 4: Limpar Inventário e Moedas
+	var btn_clear_inv = Button.new()
+	btn_clear_inv.text = "🗑️ Limpar Inventário e Moedas"
+	btn_clear_inv.pressed.connect(_limpar_inventario_e_moedas)
+	vbox.add_child(btn_clear_inv)
+	
 	var hs3 = HSeparator.new()
 	vbox.add_child(hs3)
 	
@@ -185,3 +202,33 @@ func _toggle_menu() -> void:
 func _derrotar_monstro_atual() -> void:
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.derrotar_inimigo_atual()
+
+func _limpar_inventario_e_moedas() -> void:
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.limpar_inventario_e_moedas()
+		print("[DevManager] Inventário e Moedas completamente zerados!")
+		
+		# Atualiza UI do inventário se estiver aberta ou instanciada
+		var inv = get_tree().get_first_node_in_group("inventario_ui")
+		if not inv:
+			inv = get_tree().root.find_child("InventarioUI", true, false)
+		if inv:
+			if inv.has_method("_limpar_detalhes"):
+				inv._limpar_detalhes()
+			if inv.has_method("_atualizar_listas"):
+				inv._atualizar_listas()
+				
+		# Atualiza loja do mercador se estiver aberta
+		var loja = get_tree().root.find_child("LojaMercador", true, false)
+		if loja and loja.has_method("_atualizar_interface"):
+			loja._atualizar_interface()
+				
+		# Notificação visual na HUD
+		var hud = get_tree().get_first_node_in_group("hud")
+		if not hud:
+			hud = get_tree().root.find_child("HUD", true, false)
+		if hud and hud.has_method("mostrar_mensagem"):
+			hud.mostrar_mensagem("🗑️ Inventário e Moedas Zerados!")
+			
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.play_sfx("ui_5")

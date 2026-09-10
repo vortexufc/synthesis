@@ -33,6 +33,7 @@ RankingManager="*res://scripts/autoload/RankingManager.gd"
 ClanManager="*res://scripts/autoload/ClanManager.gd"
 DevManager="*res://scripts/autoload/DevManager.gd"
 PergaminhoManager="*res://scripts/autoload/PergaminhoManager.gd"
+MenuPausaManager="*res://scripts/autoload/MenuPausaManager.gd"
 
 [display]
 
@@ -90,3 +91,4 @@ interagir={
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

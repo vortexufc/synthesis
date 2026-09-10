@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://bc4o04l2tcu36"]
+
+[ext_resource type="Script" uid="uid://doir7gx4hghtx" path="res://scripts/NPCCientista.gd" id="1_cientista"]
+[ext_resource type="Texture2D" uid="uid://dlg7ungau1e82" path="res://assets/sprites/Characters/npc_cientista.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://dxngte5fixvcd" path="res://assets/sprites/Characters/Maguinho/shadow.png" id="3_shadow"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cientista"]
+radius = 80.0
+
+[node name="NPCCientista" type="Area2D" unique_id=1125669276]
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_cientista")
+
+[node name="Shadow" type="Sprite2D" parent="." unique_id=1842863828]
+position = Vector2(10, 20)
+scale = Vector2(2.1, 1.2)
+texture = ExtResource("3_shadow")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1842863827]
+z_index = 1
+position = Vector2(0, -60)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1523572959]
+shape = SubResource("CircleShape2D_cientista")

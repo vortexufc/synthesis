@@ -24,6 +24,8 @@ func _ready() -> void:
 		$sprite.play("idle_direita")
 	)
 
+
+
 func _reposicionar_na_porta_correta() -> void:
 	if not get_node_or_null("/root/DungeonGenerator"):
 		return
@@ -95,8 +97,30 @@ func _physics_process(_delta: float) -> void:
 	if Input.is_action_just_pressed("ui_accept"):
 		AudioManager.play_sfx("ui-1")
 	
-	
 	move_and_slide()
+	_animar_sombra(_delta)
+
+const SOMBRA_BASE_X: float = 1.85
+const SOMBRA_BASE_Y: float = 1.25
+var tempo_anim_sombra: float = 0.0
+
+func _animar_sombra(delta: float) -> void:
+	if not has_node("Shadow"):
+		return
+	
+	tempo_anim_sombra += delta
+	var shadow = $Shadow
+	
+	if velocity.length() > 10.0:
+		# Andando: leve efeito elástico (squash & stretch) sincronizado com os passos
+		var onda = sin(tempo_anim_sombra * 16.0)
+		shadow.scale.x = SOMBRA_BASE_X + onda * 0.15
+		shadow.scale.y = SOMBRA_BASE_Y - onda * 0.10
+	else:
+		# Parado (Idle): pulso suave e sutil acompanhando a respiração do mago
+		var onda = sin(tempo_anim_sombra * 3.5)
+		shadow.scale.x = SOMBRA_BASE_X + onda * 0.06
+		shadow.scale.y = SOMBRA_BASE_Y + onda * 0.04
 
 # [Fix-1] Chamado pelo Mímico para aplicar penalidade e feedback visual
 func receber_dano_mimico() -> void:

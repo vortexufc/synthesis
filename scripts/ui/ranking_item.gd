@@ -26,10 +26,14 @@ func _aplicar_visual():
 		icone_mago.texture = tex_mago
 	
 	# Aplica fonte nas labels
+	var font_num = SystemFont.new()
+	font_num.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_num.font_weight = 700
+	
+	label_posicao.add_theme_font_override("font", font_num)
+	label_score.add_theme_font_override("font", font_num)
 	if font:
-		label_posicao.add_theme_font_override("font", font)
 		label_nome.add_theme_font_override("font", font)
-		label_score.add_theme_font_override("font", font)
 
 func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false) -> void:
 	if not is_node_ready():

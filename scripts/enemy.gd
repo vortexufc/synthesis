@@ -4,6 +4,8 @@ extends CharacterBody2D
 ## Move-se em direções aleatórias (8 direções) até encontrar o Player.
 ## Ao receber o sinal de batalha, para completamente.
 
+signal inimigo_derrotado(pos: Vector2)
+
 # ──────────────────────────────────────────
 # Atributos do Inimigo (configuráveis pelo Inspector)
 # ──────────────────────────────────────────
@@ -66,6 +68,75 @@ func _ready() -> void:
 
 	if sprite:
 		sprite.play("default")
+	
+	_criar_sombra()
+
+var shadow: Sprite2D = null
+var shadow_base_scale: Vector2 = Vector2(1.8, 1.2)
+var tempo_anim_sombra: float = 0.0
+
+func _criar_sombra() -> void:
+	var shadow_tex = load("res://assets/sprites/Characters/Maguinho/shadow.png")
+	if not shadow_tex:
+		return
+	
+	shadow = Sprite2D.new()
+	shadow.name = "Shadow"
+	shadow.texture = shadow_tex
+	shadow.z_index = 0
+	
+	if sprite and sprite.z_index == 0:
+		sprite.z_index = 1
+	
+	var nome_baixo = name.to_lower()
+	
+	# Slimes não precisam de sombra pois são colados no chão
+	if "slime" in nome_baixo:
+		return
+	
+	var pos_y: float = 20.0
+	
+	if "robo_g" in nome_baixo:
+		pos_y = 82.0
+		shadow_base_scale = Vector2(1.8, 1.2)
+	elif "robo_p" in nome_baixo:
+		pos_y = 46.0
+		shadow_base_scale = Vector2(1.9, 1.2)
+	elif "evil_wizzard" in nome_baixo or "wizzard" in nome_baixo or "wizard" in nome_baixo:
+		pos_y = 40.0
+		shadow_base_scale = Vector2(1.85, 1.25)
+	else:
+		var col = get_node_or_null("CollisionShape2D")
+		if col:
+			pos_y = col.position.y + 12.0
+		else:
+			pos_y = 20.0
+		shadow_base_scale = Vector2(1.8, 1.2)
+	
+	shadow.position = Vector2(0, pos_y)
+	shadow.scale = shadow_base_scale
+	
+	add_child(shadow)
+	move_child(shadow, 0)
+
+func _process(delta: float) -> void:
+	_animar_sombra(delta)
+
+func _animar_sombra(delta: float) -> void:
+	if not shadow or not is_instance_valid(shadow):
+		return
+	
+	tempo_anim_sombra += delta
+	if velocity.length() > 5.0:
+		# Movimento / patrulha: squash & stretch suave acompanhando os passos/quiques
+		var onda = sin(tempo_anim_sombra * 14.0)
+		shadow.scale.x = shadow_base_scale.x + onda * (shadow_base_scale.x * 0.08)
+		shadow.scale.y = shadow_base_scale.y - onda * (shadow_base_scale.y * 0.08)
+	else:
+		# Parado / pausa: respiração sutil
+		var onda = sin(tempo_anim_sombra * 3.0)
+		shadow.scale.x = shadow_base_scale.x + onda * (shadow_base_scale.x * 0.04)
+		shadow.scale.y = shadow_base_scale.y + onda * (shadow_base_scale.y * 0.04)
 
 # ──────────────────────────────────────────
 # Loop de Patrulha Aleatória
@@ -194,3 +265,45 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 func sofrer_dano(quantidade: float) -> void:
 	vida_atual = max(0.0, vida_atual - quantidade)
 	print("[Dev-1] Inimigo recebeu %.0f de dano. Vida: %.0f / %.0f" % [quantidade, vida_atual, vida_maxima])
+
+func derrotar() -> void:
+	_dropar_itens()
+	inimigo_derrotado.emit(global_position)
+	queue_free()
+
+func _dropar_itens() -> void:
+	var enemy_id = ""
+	for child in get_children():
+		if child.name == "EnemyTrigger":
+			enemy_id = child.get("id_inimigo")
+			break
+
+	var r = randf()
+	var is_quimica = (enemy_id.begins_with("slime"))
+	var is_fisica = (enemy_id.begins_with("robo"))
+
+	if is_quimica:
+		if r > 0.50:
+			_instanciar_drop("res://scenes/Entidades/ItemFragmentoGelatina.tscn")
+		else:
+			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+	elif is_fisica:
+		if r > 0.50:
+			_instanciar_drop("res://scenes/Entidades/ItemChip.tscn")
+		else:
+			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+	else:
+		if r > 0.50:
+			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+
+func _instanciar_drop(caminho: String) -> void:
+	var cena = load(caminho)
+	if not cena: return
+	var item = cena.instantiate()
+	var angle = randf() * TAU
+	var dist = randf_range(30.0, 60.0)
+	if caminho.ends_with("ItemChave.tscn"):
+		item.position = global_position
+	else:
+		item.position = global_position + Vector2(cos(angle), sin(angle)) * dist
+	get_parent().call_deferred("add_child", item)
