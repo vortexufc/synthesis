@@ -10,6 +10,7 @@ extends Area2D
 @export var num_questoes:      int   = 5      ## Rodadas de quiz desta batalha
 @export var duracao_batalha:   float = 300.0  ## Segundos totais (5 min = Golem Andar 1)
 @export var andar_id:          int   = 1      ## [Dev-1] Identifica o andar → QuizManager carrega Biologia
+@export var nivel_dificuldade: int   = 0      ## [TRI] 1=Fácil, 2=Médio, 3=Difícil (0=Automático por monstro/sala)
 
 ## [Local] Questões hardcoded para este inimigo (ex: builds de teste).
 ## Cada item deve ter: { question, options: [], answer (índice) }
@@ -68,11 +69,12 @@ func _on_body_entered(body: Node2D) -> void:
 
 		# Monta enemy_data com andar_id para o QuizManager filtrar o banco
 		var enemy_data: Dictionary = {
-			"num_questoes":    num_questoes,
-			"duracao_batalha": duracao_batalha,
-			"andar_id":        andar_id,
-			"id_inimigo":      id_inimigo,
-			"inimigo_node":    node_pai,
+			"num_questoes":      num_questoes,
+			"duracao_batalha":   duracao_batalha,
+			"andar_id":          andar_id,
+			"id_inimigo":        id_inimigo,
+			"inimigo_node":      node_pai,
+			"nivel_dificuldade": nivel_dificuldade,
 		}
 
 		# [Fix-9] Fallback inteligente do Sprite do inimigo

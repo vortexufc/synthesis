@@ -1,16 +1,8 @@
-extends Node2D
-
-var monstros_na_sala = 0
+extends "res://scripts/levels/sala_quimica.gd"
 
 func _ready() -> void:
-	print("Sala02 (Física) Iniciada - Gerenciando drops")
-	
-	var inimigos = get_tree().get_nodes_in_group("inimigos")
-	monstros_na_sala = inimigos.size()
-	
-	for inimigo in inimigos:
-		if inimigo:
-			inimigo.inimigo_derrotado.connect(_on_inimigo_derrotado)
+	print("Sala02 Iniciada - Iluminação Realista e Gerenciamento de Drops")
+	super._ready()
 			
 	var porta = get_node_or_null("PortaTransicao")
 	if porta:

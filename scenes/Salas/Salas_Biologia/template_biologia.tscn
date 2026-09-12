@@ -7,12 +7,12 @@
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="3_eqak8"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="4_513mq"]
 [ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="5_bjess"]
-[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="6_diyyw"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="6_diyyw"]
 [ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="7_tajb7"]
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="8_ergom"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="9_6vc2l"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="10_au4vc"]
-[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="11_doyxm"]
+[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="11_doyxm"]
 
 [node name="Node2D" type="Node2D" unique_id=76001048]
 

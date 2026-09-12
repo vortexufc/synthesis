@@ -1,7 +1,7 @@
 extends Node
 
 # Cena base para SFX (deve ser AudioStreamPlayer na raiz)
-var audio_scene = preload("res://scenes/audio.tscn")
+var audio_scene = preload("res://scenes/Mecanicas/audio.tscn")
 
 # Player de música
 var music_player: AudioStreamPlayer

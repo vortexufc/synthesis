@@ -49,7 +49,11 @@ func _formatar_anotacao_detalhada(q: Dictionary, andar_id: int) -> String:
 	var texto = titulo + "\n\n"
 	texto += "QUESTÃO DE ESTUDO:\n" + pergunta + "\n\n"
 	texto += "ANÁLISE E EXPLICAÇÃO DO CONCEITO:\n"
-	texto += _gerar_explicacao_conceitual(pergunta, resposta_correta, andar_id)
+	var dica_custom = str(q.get("dica", "")).strip_edges()
+	if not dica_custom.is_empty():
+		texto += dica_custom
+	else:
+		texto += _gerar_explicacao_conceitual(pergunta, resposta_correta, andar_id)
 	
 	return texto
 

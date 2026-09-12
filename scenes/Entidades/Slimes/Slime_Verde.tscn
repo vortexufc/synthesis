@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" uid="uid://juhg83qee18fk" path="res://assets/sprites/Sprite Frames/slime_verde.tres" id="1_verde"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_ijx7b"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="3_mo75o"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4w0lo"]
+radius = 31.0
+height = 94.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ixeeu"]
+radius = 34.44198
+
+[node name="Slime_Verde" type="CharacterBody2D"]
+script = ExtResource("3_mo75o")
+vida_maxima = 80.0
+velocidade = 38.0
+dano = 18.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 4
+scale = Vector2(1.5, 1.5)
+sprite_frames = ExtResource("1_verde")
+autoplay = "default"
+frame_progress = 0.6070143
+
+[node name="EnemyTrigger" type="Area2D" parent="."]
+script = ExtResource("2_ijx7b")
+id_inimigo = "slime_verde"
+nivel_dificuldade = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger"]
+position = Vector2(4, 15)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_4w0lo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2.5, 16)
+shape = SubResource("CircleShape2D_ixeeu")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

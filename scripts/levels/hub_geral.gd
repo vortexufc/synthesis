@@ -46,6 +46,23 @@ func _obter_textura_luz() -> Texture2D:
 	grad_tex.height = 256
 	return grad_tex
 
+func _obter_textura_brasa() -> Texture2D:
+	var grad_tex = GradientTexture2D.new()
+	var grad = Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	grad.colors = PackedColorArray([
+		Color(1, 1, 1, 1.0),
+		Color(1, 1, 1, 0.8),
+		Color(1, 1, 1, 0.0)
+	])
+	grad_tex.gradient = grad
+	grad_tex.fill = GradientTexture2D.FILL_RADIAL
+	grad_tex.fill_from = Vector2(0.5, 0.5)
+	grad_tex.fill_to = Vector2(0.5, 0.0)
+	grad_tex.width = 12
+	grad_tex.height = 12
+	return grad_tex
+
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
 	
@@ -55,31 +72,7 @@ func _configurar_sistema_iluminacao() -> void:
 	_canvas_modulate.color = Color(0.24, 0.24, 0.35, 1.0) # Tom azul-ardósia escuro da masmorra
 	add_child(_canvas_modulate)
 	
-	# 2. Tochas: Iluminação acolhedora e equilibrada em cada tocha do mapa
-	var tochas_layer = find_child("Tochas", true, false) as TileMapLayer
-	if tochas_layer:
-		var cells = tochas_layer.get_used_cells()
-		for cell in cells:
-			var local_pos = tochas_layer.map_to_local(cell)
-			var pos_global = tochas_layer.to_global(local_pos)
-			
-			var luz = PointLight2D.new()
-			luz.name = "LuzTocha_%d_%d" % [cell.x, cell.y]
-			luz.texture = tex_luz
-			luz.color = Color(1.0, 0.70, 0.35, 1.0) # Chama quente e alaranjada
-			luz.energy = 0.58
-			luz.texture_scale = 1.6
-			# Alinha a luz com o topo da tocha (onde fica a chama acesa)
-			luz.global_position = pos_global + Vector2(0, -18)
-			add_child(luz)
-			
-			_luzes_tochas.append({
-				"node": luz,
-				"base_energy": 0.58,
-				"base_scale": 1.6,
-				"offset": randf() * 100.0,
-				"speed": randf_range(7.0, 12.0)
-			})
+	# 2. Tochas: Cada tocha instanciada gerencia autonomamente suas chamas, luzes e brasas via Tocha.gd
 	
 	# 3. Orbe Mágico do Mago Mercador: Brilho sutil no topo do cajado
 	var mercador = find_child("NPCMercador", true, false)
@@ -129,6 +122,49 @@ func _configurar_sistema_iluminacao() -> void:
 	_luz_caldeirao.texture_scale = 0.50 # Raio compacto focado diretamente na boca do caldeirão
 	_luz_caldeirao.global_position = pos_caldeirao
 	add_child(_luz_caldeirao)
+	
+	# Partículas de vapor e bolhas mágicas saindo do Caldeirão (grandes, brilhantes e com z_index)
+	var part_caldeirao = CPUParticles2D.new()
+	part_caldeirao.name = "ParticulasCaldeirao"
+	part_caldeirao.global_position = pos_caldeirao + Vector2(0, -10)
+	part_caldeirao.z_index = 5 # Garante que apareça na frente do caldeirão e do cenário
+	
+	var mat_caldeirao = CanvasItemMaterial.new()
+	mat_caldeirao.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	part_caldeirao.material = mat_caldeirao
+	
+	var grad_b_tex = Gradient.new()
+	grad_b_tex.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	grad_b_tex.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.85), Color(1, 1, 1, 0)])
+	var tex_bolha = GradientTexture2D.new()
+	tex_bolha.gradient = grad_b_tex
+	tex_bolha.width = 16
+	tex_bolha.height = 16
+	tex_bolha.fill = GradientTexture2D.FILL_RADIAL
+	tex_bolha.fill_from = Vector2(0.5, 0.5)
+	tex_bolha.fill_to = Vector2(0.5, 0.0)
+	part_caldeirao.texture = tex_bolha
+	
+	part_caldeirao.amount = 18
+	part_caldeirao.lifetime = 1.8
+	part_caldeirao.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	part_caldeirao.emission_rect_extents = Vector2(18, 6)
+	part_caldeirao.direction = Vector2(0, -1)
+	part_caldeirao.spread = 28.0
+	part_caldeirao.gravity = Vector2(0, -22)
+	part_caldeirao.initial_velocity_min = 18.0
+	part_caldeirao.initial_velocity_max = 38.0
+	part_caldeirao.scale_amount_min = 0.5
+	part_caldeirao.scale_amount_max = 1.3
+	
+	var grad_c = Gradient.new()
+	grad_c.colors = PackedColorArray([
+		Color(0.85, 0.35, 1.0, 0.95),
+		Color(0.40, 0.85, 1.0, 0.85),
+		Color(0.60, 0.20, 0.95, 0.0)
+	])
+	part_caldeirao.color_ramp = grad_c
+	add_child(part_caldeirao)
 	
 	# 5.2. Frascos de Cristais Arcanos na Mesa de Alquimia (Bioluminescência Ciano/Azul)
 	frascos_pos.sort_custom(func(a, b): return a.x < b.x)

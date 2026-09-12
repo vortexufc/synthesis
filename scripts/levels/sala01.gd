@@ -13,7 +13,7 @@ var monstros_na_sala: int = 0
 
 var _canvas_modulate: CanvasModulate = null
 var _luz_player: PointLight2D = null
-var _luz_caldeirao: PointLight2D = null
+var _luzes_caldeiroes: Array = []
 var _luzes_portais: Array = []
 var _luzes_props: Array = []
 var _tempo_iluminacao: float = 0.0
@@ -45,8 +45,71 @@ func _obter_textura_luz() -> Texture2D:
 	grad_tex.height = 256
 	return grad_tex
 
+func _obter_textura_bolha() -> Texture2D:
+	var grad_tex = GradientTexture2D.new()
+	var grad = Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	grad.colors = PackedColorArray([
+		Color(1, 1, 1, 1.0),
+		Color(1, 1, 1, 0.85),
+		Color(1, 1, 1, 0.0)
+	])
+	grad_tex.gradient = grad
+	grad_tex.width = 16
+	grad_tex.height = 16
+	grad_tex.fill = GradientTexture2D.FILL_RADIAL
+	grad_tex.fill_from = Vector2(0.5, 0.5)
+	grad_tex.fill_to = Vector2(0.5, 0.0)
+	return grad_tex
+
+func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2, cor_luz: Color, cores_gradiente: PackedColorArray, extents_emissao: Vector2, id_sufixo: String) -> void:
+	var luz = PointLight2D.new()
+	luz.name = "LuzCaldeirao_" + id_sufixo
+	luz.texture = tex_luz
+	luz.color = cor_luz
+	luz.energy = 0.52
+	luz.texture_scale = 0.50
+	luz.position = pos
+	add_child(luz)
+	
+	_luzes_caldeiroes.append({
+		"node": luz,
+		"base_energy": 0.52,
+		"offset": randf() * 10.0
+	})
+	
+	# Vapor e bolhas mágicas saindo do caldeirão
+	var part = CPUParticles2D.new()
+	part.name = "ParticulasCaldeirao_" + id_sufixo
+	part.position = pos + Vector2(0, -10)
+	part.z_index = 5
+	
+	var mat = CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	part.material = mat
+	part.texture = tex_bolha
+	
+	part.amount = 18
+	part.lifetime = 1.8
+	part.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	part.emission_rect_extents = extents_emissao
+	part.direction = Vector2(0, -1)
+	part.spread = 28.0
+	part.gravity = Vector2(0, -22)
+	part.initial_velocity_min = 18.0
+	part.initial_velocity_max = 38.0
+	part.scale_amount_min = 0.5
+	part.scale_amount_max = 1.3
+	
+	var grad = Gradient.new()
+	grad.colors = cores_gradiente
+	part.color_ramp = grad
+	
+	add_child(part)
+
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
+	var tex_bolha = _obter_textura_bolha()
 	
 	# 1. CanvasModulate: Cria a atmosfera escura e profunda da masmorra (mesmo tom do Hub e Corredor)
 	_canvas_modulate = CanvasModulate.new()
@@ -70,57 +133,166 @@ func _configurar_sistema_iluminacao() -> void:
 	_criar_luz_portal("PortaTransicao", Color(0.85, 0.38, 1.0, 1.0)) # Roxo químico arcano
 	_criar_luz_portal("PortaRetorno", Color(0.25, 0.78, 1.0, 1.0))   # Azul misterioso de retorno
 	
-	# 4. Caldeirão Alquímico e Frascos de Laboratório:
-	# Localiza as coordenadas exatas dos objetos da decoração para posicionar a luz diretamente sobre eles
-	var pos_caldeirao = Vector2(956, 592)
-	var pos_frasco_cristal = Vector2(180, 672)
-	var pos_frasco_planta = Vector2(272, 672)
-	
+	# 4. Caldeirões Alquímicos e Frascos de Laboratório:
 	var decor = get_node_or_null("Decoration") as TileMapLayer
 	if decor:
 		for cell in decor.get_used_cells():
 			var atlas = decor.get_cell_atlas_coords(cell)
-			if atlas == Vector2i(91, 20):
-				var cell_world = decor.to_global(decor.map_to_local(cell))
-				pos_caldeirao = cell_world + Vector2(-20, -32)
+			var cell_world = decor.to_global(decor.map_to_local(cell))
+			var cell_id = str(cell.x) + "_" + str(cell.y)
+			
+			var src_id = decor.get_cell_source_id(cell)
+			var src = decor.tile_set.get_source(src_id) as TileSetAtlasSource if decor.tile_set else null
+			var tex_name = src.texture.resource_path.get_file() if (src and src.texture) else ""
+			
+			# 4.1 Marcas / Círculos Rúnicos no Chão em círculo.png (atlas 0:0, 6:0, 12:0)
+			# Apenas brilho suave de sua respectiva cor iluminando as bordas e runas, SEM bolhas nem vapor
+			var is_circulo = (src and src.texture and ("círculo" in src.texture.resource_path or "circulo" in src.texture.resource_path.to_lower())) or ("c" in tex_name.to_lower() and "ulo" in tex_name.to_lower())
+			if is_circulo or (atlas.y == 0 and (atlas.x == 0 or atlas.x == 6 or atlas.x == 12) and ("OBJETOS" not in tex_name)):
+				var cor_runa = Color(1.0, 1.0, 1.0, 1.0)
+				var pos_runa = cell_world
+				var id_runa = ""
+				
+				if atlas.x == 0:
+					# Runa Verde no chão
+					cor_runa = Color(0.35, 0.95, 0.30, 1.0)
+					pos_runa = cell_world
+					id_runa = "RunaVerde_" + cell_id
+				elif atlas.x == 6:
+					# Runa Âmbar / Dourada no chão
+					cor_runa = Color(0.95, 0.52, 0.18, 1.0)
+					pos_runa = cell_world + Vector2(-16, 0)
+					id_runa = "RunaAmbar_" + cell_id
+				elif atlas.x == 12:
+					# Runa Violeta / Roxa no chão
+					cor_runa = Color(0.80, 0.32, 0.95, 1.0)
+					pos_runa = cell_world
+					id_runa = "RunaRoxa_" + cell_id
+					
+				if id_runa != "":
+					var luz_runa = PointLight2D.new()
+					luz_runa.name = "BrilhoRunaChao_" + id_runa
+					luz_runa.texture = tex_luz
+					luz_runa.color = cor_runa
+					luz_runa.energy = 0.35
+					luz_runa.texture_scale = 0.70
+					luz_runa.position = pos_runa
+					add_child(luz_runa)
+					_luzes_props.append({"node": luz_runa, "base_energy": 0.35, "speed": 1.5, "offset": randf() * 5.0})
+					
+			# 4.2 Caldeirões de Pé em OBJETOS02.png (atlas 0:6 = Amarelo/Âmbar, 8:6 = Verde/Ácido)
+			elif atlas.y == 6 and (atlas.x == 0 or atlas.x == 8) and ("OBJETOS02" in tex_name or tex_name == ""):
+				if atlas.x == 0:
+					# Caldeirão de Pé Amarelo / Dourado (brilho quente + bolhas âmbar/ouro)
+					_adicionar_caldeirao(
+						tex_luz, tex_bolha,
+						cell_world + Vector2(-4, -36),
+						Color(1.0, 0.82, 0.20, 1.0),
+						PackedColorArray([
+							Color(1.0, 0.85, 0.25, 0.95),
+							Color(0.95, 0.55, 0.15, 0.85),
+							Color(0.85, 0.35, 0.10, 0.0)
+						]),
+						Vector2(20, 7),
+						"CaldeiraoAmarelo_" + cell_id
+					)
+				elif atlas.x == 8:
+					# Caldeirão de Pé Verde / Ácido (brilho verde-lima + bolhas verdes)
+					_adicionar_caldeirao(
+						tex_luz, tex_bolha,
+						cell_world + Vector2(-4, -36),
+						Color(0.40, 0.98, 0.25, 1.0),
+						PackedColorArray([
+							Color(0.45, 1.0, 0.30, 0.95),
+							Color(0.20, 0.85, 0.45, 0.85),
+							Color(0.15, 0.70, 0.30, 0.0)
+						]),
+						Vector2(20, 7),
+						"CaldeiraoVerde_" + cell_id
+					)
+					
+			# 4.3 Caldeirão de Pé Arcano em OBJETOS.png (atlas 91, 20)
+			elif atlas == Vector2i(91, 20):
+				_adicionar_caldeirao(
+					tex_luz, tex_bolha,
+					cell_world + Vector2(-20, -32),
+					Color(0.84, 0.22, 0.98, 1.0),
+					PackedColorArray([
+						Color(0.85, 0.35, 1.0, 0.95),
+						Color(0.40, 0.85, 1.0, 0.85),
+						Color(0.60, 0.20, 0.95, 0.0)
+					]),
+					Vector2(18, 6),
+					"ObjetosRoxo_" + cell_id
+				)
+				
+			# 4.4 Caldeirões Derramados / Tombados em OBJETOS02.png (atlas.y == 19)
+			elif atlas.y == 19 and ("OBJETOS02" in tex_name or tex_name == ""):
+				if atlas.x in [16, 17]:
+					# Caldeirão Tombado Azul Místico com poça derramada
+					_adicionar_caldeirao(
+						tex_luz, tex_bolha,
+						cell_world + Vector2(10, 14),
+						Color(0.28, 0.65, 1.0, 1.0),
+						PackedColorArray([
+							Color(0.35, 0.70, 1.0, 0.95),
+							Color(0.18, 0.45, 0.95, 0.85),
+							Color(0.10, 0.25, 0.80, 0.0)
+						]),
+						Vector2(14, 6),
+						"TombadoAzul_" + cell_id
+					)
+				elif atlas.x in [24, 25]:
+					# Caldeirão Tombado Ciano / Turquesa com poça derramada
+					_adicionar_caldeirao(
+						tex_luz, tex_bolha,
+						cell_world + Vector2(10, 14),
+						Color(0.20, 0.92, 0.95, 1.0),
+						PackedColorArray([
+							Color(0.25, 0.95, 0.95, 0.95),
+							Color(0.15, 0.75, 0.85, 0.85),
+							Color(0.08, 0.50, 0.70, 0.0)
+						]),
+						Vector2(14, 6),
+						"TombadoCiano_" + cell_id
+					)
+				elif atlas.x in [32, 33]:
+					# Caldeirão Tombado Vermelho Carmesim / Sangue Alquímico com poça derramada
+					_adicionar_caldeirao(
+						tex_luz, tex_bolha,
+						cell_world + Vector2(10, 14),
+						Color(1.0, 0.25, 0.25, 1.0),
+						PackedColorArray([
+							Color(1.0, 0.30, 0.28, 0.95),
+							Color(0.90, 0.15, 0.20, 0.85),
+							Color(0.70, 0.08, 0.12, 0.0)
+						]),
+						Vector2(14, 6),
+						"TombadoVermelho_" + cell_id
+					)
+				# NOTA: atlas.x in [40, 41] é entulho de madeira/mesa quebrada, não é caldeirão e NÃO deve ter efeitos.
+					
+			# 4.5 Frasco de Cristais Arcanos (atlas 40, 20)
 			elif atlas == Vector2i(40, 20):
-				var cell_world = decor.to_global(decor.map_to_local(cell))
-				pos_frasco_cristal = cell_world + Vector2(4, -16)
+				var luz_cristal = PointLight2D.new()
+				luz_cristal.name = "LuzFrascoCristal_" + cell_id
+				luz_cristal.texture = tex_luz
+				luz_cristal.color = Color(0.18, 0.88, 1.0, 1.0)
+				luz_cristal.energy = 0.40
+				luz_cristal.texture_scale = 0.35
+				luz_cristal.position = cell_world + Vector2(4, -16)
+				add_child(luz_cristal)
+				_luzes_props.append({"node": luz_cristal, "base_energy": 0.40, "speed": 1.9, "offset": 0.0})
 			elif atlas == Vector2i(40, 32):
-				var cell_world = decor.to_global(decor.map_to_local(cell))
-				pos_frasco_planta = cell_world + Vector2(0, -16)
-
-	# 4.1. Caldeirão Alquímico: Brilho violeta concentrado na boca borbulhante do caldeirão
-	_luz_caldeirao = PointLight2D.new()
-	_luz_caldeirao.name = "LuzCaldeirao"
-	_luz_caldeirao.texture = tex_luz
-	_luz_caldeirao.color = Color(0.84, 0.22, 0.98, 1.0) # Violeta alquímico vivo
-	_luz_caldeirao.energy = 0.52
-	_luz_caldeirao.texture_scale = 0.50 # Raio compacto focado diretamente na boca do caldeirão
-	_luz_caldeirao.position = pos_caldeirao
-	add_child(_luz_caldeirao)
-	
-	# 4.2. Frasco de Cristais Arcanos (Mesa inferior esquerda): Brilho ciano mágico
-	var luz_cristal = PointLight2D.new()
-	luz_cristal.name = "LuzFrascoCristal"
-	luz_cristal.texture = tex_luz
-	luz_cristal.color = Color(0.18, 0.88, 1.0, 1.0) # Ciano celestial bioluminescente
-	luz_cristal.energy = 0.40
-	luz_cristal.texture_scale = 0.35 # Focado diretamente sobre o vidro do frasco
-	luz_cristal.position = pos_frasco_cristal
-	add_child(luz_cristal)
-	_luzes_props.append({"node": luz_cristal, "base_energy": 0.40, "speed": 1.9, "offset": 0.0})
-	
-	# 4.3. Frasco de Alquimia Botânica (Mesa inferior direita): Brilho esmeralda vivo
-	var luz_planta = PointLight2D.new()
-	luz_planta.name = "LuzFrascoPlanta"
-	luz_planta.texture = tex_luz
-	luz_planta.color = Color(0.20, 0.98, 0.45, 1.0) # Verde esmeralda vivo
-	luz_planta.energy = 0.40
-	luz_planta.texture_scale = 0.35 # Focado diretamente sobre o vidro do frasco
-	luz_planta.position = pos_frasco_planta
-	add_child(luz_planta)
-	_luzes_props.append({"node": luz_planta, "base_energy": 0.40, "speed": 1.4, "offset": 2.1})
+				var luz_planta = PointLight2D.new()
+				luz_planta.name = "LuzFrascoPlanta_" + cell_id
+				luz_planta.texture = tex_luz
+				luz_planta.color = Color(0.20, 0.98, 0.45, 1.0)
+				luz_planta.energy = 0.40
+				luz_planta.texture_scale = 0.35
+				luz_planta.position = cell_world + Vector2(0, -16)
+				add_child(luz_planta)
+				_luzes_props.append({"node": luz_planta, "base_energy": 0.40, "speed": 1.4, "offset": 2.1})
 
 func _criar_luz_portal(nome_porta: String, cor_luz: Color) -> void:
 	var porta = find_child(nome_porta, true, false)
@@ -145,11 +317,14 @@ func _criar_luz_portal(nome_porta: String, cor_luz: Color) -> void:
 func _process(delta: float) -> void:
 	_tempo_iluminacao += delta
 	
-	# 1. Borbulhar dinâmico no Caldeirão Alquímico (intensidade e leve pulso na poção)
-	if _luz_caldeirao and is_instance_valid(_luz_caldeirao):
-		var borbulha = sin(_tempo_iluminacao * 5.5) * 0.06 + sin(_tempo_iluminacao * 9.2) * 0.03
-		_luz_caldeirao.energy = 0.52 + borbulha
-		_luz_caldeirao.texture_scale = 0.50 + sin(_tempo_iluminacao * 6.0) * 0.02
+	# 1. Borbulhar dinâmico em todos os Caldeirões da sala
+	for c_data in _luzes_caldeiroes:
+		var luz = c_data["node"] as PointLight2D
+		if luz and is_instance_valid(luz):
+			var t = _tempo_iluminacao + c_data["offset"]
+			var borbulha = sin(t * 5.5) * 0.06 + sin(t * 9.2) * 0.03
+			luz.energy = c_data["base_energy"] + borbulha
+			luz.texture_scale = 0.50 + sin(t * 6.0) * 0.02
 		
 	# 2. Pulso sutil da aura do mago jogador
 	if _luz_player and is_instance_valid(_luz_player):

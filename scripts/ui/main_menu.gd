@@ -54,10 +54,7 @@ func _ready() -> void:
 	hbox_perfil.add_theme_constant_override("separation", 12)
 	
 	_btn_avatar = TextureButton.new()
-	var tex = load("res://avatar.png.png") as Texture2D
-	
-	if tex == null:
-		tex = load("res://avatar.png") as Texture2D
+	var tex = load("res://assets/branding/avatar.png.png") as Texture2D
 		
 	if tex == null:
 		tex = PlaceholderTexture2D.new()
@@ -119,7 +116,7 @@ func _on_btn_jogar_pressed() -> void:
 		
 	# Efeito de transicao
 	AudioManager.play_sfx("transicao-1")
-	TransitionScreen.change_scene("res://scenes/Salas/Hub_Geral.tscn")
+	TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
@@ -349,5 +346,3 @@ func _criar_particulas_magicas() -> void:
 	else:
 		add_child(particles)
 		move_child(particles, 1)
-
-

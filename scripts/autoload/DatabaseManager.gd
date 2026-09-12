@@ -295,3 +295,88 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 		elif res_data is Array and res_data.size() > 0 and res_data[0] is Dictionary:
 			error_msg = res_data[0].get("message", "Erro desconhecido")
 		return {"success": false, "code": response_code, "message": error_msg}
+
+# Remove pergunta no Supabase e no arquivo local
+func remover_pergunta(pergunta_id: int) -> Dictionary:
+	print("[DatabaseManager] Solicitando exclusao da pergunta #", pergunta_id)
+	# 1. Remove respostas vinculadas para evitar conflito de chave estrangeira
+	await request_async("/rest/v1/respostas?pergunta_id=eq." + str(pergunta_id), HTTPClient.METHOD_DELETE)
+	
+	# 2. Deleta a questao no banco
+	var res = await request_async("/rest/v1/perguntas?id=eq." + str(pergunta_id), HTTPClient.METHOD_DELETE)
+	
+	# 3. Remove do arquivo local de fallback caso exista
+	remover_pergunta_local(pergunta_id)
+	
+	# 4. Remove do cache em memoria do QuizManager
+	if QuizManager:
+		var nova_lista = []
+		for q in QuizManager.questions:
+			if q is Dictionary and int(q.get("id", -1)) == pergunta_id:
+				continue
+			nova_lista.append(q)
+		QuizManager.questions = nova_lista
+		QuizManager.reset_questions()
+		
+	return res
+
+# Remove questao do arquivo json local (questions.json)
+func remover_pergunta_local(pergunta_id: int) -> bool:
+	var path = "res://data/questions.json"
+	if not FileAccess.file_exists(path):
+		return false
+	var file = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return false
+	var content = file.get_as_text()
+	file.close()
+	var json = JSON.new()
+	if json.parse(content) == OK and json.data is Array:
+		var todas: Array = json.data
+		var nova_lista = []
+		var encontrada = false
+		for p in todas:
+			if p is Dictionary and int(p.get("id", -1)) == pergunta_id:
+				encontrada = true
+				continue
+			nova_lista.append(p)
+		if encontrada:
+			var wfile = FileAccess.open(path, FileAccess.WRITE)
+			if wfile:
+				wfile.store_string(JSON.stringify(nova_lista, "\t"))
+				wfile.close()
+				print("[DatabaseManager] Pergunta #", pergunta_id, " removida de ", path)
+				return true
+	return false
+
+# Adiciona ou atualiza questao no arquivo json local (questions.json)
+func salvar_pergunta_local(dados: Dictionary) -> bool:
+	var path = "res://data/questions.json"
+	var todas: Array = []
+	if FileAccess.file_exists(path):
+		var file = FileAccess.open(path, FileAccess.READ)
+		if file:
+			var content = file.get_as_text()
+			file.close()
+			var json = JSON.new()
+			if json.parse(content) == OK and json.data is Array:
+				todas = json.data
+				
+	var p_id = int(dados.get("id", -1))
+	var atualizou = false
+	if p_id > 0:
+		for i in range(todas.size()):
+			if todas[i] is Dictionary and int(todas[i].get("id", -1)) == p_id:
+				todas[i] = dados
+				atualizou = true
+				break
+	if not atualizou:
+		todas.append(dados)
+		
+	var wfile = FileAccess.open(path, FileAccess.WRITE)
+	if wfile:
+		wfile.store_string(JSON.stringify(todas, "\t"))
+		wfile.close()
+		print("[DatabaseManager] Pergunta sincronizada também no questions.json local.")
+		return true
+	return false

@@ -15,10 +15,17 @@ var game_over_cena = preload("res://scenes/ui/game_over.tscn")
 var ui_instancia = null
 var pergunta_atual = null
 var _processando_resposta: bool = false
+var _inimigo_atual_id: String = ""
+var _nivel_dificuldade_alvo: int = 0
 
 var sprite_frames_inimigos = {
 	"slime_p": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
+	"slime_azul": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
+	"slime_verde": preload("res://assets/sprites/Sprite Frames/slime_verde.tres"),
+	"slime_laranja": preload("res://assets/sprites/Sprite Frames/slime_g.tres"),
 	"slime_g": preload("res://assets/sprites/Sprite Frames/slime_g.tres"),
+	"slime_boss_roxo": preload("res://assets/sprites/Sprite Frames/slime_boss_roxo.tres"),
+	"slime_g_boss": preload("res://assets/sprites/Sprite Frames/slime_boss_roxo.tres"),
 	## [PROG-06] Inimigos do Andar 3 — Física
 	"robo_p_laranja": preload("res://assets/sprites/Sprite Frames/robo_p_laranja.tres"),
 	"robo_p_amarelo":  preload("res://assets/sprites/Sprite Frames/robo_p_amarelo.tres"),
@@ -63,27 +70,34 @@ func reset_questions():
 	else:
 		base_list = questions.duplicate()
 		
-	# Determina a dificuldade alvo com base no progresso das salas ou se é a sala do Boss
+	# Determina a dificuldade alvo com base no tipo de slime / progresso TRI da masmorra
 	var target_nivel: int = 1
 	var current_scene_path = ""
 	if get_tree() and get_tree().current_scene:
 		current_scene_path = get_tree().current_scene.scene_file_path
 		
-	if current_scene_path.to_lower().find("boss") != -1:
+	if _nivel_dificuldade_alvo > 0:
+		target_nivel = _nivel_dificuldade_alvo
+	elif current_scene_path.to_lower().find("boss") != -1:
 		target_nivel = 3
 	else:
+		# Mapeamento TRI nas 8 salas do andar:
+		# Salas 1 a 3: Nível 1 (Fácil - Slime Azul)
+		# Salas 4 a 5: Nível 2 (Médio - Slime Verde)
+		# Salas 6 a 7: Nível 3 (Difícil - Slime Laranja)
+		# Sala 8: Boss Final (Nível 3 - Slime Grandão Roxo)
 		var sala_idx = DungeonGenerator.get_index_da_cena(current_scene_path)
 		if sala_idx != -1:
-			if sala_idx <= 4:
+			if sala_idx <= 3:
 				target_nivel = 1
-			elif sala_idx <= 9:
+			elif sala_idx <= 5:
 				target_nivel = 2
 			else:
 				target_nivel = 3
 		else:
 			target_nivel = 1
 		
-	print("[QuizManager] Sala: %s (index: %d), Dificuldade alvo: %d" % [current_scene_path.get_file(), DungeonGenerator.get_index_da_cena(current_scene_path), target_nivel])
+	print("[QuizManager] Inimigo: %s | Sala: %s (index: %d) -> Dificuldade alvo TRI: %d" % [_inimigo_atual_id, current_scene_path.get_file(), DungeonGenerator.get_index_da_cena(current_scene_path), target_nivel])
 	
 	var disponiveis: Array = []
 	for q in base_list:
@@ -225,6 +239,23 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
 	if id_do_inimigo.to_lower().begins_with("slime"):
 		novo_andar = 1
+
+	_inimigo_atual_id = id_do_inimigo
+	var id_lower = id_do_inimigo.to_lower()
+	var nivel_explicit: int = int(enemy_data.get("nivel_dificuldade", 0))
+	
+	if nivel_explicit > 0:
+		_nivel_dificuldade_alvo = nivel_explicit
+	elif "boss" in id_lower or "roxo" in id_lower:
+		_nivel_dificuldade_alvo = 3
+	elif "verde" in id_lower:
+		_nivel_dificuldade_alvo = 2
+	elif "laranja" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower:
+		_nivel_dificuldade_alvo = 3
+	elif "azul" in id_lower or "slime_p" in id_lower:
+		_nivel_dificuldade_alvo = 1
+	else:
+		_nivel_dificuldade_alvo = 0
 
 	if _questoes_locais_ativas.size() > 0:
 		# Usa as questões locais — ignora banco para esta batalha (funciona offline)

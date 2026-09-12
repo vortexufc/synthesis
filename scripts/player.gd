@@ -11,9 +11,20 @@ var ultima_direcao = "baixo"
 var travado: bool = false
 
 # [Fix-1] HP unificado: gerenciado exclusivamente pelo autoload PlayerStats
+var _vida_anterior: float = 100.0
+var _shake_tempo: float = 0.0
+var _shake_intensidade: float = 0.0
 
 func _ready() -> void:
 	add_to_group("player")
+	_vida_anterior = PlayerStats.vida_atual_jogador
+	
+	# Tremer a câmera se tomar dano
+	PlayerStats.vida_alterada.connect(func(atual, _maxima):
+		if atual < _vida_anterior:
+			aplicar_shake(7.0, 0.22)
+		_vida_anterior = atual
+	)
 	
 	# Reposiciona o player na porta correta quando estiver voltando de uma sala
 	call_deferred("_reposicionar_na_porta_correta")
@@ -99,6 +110,16 @@ func _physics_process(_delta: float) -> void:
 	
 	move_and_slide()
 	_animar_sombra(_delta)
+	
+	# Partículas de poeira nos passos (sempre atrás do corpo do personagem)
+	if has_node("PoeiraPassos"):
+		var movendo = (velocity.length() > 10.0)
+		$PoeiraPassos.emitting = movendo
+		if movendo:
+			var dir_norm = velocity.normalized()
+			$PoeiraPassos.direction = -dir_norm
+				
+	_process_shake(_delta)
 
 const SOMBRA_BASE_X: float = 1.85
 const SOMBRA_BASE_Y: float = 1.25
@@ -122,10 +143,27 @@ func _animar_sombra(delta: float) -> void:
 		shadow.scale.x = SOMBRA_BASE_X + onda * 0.06
 		shadow.scale.y = SOMBRA_BASE_Y + onda * 0.04
 
+## Aplica Screen Shake dinâmico na câmera do jogador
+func aplicar_shake(intensidade: float = 6.0, duracao: float = 0.2) -> void:
+	_shake_intensidade = max(_shake_intensidade, intensidade)
+	_shake_tempo = max(_shake_tempo, duracao)
+
+func _process_shake(delta: float) -> void:
+	if not has_node("Camera2D"):
+		return
+	if _shake_tempo > 0.0:
+		_shake_tempo -= delta
+		var offset_shake = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _shake_intensidade
+		$Camera2D.offset = offset_shake
+		_shake_intensidade = lerp(_shake_intensidade, 0.0, delta * 8.0)
+	else:
+		$Camera2D.offset = Vector2.ZERO
+
 # [Fix-1] Chamado pelo Mímico para aplicar penalidade e feedback visual
 func receber_dano_mimico() -> void:
 	# [Fix-1] Delega o dano ao autoload centralizado (emite vida_alterada → HUD atualiza)
 	PlayerStats.sofrer_dano(15.0)
+	aplicar_shake(8.0, 0.25)
 	print("[Mímico] HP restante: %.0f / %.0f" % [PlayerStats.vida_atual_jogador, PlayerStats.vida_maxima_jogador])
 	
 	# Flash vermelho no sprite (feedback visual mantido)

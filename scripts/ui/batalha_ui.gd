@@ -60,10 +60,18 @@ func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 		elif id_inimigo == "evil_wizzard":
 			$Control/SpriteMonstro.position.y = 195.0 # Mago fica perfeito nessa altura
 			$Control/HealthEnemy.position.y = 165.0
-
+		elif "boss" in id_inimigo or "roxo" in id_inimigo:
+			$Control/SpriteMonstro.position.y = 180.0 # Slime Grandão Roxo Boss
+			$Control/HealthEnemy.position.y = 160.0
+			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(2.4, 2.4)
+		elif "laranja" in id_inimigo or id_inimigo == "slime_g":
+			$Control/SpriteMonstro.position.y = 205.0 # Slime Laranja
+			$Control/HealthEnemy.position.y = 190.0
+			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(1.8, 1.8)
 		else:
 			$Control/SpriteMonstro.position.y = 233.0
 			$Control/HealthEnemy.position.y = 233.0
+			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(1.5, 1.5)
 			
 		# [UI] Apenas os robôs originalmente encaram a esquerda, logo não precisam do flip_h.
 		# Slimes e o Mago encaram a direita na sprite original, então precisam.
@@ -180,10 +188,18 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 	if acertou:
 		$AnimationPlayer.play("ataque_mago")
 		await $AnimationPlayer.animation_finished
-		# Flash
+		# Flash e tremor de impacto no monstro
 		var tween = create_tween()
 		tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
 		tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 1, 1, 1), 0.35)
+		
+		var pos_base_x = $Control/SpriteMonstro.position.x
+		var impact_tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x + 8.0, 0.04)
+		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x - 8.0, 0.04)
+		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x + 4.0, 0.04)
+		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x, 0.04)
+		
 		lbl.text = str(valor) + " DMG!"
 		lbl.modulate = Color(0.2, 0.8, 0.2)
 	else:
@@ -202,6 +218,14 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int) -> void:
 			# Retorna pro idle
 			if $Control/SpriteMonstro/AnimatedSprite2D.sprite_frames.has_animation("default"):
 				$Control/SpriteMonstro/AnimatedSprite2D.play("default")
+			
+		# Screen shake dinâmico na tela de batalha ao tomar dano
+		var shake_tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		shake_tw.tween_property($Control, "position", Vector2(10, -6), 0.035)
+		shake_tw.tween_property($Control, "position", Vector2(-10, 6), 0.035)
+		shake_tw.tween_property($Control, "position", Vector2(6, 4), 0.035)
+		shake_tw.tween_property($Control, "position", Vector2(-4, -2), 0.035)
+		shake_tw.tween_property($Control, "position", Vector2.ZERO, 0.035)
 			
 		lbl.text = "-" + str(valor) + " HP"
 		lbl.modulate = Color(0.9, 0.2, 0.2)

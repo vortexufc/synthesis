@@ -26,9 +26,7 @@ func _aplicar_visual() -> void:
 		btn_expulsar.add_theme_font_override("font", font)
 		
 	# Avatar loading
-	var tex: Texture2D = load("res://avatar.png.png") as Texture2D
-	if tex == null:
-		tex = load("res://avatar.png") as Texture2D
+	var tex: Texture2D = load("res://assets/branding/avatar.png.png") as Texture2D
 	if tex:
 		img_avatar.texture = tex
 		
