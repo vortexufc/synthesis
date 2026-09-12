@@ -11,3 +11,4 @@ override.cfg
 *.zip
 temp_*.txt
 *.tmp
+scratch/
