@@ -19,10 +19,9 @@ dano = 22.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 z_index = 4
-scale = Vector2(1.5, 1.5)
+scale = Vector2(1.1, 1.1)
 sprite_frames = ExtResource("1_laranja")
 autoplay = "default"
-frame_progress = 0.6070143
 
 [node name="EnemyTrigger" type="Area2D" parent="."]
 script = ExtResource("3_trigger")

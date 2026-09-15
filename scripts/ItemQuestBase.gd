@@ -15,6 +15,7 @@ func _ready() -> void:
 	scale = Vector2.ZERO
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector2(1, 1), 0.4).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(0.35)
 	tween.tween_callback(func(): coletavel = true)
 	tween.tween_callback(_verificar_coleta_imediata)
 	

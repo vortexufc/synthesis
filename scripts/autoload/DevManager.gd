@@ -162,6 +162,70 @@ func _criar_interface_dev() -> void:
 	btn_clear_inv.pressed.connect(_limpar_inventario_e_moedas)
 	vbox.add_child(btn_clear_inv)
 	
+	var hs_novos = HSeparator.new()
+	vbox.add_child(hs_novos)
+
+	var lbl_novos = Label.new()
+	lbl_novos.text = "⚔️ Novos Recursos (Fúria & Vinhetas):"
+	lbl_novos.add_theme_font_size_override("font_size", 13)
+	lbl_novos.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
+	vbox.add_child(lbl_novos)
+
+	var btn_test_furia = Button.new()
+	btn_test_furia.text = "⚡ Testar Fúria do Chefe (V/F QTE)"
+	btn_test_furia.pressed.connect(func():
+		_panel_container.visible = false
+		var furia_cena = load("res://scenes/ui/furia_chefe_ui.tscn")
+		if furia_cena:
+			var furia_inst = furia_cena.instantiate()
+			get_tree().root.add_child(furia_inst)
+			furia_inst.iniciar_furia(1)
+	)
+	vbox.add_child(btn_test_furia)
+
+	var hbox_vinhetas = HBoxContainer.new()
+	hbox_vinhetas.add_theme_constant_override("separation", 6)
+	
+	var btn_v1 = Button.new()
+	btn_v1.text = "📜 Cap. I (Química)"
+	btn_v1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn_v1.pressed.connect(func():
+		_panel_container.visible = false
+		var v_cena = load("res://scenes/ui/vinheta_historia.tscn")
+		if v_cena:
+			var v = v_cena.instantiate()
+			get_tree().root.add_child(v)
+			v.iniciar_vinheta(1)
+	)
+	hbox_vinhetas.add_child(btn_v1)
+
+	var btn_v2 = Button.new()
+	btn_v2.text = "📜 Cap. II (Física)"
+	btn_v2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn_v2.pressed.connect(func():
+		_panel_container.visible = false
+		var v_cena = load("res://scenes/ui/vinheta_historia.tscn")
+		if v_cena:
+			var v = v_cena.instantiate()
+			get_tree().root.add_child(v)
+			v.iniciar_vinheta(2)
+	)
+	hbox_vinhetas.add_child(btn_v2)
+
+	var btn_v3 = Button.new()
+	btn_v3.text = "📜 Cap. III (Bio)"
+	btn_v3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn_v3.pressed.connect(func():
+		_panel_container.visible = false
+		var v_cena = load("res://scenes/ui/vinheta_historia.tscn")
+		if v_cena:
+			var v = v_cena.instantiate()
+			get_tree().root.add_child(v)
+			v.iniciar_vinheta(3)
+	)
+	hbox_vinhetas.add_child(btn_v3)
+	vbox.add_child(hbox_vinhetas)
+
 	var hs3 = HSeparator.new()
 	vbox.add_child(hs3)
 	

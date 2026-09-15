@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://b1niptup4t0uq" path="res://scripts/player.gd" id="1_uhc0a"]
 [ext_resource type="Texture2D" uid="uid://b2713wbgtpddw" path="res://assets/sprites/Characters/Maguinho/walk.png" id="2_qhqgy"]
 [ext_resource type="Texture2D" uid="uid://bb58dqe3i4i1p" path="res://assets/sprites/Characters/Maguinho/idle.png" id="3_r0kh6"]
-[ext_resource type="Texture2D" uid="uid://dxngte5fixvcd" path="res://assets/sprites/Characters/Maguinho/shadow.png" id="4_shadow"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
 radius = 19.0
@@ -395,11 +394,6 @@ limit_bottom = 4096
 position_smoothing_enabled = true
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1020740764]
-
-[node name="Shadow" type="Sprite2D" parent="." unique_id=987162543]
-position = Vector2(-2, 38)
-scale = Vector2(1.85, 1.25)
-texture = ExtResource("4_shadow")
 
 [node name="PoeiraPassos" type="CPUParticles2D" parent="." unique_id=990000001]
 z_index = 0

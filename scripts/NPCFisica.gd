@@ -16,15 +16,17 @@ func _quando_corpo_sai(corpo: Node2D) -> void:
 
 var _balao_interacao: Node2D = null
 var _indicador_quest: Label = null
+var _sprite: Sprite2D = null
 var _tempo_anim: float = 0.0
-var _base_balao_y: float = -135.0
-var _base_quest_y: float = -155.0
-var _curr_quest_y: float = -155.0
+var _base_balao_y: float = -110.0
+var _base_quest_y: float = -130.0
+var _curr_quest_y: float = -130.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	collision_layer = 0
 	collision_mask = 15 # Pega o player
+	_sprite = get_node_or_null("Sprite2D")
 	
 	body_entered.connect(_quando_corpo_entra)
 	body_exited.connect(_quando_corpo_sai)
@@ -36,6 +38,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_tempo_anim += delta
 	var flutuacao = sin(_tempo_anim * 3.8) * 4.0
+	
+	if _sprite and _sprite.hframes > 1:
+		_sprite.frame = int(_tempo_anim * 2.0) % _sprite.hframes
 	
 	if _balao_interacao:
 		_balao_interacao.position.y = _base_balao_y + flutuacao

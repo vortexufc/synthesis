@@ -8,12 +8,19 @@ extends Area2D
 @export var usar_paginas_custom: bool = false
 @export_multiline var paginas_custom: Array[String] = []
 @export_range(1, 4) var num_paginas: int = 4
+@export_enum("Madeira", "Arcano", "Ferro") var tipo_bau: int = 0
+@export_enum("Desafio da Memória Arcana", "Pergaminho de Dicas") var modo_conteudo: int = 0
+@export_enum("Automático (Detectar pela Sala)", "Andar 1 (Química)", "Andar 2 (Física)", "Andar 3 (Biologia)") var forcar_andar: int = 0
+@export var eh_desafio_memoria: bool = true
+@export var recompensa_moedas: int = 30
+@export var recompensa_pocao: String = "Poção de Cura"
+@export var duracao_buff_salas: int = 2
 
 var ja_aberto: bool = false
 
 @onready var sprite: Sprite2D = $BauSprite if has_node("BauSprite") else null
 
-# Texturas da folha de sprite Alquimia/preto.png (32x32)
+# Texturas da folha de sprite Alquimia/OBJETOS.png (48x48)
 var tex_fechado: AtlasTexture
 var tex_aberto: AtlasTexture
 
@@ -23,16 +30,31 @@ var canvas_prompt: CanvasLayer = null
 var panel_prompt: PanelContainer = null
 
 func _ready() -> void:
-	# Prepara as texturas para o baú fechado e aberto
-	var base_tex = load("res://assets/sprites/tilesets/Alquimia/preto.png")
+	# Define se é desafio de memória baseado no modo_conteudo (padrão: Desafio da Memória)
+	if modo_conteudo == 0:
+		eh_desafio_memoria = true
+	elif modo_conteudo == 1:
+		eh_desafio_memoria = false
+
+	# Prepara as texturas para o baú fechado e aberto usando os sprites reais de OBJETOS.png
+	var base_tex = load("res://assets/sprites/tilesets/Alquimia/OBJETOS.png")
 	if base_tex:
 		tex_fechado = AtlasTexture.new()
 		tex_fechado.atlas = base_tex
-		tex_fechado.region = Rect2(0, 128, 32, 32)
 		
 		tex_aberto = AtlasTexture.new()
 		tex_aberto.atlas = base_tex
-		tex_aberto.region = Rect2(32, 128, 32, 32)
+		
+		match tipo_bau:
+			0: # Baú 1: Madeira
+				tex_fechado.region = Rect2(1024, 336, 48, 48)
+				tex_aberto.region = Rect2(1024, 528, 48, 48)
+			1: # Baú 2: Arcano (Roxo)
+				tex_fechado.region = Rect2(896, 336, 48, 48)
+				tex_aberto.region = Rect2(896, 528, 48, 48)
+			2: # Baú 3: Ferro (Cinza)
+				tex_fechado.region = Rect2(768, 336, 48, 48)
+				tex_aberto.region = Rect2(768, 528, 48, 48)
 		
 		if sprite:
 			sprite.texture = tex_fechado
@@ -68,7 +90,10 @@ func _exibir_prompt_tela() -> void:
 	panel_prompt.add_theme_stylebox_override("panel", style)
 	
 	var label = Label.new()
-	label.text = "Pressione [F] para Abrir o Baú"
+	if eh_desafio_memoria:
+		label.text = "Pressione [F] - Desafio da Memória Arcana"
+	else:
+		label.text = "Pressione [F] para Abrir o Baú"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
@@ -121,8 +146,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func abrir_bau() -> void:
 	if ja_aberto:
 		return
+		
+	if eh_desafio_memoria:
+		_iniciar_desafio_memoria()
+		return
+
 	ja_aberto = true
-	
 	_remover_prompt_tela()
 	
 	# Transiciona o sprite para o estado Aberto
@@ -162,4 +191,61 @@ func abrir_bau() -> void:
 		ui.abrir_pergaminho(paginas, player_ref)
 	else:
 		push_warning("[Bau] ParchmentUI não foi encontrado na cena!")
+
+## Inicia o minigame Desafio da Memória Arcana
+func _iniciar_desafio_memoria() -> void:
+	_remover_prompt_tela()
+	
+	# Determina o andar correspondente (1 = Química, 2 = Física, 3 = Biologia)
+	var andar_id = 1
+	if forcar_andar > 0:
+		andar_id = forcar_andar
+	else:
+		var nome_dungeon = ""
+		if get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
+			nome_dungeon = DatabaseManager.active_dungeon.to_lower()
+		elif get_tree() and get_tree().current_scene:
+			nome_dungeon = get_tree().current_scene.scene_file_path.to_lower()
+			
+		if "fisica" in nome_dungeon:
+			andar_id = 2
+		elif "biologia" in nome_dungeon:
+			andar_id = 3
+		elif get_node_or_null("/root/QuizManager"):
+			andar_id = QuizManager._andar_atual
+		else:
+			andar_id = 1
+		
+	var minigame_scene = preload("res://scenes/ui/desafio_memoria_ui.tscn")
+	if minigame_scene:
+		var minigame = minigame_scene.instantiate()
+		get_tree().root.add_child(minigame)
+		minigame.desafio_concluido.connect(_on_desafio_memoria_concluido)
+		minigame.iniciar_desafio(andar_id, player_ref)
+
+func _on_desafio_memoria_concluido(vitoria: bool) -> void:
+	if vitoria:
+		ja_aberto = true
+		if sprite and tex_aberto:
+			sprite.texture = tex_aberto
+			
+		if get_node_or_null("/root/PlayerStats"):
+			# Recompensas: Poção de Cura + Moedas de Ouro + Buff de Escudo (+10 HP Máx por 2 salas)
+			PlayerStats.adicionar_pocao(recompensa_pocao, 40, "Cura 40 HP (Baú Arcano)", 1)
+			PlayerStats.adicionar_moedas(recompensa_moedas)
+			PlayerStats.aplicar_buff_escudo(duracao_buff_salas, 10.0)
+			
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("mostrar_notificacao_quest"):
+			hud.mostrar_notificacao_quest(
+				"✨ DESAFIO CONCLUÍDO!",
+				"+1 Poção, +%d Moedas e Escudo Arcano (+10 HP Máx)!" % recompensa_moedas,
+				Color(0.7, 0.45, 1.0),
+				"ui_1"
+			)
+	else:
+		# Se perdeu ou cancelou, o baú permanece trancado e o jogador pode tentar de novo
+		if player_perto:
+			_exibir_prompt_tela()
+
 

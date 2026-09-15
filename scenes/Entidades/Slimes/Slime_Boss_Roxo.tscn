@@ -19,10 +19,9 @@ dano = 30.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 z_index = 4
-scale = Vector2(2.2, 2.2)
+scale = Vector2(1.35, 1.35)
 sprite_frames = ExtResource("1_roxo")
 autoplay = "default"
-frame_progress = 0.6070143
 
 [node name="EnemyTrigger" type="Area2D" parent="."]
 script = ExtResource("2_mo75o")
@@ -32,12 +31,12 @@ num_questoes = 5
 duracao_batalha = 300.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger"]
-position = Vector2(-1, 31)
+position = Vector2(-1, 45)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_mo75o")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-1, 35)
+position = Vector2(-1, 50)
 shape = SubResource("RectangleShape2D_sjgcv")
 
 [connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

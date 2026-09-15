@@ -16,6 +16,11 @@ var _luzes_portais: Array = []
 var _tempo_iluminacao: float = 0.0
 
 func _ready() -> void:
+	if get_node_or_null("/root/DatabaseManager"):
+		DatabaseManager.active_dungeon = "Química"
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.masmorra_retorno_hub = "Química"
+		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.start_playlist()
 	_configurar_sistema_iluminacao()

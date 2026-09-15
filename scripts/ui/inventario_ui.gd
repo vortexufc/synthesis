@@ -92,7 +92,7 @@ func _ready() -> void:
 	
 	atlas_pergaminho_fechado = AtlasTexture.new()
 	atlas_pergaminho_fechado.atlas = tex_pergaminho
-	atlas_pergaminho_fechado.region = Rect2(0, 0, 64, 64)
+	atlas_pergaminho_fechado.region = Rect2(0, 0, 23, 64)
 	
 	atlas_pergaminho_aberto = AtlasTexture.new()
 	atlas_pergaminho_aberto.atlas = tex_pergaminho
@@ -297,7 +297,13 @@ func _on_btn_descartar_pressionado() -> void:
 		if item_selecionado["nome"] == "Chave de Porta":
 			PlayerStats.chaves = max(0, PlayerStats.chaves - qtd_descarte)
 		else:
-			PlayerStats.itens.remove_at(idx)
+			var removidos = 0
+			for k in range(PlayerStats.itens.size() - 1, -1, -1):
+				if PlayerStats.itens[k]["nome"] == item_selecionado["nome"]:
+					PlayerStats.itens.remove_at(k)
+					removidos += 1
+					if removidos >= qtd_descarte:
+						break
 	elif tipo == "grimorio":
 		PlayerStats.grimorio.remove_at(idx)
 	elif tipo == "moeda":
@@ -335,21 +341,60 @@ func _atualizar_listas() -> void:
 		var card = _criar_slot_card(icone_chave, "Chave de Porta", PlayerStats.chaves, func(): _selecionar_item(dic_chave, "item", -1))
 		grid_itens.add_child(card)
 		
-	for i in range(PlayerStats.itens.size()):
+	# Agrupa itens repetidos por nome
+	var itens_agrupados: Dictionary = {}
+	for it in PlayerStats.itens:
+		var nome = it.get("nome", "Item Desconhecido")
+		if not itens_agrupados.has(nome):
+			itens_agrupados[nome] = {
+				"item_base": it,
+				"qtd": 0,
+				"cores": []
+			}
+		itens_agrupados[nome]["qtd"] += 1
+		if it.has("cor"):
+			itens_agrupados[nome]["cores"].append(it["cor"])
+			
+	for nome in itens_agrupados.keys():
 		tem_qualquer_item = true
-		var item = PlayerStats.itens[i]
+		var grupo = itens_agrupados[nome]
+		var item_base = grupo["item_base"]
+		var qtd = grupo["qtd"]
 		var icone: Texture2D = null
 		
-		if item["nome"] == "Livro de Fórmulas":
+		if nome == "Livro de Fórmulas":
 			icone = load("res://assets/sprites/ui/item_livro_formulas.png")
-		elif item["nome"] == "Fragmento de Gelatina":
-			icone = load("res://assets/sprites/ui/item_fragmento_gelatina.png")
-		elif item["nome"] == "Bateria Elétrica":
+		elif nome == "Fragmento de Gelatina":
+			var cores = grupo["cores"]
+			var todas_mesma_cor = true
+			for c in cores:
+				if c != cores[0]:
+					todas_mesma_cor = false
+					break
+			if cores.size() > 1 and not todas_mesma_cor:
+				icone = load("res://assets/sprites/ui/item_fragmento_gelatina_mercado.png")
+			else:
+				var cor_destaque = cores[0] if cores.size() > 0 else "azul"
+				icone = _obter_icone_gelatina(cor_destaque)
+		elif nome == "Bateria Elétrica":
 			icone = load("res://assets/sprites/ui/item_bateria.png")
-		elif item["nome"] == "Fragmento de Chip":
+		elif nome == "Fragmento de Chip":
 			icone = load("res://assets/sprites/ui/item_chip.png")
 			
-		var card = _criar_slot_card(icone, item["nome"], 1, func(): _selecionar_item(item, "item", i))
+		var item_display = item_base.duplicate()
+		item_display["qtd"] = qtd
+		if nome == "Fragmento de Gelatina":
+			var cores = grupo["cores"]
+			var todas_mesma_cor = true
+			for c in cores:
+				if c != cores[0]:
+					todas_mesma_cor = false
+					break
+			if cores.size() > 1 and not todas_mesma_cor:
+				item_display["cores_mistas"] = true
+			else:
+				item_display["cor"] = cores[0] if cores.size() > 0 else "azul"
+		var card = _criar_slot_card(icone, nome, qtd, func(): _selecionar_item(item_display, "item", -1))
 		grid_itens.add_child(card)
 		
 	if not tem_qualquer_item:
@@ -362,7 +407,12 @@ func _atualizar_listas() -> void:
 	else:
 		for i in range(PlayerStats.grimorio.size()):
 			var doc = PlayerStats.grimorio[i]
-			var card = _criar_slot_card(atlas_pergaminho_fechado, doc["titulo"], 1, func(): _selecionar_item(doc, "grimorio", i))
+			var icone_doc: Texture2D = atlas_pergaminho_fechado
+			if doc is Dictionary and doc.get("tipo_codice") == "mural":
+				var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
+				if tex_livro:
+					icone_doc = tex_livro
+			var card = _criar_slot_card(icone_doc, doc["titulo"], 1, func(): _selecionar_item(doc, "grimorio", i))
 			grid_grimorio.add_child(card)
 
 ## Cria um Card de Slot de Inventário com moldura de alta qualidade, ícone e badge de quantidade
@@ -541,27 +591,54 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		elif item["nome"] == "Livro de Fórmulas":
 			icone_item = load("res://assets/sprites/ui/item_livro_formulas.png")
 		elif item["nome"] == "Fragmento de Gelatina":
-			icone_item = load("res://assets/sprites/ui/item_fragmento_gelatina.png")
+			if item.get("cores_mistas", false):
+				icone_item = load("res://assets/sprites/ui/item_fragmento_gelatina_mercado.png")
+			else:
+				icone_item = _obter_icone_gelatina(item.get("cor", "azul"))
 		elif item["nome"] == "Bateria Elétrica":
 			icone_item = load("res://assets/sprites/ui/item_bateria.png")
 		elif item["nome"] == "Fragmento de Chip":
 			icone_item = load("res://assets/sprites/ui/item_chip.png")
 			
 		if img_detalhe_icone: img_detalhe_icone.texture = icone_item
-		lbl_detalhe_titulo.text = item["nome"]
-		lbl_detalhe_desc.text = item.get("descricao", "Um item raro e valioso necessário para abrir caminhos ou avançar na jornada.")
+		if item["nome"] == "Fragmento de Gelatina":
+			if item.get("cores_mistas", false):
+				lbl_detalhe_titulo.text = "Fragmentos de Gelatina"
+			elif item.has("cor"):
+				lbl_detalhe_titulo.text = "Fragmento de Gelatina (%s)" % str(item["cor"]).capitalize()
+			else:
+				lbl_detalhe_titulo.text = item["nome"]
+		else:
+			lbl_detalhe_titulo.text = item["nome"]
+			
+		var desc_base = item.get("descricao", "Um item raro e valioso necessário para abrir caminhos ou avançar na jornada.")
+		if item.has("qtd") and item["qtd"] > 1:
+			lbl_detalhe_desc.text = "Quantidade na Bolsa: %d\n\n%s" % [item["qtd"], desc_base]
+		else:
+			lbl_detalhe_desc.text = desc_base
+			
 		btn_acao.visible = false
 		box_descarte.visible = true
-		spin_descarte.max_value = max(1, PlayerStats.chaves) if item["nome"] == "Chave de Porta" else 1
+		spin_descarte.max_value = max(1, PlayerStats.chaves) if item["nome"] == "Chave de Porta" else max(1, item.get("qtd", 1))
 		
 	elif tipo == "grimorio":
-		if img_detalhe_icone: img_detalhe_icone.texture = atlas_pergaminho_fechado
+		var e_codice = (item is Dictionary and item.get("tipo_codice") == "mural")
+		if img_detalhe_icone:
+			if e_codice:
+				var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
+				img_detalhe_icone.texture = tex_livro if tex_livro else atlas_pergaminho_fechado
+			else:
+				img_detalhe_icone.texture = atlas_pergaminho_fechado
 		lbl_detalhe_titulo.text = item["titulo"]
-		lbl_detalhe_desc.text = "Um manuscrito acadêmico sagrado repleto de fórmulas e teorias científicas.\n\nAbra o pergaminho para consultar anotações essenciais dos desafios."
-		btn_acao.text = "✦ LER DOCUMENTO ✦"
+		lbl_detalhe_desc.text = item.get("desc", "Um manuscrito acadêmico sagrado repleto de fórmulas e teorias científicas.\n\nAbra o documento para consultar anotações essenciais dos desafios.")
+		if e_codice:
+			btn_acao.text = "✦ ABRIR CÓDICE CIENTÍFICO ✦"
+			box_descarte.visible = false # Códices acadêmicos não podem ser descartados pelo aluno!
+		else:
+			btn_acao.text = "✦ LER DOCUMENTO ✦"
+			box_descarte.visible = true
+			spin_descarte.max_value = 1
 		btn_acao.visible = true
-		box_descarte.visible = true
-		spin_descarte.max_value = 1
 		
 	elif tipo == "moeda":
 		var icone_moeda = load("res://assets/sprites/ui/coin.png")
@@ -597,7 +674,19 @@ func _on_btn_acao_pressionado() -> void:
 			_atualizar_listas()
 	elif tipo == "grimorio":
 		var doc = PlayerStats.grimorio[idx]
-		if doc.has("paginas") and doc["paginas"] is Array and doc["paginas"].size() > 0:
+		if doc is Dictionary and doc.get("tipo_codice") == "mural":
+			var andar = int(doc.get("andar", 1))
+			var cena_mural = load("res://scenes/ui/mural_ui.tscn")
+			if cena_mural:
+				var mural_inst = cena_mural.instantiate()
+				get_tree().root.add_child(mural_inst)
+				visible = false
+				mural_inst.mural_fechado.connect(func():
+					visible = true
+				)
+				mural_inst.abrir_mural(andar, null)
+			return
+		elif doc.has("paginas") and doc["paginas"] is Array and doc["paginas"].size() > 0:
 			var paginas_cast: Array[String] = []
 			for p in doc["paginas"]:
 				paginas_cast.append(str(p))
@@ -629,6 +718,22 @@ func _atualizar_pagina() -> void:
 	label_texto_leitura.text = paginas_leitura[pagina_atual].strip_edges()
 	btn_anterior.visible = (pagina_atual > 0)
 	btn_proxima.visible = (pagina_atual < paginas_leitura.size() - 1)
+
+func _obter_icone_gelatina(cor: String = "azul") -> Texture2D:
+	var tex = load("res://assets/sprites/ui/item_fragmento_gelatina.png") as Texture2D
+	if not tex: return null
+	var atlas = AtlasTexture.new()
+	atlas.atlas = tex
+	var fw = tex.get_width() / 3.0
+	var fh = tex.get_height() / 3.0
+	var row = 2 # Padrão: Azul (linha 2)
+	var cor_l = cor.to_lower()
+	if "verm" in cor_l or "laranja" in cor_l:
+		row = 0
+	elif "verd" in cor_l:
+		row = 1
+	atlas.region = Rect2(0, row * fh, fw, fh)
+	return atlas
 
 func _pagina_anterior() -> void:
 	if pagina_atual > 0:

@@ -15,9 +15,11 @@ var _vida_anterior: float = 100.0
 var _shake_tempo: float = 0.0
 var _shake_intensidade: float = 0.0
 
+
 func _ready() -> void:
 	add_to_group("player")
 	_vida_anterior = PlayerStats.vida_atual_jogador
+
 	
 	# Tremer a câmera se tomar dano
 	PlayerStats.vida_alterada.connect(func(atual, _maxima):
@@ -50,15 +52,23 @@ func _reposicionar_na_porta_correta() -> void:
 		
 	if DungeonGenerator.vindo_de_porta_de_retorno:
 		# Ao VOLTAR, nasce perto da porta de AVANÇO desta sala (porta de cima/norte)
+		var masmorra_alvo = ""
+		if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.get("masmorra_retorno_hub") != "":
+			masmorra_alvo = DungeonGenerator.masmorra_retorno_hub
+		elif get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
+			masmorra_alvo = DatabaseManager.active_dungeon
+			
 		for porta in portas:
 			if not porta.porta_de_retorno:
-				# No Hub, precisamos nascer na porta específica que o jogador entrou!
-				if porta.get("is_hub_door") and porta.get("hub_dungeon_name") != DatabaseManager.active_dungeon:
-					continue
+				# No Hub, precisamos nascer na porta específica que o jogador explorava!
+				if porta.get("is_hub_door"):
+					if masmorra_alvo != "" and porta.get("hub_dungeon_name") != masmorra_alvo:
+						continue
 					
 				global_position = porta.global_position
 				global_position.y += 180 # Nasce mais abaixo (escapando de colisão)
 				break
+		DungeonGenerator.vindo_de_porta_de_retorno = false
 	else:
 		# Ao AVANÇAR, nasce perto da porta de RETORNO desta sala (porta de baixo/sul)
 		for porta in portas:
@@ -112,7 +122,6 @@ func _physics_process(_delta: float) -> void:
 		AudioManager.play_sfx("ui-1")
 	
 	move_and_slide()
-
 	# Se o jogador colidiu com um inimigo hostil enquanto andava, aciona a batalha imediatamente!
 	var em_transicao = get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning
 	if not em_transicao:
@@ -176,13 +185,39 @@ func _process_shake(delta: float) -> void:
 		$Camera2D.offset = Vector2.ZERO
 
 # [Fix-1] Chamado pelo Mímico para aplicar penalidade e feedback visual
-func receber_dano_mimico() -> void:
-	# [Fix-1] Delega o dano ao autoload centralizado (emite vida_alterada → HUD atualiza)
-	PlayerStats.sofrer_dano(15.0)
-	aplicar_shake(8.0, 0.25)
-	print("[Mímico] HP restante: %.0f / %.0f" % [PlayerStats.vida_atual_jogador, PlayerStats.vida_maxima_jogador])
+func receber_dano_mimico(quantidade: float = 70.0) -> void:
+	receber_dano(quantidade, 14.0, "Mímico")
+	print("[Mímico] Jogador mordido pelo Mímico! Dano: %.0f | HP restante: %.0f / %.0f" % [quantidade, PlayerStats.vida_atual_jogador, PlayerStats.vida_maxima_jogador])
+
+## Aplica dano ao jogador por armadilhas e perigos ambientais com feedback visual e texto flutuante
+func receber_dano(quantidade: float = 15.0, intensidade_shake: float = 8.0, motivo: String = "") -> void:
+	PlayerStats.sofrer_dano(quantidade)
+	aplicar_shake(intensidade_shake, 0.28)
 	
-	# Flash vermelho no sprite (feedback visual mantido)
-	var tween = create_tween()
-	tween.tween_property($sprite, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
-	tween.tween_property($sprite, "modulate", Color(1, 1, 1, 1), 0.35)
+	if has_node("sprite"):
+		var tween = create_tween()
+		tween.tween_property($sprite, "modulate", Color(2.2, 0.15, 0.15, 1.0), 0.08)
+		tween.tween_property($sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.35)
+		
+	if not motivo.is_empty():
+		_exibir_texto_dano(motivo, quantidade)
+
+func _exibir_texto_dano(motivo: String, quantidade: float) -> void:
+	var lbl = Label.new()
+	lbl.text = "-%.0f HP (%s)" % [quantidade, motivo]
+	lbl.z_index = 25
+	lbl.position = Vector2(-80, -90)
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font_pixel:
+		lbl.add_theme_font_override("font", font_pixel)
+	add_child(lbl)
+	
+	var tw = create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(lbl, "position:y", lbl.position.y - 32.0, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.85).set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(lbl.queue_free)
+
+

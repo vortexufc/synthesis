@@ -37,9 +37,11 @@ var sfx = {
 	"acerto_1": preload("res://assets/audio/sfx/acerto_1.wav"),
 	"acerto_2": preload("res://assets/audio/sfx/acerto_2.wav"),
 	"acerto_3": preload("res://assets/audio/sfx/acerto_3.wav"),
-	"win": preload("res://assets/audio/sfx/fail.wav"),
-	"fail": preload("res://assets/audio/sfx/win.wav"),
-	"transicao-1": preload("res://assets/audio/sfx/transicao-1.wav")
+	"win": preload("res://assets/audio/sfx/win.wav"),
+	"fail": preload("res://assets/audio/sfx/fail.wav"),
+	"transicao-1": preload("res://assets/audio/sfx/transicao-1.wav"),
+	"moedas": preload("res://assets/audio/sfx/acerto_1.wav"),
+	"moeda": preload("res://assets/audio/sfx/acerto_1.wav")
 }
 
 # Lista de sons ao caminhar
@@ -120,11 +122,11 @@ func play_music(music: AudioStream) -> void:
 	current_music = music
 
 	if music_player.playing:
-		var tween = create_tween()
+		var tween_fade = create_tween()
 
-		tween.tween_property(music_player, "volume_db", -40.0, MUSIC_FADE_TIME)
+		tween_fade.tween_property(music_player, "volume_db", -40.0, MUSIC_FADE_TIME)
 
-		await tween.finished
+		await tween_fade.finished
 
 	music_player.stream = music
 	music_player.volume_db = -40.0

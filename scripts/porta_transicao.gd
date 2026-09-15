@@ -38,7 +38,7 @@ func _ready() -> void:
 		_sprite_porta = Sprite2D.new()
 		_sprite_porta.texture = textura_porta
 		if textura_porta.get_width() > 100:
-			_sprite_porta.hframes = int(textura_porta.get_width() / 32)
+			_sprite_porta.hframes = int(float(textura_porta.get_width()) / 32.0)
 			_sprite_porta.frame = 0 # Porta fechada
 		# Posiciona o sprite ajustando para o centro da colisão
 		_sprite_porta.position = Vector2(0, -16) 
@@ -232,6 +232,7 @@ func _mostrar_prompt_hub() -> void:
 		if DatabaseManager.has_method("salvar_progresso"):
 			DatabaseManager.salvar_progresso()
 		if get_node_or_null("/root/DungeonGenerator"):
+			DungeonGenerator.masmorra_retorno_hub = hub_dungeon_name
 			DungeonGenerator.resetar_masmorra(hub_dungeon_name)
 		_transacionar_porta()
 	)
@@ -265,6 +266,21 @@ func _transacionar_porta() -> void:
 	var cena_alvo = proxima_cena
 	if get_node_or_null("/root/DungeonGenerator"):
 		DungeonGenerator.vindo_de_porta_de_retorno = porta_de_retorno
+		var s_path = ""
+		if get_tree() and get_tree().current_scene:
+			s_path = get_tree().current_scene.scene_file_path.to_lower()
+		if "fisica" in s_path or "física" in s_path:
+			DungeonGenerator.masmorra_retorno_hub = "Física"
+			if get_node_or_null("/root/DatabaseManager"):
+				DatabaseManager.active_dungeon = "Física"
+		elif "alquimia" in s_path or "quimica" in s_path or "corredor" in s_path:
+			DungeonGenerator.masmorra_retorno_hub = "Química"
+			if get_node_or_null("/root/DatabaseManager"):
+				DatabaseManager.active_dungeon = "Química"
+		elif "biologia" in s_path:
+			DungeonGenerator.masmorra_retorno_hub = "Biologia"
+			if get_node_or_null("/root/DatabaseManager"):
+				DatabaseManager.active_dungeon = "Biologia"
 	
 	if cena_alvo == "" and get_node_or_null("/root/DungeonGenerator"):
 		var arquivo_sala = get_tree().current_scene.scene_file_path
@@ -307,6 +323,29 @@ func _on_body_entered(body: Node2D) -> void:
 		var dev_mgr = get_node_or_null("/root/DevManager")
 		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
 
+		# LÓGICA EXCLUSIVA PARA A SALA DO CHEFE (BOSS)
+		if _is_sala_boss():
+			if porta_de_retorno:
+				# Na sala do chefe, a porta de volta é permanentemente bloqueada (mesmo com chave)
+				if not ignorar_bloqueio:
+					if _tem_inimigos_vivos():
+						_mostrar_feedback_hub("A entrada da arena foi selada! Derrote o Chefe para sobreviver.", Color(0.85, 0.25, 0.25, 0.9))
+					else:
+						_mostrar_feedback_hub("O caminho de volta desmoronou! Avance pelo portal dimensional do Chefe.", Color(0.85, 0.25, 0.25, 0.9))
+					return
+			else:
+				# Porta de avanço (saída do Chefe)
+				if _tem_inimigos_vivos() and not ignorar_bloqueio:
+					_mostrar_feedback_hub("Portão ancestral selado pela aura do Chefe! Derrote o monstro para abrir.", Color(0.85, 0.25, 0.25, 0.9))
+					return
+				
+				# Chefe derrotado: ao passar pela porta, dispara a vinheta da história e vai para o Hub!
+				_cooldown_ativo = true
+				set_deferred("monitoring", false)
+				var andar_id = _obter_andar_atual()
+				_exibir_vinheta_boss(andar_id)
+				return
+
 		if not ignorar_bloqueio:
 			# REGRA 1: Se a porta for do Hub e estiver marcada como trancada
 			if esta_trancada:
@@ -330,3 +369,46 @@ func _on_body_entered(body: Node2D) -> void:
 			_mostrar_prompt_hub()
 		else:
 			_transacionar_porta()
+
+func _is_sala_boss() -> bool:
+	var cena_atual = ""
+	if get_tree() and get_tree().current_scene:
+		cena_atual = get_tree().current_scene.scene_file_path.to_lower()
+	if get_node_or_null("/root/DungeonGenerator"):
+		if DungeonGenerator.has_method("is_sala_boss") and DungeonGenerator.is_sala_boss(cena_atual):
+			return true
+	return ("boss" in cena_atual) or ("fisica12" in cena_atual) or ("física12" in cena_atual)
+
+func _obter_andar_atual() -> int:
+	var cena_atual = ""
+	if get_tree() and get_tree().current_scene:
+		cena_atual = get_tree().current_scene.scene_file_path.to_lower()
+		
+	if "fisica" in cena_atual or "física" in cena_atual:
+		return 2
+	elif "biologia" in cena_atual:
+		return 3
+		
+	var d_name = ""
+	if get_node_or_null("/root/DatabaseManager"):
+		d_name = DatabaseManager.active_dungeon.to_lower()
+	if "física" in d_name or "fisica" in d_name:
+		return 2
+	elif "biologia" in d_name:
+		return 3
+	return 1
+
+func _exibir_vinheta_boss(andar_id: int) -> void:
+	if not _porta_aberta:
+		await _abrir_porta_animacao()
+		
+	var vinheta_cena = load("res://scenes/ui/vinheta_historia.tscn")
+	if vinheta_cena:
+		var vinheta = vinheta_cena.instantiate()
+		get_tree().root.add_child(vinheta)
+		vinheta.iniciar_vinheta(andar_id)
+	else:
+		if get_node_or_null("/root/TransitionScreen"):
+			TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+		else:
+			get_tree().change_scene_to_file("res://scenes/Salas/Comum/Hub_Geral.tscn")

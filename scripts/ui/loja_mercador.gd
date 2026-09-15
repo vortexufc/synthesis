@@ -14,7 +14,7 @@ var _btn_vender_chip: Button = null
 var tex_pocao = preload("res://assets/sprites/vida.png")
 var tex_pergaminho = preload("res://assets/sprites/pergaminho.png")
 var tex_moeda = preload("res://assets/sprites/ui/coin.png")
-var tex_gelatina = preload("res://assets/sprites/ui/item_fragmento_gelatina.png")
+var tex_gelatina = preload("res://assets/sprites/ui/item_fragmento_gelatina_mercado.png")
 var tex_chip = preload("res://assets/sprites/ui/item_chip.png")
 
 var itens_loja = [
@@ -301,7 +301,10 @@ func _criar_card_venda(icone_tex: Texture2D, nome_item: String, callback: Callab
 	
 	var ico = TextureRect.new()
 	ico.texture = icone_tex
-	ico.custom_minimum_size = Vector2(26, 26)
+	if icone_tex and icone_tex.get_width() > icone_tex.get_height() * 1.5:
+		ico.custom_minimum_size = Vector2(46, 22)
+	else:
+		ico.custom_minimum_size = Vector2(26, 26)
 	ico.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ico.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	hbox.add_child(ico)

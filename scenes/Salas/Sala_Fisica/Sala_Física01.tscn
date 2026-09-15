@@ -20,6 +20,8 @@
 [ext_resource type="PackedScene" uid="uid://bavvcg7n5masf" path="res://scenes/Entidades/ItemBateria.tscn" id="17_wbf8q"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/NPCFisica.tscn" id="18_uglgd"]
 [ext_resource type="PackedScene" uid="uid://bwg5w1f6gk1sk" path="res://scenes/Entidades/ItemChip.tscn" id="19_osp8w"]
+[ext_resource type="PackedScene" path="res://scenes/Objetos/bau3.tscn" id="22_k76es"]
+[ext_resource type="PackedScene" path="res://scenes/Objetos/mural_parede.tscn" id="25_mural"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="lum_fisica_inst"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdngi"]
@@ -469,6 +471,7 @@ region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 [node name="PortaRetorno" parent="." unique_id=1952945906 instance=ExtResource("14_um6bs")]
 position = Vector2(475, 1377)
 porta_de_retorno = true
+proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
 
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("15_imiam")]
 position = Vector2(1501, 601)
@@ -539,3 +542,11 @@ orientacao = 2
 [node name="LuminariaOeste2" parent="Luminarias" unique_id=342507567 instance=ExtResource("lum_fisica_inst")]
 position = Vector2(75, 1066)
 orientacao = 1
+
+[node name="Bau3" parent="." unique_id=1577529831 instance=ExtResource("22_k76es")]
+position = Vector2(692, 1121)
+forcar_andar = 2
+
+[node name="MuralParede" parent="." unique_id=1179287943 instance=ExtResource("25_mural")]
+position = Vector2(161, 1117)
+forcar_andar = 2

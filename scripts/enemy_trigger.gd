@@ -11,6 +11,8 @@ extends Area2D
 @export var duracao_batalha:   float = 300.0  ## Segundos totais (5 min = Golem Andar 1)
 @export var andar_id:          int   = 1      ## [Dev-1] Identifica o andar → QuizManager carrega Biologia
 @export var nivel_dificuldade: int   = 0      ## [TRI] 1=Fácil, 2=Médio, 3=Difícil (0=Automático por monstro/sala)
+@export var eh_boss: bool           = false  ## Força este encontro a ser Batalha de Chefe (Fúria + Vinheta)
+@export var eh_runico: bool          = false  ## Força este encontro a ser Campeão Rúnico
 
 ## [Local] Questões hardcoded para este inimigo (ex: builds de teste).
 ## Cada item deve ter: { question, options: [], answer (índice) }
@@ -110,6 +112,20 @@ func _on_body_entered(body: Node2D) -> void:
 
 	var node_pai = get_parent()
 
+	var eh_runico_final: bool = eh_runico
+	if node_pai and "eh_runico" in node_pai and node_pai.eh_runico:
+		eh_runico_final = true
+
+	var eh_boss_final: bool = eh_boss
+	var id_low = id_inimigo.to_lower()
+	var scene_low = get_tree().current_scene.scene_file_path.to_lower() if get_tree().current_scene else ""
+	if node_pai and "eh_boss" in node_pai and node_pai.eh_boss:
+		eh_boss_final = true
+	elif "boss" in id_low or "roxo" in id_low or id_low == "robo_g" or "wizard" in id_low:
+		eh_boss_final = true
+	elif "boss" in scene_low or "fisica12" in scene_low or "física12" in scene_low:
+		eh_boss_final = true
+
 	# Monta enemy_data com andar_id para o QuizManager filtrar o banco
 	var enemy_data: Dictionary = {
 		"num_questoes":      num_questoes,
@@ -118,6 +134,8 @@ func _on_body_entered(body: Node2D) -> void:
 		"id_inimigo":        id_inimigo,
 		"inimigo_node":      node_pai,
 		"nivel_dificuldade": nivel_dificuldade,
+		"eh_runico":          eh_runico_final,
+		"eh_boss":            eh_boss_final,
 	}
 
 	# [Fix-9] Fallback inteligente do Sprite do inimigo

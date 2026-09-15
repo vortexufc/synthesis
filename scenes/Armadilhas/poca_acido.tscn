@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3 uid="uid://poca_acido_01"]
+
+[ext_resource type="Script" path="res://scripts/armadilhas/poca_acido.gd" id="1_script"]
+
+[sub_resource type="Gradient" id="Gradient_poca"]
+offsets = PackedFloat32Array(0, 0.45, 0.75, 1)
+colors = PackedColorArray(0.25, 0.95, 0.2, 0.85, 0.12, 0.7, 0.35, 0.7, 0.35, 0.08, 0.55, 0.4, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_poca"]
+gradient = SubResource("Gradient_poca")
+width = 72
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_poca"]
+radius = 20.0
+height = 56.0
+
+[sub_resource type="Gradient" id="Gradient_bolhas"]
+colors = PackedColorArray(0.4, 1, 0.2, 0.9, 0.7, 0.2, 0.9, 0)
+
+[node name="PocaAcido" type="Area2D"]
+z_index = 1
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_script")
+
+[node name="SpritePoca" type="Sprite2D" parent="."]
+texture = SubResource("GradientTexture2D_poca")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_poca")
+
+[node name="Bolhas" type="CPUParticles2D" parent="."]
+amount = 8
+lifetime = 1.2
+emission_shape = 2
+emission_sphere_radius = 24.0
+direction = Vector2(0, -1)
+spread = 25.0
+gravity = Vector2(0, -25)
+initial_velocity_min = 15.0
+initial_velocity_max = 30.0
+scale_amount_min = 2.0
+scale_amount_max = 4.5
+color_ramp = SubResource("Gradient_bolhas")

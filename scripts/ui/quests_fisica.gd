@@ -167,7 +167,18 @@ func _atualizar_quests() -> void:
 	var ativa2 = PlayerStats.quests_ativas.get("fisica_quest2", false)
 	
 	if q1 and q2:
-		_definir_texto_dialogo("Obrigado por consertar minhas máquinas! O andar de Física agora está operando com 100% de eficiência. Você tem um futuro brilhante como engenheiro, garoto!")
+		var acabou_de_ganhar = false
+		if PlayerStats.has_method("adicionar_codice_mural"):
+			acabou_de_ganhar = PlayerStats.adicionar_codice_mural(
+				"codice_fisica",
+				"Tratado de Óptica: Prisma de Newton",
+				2,
+				"Tratado óptico de física moderna concedido pelo Engenheiro Maluco. Detalha a dispersão e refração da luz branca através do prisma de vidro para estudo a qualquer hora."
+			)
+		if acabou_de_ganhar:
+			_definir_texto_dialogo("Espetacular! Com as baterias e chips você restaurou todas as máquinas do andar!\n\nComo recompensa de honra, entrego-lhe meu TRATADO DE ÓPTICA! Ele foi registrado no seu Grimório (Inventário) para você estudar o Prisma de Newton e o espectro de luz visível quando desejar!")
+		else:
+			_definir_texto_dialogo("Obrigado por consertar minhas máquinas! O andar de Física opera a 100%. Consulte o Tratado de Óptica no seu Grimório (Inventário) sempre que desejar revisar os conceitos de refração e dispersão!")
 	elif not ativa1 and not ativa2:
 		_definir_texto_dialogo("As máquinas pifaram e os robôs estão fora de controle! Você pode me ajudar a consertar tudo? Aceite uma missão abaixo:")
 	else:

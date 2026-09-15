@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cfuria_chefe_ui_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/furia_chefe_ui.gd" id="1_script"]
+
+[node name="FuriaChefeUI" type="CanvasLayer"]
+layer = 110
+script = ExtResource("1_script")

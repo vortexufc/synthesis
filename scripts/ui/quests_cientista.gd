@@ -166,7 +166,18 @@ func _atualizar_quests() -> void:
 	var ativa2 = PlayerStats.quests_ativas.get("cientista_quest2", false)
 	
 	if q1 and q2:
-		_definir_texto_dialogo("Obrigado por coletar os materiais! Com os livros e a gelatina, minha nova fórmula está quase pronta. A ciência agradece o seu esforço!")
+		var acabou_de_ganhar = false
+		if PlayerStats.has_method("adicionar_codice_mural"):
+			acabou_de_ganhar = PlayerStats.adicionar_codice_mural(
+				"codice_quimica",
+				"Tomo Alquímico: Tabela Periódica",
+				1,
+				"Manuscrito acadêmico sagrado concedido pelo Cientista Maluco. Contém o estudo minucioso dos elementos químicos e famílias da Tabela Periódica para consulta e estudo a qualquer momento."
+			)
+		if acabou_de_ganhar:
+			_definir_texto_dialogo("Incrível! Graças a você com as fórmulas e materiais, minha pesquisa foi concluída com êxito total!\n\nComo recompensa suprema, entrego-lhe o TOMO ALQUÍMICO! Ele foi guardado no seu Grimório (Inventário) para que você possa consultar e estudar os elementos sempre que quiser!")
+		else:
+			_definir_texto_dialogo("Obrigado por coletar os materiais! Minha pesquisa foi concluída. Consulte o Tomo Alquímico no seu Grimório (Inventário) sempre que precisar revisar os elementos químicos!")
 	elif not ativa1 and not ativa2:
 		_definir_texto_dialogo("As máquinas pifaram... Opa, desculpe. Minhas fórmulas sumiram! Você pode me ajudar a encontrá-las? Aceite uma missão abaixo:")
 	else:
