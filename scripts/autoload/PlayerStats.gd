@@ -125,7 +125,7 @@ func adicionar_pergaminho(titulo: String, paginas: Array[String], desc: String =
 			
 	var texto_completo = ""
 	for i in range(paginas.size()):
-		texto_completo += "── PÁGINA " + str(i + 1) + " ──\n" + paginas[i] + "\n\n"
+		texto_completo += "-- PÁGINA " + str(i + 1) + " --\n" + paginas[i] + "\n\n"
 		
 	grimorio.append({
 		"titulo": titulo,

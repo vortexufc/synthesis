@@ -14,6 +14,7 @@ var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
 var game_over_cena = preload("res://scenes/ui/game_over.tscn")
 var ui_instancia = null
 var pergunta_atual = null
+var em_batalha: bool = false
 var _processando_resposta: bool = false
 var _inimigo_atual_id: String = ""
 var _nivel_dificuldade_alvo: int = 0
@@ -220,6 +221,14 @@ var _dano_causado: int = 0
 var _tempo_inicio_batalha: float = 0
 
 func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
+	if em_batalha:
+		print("[QuizManager] Batalha já está em andamento. Ignorando solicitação duplicada.")
+		return
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		print("[QuizManager] Ignorando início de batalha pois transição de cena está ativa.")
+		return
+	em_batalha = true
+
 	# [PROG-02 / Offline Fix] Lê as questões locais PRIMEIRO, antes de qualquer await.
 	# Se o inimigo tiver questões hardcoded, a batalha inicia sem precisar do banco.
 	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
@@ -351,6 +360,7 @@ func _nova_rodada() -> void:
 	ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
 
 func fechar_ui_batalha() -> void:
+	em_batalha = false
 	if ui_instancia:
 		ui_instancia.queue_free()
 		ui_instancia = null
@@ -429,6 +439,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			print("[Combate] Você venceu o quiz!")
 			
 		_processando_resposta = false
+		em_batalha = false
 		GlobalSignals.batalha_encerrada.emit(vitoria)
 		PlayerStats.salvar()
 		GlobalSignals.fim_de_jogo.emit(vitoria, stats)

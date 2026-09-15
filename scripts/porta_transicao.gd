@@ -297,6 +297,10 @@ func _transacionar_porta() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if _cooldown_ativo:
 		return
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		return
+	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+		return
 		
 	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
 		# [DEV TOOL] Verifica se o cheat de ignorar portas trancadas está ativo

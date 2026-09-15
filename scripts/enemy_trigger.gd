@@ -24,8 +24,44 @@ const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 
 func _ready() -> void:
 	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
+	if not body_entered.is_connected(_on_body_entered):
+		body_entered.connect(_on_body_entered)
+	call_deferred("_garantir_alcance_trigger")
+
+func _garantir_alcance_trigger() -> void:
+	var pai = get_parent()
+	if not (pai is CharacterBody2D):
+		return
+	var col_pai = pai.get_node_or_null("CollisionShape2D")
+	var col_trigger = get_node_or_null("CollisionShape2D")
+	if col_pai and col_trigger and col_trigger.shape and col_pai.shape:
+		col_trigger.shape = col_trigger.shape.duplicate()
+		if col_trigger.shape is CircleShape2D:
+			if col_pai.shape is CircleShape2D:
+				col_trigger.shape.radius = max(col_trigger.shape.radius, col_pai.shape.radius + 8.0)
+		elif col_trigger.shape is CapsuleShape2D:
+			if col_pai.shape is CircleShape2D:
+				col_trigger.shape.radius = max(col_trigger.shape.radius, col_pai.shape.radius + 6.0)
+				col_trigger.shape.height = max(col_trigger.shape.height, (col_pai.shape.radius + 6.0) * 2.0)
+			elif col_pai.shape is RectangleShape2D:
+				var half_size = col_pai.shape.size * 0.5
+				col_trigger.shape.radius = max(col_trigger.shape.radius, half_size.y + 8.0)
+				col_trigger.shape.height = max(col_trigger.shape.height, col_pai.shape.size.x + 16.0)
+			elif col_pai.shape is CapsuleShape2D:
+				col_trigger.shape.radius = max(col_trigger.shape.radius, col_pai.shape.radius + 6.0)
+				col_trigger.shape.height = max(col_trigger.shape.height, col_pai.shape.height + 12.0)
 
 var _em_batalha: bool = false
+
+func _physics_process(_delta: float) -> void:
+	if _em_batalha or not monitoring:
+		return
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		return
+	for body in get_overlapping_bodies():
+		if body.is_in_group("player") or body.name == "Player":
+			_on_body_entered(body)
+			return
 
 func _on_batalha_encerrada(vitoria: bool) -> void:
 	if not _em_batalha:
@@ -64,42 +100,48 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 				queue_free()
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.name == "Player":
-		var node_pai = get_parent()
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		return
+	if not (body.is_in_group("player") or body.name == "Player"):
+		return
+	if _em_batalha:
+		return
+	_em_batalha = true # <--- MARCA ESTE INIMIGO COMO O ENGAJADO
 
-		# Monta enemy_data com andar_id para o QuizManager filtrar o banco
-		var enemy_data: Dictionary = {
-			"num_questoes":      num_questoes,
-			"duracao_batalha":   duracao_batalha,
-			"andar_id":          andar_id,
-			"id_inimigo":        id_inimigo,
-			"inimigo_node":      node_pai,
-			"nivel_dificuldade": nivel_dificuldade,
-		}
+	var node_pai = get_parent()
 
-		# [Fix-9] Fallback inteligente do Sprite do inimigo
-		if QuizManager.sprite_frames_inimigos.has(id_inimigo):
-			enemy_data["sprite_frames"] = QuizManager.sprite_frames_inimigos[id_inimigo]
-		else:
-			if node_pai and node_pai.has_node("AnimatedSprite2D"):
-				enemy_data["sprite_frames"] = node_pai.get_node("AnimatedSprite2D").sprite_frames
-			elif node_pai and node_pai.has_node("sprite"):
-				enemy_data["sprite_frames"] = node_pai.get_node("sprite").sprite_frames
+	# Monta enemy_data com andar_id para o QuizManager filtrar o banco
+	var enemy_data: Dictionary = {
+		"num_questoes":      num_questoes,
+		"duracao_batalha":   duracao_batalha,
+		"andar_id":          andar_id,
+		"id_inimigo":        id_inimigo,
+		"inimigo_node":      node_pai,
+		"nivel_dificuldade": nivel_dificuldade,
+	}
 
-		# [Local] Se houver questões hardcoded, injeta no enemy_data
-		if questoes_locais.size() > 0:
-			enemy_data["questoes_locais"] = questoes_locais
-			print("[Local] Usando %d questões locais para '%s'" % [questoes_locais.size(), id_inimigo])
+	# [Fix-9] Fallback inteligente do Sprite do inimigo
+	if QuizManager.sprite_frames_inimigos.has(id_inimigo):
+		enemy_data["sprite_frames"] = QuizManager.sprite_frames_inimigos[id_inimigo]
+	else:
+		if node_pai and node_pai.has_node("AnimatedSprite2D"):
+			enemy_data["sprite_frames"] = node_pai.get_node("AnimatedSprite2D").sprite_frames
+		elif node_pai and node_pai.has_node("sprite"):
+			enemy_data["sprite_frames"] = node_pai.get_node("sprite").sprite_frames
 
-		print("[Combat-5] Batalha: %d questões / %ds / Andar %d" % [
-			num_questoes, int(duracao_batalha), andar_id
-		])
+	# [Local] Se houver questões hardcoded, injeta no enemy_data
+	if questoes_locais.size() > 0:
+		enemy_data["questoes_locais"] = questoes_locais
+		print("[Local] Usando %d questões locais para '%s'" % [questoes_locais.size(), id_inimigo])
 
-		# Para a patrulha do inimigo-pai (se este trigger for filho de um enemy.gd)
-		if node_pai and node_pai.has_method("_on_batalha_iniciada"):
-			node_pai._on_batalha_iniciada(enemy_data)
+	print("[Combat-5] Batalha: %d questões / %ds / Andar %d" % [
+		num_questoes, int(duracao_batalha), andar_id
+	])
 
-		_em_batalha = true # <--- MARCA ESTE INIMIGO COMO O ENGAJADO
-		GlobalSignals.iniciar_batalha.emit(enemy_data)
-		hide()
-		set_deferred("monitoring", false)
+	# Para a patrulha do inimigo-pai (se este trigger for filho de um enemy.gd)
+	if node_pai and node_pai.has_method("_on_batalha_iniciada"):
+		node_pai._on_batalha_iniciada(enemy_data)
+
+	GlobalSignals.iniciar_batalha.emit(enemy_data)
+	hide()
+	set_deferred("monitoring", false)

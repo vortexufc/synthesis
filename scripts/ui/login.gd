@@ -15,6 +15,9 @@ func _ready() -> void:
 	link_esqueci_senha.pressed.connect(_on_esqueci_senha_pressed)
 	btn_show_password.toggled.connect(_on_btn_show_password_toggled)
 	
+	email_input.text_submitted.connect(func(_t): _on_btn_login_pressed())
+	password_input.text_submitted.connect(func(_t): _on_btn_login_pressed())
+	
 	# Escutando as respostas do banco
 	DatabaseManager.auth_sucesso.connect(_on_auth_sucesso)
 	DatabaseManager.auth_erro.connect(_on_auth_erro)
@@ -38,7 +41,7 @@ func _on_btn_show_password_toggled(button_pressed: bool) -> void:
 
 func _on_btn_login_pressed() -> void:
 	var email := email_input.text.strip_edges()
-	var password := password_input.text
+	var password := password_input.text.strip_edges()
 	
 	if email.is_empty() or password.is_empty():
 		_show_error_popup("Preencha todos os campos!")
@@ -53,12 +56,25 @@ func _on_btn_login_pressed() -> void:
 func _on_auth_sucesso(token: String) -> void:
 	print("usuario logou com sucesso!")
 	print("Logado com sucesso! Token Recebido:\n", token)
+	btn_login.disabled = false
 	# Ir para o menu principal
-	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+	if TransitionScreen:
+		TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _on_auth_erro(mensagem: String) -> void:
 	print("Erro ao fazer login: ", mensagem)
 	btn_login.disabled = false
+	var msg = mensagem
+	var msg_lower = mensagem.to_lower()
+	if "invalid login credentials" in msg_lower:
+		msg = "E-mail ou senha incorretos!\nVerifique as credenciais digitadas e tente novamente."
+	elif "email not confirmed" in msg_lower:
+		msg = "E-mail ainda não confirmado!\nVerifique sua caixa de entrada para ativar a conta."
+	elif "falha de conexão" in msg_lower or "cant_connect" in msg_lower:
+		msg = "Não foi possível conectar ao servidor.\nVerifique sua conexão com a internet."
+	_show_error_popup(msg)
 
 func _on_reset_senha_enviado() -> void:
 	print("Se o email existir, um link de recuperacao foi enviado!")

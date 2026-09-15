@@ -88,9 +88,7 @@ func _criar_painel_toast() -> void:
 	_toast_label_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_toast_label_titulo)
 	
-	var font_num = SystemFont.new()
-	font_num.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	font_num.font_weight = 600
+	var font_num = font_pixel
 
 	_toast_label_sub = Label.new()
 	_toast_label_sub.add_theme_font_override("font", font_num)

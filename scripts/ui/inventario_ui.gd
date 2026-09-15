@@ -139,6 +139,10 @@ func _ready() -> void:
 	
 	# Badge Elegante de Moedas (Cofre Dourado)
 	lbl_moedas_inv = Button.new()
+	var tex_coin_inv = load("res://assets/sprites/ui/coin.png") as Texture2D
+	if tex_coin_inv:
+		lbl_moedas_inv.icon = tex_coin_inv
+		lbl_moedas_inv.expand_icon = true
 	var sb_moeda = StyleBoxFlat.new()
 	sb_moeda.bg_color = Color(0.14, 0.09, 0.20, 0.95)
 	sb_moeda.border_width_left = 2
@@ -314,7 +318,7 @@ func _atualizar_listas() -> void:
 	
 	# 1. Carrega Poções
 	if PlayerStats.pocoes.is_empty():
-		_add_mensagem_vazia(grid_pocoes, "🧪", "Nenhuma Poção na Bolsa", "Visite o Mercador ou explore as salas para coletar novos elixires.")
+		_add_mensagem_vazia(grid_pocoes, tex_pocao, "Nenhuma Poção na Bolsa", "Visite o Mercador ou explore as salas para coletar novos elixires.")
 	else:
 		for i in range(PlayerStats.pocoes.size()):
 			var po = PlayerStats.pocoes[i]
@@ -349,11 +353,12 @@ func _atualizar_listas() -> void:
 		grid_itens.add_child(card)
 		
 	if not tem_qualquer_item:
-		_add_mensagem_vazia(grid_itens, "🗝️", "Sem Relíquias no Momento", "Resolva enigmas ou derrote guardiões para obter artefatos e chaves.")
+		var icone_reliquia_padrao = load("res://assets/sprites/ui/icon_key_transparent.png")
+		_add_mensagem_vazia(grid_itens, icone_reliquia_padrao, "Sem Relíquias no Momento", "Resolva enigmas ou derrote guardiões para obter artefatos e chaves.")
 			
 	# 3. Carrega Páginas do Grimório
 	if PlayerStats.grimorio.is_empty():
-		_add_mensagem_vazia(grid_grimorio, "📜", "Grimório em Branco", "Descubra pergaminhos antigos pelas masmorras para registrar fórmulas.")
+		_add_mensagem_vazia(grid_grimorio, atlas_pergaminho_fechado, "Grimório em Branco", "Descubra pergaminhos antigos pelas masmorras para registrar fórmulas.")
 	else:
 		for i in range(PlayerStats.grimorio.size()):
 			var doc = PlayerStats.grimorio[i]
@@ -464,18 +469,22 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 	
 	return btn
 
-func _add_mensagem_vazia(node: Node, icone_emoji: String, titulo: String, dica: String) -> void:
+func _add_mensagem_vazia(node: Node, icone_recurso: Variant, titulo: String, dica: String) -> void:
 	var vbox = VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", 10)
 	
-	var lbl_ico = Label.new()
-	lbl_ico.text = icone_emoji
-	lbl_ico.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl_ico.add_theme_font_size_override("font_size", 28)
-	vbox.add_child(lbl_ico)
+	if icone_recurso is Texture2D and icone_recurso != null:
+		var tr = TextureRect.new()
+		tr.texture = icone_recurso
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.custom_minimum_size = Vector2(36, 36)
+		tr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		tr.modulate = Color(1.0, 1.0, 1.0, 0.45)
+		vbox.add_child(tr)
 	
 	var lbl_tit = Label.new()
 	lbl_tit.text = titulo

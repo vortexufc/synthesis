@@ -35,7 +35,7 @@ func _on_btn_show_password_toggled(button_pressed: bool) -> void:
 func _on_btn_create_pressed() -> void:
 	var player_name := name_input.text.strip_edges()
 	var email := email_input.text.strip_edges()
-	var password := password_input.text
+	var password := password_input.text.strip_edges()
 	
 	if player_name.is_empty() or email.is_empty() or password.is_empty():
 		_show_error_popup("Preencha todos os campos!")
@@ -91,6 +91,13 @@ func _on_auth_sucesso(token: String) -> void:
 func _on_auth_erro(mensagem: String) -> void:
 	print("Erro ao criar conta: ", mensagem)
 	btn_create.disabled = false
+	var msg = mensagem
+	var msg_lower = mensagem.to_lower()
+	if "already registered" in msg_lower or "user already exists" in msg_lower:
+		msg = "Este e-mail já está cadastrado!\nTente fazer login."
+	elif "password should be at least" in msg_lower:
+		msg = "A senha é muito curta!\nDigite uma senha com pelo menos 6 caracteres."
+	_show_error_popup(msg)
 
 func _on_btn_back_pressed() -> void:
 	print("Voltar pressionado. Mudando de cena...")

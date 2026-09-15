@@ -10,11 +10,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	_font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	
-	var sf = SystemFont.new()
-	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	sf.font_weight = 700
-	_font_normal = sf
+	_font_normal = _font_pixel
 	
 	vbox_quests = VBoxContainer.new()
 	vbox_quests.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -29,9 +25,14 @@ func _ready() -> void:
 	PlayerStats.quests_atualizadas.connect(_atualizar_hud)
 	_atualizar_hud()
 
-func _process(_delta: float) -> void:
-	# Atualiza o progresso em tempo real caso o jogador pegue um item
-	_atualizar_hud()
+var _timer_hud: float = 0.0
+
+func _process(delta: float) -> void:
+	# Atualiza o progresso a cada 0.3s em vez de todo frame (economiza CPU no navegador)
+	_timer_hud += delta
+	if _timer_hud >= 0.3:
+		_timer_hud = 0.0
+		_atualizar_hud()
 
 func _atualizar_hud() -> void:
 	# Lista de todas as quests possiveis e suas descrições

@@ -122,8 +122,15 @@ func _criar_luz_portal(nome_porta: String, cor_luz: Color) -> void:
 		"offset": randf() * 10.0
 	})
 
+var _tempo_luz_tick: float = 0.0
+
 func _process(delta: float) -> void:
-	_tempo_iluminacao += delta
+	_tempo_luz_tick += delta
+	if _tempo_luz_tick < 0.033:
+		return
+	var dt = _tempo_luz_tick
+	_tempo_luz_tick = 0.0
+	_tempo_iluminacao += dt
 	
 	# 1. Efeito de chamas tremeluzindo nas tochas das paredes
 	for tocha in _luzes_tochas:
@@ -136,7 +143,6 @@ func _process(delta: float) -> void:
 		var f2 = sin((_tempo_iluminacao + off * 1.7) * (spd * 1.5)) * 0.02
 		var flicker = f1 + f2
 		node.energy = tocha["base_energy"] + flicker
-		node.texture_scale = tocha["base_scale"] + flicker * 0.05
 	
 	# 2. Pulso suave da aura de caminhada do mago jogador
 	if _luz_player and is_instance_valid(_luz_player):

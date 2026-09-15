@@ -385,8 +385,15 @@ func _garantir_luminarias_na_sala() -> void:
 			lum.atualizar_orientacao(info["orient"])
 		add_child(lum)
 
+var _tempo_luz_tick: float = 0.0
+
 func _process(delta: float) -> void:
-	_tempo_iluminacao += delta
+	_tempo_luz_tick += delta
+	if _tempo_luz_tick < 0.033:
+		return
+	var dt = _tempo_luz_tick
+	_tempo_luz_tick = 0.0
+	_tempo_iluminacao += dt
 	
 	# 1. Flicker sutil e scanlines de telas e monitores
 	for i in range(_luzes_telas.size() - 1, -1, -1):

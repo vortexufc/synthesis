@@ -111,6 +111,8 @@ func _ready() -> void:
 	if font_pixel:
 		lbl_titulo.add_theme_font_override("font", font_pixel)
 		lbl_desc.add_theme_font_override("font", font_pixel)
+	lbl_desc.add_theme_font_size_override("font_size", 16)
+	lbl_desc.add_theme_color_override("font_color", Color(0.95, 0.94, 0.92))
 	
 	lbl_titulo.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2))
 	
@@ -123,6 +125,11 @@ func _ready() -> void:
 	_atualizar_quests()
 
 func _estilizar_botao(btn: Button, e_cancelar: bool = false) -> void:
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+	if font_pixel:
+		btn.add_theme_font_override("font", font_pixel)
+	btn.add_theme_font_size_override("font_size", 14)
+	
 	var sb_normal = StyleBoxFlat.new()
 	if e_cancelar:
 		sb_normal.bg_color = Color(0.4, 0.1, 0.1, 1) # Vermelho escuro pro 'X'

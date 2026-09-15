@@ -3,7 +3,7 @@ extends CanvasLayer
 ## Interface do Pergaminho Arcano com estilo Pixel Art
 ## Exibe anotações educativas detalhadas com suporte a rolagem interna e navegação por páginas.
 
-# Fonte pixelada oficial do jogo
+# Fonte pixelada oficial do jogo (com fallback nativo de emojis e símbolos)
 var font_pixel: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 
 # Nós da interface
@@ -29,7 +29,7 @@ func _ready() -> void:
 	_construir_interface_pixel()
 	hide()
 
-## Constrói um painel de pergaminho limpo, bonito e pixel-art com rolagem interna
+## Constrói um painel de pergaminho limpo, bonito e legível com rolagem interna
 func _construir_interface_pixel() -> void:
 	# Limpa nós antigos para evitar bugs de layout
 	for c in get_children():
@@ -50,26 +50,33 @@ func _construir_interface_pixel() -> void:
 	painel_pergaminho.anchor_top = 0.5
 	painel_pergaminho.anchor_right = 0.5
 	painel_pergaminho.anchor_bottom = 0.5
-	painel_pergaminho.offset_left = -410
-	painel_pergaminho.offset_top = -250
-	painel_pergaminho.offset_right = 410
-	painel_pergaminho.offset_bottom = 250
-	backdrop.add_child(painel_pergaminho)
+	painel_pergaminho.offset_left = -340
+	painel_pergaminho.offset_top = -220
+	painel_pergaminho.offset_right = 340
+	painel_pergaminho.offset_bottom = 220
+	painel_pergaminho.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	painel_pergaminho.grow_vertical = Control.GROW_DIRECTION_BOTH
 	
-	# Estilo visual do papel pergaminho em Pixel Art
-	var style_papel = StyleBoxFlat.new()
-	style_papel.bg_color = Color(0.92, 0.84, 0.68) # Papel pergaminho amarelado
-	style_papel.border_color = Color(0.35, 0.20, 0.08) # Borda escura estilo madeira/tinta
-	style_papel.set_border_width_all(5)
-	style_papel.set_corner_radius_all(6)
-	style_papel.content_margin_left = 25
-	style_papel.content_margin_top = 18
-	style_papel.content_margin_right = 25
-	style_papel.content_margin_bottom = 18
-	painel_pergaminho.add_theme_stylebox_override("panel", style_papel)
+	var style_pergaminho = StyleBoxFlat.new()
+	style_pergaminho.bg_color = Color(0.92, 0.82, 0.65) # Tom pergaminho/papiro
+	style_pergaminho.border_color = Color(0.42, 0.26, 0.12) # Borda marrom couro
+	style_pergaminho.border_width_left = 4
+	style_pergaminho.border_width_top = 4
+	style_pergaminho.border_width_right = 4
+	style_pergaminho.border_width_bottom = 4
+	style_pergaminho.set_corner_radius_all(6)
+	style_pergaminho.content_margin_left = 22
+	style_pergaminho.content_margin_top = 16
+	style_pergaminho.content_margin_right = 22
+	style_pergaminho.content_margin_bottom = 16
+	style_pergaminho.shadow_size = 12
+	style_pergaminho.shadow_color = Color(0, 0, 0, 0.6)
+	painel_pergaminho.add_theme_stylebox_override("panel", style_pergaminho)
+	add_child(painel_pergaminho)
 	
-	# Layout vertical principal
+	# Container Vertical Principal
 	var vbox_main = VBoxContainer.new()
+	vbox_main.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vbox_main.add_theme_constant_override("separation", 10)
 	painel_pergaminho.add_child(vbox_main)
 	

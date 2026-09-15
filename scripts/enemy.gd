@@ -215,6 +215,18 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# Se tocou no jogador fisicamente durante o movimento, aciona a batalha imediatamente!
+	var em_transicao = get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning
+	if not _em_batalha and not em_transicao:
+		for i in range(get_slide_collision_count()):
+			var col = get_slide_collision(i)
+			var collider = col.get_collider()
+			if collider and (collider.is_in_group("player") or collider.name == "Player"):
+				var trigger = get_node_or_null("EnemyTrigger")
+				if trigger and trigger.has_method("_on_body_entered"):
+					trigger._on_body_entered(collider)
+					return
+
 	# Se colidiu com parede (e não estiver perseguindo), sorteia nova direção imediatamente
 	if not no_alcance and velocity.length() < 1.0 and not _em_pausa:
 		_sortear_nova_direcao()

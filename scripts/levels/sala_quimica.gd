@@ -371,8 +371,15 @@ func _garantir_tochas_na_sala() -> void:
 		tocha.position = posicoes_tochas[i]
 		add_child(tocha)
 
+var _tempo_luz_tick: float = 0.0
+
 func _process(delta: float) -> void:
-	_tempo_iluminacao += delta
+	_tempo_luz_tick += delta
+	if _tempo_luz_tick < 0.033:
+		return
+	var dt = _tempo_luz_tick
+	_tempo_luz_tick = 0.0
+	_tempo_iluminacao += dt
 	
 	# 1. Borbulhar dinâmico em todos os Caldeirões da sala
 	for c_data in _luzes_caldeiroes:
@@ -381,7 +388,6 @@ func _process(delta: float) -> void:
 			var t = _tempo_iluminacao + c_data["offset"]
 			var borbulha = sin(t * 5.5) * 0.06 + sin(t * 9.2) * 0.03
 			luz.energy = c_data["base_energy"] + borbulha
-			luz.texture_scale = 0.50 + sin(t * 6.0) * 0.02
 		
 	# 2. Pulso sutil da aura do mago jogador
 	if _luz_player and is_instance_valid(_luz_player):

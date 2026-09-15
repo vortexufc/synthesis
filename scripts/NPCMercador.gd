@@ -16,7 +16,7 @@ func _quando_corpo_sai(corpo: Node2D) -> void:
 
 
 var _balao_interacao: Node2D = null
-var _indicador_loja: Label = null
+var _indicador_loja: Control = null
 var _tempo_anim: float = 0.0
 var _base_balao_y: float = -95.0
 var _base_icone_y: float = -115.0
@@ -89,7 +89,7 @@ func _criar_balao_e_indicadores() -> void:
 	_balao_interacao.add_child(panel)
 	add_child(_balao_interacao)
 	
-	# 2. Ícone flutuante de Loja/Moeda acima do Mercador
+	# 2. Ícone flutuante de Moeda acima do Mercador (Emoji 🪙)
 	_indicador_loja = Label.new()
 	_indicador_loja.name = "IndicadorLoja"
 	_indicador_loja.z_index = 26

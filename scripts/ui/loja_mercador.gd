@@ -87,9 +87,7 @@ func _ready() -> void:
 		AudioManager.play_sfx("ui_5")
 	
 	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	var font_num = SystemFont.new()
-	font_num.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	font_num.font_weight = 700
+	var font_num = font_pixel
 	
 	var vbox = VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
@@ -159,7 +157,7 @@ func _ready() -> void:
 	lbl_fala_mercador = Label.new()
 	lbl_fala_mercador.autowrap_mode = TextServer.AUTOWRAP_WORD
 	if font_pixel: lbl_fala_mercador.add_theme_font_override("font", font_pixel)
-	lbl_fala_mercador.add_theme_font_size_override("font_size", 13)
+	lbl_fala_mercador.add_theme_font_size_override("font_size", 14)
 	lbl_fala_mercador.add_theme_color_override("font_color", Color(0.92, 0.94, 0.96))
 	balao_panel.add_child(lbl_fala_mercador)
 	vbox.add_child(balao_panel)

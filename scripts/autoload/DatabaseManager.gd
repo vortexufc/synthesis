@@ -28,6 +28,7 @@ var http_request: HTTPRequest
 func _ready() -> void:
 	# cria e add o http na cena
 	http_request = HTTPRequest.new()
+	http_request.accept_gzip = false
 	add_child(http_request)
 	http_request.request_completed.connect(_on_request_completed)
 	
@@ -62,6 +63,10 @@ func carregar_progresso() -> void:
 func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> void:
 	var url: String = supabase_url + endpoint
 	
+	var http := HTTPRequest.new()
+	http.accept_gzip = false
+	add_child(http)
+	
 	# headers q o supabase pede
 	var auth_bearer = user_token if not user_token.is_empty() else supabase_key
 	var headers: PackedStringArray = [
@@ -76,11 +81,18 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	if not data.is_empty():
 		body = JSON.stringify(data)
 
+	http.request_completed.connect(func(result: int, response_code: int, res_headers: PackedStringArray, res_body: PackedByteArray):
+		_on_request_completed(result, response_code, res_headers, res_body)
+		http.queue_free()
+	)
+
 	# manda a req asincrona
-	var error = http_request.request(url, headers, method, body)
+	var error = http.request(url, headers, method, body)
 	
 	if error != OK:
-		push_error("deu ruim na req pra: " + url)
+		push_error("deu ruim na req pra: " + url + " - erro: " + str(error))
+		http.queue_free()
+		auth_erro.emit("Falha de conexão com o servidor (" + str(error) + ")")
 
 # quando o supabase responde cai aqui
 func _on_request_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
@@ -90,6 +102,8 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 	
 	if erro_json != OK:
 		push_error("erro no parse do json: " + body_text)
+		if response_code < 200 or response_code >= 300:
+			auth_erro.emit("Erro no servidor (%d)" % response_code)
 		return
 		
 	var dados = json.data
@@ -102,26 +116,30 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 			# Salvando os dados locais do player na memoria
 			user_token = dados.access_token
 			
-			if dados.has("user") and dados.user.has("user_metadata"):
-				user_nick = dados.user.user_metadata.get("nick", "Mago Desconhecido")
-				user_cla = dados.user.user_metadata.get("cla", "Nenhum")
+			if dados.has("user") and dados.user is Dictionary:
+				var u = dados.user
+				if u.has("email") and u.email.to_lower() == "admin@synthesis.com":
+					is_admin = true
+					print("👑 Bem-vindo, Administrador!")
+				else:
+					is_admin = false
+					
+				if u.has("user_metadata") and u.user_metadata is Dictionary:
+					user_nick = u.user_metadata.get("nick", "Admin" if is_admin else "Mago Desconhecido")
+					user_cla = u.user_metadata.get("cla", "Nenhum")
+				else:
+					user_nick = "Admin" if is_admin else "Mago Desconhecido"
+					user_cla = "Nenhum"
 				
 				# Funde o progresso de Convidado assim que logar ou se registrar!
 				if RankingManager.has_method("fundir_conta_guest"):
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
-				# Checa se é conta de admin
-				if dados.user.has("email") and dados.user.email == "admin@synthesis.com":
-					is_admin = true
-					print("👑 Bem-vindo, Administrador!")
-				else:
-					is_admin = false
-				
 			auth_sucesso.emit(user_token)
 		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
 			print("usuario cadastrado ou atualizado com sucesso!")
 			var user_data = dados.get("user", dados)
-			if user_data is Dictionary and user_data.has("user_metadata"):
+			if user_data is Dictionary and user_data.has("user_metadata") and user_data.user_metadata is Dictionary:
 				user_nick = user_data.user_metadata.get("nick", user_nick)
 				user_cla = user_data.user_metadata.get("cla", user_cla)
 				print("Metadata do usuario atualizada! Nick: ", user_nick, " Cla: ", user_cla)
@@ -255,6 +273,7 @@ func atualizar_cla_usuario(novo_cla: String) -> void:
 func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
 	var url: String = supabase_url + endpoint
 	var http: HTTPRequest = HTTPRequest.new()
+	http.accept_gzip = false
 	add_child(http)
 	
 	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key

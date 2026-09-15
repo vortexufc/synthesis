@@ -29,10 +29,13 @@ func _ready() -> void:
 	# Reposiciona o player na porta correta quando estiver voltando de uma sala
 	call_deferred("_reposicionar_na_porta_correta")
 	
-	# quando a batalha começar, vira o mago pra direita (olhando pro inimigo)
+	# quando a batalha começar, vira o mago pra direita e para o movimento
 	GlobalSignals.iniciar_batalha.connect(func(_d):
+		velocity = Vector2.ZERO
 		ultima_direcao = "direita"
 		$sprite.play("idle_direita")
+		if has_node("PoeiraPassos"):
+			$PoeiraPassos.emitting = false
 	)
 
 
@@ -109,6 +112,19 @@ func _physics_process(_delta: float) -> void:
 		AudioManager.play_sfx("ui-1")
 	
 	move_and_slide()
+
+	# Se o jogador colidiu com um inimigo hostil enquanto andava, aciona a batalha imediatamente!
+	var em_transicao = get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning
+	if not em_transicao:
+		for i in range(get_slide_collision_count()):
+			var col = get_slide_collision(i)
+			var collider = col.get_collider()
+			if collider and collider.is_in_group("inimigos"):
+				var trigger = collider.get_node_or_null("EnemyTrigger")
+				if trigger and trigger.has_method("_on_body_entered"):
+					trigger._on_body_entered(self)
+					break
+
 	_animar_sombra(_delta)
 	
 	# Partículas de poeira nos passos (sempre atrás do corpo do personagem)

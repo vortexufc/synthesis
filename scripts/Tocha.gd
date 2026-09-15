@@ -64,4 +64,3 @@ func _process(delta: float) -> void:
 		var f2 = sin((_tempo + _offset * 1.7) * (_velocidade * 1.5)) * 0.02
 		var flicker = f1 + f2
 		_luz.energy = energia_base + flicker
-		_luz.texture_scale = escala_base + flicker * 0.05

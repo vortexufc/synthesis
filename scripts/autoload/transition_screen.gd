@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+var is_transitioning: bool = false
+
 @onready var color_rect = $ColorRect as ColorRect
 
 func _ready() -> void:
@@ -10,6 +12,17 @@ func _ready() -> void:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
+	if is_transitioning:
+		return
+	is_transitioning = true
+	
+	# Cancela qualquer batalha pendente para nunca vazar para a próxima sala
+	if get_node_or_null("/root/QuizManager"):
+		var qm = get_node("/root/QuizManager")
+		if qm.has_method("fechar_ui_batalha"):
+			qm.fechar_ui_batalha()
+		qm.set("em_batalha", false)
+	
 	var vp_size = get_viewport().get_visible_rect().size
 	
 	var mat = color_rect.material as ShaderMaterial if color_rect else null
@@ -82,6 +95,7 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	# Garante que, ao carregar a nova sala, o jogo não fique pausado
 	get_tree().paused = false
 	get_tree().get_root().set_disable_input(false)
+	is_transitioning = false
 
 func _obter_textura_luz() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()

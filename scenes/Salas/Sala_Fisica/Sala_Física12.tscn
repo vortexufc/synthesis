@@ -351,7 +351,7 @@ tile_set = ExtResource("3_gg4gl")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_7m57g")]
 z_index = 4
-position = Vector2(2610, 2654)
+position = Vector2(2615, 2564)
 scale = Vector2(1.2, 1.2)
 
 [node name="Node" type="Node" parent="." unique_id=1293979235]
@@ -457,7 +457,7 @@ region_enabled = true
 region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="PortaRetorno" parent="." unique_id=2061926795 instance=ExtResource("13_50wn6")]
-position = Vector2(2624, 2712)
+position = Vector2(2624, 2709)
 porta_de_retorno = true
 
 [node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("14_l2t32")]

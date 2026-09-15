@@ -220,8 +220,15 @@ func _criar_luz_portal(nome_porta: String, cor_luz: Color, cor_fundo: Color) -> 
 		"offset": randf() * 10.0
 	})
 
+var _tempo_luz_tick: float = 0.0
+
 func _process(delta: float) -> void:
-	_tempo_iluminacao += delta
+	_tempo_luz_tick += delta
+	if _tempo_luz_tick < 0.033:
+		return
+	var dt = _tempo_luz_tick
+	_tempo_luz_tick = 0.0
+	_tempo_iluminacao += dt
 	
 	# 1. Efeito dinâmico de chamas tremeluzindo (flicker suave)
 	for tocha in _luzes_tochas:
@@ -234,7 +241,6 @@ func _process(delta: float) -> void:
 		var f2 = sin((_tempo_iluminacao + off * 1.7) * (spd * 1.5)) * 0.02
 		var flicker = f1 + f2
 		node.energy = tocha["base_energy"] + flicker
-		node.texture_scale = tocha["base_scale"] + flicker * 0.05
 	
 	# 2. Pulso mágico sutil do orbe do cajado
 	if _luz_cajado and is_instance_valid(_luz_cajado):
@@ -258,7 +264,6 @@ func _process(delta: float) -> void:
 	if _luz_caldeirao and is_instance_valid(_luz_caldeirao):
 		var borbulha = sin(_tempo_iluminacao * 5.5) * 0.06 + sin(_tempo_iluminacao * 9.2) * 0.03
 		_luz_caldeirao.energy = 0.52 + borbulha
-		_luz_caldeirao.texture_scale = 0.50 + sin(_tempo_iluminacao * 6.0) * 0.02
 		
 	# 6. Cintilação mágica suave dos frascos de cristais da mesa de alquimia
 	for prop in _luzes_props:
