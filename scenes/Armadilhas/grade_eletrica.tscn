@@ -1,0 +1,79 @@
+[gd_scene load_steps=6 format=3 uid="uid://grade_eletrica_01"]
+
+[ext_resource type="Script" path="res://scripts/armadilhas/grade_eletrica.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_grade"]
+bg_color = Color(0.12, 0.12, 0.18, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.4, 0.5, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="Gradient" id="Gradient_eletrico"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0.2, 0.9, 1, 0.65, 0.1, 0.4, 0.9, 0.35, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_eletrico"]
+gradient = SubResource("Gradient_eletrico")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_grade"]
+size = Vector2(48, 48)
+
+[node name="GradeEletrica" type="Area2D"]
+z_index = 1
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_script")
+
+[node name="PainelGrade" type="Panel" parent="."]
+custom_minimum_size = Vector2(48, 48)
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_grade")
+
+[node name="IconeEletrico" type="Label" parent="PainelGrade"]
+modulate = Color(0.3, 0.9, 1, 0.8)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 20
+text = "⚡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LuzAura" type="Sprite2D" parent="."]
+scale = Vector2(1.4, 1.4)
+texture = SubResource("GradientTexture2D_eletrico")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_grade")
+
+[node name="Faiscas" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 16
+lifetime = 0.35
+emission_shape = 3
+emission_rect_extents = Vector2(22, 22)
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 35.0
+initial_velocity_max = 70.0
+scale_amount_min = 2.0
+scale_amount_max = 3.5
+color = Color(0.2, 0.9, 1, 1)

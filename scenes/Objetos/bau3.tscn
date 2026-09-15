@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://cbau3_ferro_03"]
+
+[ext_resource type="Script" path="res://scripts/bau.gd" id="1_bau"]
+[ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_chest"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bau"]
+size = Vector2(40, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_chest3"]
+atlas = ExtResource("2_chest")
+region = Rect2(768, 336, 48, 48)
+
+[node name="Bau3" type="Area2D"]
+scale = Vector2(1.25, 1.25)
+script = ExtResource("1_bau")
+tipo_bau = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_bau")
+
+[node name="BauSprite" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_chest3")

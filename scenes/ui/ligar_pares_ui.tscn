@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cligar_pares_ui_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/ligar_pares_ui.gd" id="1_script"]
+
+[node name="LigarParesUI" type="CanvasLayer"]
+layer = 105
+script = ExtResource("1_script")

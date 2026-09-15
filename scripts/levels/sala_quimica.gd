@@ -20,6 +20,11 @@ var _luzes_props: Array = []
 var _tempo_iluminacao: float = 0.0
 
 func _ready() -> void:
+	if get_node_or_null("/root/DatabaseManager"):
+		DatabaseManager.active_dungeon = "Química"
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.masmorra_retorno_hub = "Química"
+		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.start_playlist()
 		
@@ -425,8 +430,11 @@ func _on_inimigo_derrotado(pos: Vector2) -> void:
 		_dropar_chave(pos)
 
 func _dropar_chave(pos: Vector2) -> void:
+	var cena_atual = scene_file_path.to_lower()
+	if "boss" in cena_atual:
+		return
 	var cena_chave = load("res://scenes/Entidades/ItemChave.tscn")
 	if not cena_chave: return
 	var chave = cena_chave.instantiate()
-	chave.position = pos
+	chave.position = to_local(pos)
 	call_deferred("add_child", chave)

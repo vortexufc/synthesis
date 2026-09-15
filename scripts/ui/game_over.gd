@@ -9,12 +9,32 @@ extends CanvasLayer
 
 var particulas: CPUParticles2D
 var _pode_pular_vitoria: bool = false
+var _era_boss: bool = false
+var _andar_concluido: int = 1
 
 func _ready() -> void:
 	hide()
 	GlobalSignals.fim_de_jogo.connect(_on_fim_de_jogo)
 	btn_tentar_novamente.pressed.connect(_on_tentar_novamente_pressed)
 	btn_menu_principal.pressed.connect(_on_menu_principal_pressed)
+	
+	# Aplica fonte moderna, limpa e legível no lugar da fonte RPG pixelada
+	var font_titulo = SystemFont.new()
+	font_titulo.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_titulo.font_weight = 800
+	titulo.add_theme_font_override("font", font_titulo)
+	titulo.add_theme_font_size_override("font_size", 42)
+	
+	var font_sans = SystemFont.new()
+	font_sans.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_sans.font_weight = 600
+	stats.add_theme_font_override("font", font_sans)
+	stats.add_theme_font_size_override("font_size", 20)
+	
+	btn_tentar_novamente.add_theme_font_override("font", font_sans)
+	btn_tentar_novamente.add_theme_font_size_override("font_size", 18)
+	btn_menu_principal.add_theme_font_override("font", font_sans)
+	btn_menu_principal.add_theme_font_size_override("font_size", 18)
 	
 	# Criação das partículas via código para não precisar alterar a cena
 	particulas = CPUParticles2D.new()
@@ -37,9 +57,11 @@ func _ready() -> void:
 
 func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 	show()
+	_era_boss = dict_stats.get("eh_boss", false)
+	_andar_concluido = dict_stats.get("andar_id", 1)
 	if vitoria:
 		AudioManager.restore_previous_music()
-		AudioManager.play_sfx("fail")
+		AudioManager.play_sfx("win")
 		titulo.text = "VITÓRIA!"
 		titulo.add_theme_color_override("font_color", Color.GOLD)
 		color_rect.color = Color(0, 0, 0, 0.8) # Fundo escuro simples
@@ -54,15 +76,16 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		lbl_skip.add_theme_font_size_override("font_size", 14)
 		lbl_skip.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 0.8)) # Cinza discreto
 		
-		var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-		if font:
-			lbl_skip.add_theme_font_override("font", font)
+		var font_skip = SystemFont.new()
+		font_skip.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+		font_skip.font_weight = 500
+		lbl_skip.add_theme_font_override("font", font_skip)
 			
 		$ColorRect/VBoxContainer.add_child(lbl_skip)
 		_pode_pular_vitoria = true
 	else:
 		AudioManager.stop_battle_music()
-		AudioManager.play_sfx("win")
+		AudioManager.play_sfx("fail")
 		titulo.text = "DERROTA..."
 		titulo.add_theme_color_override("font_color", Color.RED)
 		color_rect.color = Color(0.2, 0, 0, 0.8) # Fundo vermelho escuro
@@ -117,10 +140,12 @@ func _finalizar_vitoria() -> void:
 	_pode_pular_vitoria = false
 	hide()
 	particulas.emitting = false
-	get_tree().paused = false
 	QuizManager.fechar_ui_batalha()
 	if $ColorRect/VBoxContainer.has_node("LblSkip"):
 		$ColorRect/VBoxContainer.get_node("LblSkip").queue_free()
+
+	_era_boss = false
+	get_tree().paused = false
 
 func _on_tentar_novamente_pressed() -> void:
 	hide()

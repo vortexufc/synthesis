@@ -21,6 +21,8 @@
 [ext_resource type="PackedScene" uid="uid://b88fskp86tqc2" path="res://scenes/Entidades/ItemMoeda.tscn" id="19_yo20j"]
 [ext_resource type="PackedScene" uid="uid://crfyxl12t7qm0" path="res://scenes/Entidades/ItemLivroFormula.tscn" id="20_qyqlx"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="21_71yqb"]
+[ext_resource type="PackedScene" path="res://scenes/Objetos/bau1.tscn" id="22_fe0vg"]
+[ext_resource type="PackedScene" path="res://scenes/Objetos/mimico.tscn" id="23_vc7er"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dpstn"]
 texture = ExtResource("2_tjhdw")
@@ -382,3 +384,9 @@ position = Vector2(802, 885)
 
 [node name="ItemLivroFormula2" parent="." unique_id=91493795 instance=ExtResource("20_qyqlx")]
 position = Vector2(128, 434)
+
+[node name="Bau1" parent="." unique_id=543473787 instance=ExtResource("22_fe0vg")]
+position = Vector2(856, 972)
+
+[node name="Mimico" parent="." unique_id=1973333797 instance=ExtResource("23_vc7er")]
+position = Vector2(405, 951)

@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_wjkwu"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_n8ijl"]
 [ext_resource type="PackedScene" uid="uid://bc4o04l2tcu36" path="res://scenes/Entidades/NPCCientista.tscn" id="14_wlvpg"]
+[ext_resource type="PackedScene" path="res://scenes/Objetos/mural_parede.tscn" id="15_mural"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ndrqi"]
 texture = ExtResource("3_r6rlg")
@@ -276,3 +277,7 @@ porta_de_retorno = true
 
 [node name="NPCCientista" parent="." unique_id=371639914 instance=ExtResource("14_wlvpg")]
 position = Vector2(555, 787)
+
+[node name="MuralParede" parent="." unique_id=1541649523 instance=ExtResource("15_mural")]
+position = Vector2(699, 769)
+forcar_andar = 1

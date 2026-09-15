@@ -21,6 +21,11 @@ var _tempo_iluminacao: float = 0.0
 func _ready() -> void:
 	print("Sala01 Iniciada - Injetando Realismo e Teste de Chaves/Portas")
 	
+	if get_node_or_null("/root/DatabaseManager"):
+		DatabaseManager.active_dungeon = "Química"
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.masmorra_retorno_hub = "Química"
+		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.start_playlist()
 		
@@ -390,5 +395,5 @@ func _dropar_chave(pos: Vector2) -> void:
 	var cena_chave = load("res://scenes/Entidades/ItemChave.tscn")
 	if not cena_chave: return
 	var chave = cena_chave.instantiate()
-	chave.position = pos
+	chave.position = to_local(pos)
 	call_deferred("add_child", chave)

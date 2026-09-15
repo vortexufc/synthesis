@@ -56,14 +56,14 @@ func _atualizar_hud() -> void:
 			var pronto = (progresso >= def["qtd"])
 			
 			if not quest_cards.has(quest_id):
-				var card = _criar_card()
-				quest_cards[quest_id] = card
-				vbox_quests.add_child(card)
-				card.modulate.a = 0.0
-				card.scale = Vector2(0.8, 0.8)
+				var novo_card = _criar_card()
+				quest_cards[quest_id] = novo_card
+				vbox_quests.add_child(novo_card)
+				novo_card.modulate.a = 0.0
+				novo_card.scale = Vector2(0.8, 0.8)
 				var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-				tw.tween_property(card, "modulate:a", 1.0, 0.3)
-				tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.3)
+				tw.tween_property(novo_card, "modulate:a", 1.0, 0.3)
+				tw.tween_property(novo_card, "scale", Vector2(1.0, 1.0), 0.3)
 				
 			var card = quest_cards[quest_id]
 			var lbl_titulo = card.get_node("VBox/LblTitulo") as Label

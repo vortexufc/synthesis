@@ -82,6 +82,12 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	# Garante que, ao carregar a nova sala, o jogo não fique pausado
 	get_tree().paused = false
 	get_tree().get_root().set_disable_input(false)
+	
+	# Decrementa o buff de escudo se entrou em uma sala de jogo da masmorra
+	var t_lower = target_scene.to_lower()
+	var eh_sala_masmorra = not ("/ui/" in t_lower or "menu" in t_lower or "hub" in t_lower or "login" in t_lower or "cadastro" in t_lower or "config" in t_lower)
+	if eh_sala_masmorra and get_node_or_null("/root/PlayerStats"):
+		PlayerStats.decrementar_buff_escudo()
 
 func _obter_textura_luz() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()

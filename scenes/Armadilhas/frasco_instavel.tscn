@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3 uid="uid://frasco_instavel_01"]
+
+[ext_resource type="Script" path="res://scripts/armadilhas/frasco_instavel.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://buh6511v5kggd" path="res://assets/sprites/vida.png" id="2_tex"]
+
+[sub_resource type="Gradient" id="Gradient_aura"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(1, 0.45, 0.1, 0.75, 0.9, 0.1, 0.3, 0.45, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_aura"]
+gradient = SubResource("Gradient_aura")
+width = 48
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_frasco"]
+radius = 36.0
+
+[sub_resource type="Gradient" id="Gradient_explosao"]
+offsets = PackedFloat32Array(0, 0.4, 0.8, 1)
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.3, 0.1, 0.9, 0.6, 0.1, 0.1, 0.6, 0.2, 0.2, 0.2, 0)
+
+[node name="FrascoInstavel" type="Area2D"]
+z_index = 2
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_script")
+
+[node name="AuraBrilho" type="Sprite2D" parent="."]
+texture = SubResource("GradientTexture2D_aura")
+
+[node name="SpriteFrasco" type="Sprite2D" parent="."]
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_frasco")
+
+[node name="ParticulasExplosao" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 36
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.95
+emission_shape = 1
+emission_sphere_radius = 8.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 40)
+initial_velocity_min = 60.0
+initial_velocity_max = 120.0
+scale_amount_min = 3.5
+scale_amount_max = 7.0
+color_ramp = SubResource("Gradient_explosao")

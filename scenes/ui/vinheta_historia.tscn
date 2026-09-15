@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cvinheta_historia_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/vinheta_historia.gd" id="1_script"]
+
+[node name="VinhetaHistoria" type="CanvasLayer"]
+layer = 120
+script = ExtResource("1_script")

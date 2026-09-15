@@ -2,66 +2,94 @@
 
 [ext_resource type="Texture2D" uid="uid://clkds7t7hm0q1" path="res://assets/sprites/Characters/Slime_Roxo/slime_boss_roxo.png" id="1_roxo"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_iggoh"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r0"]
 atlas = ExtResource("1_roxo")
-region = Rect2(0, 0, 96, 96)
+region = Rect2(0, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_pyadc"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r1"]
 atlas = ExtResource("1_roxo")
-region = Rect2(96, 0, 96, 96)
+region = Rect2(176, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_u70fr"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r2"]
 atlas = ExtResource("1_roxo")
-region = Rect2(192, 0, 96, 96)
+region = Rect2(352, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7v22q"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r3"]
 atlas = ExtResource("1_roxo")
-region = Rect2(288, 0, 96, 96)
+region = Rect2(528, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_u25ki"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r4"]
 atlas = ExtResource("1_roxo")
-region = Rect2(384, 0, 96, 96)
+region = Rect2(704, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_oiqal"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r5"]
 atlas = ExtResource("1_roxo")
-region = Rect2(480, 0, 96, 96)
+region = Rect2(880, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_t0htw"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r6"]
 atlas = ExtResource("1_roxo")
-region = Rect2(576, 0, 96, 96)
+region = Rect2(1056, 0, 176, 211)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_o7jmc"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_r7"]
 atlas = ExtResource("1_roxo")
-region = Rect2(672, 0, 96, 96)
+region = Rect2(1232, 0, 176, 211)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r8"]
+atlas = ExtResource("1_roxo")
+region = Rect2(1408, 0, 176, 211)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r9"]
+atlas = ExtResource("1_roxo")
+region = Rect2(1584, 0, 176, 211)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r10"]
+atlas = ExtResource("1_roxo")
+region = Rect2(1760, 0, 176, 211)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r11"]
+atlas = ExtResource("1_roxo")
+region = Rect2(1936, 0, 176, 211)
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_iggoh")
+"texture": SubResource("AtlasTexture_r0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_pyadc")
+"texture": SubResource("AtlasTexture_r1")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_u70fr")
+"texture": SubResource("AtlasTexture_r2")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_7v22q")
+"texture": SubResource("AtlasTexture_r3")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_u25ki")
+"texture": SubResource("AtlasTexture_r4")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_oiqal")
+"texture": SubResource("AtlasTexture_r5")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_t0htw")
+"texture": SubResource("AtlasTexture_r6")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_o7jmc")
-}],
+"texture": SubResource("AtlasTexture_r7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r9")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r10")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r11")
+} ],
 "loop": true,
 "name": &"default",
-"speed": 5.0
+"speed": 8.0
 }]
