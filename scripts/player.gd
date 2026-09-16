@@ -219,5 +219,3 @@ func _exibir_texto_dano(motivo: String, quantidade: float) -> void:
 	tw.tween_property(lbl, "position:y", lbl.position.y - 32.0, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(lbl, "modulate:a", 0.0, 0.85).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(lbl.queue_free)
-
-

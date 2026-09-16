@@ -1,26 +1,26 @@
-[gd_scene format=4 uid="uid://p7mlchfoncsp"]
+[gd_scene format=4 uid="uid://8lrmgacmrqly"]
 
 [ext_resource type="Script" uid="uid://bifmnfccxblbu" path="res://scripts/levels/sala_fisica.gd" id="1_fisica_base"]
-[ext_resource type="Texture2D" uid="uid://bxcfqixmux3ga" path="res://assets/sprites/tilesets/Física/física.png" id="1_nale0"]
-[ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="2_51k2d"]
-[ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Sala_Fisica/Decoration.tres" id="3_6jgij"]
-[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="5_1o6yt"]
-[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="6_ejddg"]
-[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="7_5kr2w"]
-[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="8_tyc1g"]
-[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="9_s2dxs"]
-[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="10_e3s4h"]
-[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="11_ln8f8"]
-[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_iky53"]
-[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_dbb4q"]
-[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="13_nale0"]
-[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_h6lnb"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="15_qrwn8"]
-[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="16_fkhdn"]
+[ext_resource type="Texture2D" uid="uid://bxcfqixmux3ga" path="res://assets/sprites/tilesets/Física/física.png" id="1_rw3p6"]
+[ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="2_jg1rc"]
+[ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Oficina_Física/Decoration.tres" id="3_8sl3k"]
+[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="5_egjsc"]
+[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="6_ghx0f"]
+[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="7_5cbx7"]
+[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="8_1h5ku"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="9_ib8bv"]
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="10_kgb63"]
+[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="11_k7x25"]
+[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_sw56i"]
+[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_3b8l7"]
+[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_scdb8"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_7cn13"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="16_jg1rc"]
+[ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="16_rw3p6"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="lum_fisica_inst"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_64e84"]
-texture = ExtResource("1_nale0")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rw3p6"]
+texture = ExtResource("1_rw3p6")
 72:8/size_in_atlas = Vector2i(4, 4)
 72:8/0 = 0
 72:8/0/texture_origin = Vector2i(8, 8)
@@ -87,11 +87,11 @@ texture = ExtResource("1_nale0")
 24:6/0 = 0
 24:6/0/texture_origin = Vector2i(8, 8)
 
-[sub_resource type="TileSet" id="TileSet_6x5wr"]
-sources/0 = SubResource("TileSetAtlasSource_64e84")
+[sub_resource type="TileSet" id="TileSet_silk0"]
+sources/0 = SubResource("TileSetAtlasSource_rw3p6")
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_joc4n"]
-texture = ExtResource("1_nale0")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jg1rc"]
+texture = ExtResource("1_rw3p6")
 0:0/size_in_atlas = Vector2i(4, 2)
 0:0/0 = 0
 0:0/0/texture_origin = Vector2i(8, 8)
@@ -313,8 +313,8 @@ texture = ExtResource("1_nale0")
 4:6/0/texture_origin = Vector2i(8, 8)
 4:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-22.86119, -23.707905, 8.1848755, -23.143429, 8, 8, -23.990139, 9.596054)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bu0ll"]
-texture = ExtResource("2_51k2d")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_21rmo"]
+texture = ExtResource("2_jg1rc")
 margins = Vector2i(25, 3)
 0:0/size_in_atlas = Vector2i(8, 10)
 0:0/animation_separation = Vector2i(4, 0)
@@ -326,48 +326,48 @@ margins = Vector2i(25, 3)
 0:0/0/texture_origin = Vector2i(8, 8)
 0:0/0/z_index = 1
 
-[sub_resource type="TileSet" id="TileSet_ms0hf"]
+[sub_resource type="TileSet" id="TileSet_0xb0g"]
 physics_layer_0/collision_layer = 1
-sources/0 = SubResource("TileSetAtlasSource_joc4n")
-sources/1 = SubResource("TileSetAtlasSource_bu0ll")
+sources/0 = SubResource("TileSetAtlasSource_jg1rc")
+sources/1 = SubResource("TileSetAtlasSource_21rmo")
 
-[node name="Node2D" type="Node2D" unique_id=891726994]
+[node name="Node2D" type="Node2D" unique_id=1494113762]
 script = ExtResource("1_fisica_base")
 
-[node name="Floor" type="TileMapLayer" parent="." unique_id=1251044891]
+[node name="Floor" type="TileMapLayer" parent="." unique_id=641803536]
 scale = Vector2(2, 2)
-tile_map_data = PackedByteArray("AAAtACIAAABKAAQAAAAtACYAAABKAAQAAAAtACoAAABKAAQAAAAwAB4AAAAAAAwAAAAwACIAAAAAAAwAAAAwACYAAAAAAAwAAAAwACoAAAAEAAwAAAA0AB4AAAAEAAwAAAA0ACIAAAAAAAwAAAA0ACYAAABIAAgAAAA0ACoAAABIAAgAAAA4AB4AAABIAAgAAAA4ACIAAABMAAgAAAA4ACYAAABIAAgAAAA4ACoAAABMAAgAAAA8AB4AAABIAAgAAAA8ACIAAAAEAAwAAAA8ACYAAABIAAgAAAA8ACoAAABMAAgAAABAAB4AAABIAAgAAABAACIAAAAAAAwAAABAACYAAABMAAgAAABAACoAAABIAAgAAABEAB4AAAAEAAwAAABEACIAAAAEAAwAAABEACYAAABIAAgAAABEACoAAAAEAAwAAAAgAB0AAAAEAAwAAGAjAB4AAABMAAgAAFAoAB4AAABMAAgAAAAsAB4AAABMAAgAAAAYAB4AAAAEAAwAAAAcAB4AAAAEAAwAAAAfACIAAABMAAgAAFAfACYAAABMAAgAAFAfACoAAABMAAgAAFAkACIAAABMAAgAAAAkACYAAABMAAgAAAAkACoAAABMAAgAAAAoACIAAABIAAgAAAAoACYAAABMAAgAAAAoACoAAABMAAgAAAAUACIAAAAEAAwAAAAUACYAAAAEAAwAAAAUACoAAAAEAAwAAAAYACIAAAAEAAwAAAAYACYAAAAEAAwAAAAYACoAAAAEAAwAAAAcACEAAAAEAAwAAGAcACUAAAAEAAwAAGAcACkAAAAEAAwAAGARAAsAAAAWAAYAAAARAA4AAABKAAQAAAARABIAAABKAAQAAAARABYAAABKAAQAAAARABoAAABKAAQAAAARAB4AAABKAAQAAAARACIAAABKAAQAAAARACYAAABKAAQAAAARACoAAABKAAQAAAAUAB4AAAAEAAwAAAAUABYAAAAEAAwAAAAUABoAAAAEAAwAAAAYABYAAAAEAAwAAAAYABoAAAAEAAwAAAAcABYAAAAEAAwAAAAcABkAAAAEAAwAAGAUAA4AAAAEAAwAAAAUABIAAAAEAAwAAAAYAA4AAAAEAAwAAAAYABIAAAAEAAwAAAAcAA4AAAAEAAwAAAAcABEAAAAEAAwAAGAfABIAAABMAAgAAFAfABYAAABMAAgAAFAfABoAAABMAAgAAFAgAA0AAAAEAAwAAGAgAAkAAAAEAAwAAGAcAAkAAAAEAAwAAGAYAAkAAAAEAAwAAGAUAAkAAAAEAAwAAGA=")
-tile_set = SubResource("TileSet_6x5wr")
+tile_map_data = PackedByteArray("AAAEAAwAAAAWAAYAAAAHAAwAAAAAAAIAAAALAAwAAAAAAAIAAAAXAAwAAAAAAAIAAAAEAA8AAABKAAQAAAAEABMAAABKAAQAAAAEABcAAABKAAQAAAAGAA8AAAAAAAwAAFAHABMAAABIAAgAAAAHABcAAAAAAAwAAAALAA8AAAAAAAwAAAALABMAAAAAAAwAAAALABcAAABMAAgAAAAOABYAAAAEAAwAADAPAAwAAAAAAAIAAAAPAA8AAAAEAAwAAAAPABMAAABMAAgAAAASABMAAAAAAAwAAFASABcAAABMAAgAAFATAAwAAAAAAAIAAAATAA8AAAAAAAwAAAAWABIAAABMAAgAADAXAA8AAABMAAgAAAAXABcAAAAEAAwAAAAHABsAAABIAAgAAAAPABsAAABIAAgAAAATABsAAABMAAgAAAALABsAAABMAAgAAAAXABsAAAAEAAwAAAAEABsAAABKAAQAAAAEAB8AAABKAAQAAAALAB8AAAAEAAwAAAAPAB4AAAAEAAwAAGAXAB8AAABMAAgAAAASAB8AAABMAAgAAFAHAB8AAAAEAAwAAAAEACMAAABKAAQAAAAHACMAAAAEAAwAAAALACMAAAAEAAwAAAAPACIAAAAEAAwAAGASACMAAABMAAgAAFAXACMAAABMAAgAAAAEACcAAABKAAQAAAAHACcAAAAEAAwAAAALACcAAAAEAAwAAAAPACYAAAAEAAwAAGASACcAAABMAAgAAFAXACcAAABMAAgAAAAEACsAAABKAAQAAAAHACsAAAAEAAwAAAALACsAAAAEAAwAAAAPACoAAAAEAAwAAGASACsAAABMAAgAAFAXACsAAABMAAgAAAAbAAwAAAAAAAIAAAAbAA8AAAAEAAwAAAAbABMAAABIAAgAAAAbABcAAABMAAgAAAAbABsAAABIAAgAAAAbAB8AAABMAAgAAAAbACMAAABIAAgAAAAbACcAAABMAAgAAAAbACsAAABMAAgAAAA=")
+tile_set = SubResource("TileSet_silk0")
 
-[node name="Wall" type="TileMapLayer" parent="." unique_id=383490363]
+[node name="Wall" type="TileMapLayer" parent="." unique_id=1144556859]
 scale = Vector2(2, 2)
-tile_map_data = PackedByteArray("AAA4ABEAAAAwAAIAAAA4ABQAAAA8AAgAAAA4ABgAAABAAAgAAAA4ABsAAAAkAAAAAAA6AA8AAAAmAAwAAAA8ABEAAAA4AAIAAAA8ABQAAABAAAgAAAA8ABgAAAAwAAgAAAA8ABsAAAAkAAAAAAA+AA8AAAAmAAwAAABAABEAAAA0AAIAAABAABQAAABAAAgAAABAABgAAAAwAAgAAABAABsAAAAcAAAAAABCAA8AAAAmAAwAAABEAA8AAAAmAAwAAABEABEAAAA0AAIAAABEABQAAABAAAgAAABEABgAAAAwAAgAAABEABsAAAAcAAAAAABHAA8AAAAqAAwAAABHABEAAAAOAAgAAABHABQAAABOAAQAAABHABgAAABOAAQAAABHABwAAABOAAQAAABHAB8AAABOAAQAAAAoABEAAAAwAAIAAAAoABQAAAA8AAgAAAAoABgAAABAAAgAAAAoABsAAAAkAAAAAAAqAA8AAAAmAAwAAAAsABEAAAA4AAIAAAAsABQAAABAAAgAAAAsABgAAAAwAAgAAAAsABsAAAAkAAAAAAAuAA8AAAAmAAwAAAAwABEAAAA0AAIAAAAwABQAAABAAAgAAAAwABgAAAAwAAgAAAAwABsAAAAcAAAAAAAyAA8AAAAmAAwAAAA0AA8AAAAmAAwAAAA0ABEAAAA0AAIAAAA0ABQAAABAAAgAAAA0ABgAAAAwAAgAAAA0ABsAAAAcAAAAAAA2AA8AAAAmAAwAAAAoAA8AAAAmAAwAAAArACcAAABIAAQAAAArADAAAAAQAA4AAGArADQAAAAQAA4AAGAuADUAAAAoAAgAAAAyADUAAAAcAAgAAAA1AC4AAAA6AA4AAAA1ADAAAAA6AA4AAAA1ADIAAAAAAAoAAAA7AC4AAAA0AA4AAAA7ADAAAAA0AA4AAAA7ADIAAAAOAAoAAAA+ADUAAAAYAAgAAABCADUAAAAYAAgAAABGADUAAAAgAAgAAABHACUAAABOAAQAAABHACkAAABOAAQAAAArACMAAABIAAQAAAArACoAAAAAAAgAAAArACwAAAAAAAoAAAAsAC4AAAAQAA4AAAAuACwAAAAQAAwAAAAuAC4AAAAQAA4AAAAuADEAAAAYAAgAAAAyACwAAAAQAAwAAAAyAC4AAAAQAA4AAAAyADEAAAAkAAgAAAA1ACoAAAAkAAwAAAA1ACwAAAA6AA4AAAA2AC4AAAAwAAQAADA2ADUAAAAYAAgAAAA3ACwAAAAmAA4AAAA4ACoAAAAmAAwAAAA4ADIAAAAKAAoAAAA5ACwAAAAoAA4AAAA5AC8AAAAwAAQAAAA6ADUAAAAcAAgAAAA7ACoAAAAqAAwAAAA7ACwAAAA0AA4AAAA+ACwAAAAQAAwAAAA+AC4AAAAQAA4AAAA+ADEAAAAYAAgAAABAACwAAAAKAAoAAABCACwAAAAKAAoAAABCAC4AAAAQAA4AAABCADEAAAAYAAgAAABEACwAAAAKAAoAAABGAC4AAAAQAA4AAABGADEAAAAYAAgAAABHACEAAABOAAQAAABHACwAAAAOAAoAAAAlAA8AAAAmAAwAAAAPAAAAAABIAAQAAAAPAP3/AAAkAAwAAAAPAAQAAABIAAQAAAAPAAgAAABIAAQAAAARAP//AAA+AA4AAAARAAIAAAA2AAQAAAARAAYAAAA2AAQAAAARAAkAAAAWAAQAAAASAP3/AAAmAAwAAAAUAP//AAAoAAIAAAAUAAkAAAAUAAAAAAAWAP3/AAAmAAwAAAAYAP//AAA0AAIAAAAYAAIAAABEAAgAAAAYAAYAAAA8AAgAAAAYAAkAAAAcAAAAAAAaAP3/AAAmAAwAAAAcAP//AAAwAAIAAAAcAAIAAAA8AAgAAAAcAAYAAABAAAgAAAAcAAkAAAAkAAAAAAAgAP//AAA4AAIAAAAgAAIAAABAAAgAAAAgAAYAAAAwAAgAAAAeAP3/AAAmAAwAAAArACIAAABIAAQAAAAPAAwAAABIAAQAAAAPABAAAABIAAQAAAAPABQAAABIAAQAAAAPABgAAABIAAQAAAAPABwAAABIAAQAAAAPACAAAABIAAQAAAAPABYAAABIAAQAAAAPABoAAABIAAQAAAAPAB4AAABIAAQAAAAPACIAAABIAAQAAAAPACYAAABIAAQAAAAPACgAAABIAAQAAAAiAP3/AAAqAAwAAAAfAP3/AAAmAAwAAAAgAAkAAAAkAAAAAAAlABEAAAAwAAIAAAAlABQAAAA8AAgAAAAlABgAAABAAAgAAAAlABsAAAAkAAAAAAAgADEAAAAYAAgAAAAgADUAAAAYAAgAAAAkADEAAAAYAAgAAAAkADUAAAAYAAgAAAAoADEAAAAYAAgAAAAoADUAAAAgAAgAAAAUADEAAAAYAAgAAAAUADUAAAAYAAgAAAAYADEAAAAYAAgAAAAYADUAAAAYAAgAAAAcADEAAAAYAAgAAAAcADUAAAAgAAgAAAAQADEAAAAkAAgAAAAQADUAAAAsAAgAAAAPACwAAAAAAAoAAAASACwAAAAQAAwAAAAWACwAAAAQAAwAAAAaACwAAAAQAAwAAAAeACwAAAAQAAwAAAAiACwAAAAQAAwAAAAkACwAAAAQAAwAAAAmACwAAAAQAAwAAAAoACwAAAAQAAwAAAAPACoAAABIAAQAAAAgAC4AAAAQAA4AAAAkAC4AAAAQAA4AAAAoAC4AAAAQAA4AAAAUAC4AAAAQAA4AAAAYAC4AAAAQAA4AAAAcAC4AAAAQAA4AAAAQAC4AAAAQAA4AAAAiAP//AAAOAAgAAAAiAAIAAABOAAQAAAAiAAYAAAAOAAgAAAAiAAoAAABOAAQAAAAiAA0AAABOAAQAAAAiAA8AAABOAAQAAAAiABMAAABOAAQAAAAiAAUAAAAOAAgAAAAiAAgAAABOAAQAAAAiAAwAAABOAAQAAAAiABAAAABOAAQAAAAiABUAAABOAAQAAAAiABkAAABOAAQAAAAiAAkAAABOAAQAAAAiABEAAABOAAQAAAAiABQAAABOAAQAAAAiABYAAABOAAQAAAAiABoAAABOAAQAAAAUAAIAAAA4AAgAAAAUAAYAAAAwAAgAAAA=")
-tile_set = SubResource("TileSet_ms0hf")
+tile_map_data = PackedByteArray("AAAEAAAAAAA+AA4AAAAEAAMAAAA2AAQAAAAEAAcAAAA2AAQAAAAEAAoAAAAWAAQAAAAHAAAAAAAoAAIAAAAHAAMAAAA4AAgAAAAHAAoAAAAUAAAAAAALAAAAAAA0AAIAAAALAAMAAABEAAgAAAALAAcAAAA8AAgAAAALAAoAAAAcAAAAAAAPAAAAAAAwAAIAAAAPAAMAAAA8AAgAAAAPAAcAAABAAAgAAAAPAAoAAAAkAAAAAAATAAAAAAA4AAIAAAATAAMAAABAAAgAAAATAAcAAAAwAAgAAAATAAoAAAAkAAAAAAAXAAAAAAA0AAIAAAAXAAMAAABAAAgAAAAXAAcAAAAwAAgAAAAXAAoAAAAcAAAAAAACAP7/AAAkAAwAAAACAAEAAABIAAQAAAACAAUAAABIAAQAAAACAAkAAABIAAQAAAACAA0AAABIAAQAAAACABEAAABIAAQAAAACABUAAABIAAQAAAACABkAAABIAAQAAAACAB0AAABIAAQAAAACACwAAAAAAAgAAAACAC4AAAAAAAoAAAACADIAAAAQAA4AAGACADYAAAAQAA4AAGADADAAAAAQAA4AAAAFAC4AAAAQAAwAAAAFADAAAAAQAA4AAAAFADMAAAAYAAgAAAAFADcAAAAoAAgAAAAJAC4AAAAQAAwAAAAJADAAAAAQAA4AAAAJADMAAAAkAAgAAAAJADcAAAAcAAgAAAAMACwAAAAkAAwAAAAMAC4AAAA6AA4AAAAMADAAAAA6AA4AAAAMADIAAAA6AA4AAAAMADQAAAAAAAoAAAANADAAAAAwAAQAADANADcAAAAYAAgAAAAOAC4AAAAmAA4AAAAPACwAAAAmAAwAAAAPADQAAAAKAAoAAAAQAC4AAAAoAA4AAAAQADEAAAAwAAQAAAARADcAAAAcAAgAAAASACwAAAAqAAwAAAASAC4AAAA0AA4AAAASADAAAAA0AA4AAAASADIAAAA0AA4AAAASADQAAAAOAAoAAAAVAC4AAAAQAAwAAAAVADAAAAAQAA4AAAAVADMAAAAYAAgAAAAVADcAAAAYAAgAAAACACEAAABIAAQAAAACACUAAABIAAQAAAACACkAAABIAAQAAAAXAC4AAAAKAAoAAAAZADAAAAAQAA4AAAAZADMAAAAYAAgAAAAZADcAAAAYAAgAAAAFAP7/AAAmAAwAAAAJAP7/AAAmAAwAAAANAP7/AAAmAAwAAAAVAP7/AAAmAAwAAAARAP7/AAAmAAwAAAAZAC4AAAAKAAoAAAAdADMAAAAYAAgAAAAdADcAAAAgAAgAAAAdADAAAAAQAA4AAAAeAP7/AAAqAAwAAAAeAAAAAAAOAAgAAAAeAAMAAABOAAQAAAAeAAcAAABOAAQAAAAeAAsAAABOAAQAAAAeAA8AAABOAAQAAAAeABMAAABOAAQAAAAeABcAAABOAAQAAAAeABsAAABOAAQAAAAeAB8AAABOAAQAAAAeACMAAABOAAQAAAAeACcAAABOAAQAAAAeACsAAABOAAQAAAAeAC4AAAAOAAoAAAAbAC4AAAAKAAoAAAAZAP7/AAAmAAwAAAAbAP7/AAAmAAwAAAAbAAAAAAA0AAIAAAAbAAMAAABAAAgAAAAbAAcAAAAwAAgAAAAbAAoAAAAcAAAAAAAHAAcAAAAwAAgAAAA=")
+tile_set = SubResource("TileSet_0xb0g")
 
-[node name="Decoration" type="TileMapLayer" parent="." unique_id=2086792210]
+[node name="Decoration" type="TileMapLayer" parent="." unique_id=672944659]
 scale = Vector2(2, 2)
-tile_map_data = PackedByteArray("AAAaADEAAgBjAAoAAAAaADMAAgBjAAwAAAAaADUAAgBjAA4AAAAdADUAAgBnAA4AAAAaAC4AAgBiAAcAAAAhADUAAgBrAA4AAAAuABIAAgCRAAMAAAAvABIAAgCTAAMAAAAwABIAAgCUAAMAAAAzABIAAgCXAAMAAAAzABQAAgCXAAUAAAAzABYAAgCXAAcAAAAzABgAAgCXAAwAAAAzABoAAgCXAA4AAAA1ABUAAgCZAAYAAAAlACkAAwBkAAYAAAAcACoAAwBQAAcAAABBABwAAwBvABEAAAAbABUAAwAeAA4AAAATACgAAwBLAAUAABAiACIAAwAoAA0AAABCACYAAwAoABIAAAAcAAUAAAAEABwAAAAeAAQAAAAEABwAAAAeAAcAAAAEABwAAAARADIAAAAEACgAAAATADQAAAAEADQAAAAhAC8AAAAEACgAAAAjADAAAAAEABwAAAAqADAAAAADAAMAAAAtADMAAAADAA8AAAAvAC8AAAADAA8AAABCADIAAAADAAMAAABAABQAAQAEAAQAAAApABoAAQAEABAAAAAfADUAAgBpAA4AAAA=")
-tile_set = ExtResource("3_6jgij")
+tile_map_data = PackedByteArray("AAAXABUAAwAeAA4AAAAZACgAAwBGAAUAAAAJACAAAwBkAAAAAAAHACsAAwAoABIAAAAYAB0AAwAAAAAAAAAIADYAAAADAA8AAAAGADIAAAADAAMAAAAVADEAAAAEABwAAAAZADYAAAAEABwAAAAZAAIAAAAEACgAAAAaAAUAAAADAAMAAAAFAAEAAAAEABwAAAATAAcAAwAyABAAAAAVAAIAAQAEAAQAAAARAAIAAQAEAAQAAAA=")
+tile_set = ExtResource("3_8sl3k")
 
-[node name="Player" parent="." unique_id=317542166 instance=ExtResource("5_1o6yt")]
+[node name="Player" parent="." unique_id=317542166 instance=ExtResource("5_egjsc")]
 z_index = 4
-position = Vector2(1788, 1238)
+position = Vector2(479, 1306)
 scale = Vector2(1.2, 1.2)
 
-[node name="Node" type="Node" parent="." unique_id=1169358202]
-script = ExtResource("6_ejddg")
+[node name="Node" type="Node" parent="." unique_id=1814148383]
+script = ExtResource("6_ghx0f")
 
-[node name="HUD" parent="." unique_id=1680767625 instance=ExtResource("7_5kr2w")]
+[node name="HUD" parent="." unique_id=278901782 instance=ExtResource("7_5cbx7")]
 visible = false
 
-[node name="InventarioUI" parent="." unique_id=1279701713 instance=ExtResource("8_tyc1g")]
+[node name="InventarioUI" parent="." unique_id=507292693 instance=ExtResource("8_1h5ku")]
 visible = false
 
-[node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=873011412]
+[node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=1482600514]
 visible = false
-script = ExtResource("9_s2dxs")
+script = ExtResource("9_ib8bv")
 
-[node name="Control" type="Control" parent="ParchmentUI" unique_id=990452928]
+[node name="Control" type="Control" parent="ParchmentUI" unique_id=491781696]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -376,15 +376,15 @@ size_flags_horizontal = 6
 size_flags_vertical = 4
 metadata/_edit_use_anchors_ = true
 
-[node name="BackgroundPapel" type="TextureRect" parent="ParchmentUI/Control" unique_id=1364897508]
+[node name="BackgroundPapel" type="TextureRect" parent="ParchmentUI/Control" unique_id=1566710694]
 layout_mode = 0
 offset_left = 93.0
 offset_top = -97.0
 offset_right = 893.0
 offset_bottom = 703.0
-texture = ExtResource("10_e3s4h")
+texture = ExtResource("10_kgb63")
 
-[node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=994718420]
+[node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=1558279559]
 custom_minimum_size = Vector2(160, 80)
 layout_mode = 0
 offset_left = 174.0
@@ -392,7 +392,7 @@ offset_top = 273.0
 offset_right = 334.0
 offset_bottom = 353.0
 
-[node name="BotoesContainer" type="HBoxContainer" parent="ParchmentUI/Control/BackgroundPapel" unique_id=15686799]
+[node name="BotoesContainer" type="HBoxContainer" parent="ParchmentUI/Control/BackgroundPapel" unique_id=911726734]
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 1
 anchors_preset = 1
@@ -405,30 +405,30 @@ offset_bottom = 177.0
 grow_horizontal = 0
 theme_override_constants/separation = 50
 
-[node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1918766507]
+[node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1405084718]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
-texture_normal = ExtResource("11_ln8f8")
+texture_normal = ExtResource("11_k7x25")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=239197272]
+[node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=226437593]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-texture_normal = ExtResource("12_iky53")
+texture_normal = ExtResource("12_sw56i")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=686857340]
+[node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1220783701]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-texture_normal = ExtResource("13_dbb4q")
+texture_normal = ExtResource("13_3b8l7")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1529800994]
+[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=142911711]
 
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=851672236]
+[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=1891011619]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -437,57 +437,60 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=1163837226]
+[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=1236925708]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
-[node name="pergaminho" parent="InterfaceLeitura/Fundo" unique_id=706257676 instance=ExtResource("13_nale0")]
-position = Vector2(1573, 1323)
-
-[node name="PortaTransicao" parent="." unique_id=1540248353 instance=ExtResource("14_h6lnb")]
-position = Vector2(707, 268)
+[node name="PortaTransicao" parent="." unique_id=1454241312 instance=ExtResource("14_scdb8")]
+position = Vector2(279, 342)
 frames_animacao = 4
 stride_animacao = 192
 
-[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=1429710113]
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=1502698982]
 z_index = 2
-position = Vector2(-1, -60)
+position = Vector2(-1.0000002, -100)
 scale = Vector2(1.921875, 1.734375)
-texture = ExtResource("2_51k2d")
+texture = ExtResource("2_jg1rc")
 region_enabled = true
 region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
-[node name="PortaRetorno" parent="." unique_id=1727427017 instance=ExtResource("14_h6lnb")]
-position = Vector2(1794, 1361)
+[node name="PortaRetorno" parent="." unique_id=35344989 instance=ExtResource("14_scdb8")]
+position = Vector2(475, 1377)
 porta_de_retorno = true
 
-[node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("15_qrwn8")]
-position = Vector2(784, 1232)
+[node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("16_7cn13")]
+position = Vector2(303, 558)
 scale = Vector2(1.2, 1.2)
 
-[node name="Robo_P_Ciano" parent="." unique_id=1200000021 instance=ExtResource("16_fkhdn")]
-position = Vector2(906, 911.00006)
+[node name="Robo_P_Ciano" parent="." unique_id=1200000021 instance=ExtResource("16_rw3p6")]
+position = Vector2(828, 414)
 scale = Vector2(1.2, 1.2)
 
-[node name="Luminarias" type="Node2D" parent="." unique_id=299601274]
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_jg1rc")]
+position = Vector2(145, 1243)
 
-[node name="LuminariaNorte1" parent="Luminarias" unique_id=1740438812 instance=ExtResource("lum_fisica_inst")]
-position = Vector2(810, 204)
+[node name="Luminarias" type="Node2D" parent="." unique_id=990793874]
 
-[node name="LuminariaOeste1" parent="Luminarias" unique_id=172145593 instance=ExtResource("lum_fisica_inst")]
-position = Vector2(491, 685)
+[node name="LuminariaNorte1" parent="Luminarias" unique_id=124260708 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(416, 180)
+
+[node name="LuminariaNorte2" parent="Luminarias" unique_id=1654414677 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(157, 185)
+
+[node name="LuminariaOeste1" parent="Luminarias" unique_id=1920216199 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(75, 758)
 orientacao = 1
 
-[node name="LuminariaLeste1" parent="Luminarias" unique_id=148491346 instance=ExtResource("lum_fisica_inst")]
-position = Vector2(2248, 799)
+[node name="LuminariaLeste1" parent="Luminarias" unique_id=424085329 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(956, 757)
 orientacao = 2
 
-[node name="LuminariaOeste2" parent="Luminarias" unique_id=2135306517 instance=ExtResource("lum_fisica_inst")]
-position = Vector2(491, 1011)
+[node name="LuminariaOeste2" parent="Luminarias" unique_id=906659747 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(75, 1066)
 orientacao = 1
 
-[node name="LuminariaLeste2" parent="Luminarias" unique_id=196425116 instance=ExtResource("lum_fisica_inst")]
-position = Vector2(2254, 1152)
+[node name="LuminariaLeste2" parent="Luminarias" unique_id=1016361490 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(955, 1068)
 orientacao = 2

@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_pgsvy"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_wjkwu"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_n8ijl"]
-[ext_resource type="PackedScene" uid="uid://bc4o04l2tcu36" path="res://scenes/Entidades/NPCCientista.tscn" id="14_wlvpg"]
+[ext_resource type="PackedScene" uid="uid://bc4o04l2tcu36" path="res://scenes/Entidades/NPCs/NPCCientista.tscn" id="14_wlvpg"]
 [ext_resource type="PackedScene" path="res://scenes/Objetos/mural_parede.tscn" id="15_mural"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ndrqi"]

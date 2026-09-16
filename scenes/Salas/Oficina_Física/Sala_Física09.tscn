@@ -1,9 +1,9 @@
 [gd_scene format=4 uid="uid://blvwu5gw3c6ha"]
 
-[ext_resource type="TileSet" uid="uid://ms6t05hijfja" path="res://scenes/Salas/Sala_Fisica/Floor.tres" id="1_bdb5g"]
+[ext_resource type="TileSet" uid="uid://ms6t05hijfja" path="res://scenes/Salas/Oficina_Física/Floor.tres" id="1_bdb5g"]
 [ext_resource type="Script" uid="uid://bifmnfccxblbu" path="res://scripts/levels/sala_fisica.gd" id="1_fisica_base"]
-[ext_resource type="TileSet" uid="uid://d04gtlciy4pe8" path="res://scenes/Salas/Sala_Fisica/Wall.tres" id="2_hrefx"]
-[ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Sala_Fisica/Decoration.tres" id="3_i752b"]
+[ext_resource type="TileSet" uid="uid://d04gtlciy4pe8" path="res://scenes/Salas/Oficina_Física/Wall.tres" id="2_hrefx"]
+[ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Oficina_Física/Decoration.tres" id="3_i752b"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_qc6xt"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_rctny"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="6_njl4p"]

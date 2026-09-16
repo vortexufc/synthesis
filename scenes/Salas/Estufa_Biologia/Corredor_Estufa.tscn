@@ -1,0 +1,132 @@
+[gd_scene format=4 uid="uid://bfp4xwomt4gn4"]
+
+[ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_or4h3"]
+[ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_e388g"]
+[ext_resource type="TileSet" uid="uid://d2uxhwqjqqfc6" path="res://scenes/Salas/Estufa_Biologia/Decoration_Estufa.tres" id="3_feh3b"]
+[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_aomgp"]
+[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_wmoqw"]
+[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="6_yvstv"]
+[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="7_kik8w"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="8_ss3sc"]
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="9_73e8r"]
+[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="10_0128i"]
+[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_qlmc7"]
+[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_qjbvw"]
+[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_bm3yc"]
+
+[node name="Node2D" type="Node2D" unique_id=421101023]
+
+[node name="Floor" type="TileMapLayer" parent="." unique_id=1097710823]
+scale = Vector2(2, 2)
+tile_map_data = PackedByteArray("AAAKABAAAAAEACwAAHAKABIAAAAEACwAADALAAkAAAAEACwAAAALAAsAAAAEACwAAAALAAwAAAAGAC4AAGALAA4AAAAEACwAACAMAAwAAAAEAC4AAHAMABUAAAAAACwAAGANAAkAAAAGAC4AAAANAAsAAAAGACwAAAANAA4AAAAEACwAACANABAAAAAEACwAAGANABMAAAAGACwAAAAOABAAAAAEACwAAHAOABIAAAAEACwAADAPAAkAAAAEACwAAAAPAAsAAAAEACwAAAAPAAwAAAAGAC4AAGAPAA4AAAAEACwAACAQAAwAAAAEAC4AAHAQABUAAAAAACwAAGARAAkAAAAGAC4AAAARAAsAAAAGACwAAAARAA4AAAAEACwAACARABAAAAAEACwAAGARABMAAAAGACwAAAAQABcAAAAKABAAABAKAAIAAAAEACwAAHAKAAQAAAAEACwAADALAPv/AAAEACwAAAALAP3/AAAEACwAAAALAP7/AAAGAC4AAGALAAAAAAAEACwAACAMAP7/AAAEAC4AAHANAPv/AAAGAC4AAAANAP3/AAAGACwAAAANAAAAAAAEACwAACANAAIAAAAEACwAAGAOAPn/AAAAAAoAAAAOAAIAAAAEACwAAHAOAAQAAAAEACwAADAPAPv/AAAEACwAAAAPAP3/AAAEACwAAAAPAP7/AAAGAC4AAGAPAAAAAAAEACwAACAQAP7/AAAEAC4AAHAQAAcAAAAAACwAAGAQAAkAAAAKABAAABARAPv/AAAGAC4AAAARAP3/AAAGACwAAAARAAAAAAAEACwAACARAAIAAAAEACwAAGARAAUAAAAGACwAAAAMAAcAAAAEACwAAAANAAUAAAAEACwAAAALAAcAAAAEACwAAAAOAAcAAAAEACwAAAANAAQAAAAEACwAAAAMAAUAAAAEACwAAAAOAAUAAAAEACwAAAAPAAUAAAAEACwAAAA=")
+tile_set = ExtResource("1_or4h3")
+
+[node name="Wall" type="TileMapLayer" parent="." unique_id=1220534508]
+scale = Vector2(2, 2)
+tile_map_data = PackedByteArray("AAAOABsAAAAUABgAAAALABkAAAAAABgAAAANABkAAAACABgAAAAPABkAAAAFABgAAAAOACAAAAAMACAAAAANACEAAAAKABoAAAAOACEAAAAKABoAAAAOAB0AAgAAAAAAAAASABQAAAAGABAAAAASABgAAAAGABAAAAASABsAAAAOABoAAAALACEAAAAIABoAAAALABsAAAAAABoAAAALAB4AAAAAABAAAAAJABsAAAAIABoAAAAJABQAAAAAABAAAAAJABgAAAAAABAAAAATAB0AAAAYABoAAAATACAAAAAIACAAAAAIAB0AAAAYABoAAAAIACAAAAAIACAAAAAJAPb/AAAAABoAAAASAPb/AAAGABoAAAAJAPT/AAAAABgAAAAJAPn/AAAAABAAAAAJAP3/AAAAABAAAAAJAAEAAAAAABAAAAAJAAUAAAAAABAAAAAJAAkAAAAAABAAAAALAPb/AAAAAAIAAAALAPn/AAAcABAAAAALAP3/AAAcABAAAAALAAAAAAAEAAQAAAAMAPT/AAAQABgAAAANAPb/AAAAAAIAAAAOAPb/AAAAAAIAABAOAPn/AAAAACAAAAAOAP3/AgAAAAAAAAAOAAAAAAAYAAAAAAAQAPT/AAAQABgAAAARAPb/AAAMAAIAAAARAPn/AAAcABAAAAARAP3/AAAcABAAAAARAAAAAAAEAAQAAAASAPT/AAAGABgAAAASAPn/AAAGABAAAAASAP3/AAAGABAAAAASAAEAAAAGABAAAAASAAUAAAAGABAAAAASAAkAAAAGABAAAAASAA0AAAAGABAAAAASABAAAAAGABAAAAAJAA0AAAAAABAAAAAJABEAAAAAABAAAAAQABkAAAAGABgAAAA=")
+tile_set = ExtResource("2_e388g")
+
+[node name="Decoration" type="TileMapLayer" parent="." unique_id=1765909494]
+scale = Vector2(2, 2)
+tile_set = ExtResource("3_feh3b")
+
+[node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_aomgp")]
+z_index = 4
+position = Vector2(430, 747)
+scale = Vector2(1.2, 1.2)
+
+[node name="Node" type="Node" parent="." unique_id=819991200]
+script = ExtResource("5_wmoqw")
+
+[node name="HUD" parent="." unique_id=389114203 instance=ExtResource("6_yvstv")]
+visible = false
+
+[node name="InventarioUI" parent="." unique_id=1963460538 instance=ExtResource("7_kik8w")]
+visible = false
+
+[node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=1637220914]
+visible = false
+script = ExtResource("8_ss3sc")
+
+[node name="Control" type="Control" parent="ParchmentUI" unique_id=1223288563]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 6
+size_flags_vertical = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="BackgroundPapel" type="TextureRect" parent="ParchmentUI/Control" unique_id=177350031]
+layout_mode = 0
+offset_left = 93.0
+offset_top = -97.0
+offset_right = 893.0
+offset_bottom = 703.0
+texture = ExtResource("9_73e8r")
+
+[node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=1709059018]
+custom_minimum_size = Vector2(160, 80)
+layout_mode = 0
+offset_left = 174.0
+offset_top = 273.0
+offset_right = 334.0
+offset_bottom = 353.0
+
+[node name="BotoesContainer" type="HBoxContainer" parent="ParchmentUI/Control/BackgroundPapel" unique_id=1713498910]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_top = 137.0
+offset_right = -96.0
+offset_bottom = 177.0
+grow_horizontal = 0
+theme_override_constants/separation = 50
+
+[node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1914420909]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+texture_normal = ExtResource("10_0128i")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1054348040]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+texture_normal = ExtResource("11_qlmc7")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=1018746532]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+texture_normal = ExtResource("12_qjbvw")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1110537843]
+
+[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=2037173702]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=1619545150]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+metadata/_edit_use_anchors_ = true
+
+[node name="PortaTransicao" parent="." unique_id=1120561421 instance=ExtResource("13_bm3yc")]
+position = Vector2(437, -31)
+
+[node name="PortaRetorno" parent="." unique_id=1877277594 instance=ExtResource("13_bm3yc")]
+position = Vector2(448, 827)
+porta_de_retorno = true

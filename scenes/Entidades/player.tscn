@@ -388,7 +388,6 @@ shape = SubResource("CapsuleShape2D_2lcu3")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2105837662]
 limit_left = -4096
-limit_top = 0
 limit_right = 4096
 limit_bottom = 4096
 position_smoothing_enabled = true
@@ -396,13 +395,11 @@ position_smoothing_enabled = true
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1020740764]
 
 [node name="PoeiraPassos" type="CPUParticles2D" parent="." unique_id=990000001]
-z_index = 0
 position = Vector2(-2, 38)
 emitting = false
 amount = 18
-lifetime = 0.45
-local_coords = false
 texture = SubResource("GradientTexture2D_poeira")
+lifetime = 0.45
 emission_shape = 3
 emission_rect_extents = Vector2(8, 2)
 direction = Vector2(0, -1)
