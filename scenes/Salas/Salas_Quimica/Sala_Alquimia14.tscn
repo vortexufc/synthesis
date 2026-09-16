@@ -1,4 +1,4 @@
-[gd_scene format=4 uid="uid://5lllet6n0nl"]
+[gd_scene format=4 uid="uid://b6tq7ocmmuegy"]
 
 [ext_resource type="Script" uid="uid://bbv1tmc8y1luf" path="res://scripts/levels/sala02.gd" id="1_level_script"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_upxhh"]
@@ -362,20 +362,20 @@ porta_de_retorno = true
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_lc3mn")]
 position = Vector2(324, 863)
 
-[node name="Tocha1" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(389, 320)
+[node name="Tocha1" parent="." unique_id=1418986936 instance=ExtResource("tocha_entidade")]
+position = Vector2(331, 162)
 
-[node name="Tocha2" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(811, 320)
+[node name="Tocha2" parent="." unique_id=1061258815 instance=ExtResource("tocha_entidade")]
+position = Vector2(738, 164)
 
-[node name="Tocha3" parent="." instance=ExtResource("tocha_entidade")]
+[node name="Tocha3" parent="." unique_id=1050427614 instance=ExtResource("tocha_entidade")]
 position = Vector2(150, 612)
 
-[node name="Tocha4" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(150, 900)
+[node name="Tocha4" parent="." unique_id=757412304 instance=ExtResource("tocha_entidade")]
+position = Vector2(75, 688)
 
-[node name="Tocha5" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(1050, 612)
+[node name="Tocha5" parent="." unique_id=1068687848 instance=ExtResource("tocha_entidade")]
+position = Vector2(1081, 420)
 
-[node name="Tocha6" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(1050, 900)
+[node name="Tocha6" parent="." unique_id=964380085 instance=ExtResource("tocha_entidade")]
+position = Vector2(1084, 877)

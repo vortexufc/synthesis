@@ -1,6 +1,6 @@
-[gd_scene format=4 uid="uid://5ywln3c5qvos"]
+[gd_scene format=4 uid="uid://ebff5fstwfvc"]
 
-[ext_resource type="Script" path="res://scripts/levels/sala_quimica.gd" id="1_quimica_base"]
+[ext_resource type="Script" uid="uid://bnphqcxm8mo1d" path="res://scripts/levels/sala_quimica.gd" id="1_quimica_base"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_takp5"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_dx6ka"]
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="3_w7b5w"]
@@ -1680,7 +1680,7 @@ script = ExtResource("1_quimica_base")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_takp5")]
 z_index = 4
-position = Vector2(570, 752)
+position = Vector2(570, 688)
 
 [node name="Decoration" type="TileMapLayer" parent="." unique_id=231351951]
 z_index = 2
@@ -1815,20 +1815,20 @@ position = Vector2(350, 520)
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_ygk28")]
 position = Vector2(129, 344)
 
-[node name="Tocha1" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(465, 376)
+[node name="Tocha1" parent="." unique_id=590299015 instance=ExtResource("tocha_entidade")]
+position = Vector2(433, 173)
 
-[node name="Tocha2" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(929, 376)
+[node name="Tocha2" parent="." unique_id=1368214956 instance=ExtResource("tocha_entidade")]
+position = Vector2(840, 166)
 
-[node name="Tocha3" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(199, 668)
+[node name="Tocha3" parent="." unique_id=1975811600 instance=ExtResource("tocha_entidade")]
+position = Vector2(70, 601)
 
-[node name="Tocha4" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(199, 956)
+[node name="Tocha4" parent="." unique_id=2043091424 instance=ExtResource("tocha_entidade")]
+position = Vector2(806, 729)
 
-[node name="Tocha5" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(1195, 668)
+[node name="Tocha5" parent="." unique_id=45861495 instance=ExtResource("tocha_entidade")]
+position = Vector2(1268, 219)
 
-[node name="Tocha6" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(1195, 956)
+[node name="Tocha6" parent="." unique_id=1150093484 instance=ExtResource("tocha_entidade")]
+position = Vector2(1272, 537)

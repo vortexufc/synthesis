@@ -1,4 +1,4 @@
-[gd_scene format=4 uid="uid://c5ugr5mmlii4t"]
+[gd_scene format=4 uid="uid://bw6opme3c3yxq"]
 
 [ext_resource type="Script" uid="uid://bu2kwtcyegw0r" path="res://scripts/levels/sala01.gd" id="1_level_script"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_oxtvn"]
@@ -353,22 +353,22 @@ position = Vector2(1021, 739)
 position = Vector2(966, 292)
 
 [node name="Tocha" parent="." unique_id=272830461 instance=ExtResource("21_71yqb")]
-position = Vector2(1054, 923)
+position = Vector2(1072, 926.0001)
 rotation = -0.61086524
 
 [node name="Tocha2" parent="." unique_id=1267392876 instance=ExtResource("21_71yqb")]
-position = Vector2(1047, 451)
+position = Vector2(1069.0001, 557)
 rotation = -0.61086524
 
 [node name="Tocha3" parent="." unique_id=1986408434 instance=ExtResource("21_71yqb")]
-position = Vector2(622, 206)
+position = Vector2(623, 128)
 
 [node name="Tocha4" parent="." unique_id=36539113 instance=ExtResource("21_71yqb")]
-position = Vector2(983, 207)
+position = Vector2(1076.0001, 177.00003)
 rotation = -0.06981317
 
 [node name="Tocha5" parent="." unique_id=995698598 instance=ExtResource("21_71yqb")]
-position = Vector2(109, 936)
+position = Vector2(85.99997, 931)
 rotation = -5.2359877
 
 [node name="Tocha6" parent="." unique_id=1955335715 instance=ExtResource("21_71yqb")]
@@ -376,7 +376,7 @@ position = Vector2(115.00003, 630)
 rotation = -5.2359877
 
 [node name="Tocha7" parent="." unique_id=952558187 instance=ExtResource("21_71yqb")]
-position = Vector2(114.000015, 365)
+position = Vector2(94.99999, 358)
 rotation = -5.2359877
 
 [node name="ItemChave2" parent="." unique_id=1207849736 instance=ExtResource("18_mgcqj")]

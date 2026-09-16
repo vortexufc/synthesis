@@ -1,7 +1,7 @@
-[gd_scene format=4 uid="uid://ckeglnuedhcqv"]
+[gd_scene format=4 uid="uid://d24vyek2l05uh"]
 
-[ext_resource type="Script" path="res://scripts/levels/sala_quimica.gd" id="1_quimica_base"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_cprru"]
+[ext_resource type="Script" uid="uid://bnphqcxm8mo1d" path="res://scripts/levels/sala_quimica.gd" id="1_quimica_base"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_rkyvi"]
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="3_5br0x"]
 [ext_resource type="Texture2D" uid="uid://ddl5ei2h1o3s5" path="res://assets/sprites/tilesets/Alquimia/OBJETOS02.png" id="4_g2m4l"]
@@ -18,7 +18,6 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="15_myu2x"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/Slime_Boss_Roxo.tscn" id="16_rggn7"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="17_3rfjb"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_boss.tscn" id="19_5br0x"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5br0x"]
@@ -1662,12 +1661,12 @@ sources/1 = SubResource("TileSetAtlasSource_7717u")
 sources/2 = SubResource("TileSetAtlasSource_uv14r")
 
 [node name="Node2D" type="Node2D" unique_id=103472613]
-script = ExtResource("1_quimica_base")
 position = Vector2(-434, 13)
+script = ExtResource("1_quimica_base")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_cprru")]
 z_index = 4
-position = Vector2(422, 974)
+position = Vector2(426, 1563)
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=409076405]
 position = Vector2(1, 8)
@@ -1793,20 +1792,20 @@ position = Vector2(433, 236)
 position = Vector2(427, 1713)
 porta_de_retorno = true
 
-[node name="Tocha1" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(-42, 341)
+[node name="Tocha1" parent="." unique_id=37951911 instance=ExtResource("tocha_entidade")]
+position = Vector2(851, 360)
 
-[node name="Tocha2" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(232, 341)
+[node name="Tocha2" parent="." unique_id=1385773124 instance=ExtResource("tocha_entidade")]
+position = Vector2(553, 93)
 
-[node name="Tocha3" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(-187, 868)
+[node name="Tocha3" parent="." unique_id=1053310063 instance=ExtResource("tocha_entidade")]
+position = Vector2(853, 965)
 
-[node name="Tocha4" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(-187, 1425)
+[node name="Tocha4" parent="." unique_id=1961626956 instance=ExtResource("tocha_entidade")]
+position = Vector2(60, 1223)
 
-[node name="Tocha5" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(377, 868)
+[node name="Tocha5" parent="." unique_id=1542913675 instance=ExtResource("tocha_entidade")]
+position = Vector2(67, 656)
 
-[node name="Tocha6" parent="." instance=ExtResource("tocha_entidade")]
-position = Vector2(377, 1425)
+[node name="Tocha6" parent="." unique_id=1591951978 instance=ExtResource("tocha_entidade")]
+position = Vector2(845, 1462)
