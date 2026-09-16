@@ -1,22 +1,24 @@
 [gd_scene format=4 uid="uid://dprx5oy0e5vgd"]
 
 [ext_resource type="Texture2D" uid="uid://bxcfqixmux3ga" path="res://assets/sprites/tilesets/Física/física.png" id="1_7inuk"]
+[ext_resource type="Script" uid="uid://bifmnfccxblbu" path="res://scripts/levels/sala_fisica.gd" id="1_fisica_base"]
 [ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="2_xmpol"]
 [ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Sala_Fisica/Decoration.tres" id="3_r4p5r"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_f0psa"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_cambc"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="6_vg0t8"]
 [ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="7_xejnl"]
-[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="8_nlx54"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="8_nlx54"]
 [ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="9_vclge"]
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="10_3ahro"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_44p8w"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_3dmp4"]
-[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="13_1lcoj"]
+[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_1lcoj"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="14_h2fov"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="15_vpew1"]
 [ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robos/Robo_G.tscn" id="16_d8fog"]
-[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="17_xmpol"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="17_xmpol"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="lum_fisica_inst"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wbx8o"]
 texture = ExtResource("1_7inuk")
@@ -335,6 +337,7 @@ sources/0 = SubResource("TileSetAtlasSource_6xwi2")
 sources/1 = SubResource("TileSetAtlasSource_tagmr")
 
 [node name="Node2D" type="Node2D" unique_id=1338030050]
+script = ExtResource("1_fisica_base")
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=162798855]
 scale = Vector2(2, 2)
@@ -475,3 +478,33 @@ position = Vector2(1281, 511)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("17_xmpol")]
 position = Vector2(4261, 948)
+
+[node name="Luminarias" type="Node2D" parent="." unique_id=86408991]
+
+[node name="LuminariaNorte1" parent="Luminarias" unique_id=566525783 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(1502, 152)
+
+[node name="LuminariaNorte2" parent="Luminarias" unique_id=493755521 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(2145, 400)
+
+[node name="LuminariaNorte3" parent="Luminarias" unique_id=1062607668 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(3138, 398)
+
+[node name="LuminariaNorte4" parent="Luminarias" unique_id=863367664 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(3776, 400)
+
+[node name="LuminariaOeste1" parent="Luminarias" unique_id=2027492050 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(971, 661)
+orientacao = 1
+
+[node name="LuminariaLeste1" parent="Luminarias" unique_id=325883330 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(4298, 603)
+orientacao = 2
+
+[node name="LuminariaOeste2" parent="Luminarias" unique_id=1503172707 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(976, 1123)
+orientacao = 1
+
+[node name="LuminariaLeste2" parent="Luminarias" unique_id=970402098 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(4284, 1111)
+orientacao = 2

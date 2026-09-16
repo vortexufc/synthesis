@@ -6,3 +6,9 @@
 # Segurança: arquivos com chaves de API (nunca commitar!)
 .env
 override.cfg
+
+# Arquivos temporários e backups
+*.zip
+temp_*.txt
+*.tmp
+scratch/

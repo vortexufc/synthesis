@@ -49,11 +49,18 @@ func _formatar_anotacao_detalhada(q: Dictionary, andar_id: int) -> String:
 	var texto = titulo + "\n\n"
 	texto += "QUESTÃO DE ESTUDO:\n" + pergunta + "\n\n"
 	texto += "ANÁLISE E EXPLICAÇÃO DO CONCEITO:\n"
-	texto += _gerar_explicacao_conceitual(pergunta, resposta_correta, andar_id)
+	var dica_custom = str(q.get("dica", "")).strip_edges()
+	if not dica_custom.is_empty():
+		texto += dica_custom
+	else:
+		texto += _gerar_explicacao_conceitual(pergunta, resposta_correta, andar_id)
 	
 	return texto
 
-func _gerar_explicacao_conceitual(pergunta: String, resposta: String, andar_id: int) -> String:
+func gerar_explicacao_conceitual(pergunta: String, resposta: String, andar_id: int) -> String:
+	return _gerar_explicacao_conceitual(pergunta, resposta, andar_id)
+
+func _gerar_explicacao_conceitual(pergunta: String, resposta: String, _andar_id: int) -> String:
 	var p_lower = pergunta.to_lower()
 	var r_lower = resposta.to_lower()
 	
@@ -70,12 +77,18 @@ func _gerar_explicacao_conceitual(pergunta: String, resposta: String, andar_id: 
 		return "Os Ribossomos são estruturas celulares fundamentais responsáveis pela síntese de proteínas (Tradução). Eles leem as instruções codificadas no RNA mensageiro e unem os aminoácidos na ordem correta. Qualquer substância que paralise os ribossomos impede a produção proteica e interrompe a vida celular."
 		
 	# Química / Alquimia
-	elif p_lower.contains("sódio") or p_lower.contains("água") or r_lower.contains("alcalino"):
+	elif p_lower.contains("combustão") or p_lower.contains("oxidação") or p_lower.contains("queima") or r_lower.contains("combustão"):
+		return "Uma Reação de Combustão é um processo exotérmico no qual um combustível reage rapidamente com um comburente (como o gás oxigênio O₂), liberando luz e calor. A oxidação completa do carbono gera gás carbônico (CO₂) e água (H₂O)."
+	elif p_lower.contains("sódio") or p_lower.contains("metais alcalinos") or r_lower.contains("alcalino"):
 		return "O Sódio (Na) pertence à família dos Metais Alcalinos (Grupo 1 da Tabela Periódica). Esses metais possuem apenas 1 elétron na camada de valência e tendem a doá-lo facilmente, reagindo de forma extremamente violenta ao entrar em contato com a água e liberando gás hidrogênio."
-	elif p_lower.contains("hélio") or p_lower.contains("estável") or r_lower.contains("gases nobres"):
+	elif p_lower.contains("hélio") or p_lower.contains("gases nobres") or r_lower.contains("gases nobres"):
 		return "Os Gases Nobres (Grupo 18) possuem a camada de valência completamente cheia (regra do octeto). Devido a essa estabilidade eletrônica natural, eles não têm tendência a ganhar ou perder elétrons, existindo na forma de gases monoatômicos que praticamente não reagem com outros elementos."
-	elif p_lower.contains("pressão") or p_lower.contains("volume") or p_lower.contains("gás"):
+	elif p_lower.contains("ácid") or p_lower.contains("arrhenius") or p_lower.contains("h+") or r_lower.contains("ácid"):
+		return "Segundo a Teoria de Arrhenius, Ácido é qualquer substância que, em solução aquosa, sofre ionização liberando como cátion exclusivo o íon H+ (ou hidrônio H₃O+). As bases liberam o ânion hidroxila (OH-)."
+	elif p_lower.contains("boyle") or p_lower.contains("gases ideais") or (p_lower.contains("pressão") and p_lower.contains("volume")):
 		return "Pela Lei dos Gases Ideais e a Lei de Boyle (P * V = n * R * T), quando mantemos a temperatura constante em uma transformação isotérmica, a pressão e o volume são inversamente proporcionais. Se comprimirmos o gás dobrando sua pressão, seu volume será reduzido exatamente à metade."
+	elif p_lower.contains("ligação iônica") or p_lower.contains("covalente") or r_lower.contains("iônica") or r_lower.contains("covalente"):
+		return "A Ligação Iônica envolve a transferência definitiva de elétrons entre um metal (que forma cátion) e um ametal (que forma ânion). Já a Ligação Covalente ocorre pelo compartilhamento mútuo de pares de elétrons entre ametais."
 	elif p_lower.contains("carbono") or p_lower.contains("grafite") or r_lower.contains("alotropia"):
 		return "Alotropia é o fenômeno em que um mesmo elemento químico forma duas ou mais substâncias simples diferentes. O Carbono pode formar o Grafite (macio e condutor) ou o Diamante (extremamente duro e isolante), dependendo da organização cristalina dos seus átomos no espaço."
 		

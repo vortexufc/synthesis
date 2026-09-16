@@ -389,9 +389,9 @@ func get_local_nick() -> String:
 		return local_guest_nick
 
 	if FileAccess.file_exists(GUEST_FILE):
-		var file = FileAccess.open(GUEST_FILE, FileAccess.READ)
-		var content = file.get_as_text()
-		file.close()
+		var file_read = FileAccess.open(GUEST_FILE, FileAccess.READ)
+		var content = file_read.get_as_text()
+		file_read.close()
 		var json = JSON.new()
 		if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
 			if json.data.has("guest_nick"):

@@ -22,6 +22,7 @@ var _tween_glow: Tween
 var _tween_bob: Tween
 
 func _ready() -> void:
+	z_index = 2
 	body_entered.connect(_quando_corpo_entra)
 	body_exited.connect(_quando_corpo_sai)
 	_iniciar_efeito_brilho()
@@ -32,7 +33,7 @@ func _iniciar_efeito_brilho() -> void:
 		sprite = get_node_or_null("Sprite2D") as Sprite2D
 	if sprite == null:
 		for child in get_children():
-			if child is Sprite2D and child.name != "GlowSprite":
+			if child is Sprite2D and child.name != "GlowSprite" and child.name != "Shadow":
 				sprite = child as Sprite2D
 				break
 				
@@ -43,6 +44,8 @@ func _iniciar_efeito_brilho() -> void:
 		var tex_glow = load("res://assets/sprites/ui/glow_yellow.png") as Texture2D
 		if tex_glow:
 			glow.texture = tex_glow
+			glow.position = Vector2(-20.5, 0)
+			glow.scale = Vector2(0.5, 0.5)
 			glow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			add_child(glow)
 			move_child(glow, 0)
@@ -62,6 +65,39 @@ func _iniciar_efeito_brilho() -> void:
 		_tween_bob = create_tween().set_loops()
 		_tween_bob.tween_property(sprite, "position:y", pos_y - 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_tween_bob.tween_property(sprite, "position:y", pos_y + 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		
+		# Sombra realista no chão acompanhando a flutuação
+		_criar_sombra()
+		if _shadow:
+			var tw_s = create_tween().set_loops()
+			tw_s.tween_property(_shadow, "scale", Vector2(0.55, 0.28), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.65, 1.0)
+			tw_s.tween_property(_shadow, "scale", Vector2(0.75, 0.40), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.90, 1.0)
+
+var _shadow: Sprite2D = null
+
+func _criar_sombra() -> void:
+	if _shadow == null:
+		_shadow = get_node_or_null("Shadow") as Sprite2D
+	if _shadow != null:
+		_shadow.position = Vector2(-20.5, 34)
+		_shadow.scale = Vector2(0.65, 0.35)
+		_shadow.z_as_relative = false
+		_shadow.z_index = 1
+		return
+	_shadow = Sprite2D.new()
+	_shadow.name = "Shadow"
+	var tex_shadow = load("res://assets/sprites/Characters/Maguinho/shadow.png") as Texture2D
+	if tex_shadow:
+		_shadow.texture = tex_shadow
+		_shadow.position = Vector2(-20.5, 34)
+		_shadow.scale = Vector2(0.65, 0.35)
+		_shadow.modulate = Color(1.0, 1.0, 1.0, 0.85)
+		_shadow.z_as_relative = false
+		_shadow.z_index = 1
+		add_child(_shadow)
+		move_child(_shadow, 0)
 
 func _gerar_dicas_dinamicas() -> void:
 	if not eh_pergaminho_de_dicas: return
@@ -132,9 +168,9 @@ func _gerar_dicas_dinamicas() -> void:
 			
 			# Se não vier nada do Supabase, tenta resgatar a dica que a IA salvou no arquivo JSON local!
 			if dica == "" or dica == null:
-				var file = FileAccess.open("res://data/questions.json", FileAccess.READ)
-				if file:
-					var local_data = JSON.parse_string(file.get_as_text())
+				var file_questions = FileAccess.open("res://data/questions.json", FileAccess.READ)
+				if file_questions:
+					var local_data = JSON.parse_string(file_questions.get_as_text())
 					if typeof(local_data) == TYPE_ARRAY:
 						for local_q in local_data:
 							if str(local_q.get("id")) == str(q.get("id")):

@@ -13,11 +13,10 @@ var passar_portas_trancadas: bool = true   ## Permite passar por portas trancada
 # Referências da UI
 var _canvas_layer: CanvasLayer = null
 var _panel_container: PanelContainer = null
-var _btn_toggle: Button = null
 
 # Lista de salas disponíveis para teleporte
 var _salas_teleporte = [
-	{"nome": "🏰 Hub Geral", "path": "res://scenes/Salas/Hub_Geral.tscn"},
+	{"nome": "🏰 Hub Geral", "path": "res://scenes/Salas/Comum/Hub_Geral.tscn"},
 	{"nome": "🧪 Química - Sala 01", "path": "res://scenes/Salas/Salas_Quimica/Sala_Alquimia01.tscn"},
 	{"nome": "🧪 Química - Sala 02", "path": "res://scenes/Salas/Salas_Quimica/Sala_Alquimia02.tscn"},
 	{"nome": "🧪 Química - Sala 03", "path": "res://scenes/Salas/Salas_Quimica/Sala_Alquimia03.tscn"},
@@ -145,6 +144,88 @@ func _criar_interface_dev() -> void:
 	)
 	vbox.add_child(btn_heal)
 	
+	# Botão 3: Resetar Quests
+	var btn_reset = Button.new()
+	btn_reset.text = "🔄 Resetar Todas as Quests"
+	btn_reset.pressed.connect(func():
+		if get_node_or_null("/root/PlayerStats"):
+			PlayerStats.quests_concluidas.clear()
+			PlayerStats.quests_ativas.clear()
+			PlayerStats.salvar()
+			PlayerStats.quests_atualizadas.emit()
+	)
+	vbox.add_child(btn_reset)
+	
+	# Botão 4: Limpar Inventário e Moedas
+	var btn_clear_inv = Button.new()
+	btn_clear_inv.text = "🗑️ Limpar Inventário e Moedas"
+	btn_clear_inv.pressed.connect(_limpar_inventario_e_moedas)
+	vbox.add_child(btn_clear_inv)
+	
+	var hs_novos = HSeparator.new()
+	vbox.add_child(hs_novos)
+
+	var lbl_novos = Label.new()
+	lbl_novos.text = "⚔️ Novos Recursos (Fúria & Vinhetas):"
+	lbl_novos.add_theme_font_size_override("font_size", 13)
+	lbl_novos.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
+	vbox.add_child(lbl_novos)
+
+	var btn_test_furia = Button.new()
+	btn_test_furia.text = "⚡ Testar Fúria do Chefe (V/F QTE)"
+	btn_test_furia.pressed.connect(func():
+		_panel_container.visible = false
+		var furia_cena = load("res://scenes/ui/furia_chefe_ui.tscn")
+		if furia_cena:
+			var furia_inst = furia_cena.instantiate()
+			get_tree().root.add_child(furia_inst)
+			furia_inst.iniciar_furia(1)
+	)
+	vbox.add_child(btn_test_furia)
+
+	var hbox_vinhetas = HBoxContainer.new()
+	hbox_vinhetas.add_theme_constant_override("separation", 6)
+	
+	var btn_v1 = Button.new()
+	btn_v1.text = "📜 Cap. I (Química)"
+	btn_v1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn_v1.pressed.connect(func():
+		_panel_container.visible = false
+		var v_cena = load("res://scenes/ui/vinheta_historia.tscn")
+		if v_cena:
+			var v = v_cena.instantiate()
+			get_tree().root.add_child(v)
+			v.iniciar_vinheta(1)
+	)
+	hbox_vinhetas.add_child(btn_v1)
+
+	var btn_v2 = Button.new()
+	btn_v2.text = "📜 Cap. II (Física)"
+	btn_v2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn_v2.pressed.connect(func():
+		_panel_container.visible = false
+		var v_cena = load("res://scenes/ui/vinheta_historia.tscn")
+		if v_cena:
+			var v = v_cena.instantiate()
+			get_tree().root.add_child(v)
+			v.iniciar_vinheta(2)
+	)
+	hbox_vinhetas.add_child(btn_v2)
+
+	var btn_v3 = Button.new()
+	btn_v3.text = "📜 Cap. III (Bio)"
+	btn_v3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn_v3.pressed.connect(func():
+		_panel_container.visible = false
+		var v_cena = load("res://scenes/ui/vinheta_historia.tscn")
+		if v_cena:
+			var v = v_cena.instantiate()
+			get_tree().root.add_child(v)
+			v.iniciar_vinheta(3)
+	)
+	hbox_vinhetas.add_child(btn_v3)
+	vbox.add_child(hbox_vinhetas)
+
 	var hs3 = HSeparator.new()
 	vbox.add_child(hs3)
 	
@@ -185,3 +266,33 @@ func _toggle_menu() -> void:
 func _derrotar_monstro_atual() -> void:
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.derrotar_inimigo_atual()
+
+func _limpar_inventario_e_moedas() -> void:
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.limpar_inventario_e_moedas()
+		print("[DevManager] Inventário e Moedas completamente zerados!")
+		
+		# Atualiza UI do inventário se estiver aberta ou instanciada
+		var inv = get_tree().get_first_node_in_group("inventario_ui")
+		if not inv:
+			inv = get_tree().root.find_child("InventarioUI", true, false)
+		if inv:
+			if inv.has_method("_limpar_detalhes"):
+				inv._limpar_detalhes()
+			if inv.has_method("_atualizar_listas"):
+				inv._atualizar_listas()
+				
+		# Atualiza loja do mercador se estiver aberta
+		var loja = get_tree().root.find_child("LojaMercador", true, false)
+		if loja and loja.has_method("_atualizar_interface"):
+			loja._atualizar_interface()
+				
+		# Notificação visual na HUD
+		var hud = get_tree().get_first_node_in_group("hud")
+		if not hud:
+			hud = get_tree().root.find_child("HUD", true, false)
+		if hud and hud.has_method("mostrar_mensagem"):
+			hud.mostrar_mensagem("🗑️ Inventário e Moedas Zerados!")
+			
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.play_sfx("ui_5")

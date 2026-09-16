@@ -1,5 +1,6 @@
 [gd_scene format=4 uid="uid://dkww4lhyy2ng8"]
 
+[ext_resource type="Script" uid="uid://bifmnfccxblbu" path="res://scripts/levels/sala_fisica.gd" id="1_fisica_base"]
 [ext_resource type="Texture2D" uid="uid://bxcfqixmux3ga" path="res://assets/sprites/tilesets/Física/física.png" id="1_qm57n"]
 [ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="2_nmu1s"]
 [ext_resource type="TileSet" uid="uid://cbif5bsgy67y0" path="res://scenes/Salas/Sala_Fisica/Decoration.tres" id="3_qm57n"]
@@ -7,16 +8,17 @@
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="6_4ae2h"]
 [ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="7_u2wo4"]
 [ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="8_d6afq"]
-[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scenes/parchment_ui.gd" id="9_aa8ds"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="9_aa8ds"]
 [ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="10_h5atk"]
 [ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="11_qs6u3"]
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="12_apcby"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="13_jbn1o"]
-[ext_resource type="PackedScene" path="res://scenes/porta_transicao.tscn" id="14_84vd1"]
-[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/pergaminho.tscn" id="14_nmu1s"]
+[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_84vd1"]
+[ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="14_nmu1s"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="15_6uyjw"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="16_lqdeh"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="17_nmu1s"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="lum_fisica_inst"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j0ril"]
 texture = ExtResource("1_qm57n")
@@ -331,6 +333,7 @@ sources/0 = SubResource("TileSetAtlasSource_7ol7d")
 sources/1 = SubResource("TileSetAtlasSource_sqirh")
 
 [node name="Node2D" type="Node2D" unique_id=826538828]
+script = ExtResource("1_fisica_base")
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1707745808]
 scale = Vector2(2, 2)
@@ -472,3 +475,24 @@ scale = Vector2(1.2, 1.2)
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("17_nmu1s")]
 position = Vector2(324, 1332)
 scale = Vector2(1.2, 1.2)
+
+[node name="Luminarias" type="Node2D" parent="." unique_id=1734586820]
+
+[node name="LuminariaNorte2" parent="Luminarias" unique_id=415929387 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(415, 186)
+
+[node name="LuminariaOeste1" parent="Luminarias" unique_id=1883112643 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(86, 969)
+orientacao = 1
+
+[node name="LuminariaLeste1" parent="Luminarias" unique_id=1168996709 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(943, 974)
+orientacao = 2
+
+[node name="LuminariaOeste2" parent="Luminarias" unique_id=139594156 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(-341, 1398)
+orientacao = 1
+
+[node name="LuminariaLeste2" parent="Luminarias" unique_id=951701547 instance=ExtResource("lum_fisica_inst")]
+position = Vector2(948, 1394)
+orientacao = 2

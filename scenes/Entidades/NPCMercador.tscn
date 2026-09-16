@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://mercador01"]
+
+[ext_resource type="Script" uid="uid://bc18tt5y3uu5h" path="res://scripts/NPCMercador.gd" id="1_merc"]
+[ext_resource type="Texture2D" uid="uid://w304sn41pr27" path="res://assets/sprites/Characters/npcmercador.png" id="2_tex"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_merc"]
+radius = 80.0
+
+[node name="NPCMercador" type="Area2D" unique_id=778406814]
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_merc")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1817003984]
+z_index = 1
+position = Vector2(0, -20)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1296786263]
+shape = SubResource("CircleShape2D_merc")

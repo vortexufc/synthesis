@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://dmural_parede_01"]
+
+[ext_resource type="Script" path="res://scripts/mural_parede.gd" id="1_mural"]
+[ext_resource type="Texture2D" uid="uid://iwhsatj38hml" path="res://assets/sprites/pergaminho.png" id="2_pergaminho"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mural"]
+size = Vector2(44, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mural"]
+atlas = ExtResource("2_pergaminho")
+region = Rect2(64, 0, 64, 64)
+
+[node name="MuralParede" type="Area2D"]
+z_index = 2
+script = ExtResource("1_mural")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_mural")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_mural")
+scale = Vector2(0.85, 0.85)

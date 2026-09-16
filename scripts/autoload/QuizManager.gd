@@ -14,11 +14,21 @@ var batalha_ui_cena = preload("res://scenes/ui/batalha_ui.tscn")
 var game_over_cena = preload("res://scenes/ui/game_over.tscn")
 var ui_instancia = null
 var pergunta_atual = null
+var em_batalha: bool = false
 var _processando_resposta: bool = false
+var _inimigo_atual_id: String = ""
+var _nivel_dificuldade_alvo: int = 0
+var _eh_chefe_atual: bool = false
+var _furia_chefe_executada: bool = false
 
 var sprite_frames_inimigos = {
 	"slime_p": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
+	"slime_azul": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
+	"slime_verde": preload("res://assets/sprites/Sprite Frames/slime_verde.tres"),
+	"slime_laranja": preload("res://assets/sprites/Sprite Frames/slime_g.tres"),
 	"slime_g": preload("res://assets/sprites/Sprite Frames/slime_g.tres"),
+	"slime_boss_roxo": preload("res://assets/sprites/Sprite Frames/slime_boss_roxo.tres"),
+	"slime_g_boss": preload("res://assets/sprites/Sprite Frames/slime_boss_roxo.tres"),
 	## [PROG-06] Inimigos do Andar 3 — Física
 	"robo_p_laranja": preload("res://assets/sprites/Sprite Frames/robo_p_laranja.tres"),
 	"robo_p_amarelo":  preload("res://assets/sprites/Sprite Frames/robo_p_amarelo.tres"),
@@ -63,27 +73,34 @@ func reset_questions():
 	else:
 		base_list = questions.duplicate()
 		
-	# Determina a dificuldade alvo com base no progresso das salas ou se é a sala do Boss
+	# Determina a dificuldade alvo com base no tipo de slime / progresso TRI da masmorra
 	var target_nivel: int = 1
 	var current_scene_path = ""
 	if get_tree() and get_tree().current_scene:
 		current_scene_path = get_tree().current_scene.scene_file_path
 		
-	if current_scene_path.to_lower().find("boss") != -1:
+	if _nivel_dificuldade_alvo > 0:
+		target_nivel = _nivel_dificuldade_alvo
+	elif current_scene_path.to_lower().find("boss") != -1:
 		target_nivel = 3
 	else:
+		# Mapeamento TRI nas 8 salas do andar:
+		# Salas 1 a 3: Nível 1 (Fácil - Slime Azul)
+		# Salas 4 a 5: Nível 2 (Médio - Slime Verde)
+		# Salas 6 a 7: Nível 3 (Difícil - Slime Laranja)
+		# Sala 8: Boss Final (Nível 3 - Slime Grandão Roxo)
 		var sala_idx = DungeonGenerator.get_index_da_cena(current_scene_path)
 		if sala_idx != -1:
-			if sala_idx <= 4:
+			if sala_idx <= 3:
 				target_nivel = 1
-			elif sala_idx <= 9:
+			elif sala_idx <= 5:
 				target_nivel = 2
 			else:
 				target_nivel = 3
 		else:
 			target_nivel = 1
 		
-	print("[QuizManager] Sala: %s (index: %d), Dificuldade alvo: %d" % [current_scene_path.get_file(), DungeonGenerator.get_index_da_cena(current_scene_path), target_nivel])
+	print("[QuizManager] Inimigo: %s | Sala: %s (index: %d) -> Dificuldade alvo TRI: %d" % [_inimigo_atual_id, current_scene_path.get_file(), DungeonGenerator.get_index_da_cena(current_scene_path), target_nivel])
 	
 	var disponiveis: Array = []
 	for q in base_list:
@@ -206,6 +223,14 @@ var _dano_causado: int = 0
 var _tempo_inicio_batalha: float = 0
 
 func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
+	if em_batalha:
+		print("[QuizManager] Batalha já está em andamento. Ignorando solicitação duplicada.")
+		return
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		print("[QuizManager] Ignorando início de batalha pois transição de cena está ativa.")
+		return
+	em_batalha = true
+
 	# [PROG-02 / Offline Fix] Lê as questões locais PRIMEIRO, antes de qualquer await.
 	# Se o inimigo tiver questões hardcoded, a batalha inicia sem precisar do banco.
 	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
@@ -225,6 +250,36 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
 	if id_do_inimigo.to_lower().begins_with("slime"):
 		novo_andar = 1
+
+	_inimigo_atual_id = id_do_inimigo
+	var id_lower = id_do_inimigo.to_lower()
+	var nivel_explicit: int = int(enemy_data.get("nivel_dificuldade", 0))
+	
+	# Identificação de Chefe para ativação da "Fúria do Chefe"
+	_eh_chefe_atual = enemy_data.get("eh_boss", false)
+	var cena_atual_str = ""
+	if get_tree() and get_tree().current_scene:
+		cena_atual_str = get_tree().current_scene.scene_file_path.to_lower()
+	if not _eh_chefe_atual:
+		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "wizard" in id_lower or "boss" in cena_atual_str or "fisica12" in cena_atual_str or "física12" in cena_atual_str:
+			_eh_chefe_atual = true
+
+	_furia_chefe_executada = false
+	if _eh_chefe_atual:
+		print("[QuizManager] 👑 BATALHA CONTRA CHEFE DETECTADA! (Fúria do Chefe armada para 50% HP)")
+	
+	if nivel_explicit > 0:
+		_nivel_dificuldade_alvo = nivel_explicit
+	elif "boss" in id_lower or "roxo" in id_lower:
+		_nivel_dificuldade_alvo = 3
+	elif "verde" in id_lower:
+		_nivel_dificuldade_alvo = 2
+	elif "laranja" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower:
+		_nivel_dificuldade_alvo = 3
+	elif "azul" in id_lower or "slime_p" in id_lower:
+		_nivel_dificuldade_alvo = 1
+	else:
+		_nivel_dificuldade_alvo = 0
 
 	if _questoes_locais_ativas.size() > 0:
 		# Usa as questões locais — ignora banco para esta batalha (funciona offline)
@@ -263,7 +318,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	var enemy_id = enemy_data.get("id_inimigo", "slime_g")
 	sprite_frame_inimigo_atual = sprite_frames_inimigos.get(enemy_id, sprite_frames_inimigos["slime_g"])
 	
-	if ui_instancia == null:
+	if not is_instance_valid(ui_instancia):
 		ui_instancia = batalha_ui_cena.instantiate()
 		add_child(ui_instancia)
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
@@ -307,22 +362,55 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# Reinicia Barras visuais
 	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador / PlayerStats.vida_maxima_jogador, 1.0)
 
+	# [Minigame Conexão Rúnica] Se o inimigo for Campeão Rúnico, abre o desafio de ligar pares
+	var eh_runico: bool = enemy_data.get("eh_runico", false)
+	if eh_runico:
+		print("[QuizManager] Inimigo Campeão Rúnico detectado! Iniciando Conexão Rúnica...")
+		var minigame_cena = load("res://scenes/ui/ligar_pares_ui.tscn")
+		if minigame_cena:
+			var minigame = minigame_cena.instantiate()
+			add_child(minigame)
+			minigame.iniciar_conexao(_andar_atual)
+			var quebrou = await minigame.conexao_concluida
+			if quebrou:
+				print("[QuizManager] Barreira Rúnica DESTRUÍDA! Golpe Crítico de 40 HP!")
+				vida_atual_inimigo = max(10.0, vida_atual_inimigo - 40.0)
+				_dano_causado += 40
+				if is_instance_valid(ui_instancia):
+					ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador / PlayerStats.vida_maxima_jogador, vida_atual_inimigo / vida_maxima_inimigo)
+					var sprite_m = ui_instancia.get_node_or_null("Control/SpriteMonstro/AnimatedSprite2D")
+					if sprite_m:
+						var tw_hit = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+						tw_hit.tween_property(sprite_m, "modulate", Color(2.5, 0.4, 0.4), 0.12)
+						tw_hit.tween_property(sprite_m, "modulate", Color.WHITE, 0.18)
+				if get_node_or_null("/root/AudioManager"):
+					AudioManager.play_sfx("acerto_1")
+			else:
+				print("[QuizManager] Barreira Rúnica permaneceu intacta.")
+
 	# [Combat-4] Inicia o timer com a duração do inimigo (não resetado entre rodadas)
-	ui_instancia.iniciar_timer(_duracao_batalha)
+	if is_instance_valid(ui_instancia):
+		ui_instancia.iniciar_timer(_duracao_batalha)
 	
 	# Puxa o Rodada 1
 	_nova_rodada()
 
 func _nova_rodada() -> void:
+	if not is_instance_valid(ui_instancia):
+		print("[QuizManager] _nova_rodada cancelada: ui_instancia é nula ou foi fechada.")
+		return
 	_rodada_atual += 1
 	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
 	pergunta_atual = get_random_question()
-	ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
+	if pergunta_atual != null and is_instance_valid(ui_instancia):
+		ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
 
 func fechar_ui_batalha() -> void:
-	if ui_instancia:
+	em_batalha = false
+	_processando_resposta = false
+	if is_instance_valid(ui_instancia):
 		ui_instancia.queue_free()
-		ui_instancia = null
+	ui_instancia = null
 
 func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	if _processando_resposta:
@@ -351,9 +439,9 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	
 	resultado_batalha.emit(acertou)
 	
-	# aguarda o fim da animação
+	# aguarda o fim da animação e feedback pedagógico de erro
 	if is_instance_valid(ui_instancia):
-		await ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final)
+		await ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final, pergunta_atual)
 	
 	if acertou:
 		_acertos_batalha += 1
@@ -374,12 +462,26 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			
 	# atualiza as barras na interface se ainda for válida
 	if is_instance_valid(ui_instancia):
-		ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador/PlayerStats.vida_maxima_jogador, vida_atual_inimigo/vida_maxima_inimigo)
+		ui_instancia.atualizar_vida(float(PlayerStats.vida_atual_jogador) / float(PlayerStats.vida_maxima_jogador), float(vida_atual_inimigo) / float(vida_maxima_inimigo))
 	
 	# delay antes da proxima pergunta
 	await get_tree().create_timer(1.2, true).timeout
 	
-	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0:
+	if not is_instance_valid(ui_instancia):
+		_processando_resposta = false
+		return
+	
+	# [Modo Fúria do Chefe] Se a vida do chefe caiu para <= 50%, dispara o evento de QTE combo!
+	if _eh_chefe_atual and not _furia_chefe_executada and vida_atual_inimigo <= (vida_maxima_inimigo * 0.5) and vida_atual_inimigo > 0 and PlayerStats.vida_atual_jogador > 0:
+		_furia_chefe_executada = true
+		await _executar_furia_do_chefe()
+
+	if not is_instance_valid(ui_instancia):
+		_processando_resposta = false
+		return
+
+	var fim_das_rodadas = (_rodada_atual >= _num_questoes)
+	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0 or fim_das_rodadas:
 		if is_instance_valid(ui_instancia):
 			ui_instancia.ocultar_interface()
 		
@@ -391,16 +493,69 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		var stats = {
 			"tempo": tempo_decorrido,
 			"precisao": int(precisao),
-			"dano": _dano_causado
+			"dano": _dano_causado,
+			"eh_boss": _eh_chefe_atual,
+			"andar_id": _andar_atual
 		}
 		
+		if vitoria:
+			print("[Combate] Você venceu o quiz!")
+			
 		_processando_resposta = false
+		em_batalha = false
 		GlobalSignals.batalha_encerrada.emit(vitoria)
 		PlayerStats.salvar()
 		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
 	else:
 		_processando_resposta = false
 		_nova_rodada()
+
+func _executar_furia_do_chefe() -> void:
+	print("[QuizManager] ⚡ FÚRIA DO CHEFE INICIADA! Vida do Chefe: %.1f/%.1f" % [vida_atual_inimigo, vida_maxima_inimigo])
+	
+	# Pausa o timer da batalha principal durante o evento
+	if is_instance_valid(ui_instancia):
+		ui_instancia.tempo_rodando = false
+		
+	var furia_cena = load("res://scenes/ui/furia_chefe_ui.tscn")
+	if furia_cena:
+		var furia_inst = furia_cena.instantiate()
+		add_child(furia_inst)
+		furia_inst.iniciar_furia(_andar_atual)
+		var sucesso: bool = await furia_inst.furia_concluida
+		
+		if sucesso:
+			print("[QuizManager] 🛡️ PARRY PERFEITO! O jogador rebateu o golpe com sucesso!")
+			var dano_parry = 40.0
+			vida_atual_inimigo = max(0.0, vida_atual_inimigo - dano_parry)
+			_dano_causado += int(dano_parry)
+			_acertos_batalha += 1
+			
+			if is_instance_valid(ui_instancia):
+				ui_instancia.atualizar_vida(
+					float(PlayerStats.vida_atual_jogador) / float(PlayerStats.vida_maxima_jogador),
+					float(vida_atual_inimigo) / float(vida_maxima_inimigo)
+				)
+				ui_instancia.mostrar_feedback_critico_parry("PARRY PERFEITO! CHEFE ATORDIDO (-40 HP)!", true)
+		else:
+			print("[QuizManager] 💥 FALHA NA FÚRIA! O chefe desferiu o golpe devastador!")
+			var dano_golpe_chefe = 30
+			_erros_batalha += 1
+			PlayerStats.sofrer_dano(dano_golpe_chefe)
+			
+			if is_instance_valid(ui_instancia):
+				ui_instancia.atualizar_vida(
+					float(PlayerStats.vida_atual_jogador) / float(PlayerStats.vida_maxima_jogador),
+					float(vida_atual_inimigo) / float(vida_maxima_inimigo)
+				)
+				ui_instancia.mostrar_feedback_critico_parry("GOLPE DO CHEFE ACERTOU! DANO DEVASTADOR (-30 HP)!", false)
+				
+		# Intervalo para o jogador absorver o impacto visual (leitura confortável)
+		await get_tree().create_timer(2.2, true).timeout
+		
+	# Retoma o timer da batalha principal se ambos continuarem vivos
+	if is_instance_valid(ui_instancia) and vida_atual_inimigo > 0 and PlayerStats.vida_atual_jogador > 0:
+		ui_instancia.tempo_rodando = true
 
 func resetar_historico_perguntas() -> void:
 	perguntas_usadas.clear()

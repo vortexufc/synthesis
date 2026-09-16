@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" uid="uid://5574rjijqujh5" path="res://assets/sprites/Sprite Frames/slime_boss_roxo.tres" id="1_roxo"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="1_mo75o"]
+[ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_mo75o"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mo75o"]
+radius = 48.0
+height = 150.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sjgcv"]
+size = Vector2(96, 40)
+
+[node name="Slime_Boss_Roxo" type="CharacterBody2D"]
+script = ExtResource("1_mo75o")
+vida_maxima = 200.0
+velocidade = 30.0
+dano = 30.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 4
+scale = Vector2(1.35, 1.35)
+sprite_frames = ExtResource("1_roxo")
+autoplay = "default"
+
+[node name="EnemyTrigger" type="Area2D" parent="."]
+script = ExtResource("2_mo75o")
+id_inimigo = "slime_boss_roxo"
+nivel_dificuldade = 3
+num_questoes = 5
+duracao_batalha = 300.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger"]
+position = Vector2(-1, 45)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_mo75o")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1, 50)
+shape = SubResource("RectangleShape2D_sjgcv")
+
+[connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

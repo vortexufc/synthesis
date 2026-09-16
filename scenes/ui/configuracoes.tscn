@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c74j7d22qxx"]
 
 [ext_resource type="Script" uid="uid://06askmrygn0k" path="res://scripts/ui/configuracoes.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://tm5vxiwpt18v" path="res://fundomenuinicial.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://tm5vxiwpt18v" path="res://assets/branding/fundomenuinicial.png" id="2_bg"]
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="3_font"]
 [ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="4_font"]
 
@@ -9,14 +9,16 @@
 code = "shader_type canvas_item;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 uniform float lod: hint_range(0.0, 5.0) = 3.0;
+uniform vec4 escurecer: source_color = vec4(0.05, 0.06, 0.10, 0.6);
 void fragment(){
 	vec4 color = textureLod(SCREEN_TEXTURE, SCREEN_UV, lod);
-	COLOR = color;
+	COLOR = mix(color, escurecer, escurecer.a);
 }"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_blur"]
 shader = SubResource("Shader_blur")
 shader_parameter/lod = 3.0
+shader_parameter/escurecer = Color(0.05, 0.06, 0.1, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 32.0
@@ -70,6 +72,7 @@ corner_radius_bottom_left = 4
 anti_aliasing = false
 
 [node name="Configuracoes" type="Control" unique_id=1251833727]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -85,6 +88,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
@@ -97,6 +101,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="Title" type="Label" parent="." unique_id=1726101260]
 layout_mode = 1
@@ -204,23 +209,111 @@ layout_mode = 2
 size_flags_horizontal = 8
 button_pressed = true
 
-[node name="BtnVoltar" type="Button" parent="." unique_id=1617425864]
-custom_minimum_size = Vector2(250, 0)
+[node name="BotoesInferiores" type="HBoxContainer" parent="." unique_id=1617425860]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -125.0
+offset_left = -300.0
 offset_top = -80.0
-offset_right = 125.0
+offset_right = 300.0
 offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_constants/separation = 25
+alignment = 1
+
+[node name="BtnVoltar" type="Button" parent="BotoesInferiores" unique_id=1617425864]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 text = "VOLTAR"
+
+[node name="BtnMenuPrincipal" type="Button" parent="BotoesInferiores" unique_id=1617425865]
+visible = false
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "MENU INICIAL"
+
+[node name="PopupConfirmacao" type="ColorRect" parent="." unique_id=981273911]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupConfirmacao" unique_id=981273912]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelConfirm" type="PanelContainer" parent="PopupConfirmacao/CenterContainer" unique_id=981273913]
+custom_minimum_size = Vector2(560, 240)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBoxConfirm" type="VBoxContainer" parent="PopupConfirmacao/CenterContainer/PanelConfirm" unique_id=981273914]
+layout_mode = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="TituloConfirm" type="Label" parent="PopupConfirmacao/CenterContainer/PanelConfirm/VBoxConfirm" unique_id=981273915]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 20
+text = "CONFIRMAÇÃO"
+horizontal_alignment = 1
+
+[node name="MensagemConfirm" type="Label" parent="PopupConfirmacao/CenterContainer/PanelConfirm/VBoxConfirm" unique_id=981273916]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 20
+text = "Tem certeza que deseja sair para o Menu Inicial?
+O progresso não salvo nesta sala será perdido."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HBoxBotoesConfirm" type="HBoxContainer" parent="PopupConfirmacao/CenterContainer/PanelConfirm/VBoxConfirm" unique_id=981273917]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="BtnConfirmarSair" type="Button" parent="PopupConfirmacao/CenterContainer/PanelConfirm/VBoxConfirm/HBoxBotoesConfirm" unique_id=981273918]
+modulate = Color(1, 0.4, 0.4, 1)
+custom_minimum_size = Vector2(210, 48)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "SIM, SAIR"
+
+[node name="BtnCancelarSair" type="Button" parent="PopupConfirmacao/CenterContainer/PanelConfirm/VBoxConfirm/HBoxBotoesConfirm" unique_id=981273919]
+custom_minimum_size = Vector2(210, 48)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "CANCELAR"

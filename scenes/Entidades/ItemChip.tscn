@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://bwg5w1f6gk1sk"]
+
+[ext_resource type="Script" uid="uid://c65oxhfpmsxw4" path="res://scripts/ItemQuestBase.gd" id="1_chip"]
+[ext_resource type="Texture2D" uid="uid://cy8lngvaeurms" path="res://assets/sprites/ui/item_chip.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_chip"]
+radius = 30.0
+
+[node name="ItemChip" type="Area2D" unique_id=1603472439]
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_chip")
+nome_item = "Fragmento de Chip"
+descricao_item = "Uma peça de silício danificada dropada por um robô."
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=907938192]
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=577445590]
+shape = SubResource("CircleShape2D_chip")

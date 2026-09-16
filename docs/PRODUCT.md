@@ -18,7 +18,9 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [Fix-11] Forçar atualização do sprite do inimigo dinamicamente na UI de batalha ao colidir com o trigger (resolve slime de fogo mostrando sprite do slime azul).
 - [x] [Move-2] Patrulha Dinâmica nos Slimes Pequenos.
 - [x] [UI-10] Transições de Cena Polidas com TransitionScreen.
-- [x] [UI-11] Sistema de Clãs (Totalmente integrado online ao Supabase com persistência remota e assíncrona)
+- [x] [Level-4] Ambientação e Iluminação do Andar de Física — Sistema de iluminação de laboratório industrial/eletromagnético (CanvasModulate claro de laboratório, LuminariaFisica em paredes, luz em terminais, vapor em válvulas e sensores ópticos nos robôs).
+- [x] [Fix-17] Fixação, Visual e Instanciação em Cena das Luminárias de Física — Luminárias blindadas agora ficam instanciadas diretamente dentro de cada cena (`Sala_Física01.tscn` a `12.tscn` e `template.tscn`) com suporte a `@tool`, permitindo edição visual direta no viewport da Godot.
+- [x] [Fix-18] Correção de recursão infinita e stack underflow em `LuminariaFisica.gd`, e clareamento da iluminação global do Andar de Física via `@export var cor_ambiente`.
 
 ## Changelog
 Ver arquivo `CHANGELOG.md` na raiz do projeto.

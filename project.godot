@@ -12,8 +12,9 @@ config_version=5
 
 config/name="Projeto Synthesis"
 run/main_scene="res://scenes/ui/main_menu.tscn"
-config/features=PackedStringArray("4.7", "Mobile")
-config/icon="res://icon.svg"
+config/features=PackedStringArray("4.6", "Mobile")
+run/max_fps=60
+config/icon="res://assets/branding/icon.svg"
 config/supabase_key="sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
 
 [audio]
@@ -33,6 +34,7 @@ RankingManager="*res://scripts/autoload/RankingManager.gd"
 ClanManager="*res://scripts/autoload/ClanManager.gd"
 DevManager="*res://scripts/autoload/DevManager.gd"
 PergaminhoManager="*res://scripts/autoload/PergaminhoManager.gd"
+MenuPausaManager="*res://scripts/autoload/MenuPausaManager.gd"
 
 [display]
 
@@ -90,3 +92,4 @@ interagir={
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)

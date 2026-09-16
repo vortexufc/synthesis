@@ -28,6 +28,7 @@ var http_request: HTTPRequest
 func _ready() -> void:
 	# cria e add o http na cena
 	http_request = HTTPRequest.new()
+	http_request.accept_gzip = false
 	add_child(http_request)
 	http_request.request_completed.connect(_on_request_completed)
 	
@@ -62,6 +63,10 @@ func carregar_progresso() -> void:
 func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> void:
 	var url: String = supabase_url + endpoint
 	
+	var http := HTTPRequest.new()
+	http.accept_gzip = false
+	add_child(http)
+	
 	# headers q o supabase pede
 	var auth_bearer = user_token if not user_token.is_empty() else supabase_key
 	var headers: PackedStringArray = [
@@ -76,11 +81,18 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	if not data.is_empty():
 		body = JSON.stringify(data)
 
+	http.request_completed.connect(func(result: int, response_code: int, res_headers: PackedStringArray, res_body: PackedByteArray):
+		_on_request_completed(result, response_code, res_headers, res_body)
+		http.queue_free()
+	)
+
 	# manda a req asincrona
-	var error = http_request.request(url, headers, method, body)
+	var error = http.request(url, headers, method, body)
 	
 	if error != OK:
-		push_error("deu ruim na req pra: " + url)
+		push_error("deu ruim na req pra: " + url + " - erro: " + str(error))
+		http.queue_free()
+		auth_erro.emit("Falha de conexão com o servidor (" + str(error) + ")")
 
 # quando o supabase responde cai aqui
 func _on_request_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
@@ -90,6 +102,8 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 	
 	if erro_json != OK:
 		push_error("erro no parse do json: " + body_text)
+		if response_code < 200 or response_code >= 300:
+			auth_erro.emit("Erro no servidor (%d)" % response_code)
 		return
 		
 	var dados = json.data
@@ -102,26 +116,30 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 			# Salvando os dados locais do player na memoria
 			user_token = dados.access_token
 			
-			if dados.has("user") and dados.user.has("user_metadata"):
-				user_nick = dados.user.user_metadata.get("nick", "Mago Desconhecido")
-				user_cla = dados.user.user_metadata.get("cla", "Nenhum")
+			if dados.has("user") and dados.user is Dictionary:
+				var u = dados.user
+				if u.has("email") and u.email.to_lower() == "admin@synthesis.com":
+					is_admin = true
+					print("👑 Bem-vindo, Administrador!")
+				else:
+					is_admin = false
+					
+				if u.has("user_metadata") and u.user_metadata is Dictionary:
+					user_nick = u.user_metadata.get("nick", "Admin" if is_admin else "Mago Desconhecido")
+					user_cla = u.user_metadata.get("cla", "Nenhum")
+				else:
+					user_nick = "Admin" if is_admin else "Mago Desconhecido"
+					user_cla = "Nenhum"
 				
 				# Funde o progresso de Convidado assim que logar ou se registrar!
 				if RankingManager.has_method("fundir_conta_guest"):
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
-				# Checa se é conta de admin
-				if dados.user.has("email") and dados.user.email == "admin@synthesis.com":
-					is_admin = true
-					print("👑 Bem-vindo, Administrador!")
-				else:
-					is_admin = false
-				
 			auth_sucesso.emit(user_token)
 		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
 			print("usuario cadastrado ou atualizado com sucesso!")
 			var user_data = dados.get("user", dados)
-			if user_data is Dictionary and user_data.has("user_metadata"):
+			if user_data is Dictionary and user_data.has("user_metadata") and user_data.user_metadata is Dictionary:
 				user_nick = user_data.user_metadata.get("nick", user_nick)
 				user_cla = user_data.user_metadata.get("cla", user_cla)
 				print("Metadata do usuario atualizada! Nick: ", user_nick, " Cla: ", user_cla)
@@ -255,6 +273,7 @@ func atualizar_cla_usuario(novo_cla: String) -> void:
 func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
 	var url: String = supabase_url + endpoint
 	var http: HTTPRequest = HTTPRequest.new()
+	http.accept_gzip = false
 	add_child(http)
 	
 	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key
@@ -295,3 +314,88 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 		elif res_data is Array and res_data.size() > 0 and res_data[0] is Dictionary:
 			error_msg = res_data[0].get("message", "Erro desconhecido")
 		return {"success": false, "code": response_code, "message": error_msg}
+
+# Remove pergunta no Supabase e no arquivo local
+func remover_pergunta(pergunta_id: int) -> Dictionary:
+	print("[DatabaseManager] Solicitando exclusao da pergunta #", pergunta_id)
+	# 1. Remove respostas vinculadas para evitar conflito de chave estrangeira
+	await request_async("/rest/v1/respostas?pergunta_id=eq." + str(pergunta_id), HTTPClient.METHOD_DELETE)
+	
+	# 2. Deleta a questao no banco
+	var res = await request_async("/rest/v1/perguntas?id=eq." + str(pergunta_id), HTTPClient.METHOD_DELETE)
+	
+	# 3. Remove do arquivo local de fallback caso exista
+	remover_pergunta_local(pergunta_id)
+	
+	# 4. Remove do cache em memoria do QuizManager
+	if QuizManager:
+		var nova_lista = []
+		for q in QuizManager.questions:
+			if q is Dictionary and int(q.get("id", -1)) == pergunta_id:
+				continue
+			nova_lista.append(q)
+		QuizManager.questions = nova_lista
+		QuizManager.reset_questions()
+		
+	return res
+
+# Remove questao do arquivo json local (questions.json)
+func remover_pergunta_local(pergunta_id: int) -> bool:
+	var path = "res://data/questions.json"
+	if not FileAccess.file_exists(path):
+		return false
+	var file = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return false
+	var content = file.get_as_text()
+	file.close()
+	var json = JSON.new()
+	if json.parse(content) == OK and json.data is Array:
+		var todas: Array = json.data
+		var nova_lista = []
+		var encontrada = false
+		for p in todas:
+			if p is Dictionary and int(p.get("id", -1)) == pergunta_id:
+				encontrada = true
+				continue
+			nova_lista.append(p)
+		if encontrada:
+			var wfile = FileAccess.open(path, FileAccess.WRITE)
+			if wfile:
+				wfile.store_string(JSON.stringify(nova_lista, "\t"))
+				wfile.close()
+				print("[DatabaseManager] Pergunta #", pergunta_id, " removida de ", path)
+				return true
+	return false
+
+# Adiciona ou atualiza questao no arquivo json local (questions.json)
+func salvar_pergunta_local(dados: Dictionary) -> bool:
+	var path = "res://data/questions.json"
+	var todas: Array = []
+	if FileAccess.file_exists(path):
+		var file = FileAccess.open(path, FileAccess.READ)
+		if file:
+			var content = file.get_as_text()
+			file.close()
+			var json = JSON.new()
+			if json.parse(content) == OK and json.data is Array:
+				todas = json.data
+				
+	var p_id = int(dados.get("id", -1))
+	var atualizou = false
+	if p_id > 0:
+		for i in range(todas.size()):
+			if todas[i] is Dictionary and int(todas[i].get("id", -1)) == p_id:
+				todas[i] = dados
+				atualizou = true
+				break
+	if not atualizou:
+		todas.append(dados)
+		
+	var wfile = FileAccess.open(path, FileAccess.WRITE)
+	if wfile:
+		wfile.store_string(JSON.stringify(todas, "\t"))
+		wfile.close()
+		print("[DatabaseManager] Pergunta sincronizada também no questions.json local.")
+		return true
+	return false

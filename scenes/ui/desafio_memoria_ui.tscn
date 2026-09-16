@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://cdesafio_memoria_ui_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/desafio_memoria_ui.gd" id="1_script"]
+
+[node name="DesafioMemoriaUI" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_script")

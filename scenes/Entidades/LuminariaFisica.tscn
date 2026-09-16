@@ -1,0 +1,53 @@
+[gd_scene load_steps=6 format=3 uid="uid://luminaria_fisica_01"]
+
+[ext_resource type="Script" path="res://scripts/LuminariaFisica.gd" id="1_lum_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/tilesets/Física/luminaria_parede.png" id="2_lum_tex"]
+
+[sub_resource type="Gradient" id="Gradient_lum"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.45, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lum"]
+gradient = SubResource("Gradient_lum")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_sparks"]
+blend_mode = 1
+
+[node name="LuminariaFisica" type="Node2D" groups=["luminarias_fisica"]]
+z_index = 2
+script = ExtResource("1_lum_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_lum_tex")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 40)
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+position = Vector2(0, 7)
+color = Color(0.75, 0.9, 1, 1)
+energy = 0.75
+texture = SubResource("GradientTexture2D_lum")
+texture_scale = 1.8
+
+[node name="Faiscas" type="CPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_sparks")
+position = Vector2(0, 10)
+emitting = false
+amount = 6
+lifetime = 0.35
+one_shot = true
+explosiveness = 0.85
+direction = Vector2(0, 1)
+spread = 60.0
+gravity = Vector2(0, 120)
+initial_velocity_min = 35.0
+initial_velocity_max = 70.0
+scale_amount_min = 1.5
+scale_amount_max = 2.5
+color = Color(0.65, 0.9, 1, 1)
