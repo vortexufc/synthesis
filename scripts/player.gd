@@ -7,8 +7,27 @@ var direcao_vertical: float
 
 var ultima_direcao = "baixo"
 
-# [Trap-1] Mímico — flag que trava o movimento do player
+# [Trap-1] Mímico / Minigames — flag que trava o movimento do player
 var travado: bool = false
+var em_interacao: bool = false
+var _tempo_imunidade_pos_interacao: float = 0.0
+
+func esta_em_interacao() -> bool:
+	if travado or em_interacao or _tempo_imunidade_pos_interacao > 0.0:
+		return true
+	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+		return true
+	if get_tree():
+		if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
+			return true
+		if get_tree().get_nodes_in_group("dialogo_ativo").size() > 0:
+			return true
+	return false
+
+func finalizar_interacao(tempo_graca: float = 0.8) -> void:
+	travado = false
+	em_interacao = false
+	_tempo_imunidade_pos_interacao = tempo_graca
 
 # [Fix-1] HP unificado: gerenciado exclusivamente pelo autoload PlayerStats
 var _vida_anterior: float = 100.0
@@ -77,9 +96,12 @@ func _reposicionar_na_porta_correta() -> void:
 				global_position.y -= 180 # Nasce mais acima (escapando de colisão)
 				break
 
-func _physics_process(_delta: float) -> void:
-	# Se travado pelo Mímico, não processa input de movimento
-	if travado:
+func _physics_process(delta: float) -> void:
+	if _tempo_imunidade_pos_interacao > 0.0:
+		_tempo_imunidade_pos_interacao -= delta
+
+	# Se travado por minigame/mímico/interação, não processa input de movimento
+	if travado or em_interacao:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
@@ -124,7 +146,7 @@ func _physics_process(_delta: float) -> void:
 	move_and_slide()
 	# Se o jogador colidiu com um inimigo hostil enquanto andava, aciona a batalha imediatamente!
 	var em_transicao = get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning
-	if not em_transicao:
+	if not em_transicao and not esta_em_interacao():
 		for i in range(get_slide_collision_count()):
 			var col = get_slide_collision(i)
 			var collider = col.get_collider()
@@ -134,7 +156,7 @@ func _physics_process(_delta: float) -> void:
 					trigger._on_body_entered(self)
 					break
 
-	_animar_sombra(_delta)
+	_animar_sombra(delta)
 	
 	# Partículas de poeira nos passos (sempre atrás do corpo do personagem)
 	if has_node("PoeiraPassos"):
@@ -144,7 +166,7 @@ func _physics_process(_delta: float) -> void:
 			var dir_norm = velocity.normalized()
 			$PoeiraPassos.direction = -dir_norm
 				
-	_process_shake(_delta)
+	_process_shake(delta)
 
 const SOMBRA_BASE_X: float = 1.85
 const SOMBRA_BASE_Y: float = 1.25
@@ -219,5 +241,3 @@ func _exibir_texto_dano(motivo: String, quantidade: float) -> void:
 	tw.tween_property(lbl, "position:y", lbl.position.y - 32.0, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(lbl, "modulate:a", 0.0, 0.85).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(lbl.queue_free)
-
-

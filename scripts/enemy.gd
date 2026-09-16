@@ -62,6 +62,7 @@ func _ready() -> void:
 			return
 
 	add_to_group("inimigos")
+	_calibrar_balanceamento_inimigo()
 	vida_atual = vida_maxima
 	randomize()
 
@@ -87,6 +88,55 @@ func _ready() -> void:
 		vida_maxima *= 1.25
 		vida_atual = vida_maxima
 		_criar_aura_runica()
+
+func _calibrar_balanceamento_inimigo() -> void:
+	var nome_baixo = name.to_lower()
+	var enemy_id = ""
+	for child in get_children():
+		if child is Area2D and "id_inimigo" in child:
+			enemy_id = str(child.id_inimigo).to_lower()
+			break
+
+	# 1. Chefes
+	if ("boss" in nome_baixo) or ("boss" in enemy_id) or ("roxo" in nome_baixo) or ("roxo" in enemy_id):
+		vida_maxima = 130.0
+		dano = 30.0
+		velocidade = 30.0
+		velocidade_perseguicao = 48.0
+		distancia_perseguicao = 220.0
+	elif ("robo_g" in nome_baixo) or ("robo_g" in enemy_id):
+		vida_maxima = 140.0
+		dano = 30.0
+		velocidade = 30.0
+		velocidade_perseguicao = 50.0
+		distancia_perseguicao = 220.0
+	elif ("wizard" in nome_baixo) or ("wizzard" in nome_baixo) or ("wizard" in enemy_id):
+		vida_maxima = 120.0
+		dano = 28.0
+		velocidade = 40.0
+		velocidade_perseguicao = 60.0
+		distancia_perseguicao = 200.0
+	# 2. Tier 3 (Inimigos Grandes / Avançados)
+	elif ("laranja" in nome_baixo) or ("laranja" in enemy_id) or ("slime_g" in nome_baixo) or ("slime_g" in enemy_id) or ("vermelho" in nome_baixo):
+		vida_maxima = 100.0
+		dano = 24.0
+		velocidade = 46.0
+		velocidade_perseguicao = 70.0
+		distancia_perseguicao = 190.0
+	# 3. Tier 2 (Inimigos Médios / Ácidos / Ciano)
+	elif ("verde" in nome_baixo) or ("verde" in enemy_id) or ("ciano" in nome_baixo) or ("ciano" in enemy_id):
+		vida_maxima = 75.0
+		dano = 18.0
+		velocidade = 40.0
+		velocidade_perseguicao = 62.0
+		distancia_perseguicao = 180.0
+	# 4. Tier 1 (Inimigos Menores / Salas Iniciais)
+	elif ("azul" in nome_baixo) or ("azul" in enemy_id) or ("slime_p" in nome_baixo) or ("slime_p" in enemy_id) or ("amarelo" in nome_baixo) or ("amarelo" in enemy_id):
+		vida_maxima = 50.0
+		dano = 12.0
+		velocidade = 36.0
+		velocidade_perseguicao = 55.0
+		distancia_perseguicao = 160.0
 
 var shadow: Sprite2D = null
 var shadow_base_scale: Vector2 = Vector2(1.8, 1.2)
@@ -277,12 +327,42 @@ func _animar_sombra(delta: float) -> void:
 # ──────────────────────────────────────────
 # Loop de Patrulha Aleatória
 # ──────────────────────────────────────────
+func _player_em_interacao(p_node: Node2D = null) -> bool:
+	var pl = p_node if p_node else _player
+	if pl and is_instance_valid(pl):
+		if pl.has_method("esta_em_interacao"):
+			if pl.esta_em_interacao():
+				return true
+		elif pl.get("travado") == true or pl.get("em_interacao") == true:
+			return true
+	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+		return true
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		return true
+	if get_tree():
+		if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
+			return true
+		if get_tree().get_nodes_in_group("dialogo_ativo").size() > 0:
+			return true
+	return false
+
 func _physics_process(delta: float) -> void:
 	# Localiza o player dinamicamente se ainda não referenciado
 	if not _player:
 		var players = get_tree().get_nodes_in_group("player")
 		if players.size() > 0:
 			_player = players[0]
+
+	# Se o jogador estiver em uma interação (baú, minigame, diálogo), monstros ignoram e pausam o combate!
+	if _player_em_interacao(_player):
+		if _perseguindo:
+			_perseguindo = false
+			_sortear_nova_direcao()
+		velocity = Vector2.ZERO
+		move_and_slide()
+		if sprite:
+			sprite.play("default")
+		return
 
 	var no_alcance: bool = false
 	if _player and is_instance_valid(_player):
@@ -353,11 +433,13 @@ func _physics_process(delta: float) -> void:
 
 	# Se tocou no jogador fisicamente durante o movimento, aciona a batalha imediatamente!
 	var em_transicao = get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning
-	if not _em_batalha and not em_transicao:
+	if not _em_batalha and not em_transicao and not _player_em_interacao(_player):
 		for i in range(get_slide_collision_count()):
 			var col = get_slide_collision(i)
 			var collider = col.get_collider()
 			if collider and (collider.is_in_group("player") or collider.name == "Player"):
+				if _player_em_interacao(collider):
+					continue
 				var trigger = get_node_or_null("EnemyTrigger")
 				if trigger and trigger.has_method("_on_body_entered"):
 					trigger._on_body_entered(collider)
@@ -470,20 +552,15 @@ func _dropar_itens() -> void:
 	else:
 		cor_slime = "azul"
 
-	var r = randf()
+	# Sempre dropa o item temático correspondente E moeda de ouro
 	if is_quimica:
-		if r > 0.50:
-			_instanciar_drop("res://scenes/Entidades/ItemFragmentoGelatina.tscn", {"cor": cor_slime})
-		else:
-			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/ItemFragmentoGelatina.tscn", {"cor": cor_slime})
+		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 	elif is_fisica:
-		if r > 0.50:
-			_instanciar_drop("res://scenes/Entidades/ItemChip.tscn")
-		else:
-			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/ItemChip.tscn")
+		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 	else:
-		if r > 0.50:
-			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 
 	# Se for Campeão Rúnico, concede moedas extras em celebração à quebra de barreira!
 	if eh_runico:

@@ -27,6 +27,7 @@ var tempo_rodando: bool = false
 var _duracao_batalha: float = 300.0 ## Espelho da duração do inimigo (para exibição futura)
 var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
+var _eh_pergunta_vf: bool = false
 
 var battle_music = preload("res://assets/audio/ost/2.wav")
 
@@ -125,11 +126,24 @@ func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	if _tween_botoes:
 		_tween_botoes.kill()
 		
+	var eh_vf = (alternativas.size() == 2 and (
+		str(alternativas[0]).strip_edges().to_lower().begins_with("verdadeiro") or str(alternativas[0]).strip_edges().to_lower() == "v"
+	))
+	_eh_pergunta_vf = eh_vf
+		
 	for i in range(_botoes.size()):
 		_botoes[i].modulate = Color.WHITE
 		if i < alternativas.size():
-			var prefix = ["A) ", "B) ", "C) ", "D) ", "E) "][i]
-			_botoes[i].text = prefix + str(alternativas[i]).replace('\\"', '"').replace("\\'", "'")
+			if eh_vf:
+				if i == 0:
+					_botoes[i].text = "[ V ]  VERDADEIRO"
+					_botoes[i].modulate = Color(0.7, 1.25, 0.8) # Verde esmeralda vivo
+				elif i == 1:
+					_botoes[i].text = "[ F ]  FALSO"
+					_botoes[i].modulate = Color(1.25, 0.7, 0.7) # Vermelho rubi vivo
+			else:
+				var prefix = ["A) ", "B) ", "C) ", "D) ", "E) "][i]
+				_botoes[i].text = prefix + str(alternativas[i]).replace('\\"', '"').replace("\\'", "'")
 			_botoes[i].show()
 			_botoes[i].disabled = false
 		else:

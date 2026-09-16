@@ -159,7 +159,7 @@ texture = ExtResource("3_r6rlg")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_6co4c")
 
-[node name="Node2D" type="Node2D" unique_id=1363704381]
+[node name="Node2D2" type="Node2D" unique_id=1363704381]
 script = ExtResource("1_level_script")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_6co4c")]

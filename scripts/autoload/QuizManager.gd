@@ -38,6 +38,133 @@ var sprite_frames_inimigos = {
 
 var sprite_frame_inimigo_atual
 
+# Banco dedicado de questões Verdadeiro ou Falso (V ou F) para o Boss Slime Roxo
+const QUESTOES_VF_SLIME_BOSS = [
+	{
+		"question": "A queima completa de um pedaço de carvão é uma transformação física, pois a matéria não altera sua composição química.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "A combustão é uma reação química: o carbono reage com O₂ formando gás carbônico (CO₂) e cinzas."
+	},
+	{
+		"question": "Na Tabela Periódica, os elementos do Grupo 18 (Gases Nobres) são conhecidos por sua altíssima estabilidade química.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Os gases nobres possuem a última camada eletrônica completa, conferindo estabilidade em condições normais."
+	},
+	{
+		"question": "Soluções aquosas com pH menor que 7 a 25°C são classificadas como ácidas devido ao excesso de íons H⁺.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Na escala de pH: abaixo de 7 indica acidez; exatamente 7 é neutro; acima de 7 é básico/alcalino."
+	},
+	{
+		"question": "O ponto de fusão do gelo puro sob pressão atmosférica normal de 1 atm ocorre a 100°C.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "O ponto de fusão ocorre a 0°C. 100°C é a temperatura de ebulição (vaporização) da água pura."
+	},
+	{
+		"question": "Segundo Lavoisier, em um sistema fechado a massa total dos reagentes é rigorosamente igual à massa total dos produtos.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Lei da Conservação das Massas: na natureza nada se cria, nada se perde, tudo se transforma."
+	},
+	{
+		"question": "O cloreto de sódio (sal de cozinha - NaCl) é formado predominantemente por ligações puramente metálicas.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "O NaCl é um composto iônico, formado pela atração eletrostática entre o cátion Na⁺ e o ânion Cl⁻."
+	},
+	{
+		"question": "Reações químicas exotérmicas são aquelas que liberam calor e energia térmica para o ambiente externo.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Reações exotérmicas liberam calor (ΔH < 0). Reações endotérmicas absorvem calor (ΔH > 0)."
+	},
+	{
+		"question": "O átomo é composto por um núcleo denso (prótons e nêutrons) e uma eletrosfera onde orbitam os elétrons.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Prótons (+) e nêutrons (neutros) ficam no núcleo; elétrons (-) circulam na eletrosfera."
+	},
+	{
+		"question": "A mistura de água pura e óleo de cozinha forma uma solução homogênea monofásica estável.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "Água e óleo são líquidos imiscíveis e formam uma mistura heterogênea bifásica visível."
+	},
+	{
+		"question": "A sublimação é a transição física direta do estado sólido para o estado gasoso sem passar pela fase líquida.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Gelo seco (CO₂ sólido) e bolinhas de naftalina são exemplos clássicos de sublimação à temperatura ambiente."
+	},
+	{
+		"question": "Um catalisador químico acelera a velocidade da reação porque é totalmente consumido no processo.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "Catalisadores NÃO são consumidos na reação. Eles agem reduzindo a energia de ativação necessária."
+	},
+	{
+		"question": "Metais alcalinos do Grupo 1 (como Sódio e Potássio) reagem vigorosamente com a água liberando gás hidrogênio.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Metais alcalinos reagem com grande liberação de energia, gerando H₂ inflamável e hidróxido."
+	},
+	{
+		"question": "O gás oxigênio vital que os seres humanos respiram da atmosfera possui fórmula molecular O₃.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "O oxigênio gasoso respiratório é O₂. O₃ é o ozônio, gás da camada protetora na estratosfera."
+	},
+	{
+		"question": "A neutralização entre ácido clorídrico (HCl) e hidróxido de sódio (NaOH) produz sal comum e água.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Ácido forte + Base forte: HCl + NaOH → NaCl (sal) + H₂O (água)."
+	},
+	{
+		"question": "O número atômico (Z) de qualquer elemento representa a quantidade de nêutrons presentes em seu núcleo.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "O número atômico (Z) representa o número de PRÓTONS no núcleo atômico."
+	},
+	{
+		"question": "A condensação é a mudança de estado físico na qual o vapor ou gás passa para o estado líquido.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Também chamada de liquefação, ocorre quando o vapor perde calor e retorna à fase líquida."
+	},
+	{
+		"question": "A água pura (H₂O) é considerada uma substância simples por ser composta por um único tipo de molécula.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "A água é uma substância COMPOSTA, pois suas moléculas são formadas por dois elementos: H e O."
+	},
+	{
+		"question": "Na ligação covalente, ocorre o compartilhamento mútuo de pares de elétrons entre átomos ligantes.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "Átomos ametais compartilham elétrons para atingirem a estabilidade eletrônica do octeto."
+	},
+	{
+		"question": "A densidade de um material é calculada dividindo-se o seu volume pela sua massa (d = V / m).",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 1,
+		"dica": "A relação matemática correta da densidade é a massa dividida pelo volume: d = m / V."
+	},
+	{
+		"question": "O símbolo químico do Ouro na tabela periódica é 'Au', derivado da palavra em latim 'Aurum'.",
+		"options": ["Verdadeiro", "Falso"],
+		"answer": 0,
+		"dica": "'Au' vem do latim aurum (brilhante/dourado). 'Ag' representa a prata (argentum)."
+	}
+]
+
+var _eh_slime_boss_roxo: bool = false
+var _dano_erro_inimigo: float = 25.0
+
 # Sinal que as outras tasks (ex: Combat-3) vão escutar!
 signal resultado_batalha(acertou: bool)
 
@@ -164,6 +291,14 @@ func _ordenar_por_progressao(lista: Array) -> Array:
 
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
+	
+	# Se for pergunta de Verdadeiro ou Falso (V ou F), mantemos sempre Verdadeiro na opção 0 e Falso na opção 1
+	if new_q.has("options") and new_q["options"].size() == 2:
+		var opt0 = str(new_q["options"][0]).strip_edges().to_lower()
+		var opt1 = str(new_q["options"][1]).strip_edges().to_lower()
+		if (opt0.begins_with("verdadeiro") or opt0 == "v") and (opt1.begins_with("falso") or opt1 == "f"):
+			return new_q
+			
 	var correct_answer = new_q["options"][new_q["answer"]]
 	
 	# [GOD MODE / DEV TOOL] Resposta A sempre correta para apresentações rápidas
@@ -281,6 +416,20 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	else:
 		_nivel_dificuldade_alvo = 0
 
+	# Detecção específica do Boss Slime Roxo
+	_eh_slime_boss_roxo = ("slime_boss" in id_lower) or ("roxo" in id_lower) or ("slime_g_boss" in id_lower) or (("boss" in cena_atual_str or "sala_boss" in cena_atual_str) and "slime" in id_lower)
+
+	# Calibra vida do monstro e dano recebido pelo player por erro
+	vida_maxima_inimigo = float(enemy_data.get("vida_maxima", 100.0))
+	_dano_erro_inimigo = float(enemy_data.get("dano", 25.0))
+	
+	if _eh_slime_boss_roxo:
+		_eh_chefe_atual = true
+		vida_maxima_inimigo = 130.0
+		_dano_erro_inimigo = 30.0
+		_num_questoes = 5
+		print("[QuizManager] 🟣 BOSS SLIME ROXO DETECTADO! 130 HP, dano de 30 por erro e Fúria do Chefe armada com V ou F!")
+
 	if _questoes_locais_ativas.size() > 0:
 		# Usa as questões locais — ignora banco para esta batalha (funciona offline)
 		print("[Local] Batalha com questões locais (%d questões)" % _questoes_locais_ativas.size())
@@ -386,7 +535,15 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 				if get_node_or_null("/root/AudioManager"):
 					AudioManager.play_sfx("acerto_1")
 			else:
-				print("[QuizManager] Barreira Rúnica permaneceu intacta.")
+				print("[QuizManager] Barreira Rúnica repeliu o ataque! Descarga de 20 HP no Mago!")
+				PlayerStats.sofrer_dano(20.0)
+				if is_instance_valid(ui_instancia):
+					ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador / PlayerStats.vida_maxima_jogador, vida_atual_inimigo / vida_maxima_inimigo)
+					if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
+						var sprite_mago = _jogador_batalha.get_node("sprite")
+						var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+						tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
+						tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
 
 	# [Combat-4] Inicia o timer com a duração do inimigo (não resetado entre rodadas)
 	if is_instance_valid(ui_instancia):
@@ -433,9 +590,9 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	
 	if acertou:
 		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)
-		dano_final = 10 + int(25 * rapidez)
+		dano_final = 20 + int(15 * rapidez)
 	else:
-		dano_final = 25
+		dano_final = int(_dano_erro_inimigo)
 	
 	resultado_batalha.emit(acertou)
 	

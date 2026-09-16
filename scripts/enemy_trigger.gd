@@ -55,13 +55,40 @@ func _garantir_alcance_trigger() -> void:
 
 var _em_batalha: bool = false
 
+func _player_em_interacao(p_node: Node2D = null) -> bool:
+	var pl = p_node
+	if pl == null:
+		var players = get_tree().get_nodes_in_group("player")
+		if players.size() > 0:
+			pl = players[0]
+	if pl and is_instance_valid(pl):
+		if pl.has_method("esta_em_interacao"):
+			if pl.esta_em_interacao():
+				return true
+		elif pl.get("travado") == true or pl.get("em_interacao") == true:
+			return true
+	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+		return true
+	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+		return true
+	if get_tree():
+		if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
+			return true
+		if get_tree().get_nodes_in_group("dialogo_ativo").size() > 0:
+			return true
+	return false
+
 func _physics_process(_delta: float) -> void:
 	if _em_batalha or not monitoring:
 		return
 	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
 		return
+	if _player_em_interacao():
+		return
 	for body in get_overlapping_bodies():
 		if body.is_in_group("player") or body.name == "Player":
+			if _player_em_interacao(body):
+				continue
 			_on_body_entered(body)
 			return
 
@@ -108,6 +135,8 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	if _em_batalha:
 		return
+	if _player_em_interacao(body):
+		return
 	_em_batalha = true # <--- MARCA ESTE INIMIGO COMO O ENGAJADO
 
 	var node_pai = get_parent()
@@ -126,6 +155,14 @@ func _on_body_entered(body: Node2D) -> void:
 	elif "boss" in scene_low or "fisica12" in scene_low or "física12" in scene_low:
 		eh_boss_final = true
 
+	var vida_val: float = 100.0
+	var dano_val: float = 20.0
+	if node_pai:
+		if "vida_maxima" in node_pai:
+			vida_val = float(node_pai.vida_maxima)
+		if "dano" in node_pai:
+			dano_val = float(node_pai.dano)
+
 	# Monta enemy_data com andar_id para o QuizManager filtrar o banco
 	var enemy_data: Dictionary = {
 		"num_questoes":      num_questoes,
@@ -136,6 +173,8 @@ func _on_body_entered(body: Node2D) -> void:
 		"nivel_dificuldade": nivel_dificuldade,
 		"eh_runico":          eh_runico_final,
 		"eh_boss":            eh_boss_final,
+		"vida_maxima":        vida_val,
+		"dano":               dano_val,
 	}
 
 	# [Fix-9] Fallback inteligente do Sprite do inimigo

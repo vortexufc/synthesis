@@ -579,10 +579,10 @@ func _finalizar_derrota() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("fail")
 		
-	lbl_banner_titulo.text = "TEMPO ESGOTADO!"
+	lbl_banner_titulo.text = "DESCARGA RÚNICA!"
 	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	
-	lbl_banner_sub.text = "A Barreira Rúnica permaneceu intacta.\nA batalha continuará sem o golpe crítico!"
+	lbl_banner_sub.text = "O tempo esgotou e a barreira repeliu seu ataque!\nVocê sofreu uma descarga de -20 HP do Campeão Rúnico."
 	
 	banner_resultado.visible = true
 	banner_resultado.modulate.a = 0.0
@@ -592,7 +592,7 @@ func _finalizar_derrota() -> void:
 	tw.tween_property(banner_resultado, "modulate:a", 1.0, 0.25)
 	tw.tween_property(banner_resultado, "scale", Vector2(1.0, 1.0), 0.25)
 	
-	await get_tree().create_timer(1.5, true, false, true).timeout
+	await get_tree().create_timer(1.8, true, false, true).timeout
 	_fechar_e_emitir(false)
 
 func _fechar_e_emitir(vitoria: bool) -> void:

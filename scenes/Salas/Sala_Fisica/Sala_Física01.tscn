@@ -17,12 +17,14 @@
 [ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="15_imiam"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="16_3407d"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_ijptx"]
-[ext_resource type="PackedScene" uid="uid://bavvcg7n5masf" path="res://scenes/Entidades/ItemBateria.tscn" id="17_wbf8q"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/NPCFisica.tscn" id="18_uglgd"]
-[ext_resource type="PackedScene" uid="uid://bwg5w1f6gk1sk" path="res://scenes/Entidades/ItemChip.tscn" id="19_osp8w"]
-[ext_resource type="PackedScene" path="res://scenes/Objetos/bau3.tscn" id="22_k76es"]
 [ext_resource type="PackedScene" path="res://scenes/Objetos/mural_parede.tscn" id="25_mural"]
+[ext_resource type="PackedScene" path="res://scenes/Objetos/bau3.tscn" id="bau3_cena"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="lum_fisica_inst"]
+[ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="ponto_bau"]
+[ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
+[ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="spawner_bau"]
+[ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fdngi"]
 texture = ExtResource("1_3407d")
@@ -470,8 +472,8 @@ region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="PortaRetorno" parent="." unique_id=1952945906 instance=ExtResource("14_um6bs")]
 position = Vector2(475, 1377)
-porta_de_retorno = true
 proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
+porta_de_retorno = true
 
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("15_imiam")]
 position = Vector2(1501, 601)
@@ -484,38 +486,9 @@ scale = Vector2(1.2, 1.2)
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_3407d")]
 position = Vector2(757, 1269)
 
-[node name="ItemBateria" parent="." unique_id=469130166 instance=ExtResource("17_wbf8q")]
-position = Vector2(266, 1047)
-
 [node name="NPCFisica" parent="." unique_id=1810303523 instance=ExtResource("18_uglgd")]
 position = Vector2(158, 1015)
-
-[node name="ItemChip" parent="." unique_id=77967649 instance=ExtResource("19_osp8w")]
-position = Vector2(713, 736)
-
-[node name="ItemChip2" parent="." unique_id=2141493503 instance=ExtResource("19_osp8w")]
-position = Vector2(218, 780)
-
-[node name="ItemBateria2" parent="." unique_id=856295331 instance=ExtResource("17_wbf8q")]
-position = Vector2(1232, 727)
-
-[node name="ItemBateria3" parent="." unique_id=32658850 instance=ExtResource("17_wbf8q")]
-position = Vector2(686, 477)
-
-[node name="ItemBateria4" parent="." unique_id=300429796 instance=ExtResource("17_wbf8q")]
-position = Vector2(1357, 396)
-
-[node name="ItemBateria5" parent="." unique_id=10106257 instance=ExtResource("17_wbf8q")]
-position = Vector2(775, 1395)
-
-[node name="ItemChip3" parent="." unique_id=1603472439 instance=ExtResource("19_osp8w")]
-position = Vector2(1563, 751)
-
-[node name="ItemChip4" parent="." unique_id=631665641 instance=ExtResource("19_osp8w")]
-position = Vector2(130, 1224)
-
-[node name="ItemChip5" parent="." unique_id=1082860603 instance=ExtResource("19_osp8w")]
-position = Vector2(849, 402)
+usar_angulo_isometrico = true
 
 [node name="Luminarias" type="Node2D" parent="." unique_id=1437129072]
 
@@ -540,13 +513,72 @@ position = Vector2(1690, 758)
 orientacao = 2
 
 [node name="LuminariaOeste2" parent="Luminarias" unique_id=342507567 instance=ExtResource("lum_fisica_inst")]
-position = Vector2(75, 1066)
-orientacao = 1
-
-[node name="Bau3" parent="." unique_id=1577529831 instance=ExtResource("22_k76es")]
-position = Vector2(692, 1121)
-forcar_andar = 2
+position = Vector2(72, 1131)
 
 [node name="MuralParede" parent="." unique_id=1179287943 instance=ExtResource("25_mural")]
 position = Vector2(161, 1117)
 forcar_andar = 2
+
+[node name="PontosDeBateria" type="Node2D" parent="." unique_id=861910281]
+script = ExtResource("spawner_item")
+tipo_item = 2
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeBateria" unique_id=524893486]
+position = Vector2(758, 830)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeBateria" unique_id=1603723634]
+position = Vector2(1232, 727)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeBateria" unique_id=610233081]
+position = Vector2(686, 477)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="PontosDeMoeda" type="Node2D" parent="." unique_id=1962234150]
+script = ExtResource("spawner_item")
+tipo_item = 4
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=429038624]
+position = Vector2(775, 1150)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeMoeda" unique_id=244989306]
+position = Vector2(1357, 450)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=1565031577]
+position = Vector2(350, 750)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto4" type="Marker2D" parent="PontosDeMoeda" unique_id=1164082791]
+position = Vector2(1050, 950)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="PontosDeBau" type="Node2D" parent="." unique_id=1513311971]
+script = ExtResource("spawner_bau")
+chance_mimico = 0.5
+cena_bau = ExtResource("bau3_cena")
+forcar_andar = 2
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=1223941071]
+position = Vector2(1562, 407)
+gizmo_extents = 24.0
+script = ExtResource("ponto_bau")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=2073684981]
+position = Vector2(746, 1050)
+gizmo_extents = 24.0
+script = ExtResource("ponto_bau")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=492503761]
+position = Vector2(452, 422)
+gizmo_extents = 24.0
+script = ExtResource("ponto_bau")

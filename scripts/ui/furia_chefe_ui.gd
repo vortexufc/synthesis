@@ -78,7 +78,15 @@ var banco_afirmacoes = {
 		{"texto": "Soluções com pH menor que 7 em água pura a 25°C são classificadas como ácidas.", "correta": true},
 		{"texto": "A evaporação da água fervente destrói permanentemente suas moléculas de hidrogênio.", "correta": false},
 		{"texto": "Metais alcalinos do Grupo 1 reagem vigorosamente ao entrar em contato com água.", "correta": true},
-		{"texto": "Uma mistura de água purificada e óleo de cozinha forma uma solução monofásica homogênea.", "correta": false}
+		{"texto": "Uma mistura de água purificada e óleo de cozinha forma uma solução monofásica homogênea.", "correta": false},
+		{"texto": "A sublimação é a transição direta do estado sólido para o gasoso sem passar pelo líquido.", "correta": true},
+		{"texto": "Um catalisador acelera a reação química sendo totalmente consumido no processo.", "correta": false},
+		{"texto": "A neutralização entre ácido clorídrico (HCl) e hidróxido de sódio (NaOH) produz sal e água.", "correta": true},
+		{"texto": "O gás oxigênio essencial que respiramos na atmosfera possui fórmula molecular O₃.", "correta": false},
+		{"texto": "Na ligação covalente, átomos ametais compartilham pares de elétrons para atingir estabilidade.", "correta": true},
+		{"texto": "A densidade de um corpo é calculada dividindo-se o seu volume pela sua massa (d = V / m).", "correta": false},
+		{"texto": "O símbolo químico do elemento Ouro na tabela periódica é 'Au', derivado de 'Aurum'.", "correta": true},
+		{"texto": "O ponto de fusão do gelo puro sob pressão normal de 1 atm ocorre a 100°C.", "correta": false}
 	],
 	2: [ # Física (Andar 2)
 		{"texto": "Pela 1ª Lei de Newton, um corpo em repouso tende naturalmente a permanecer em repouso.", "correta": true},

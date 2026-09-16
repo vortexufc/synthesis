@@ -244,7 +244,15 @@ func _on_desafio_memoria_concluido(vitoria: bool) -> void:
 				"ui_1"
 			)
 	else:
-		# Se perdeu ou cancelou, o baú permanece trancado e o jogador pode tentar de novo
+		# Se perdeu ou o tempo esgotou, exibe aviso e permite tentar novamente se sobreviver
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("mostrar_notificacao_quest"):
+			hud.mostrar_notificacao_quest(
+				"⚠️ ARMADILHA DO BAÚ!",
+				"O tempo esgotou! Você sofreu -15 HP de dano da runa.",
+				Color(1.0, 0.35, 0.35),
+				"" # Não repete o som de derrota, pois o minigame já tocou ao encerrar
+			)
 		if player_perto:
 			_exibir_prompt_tela()
 

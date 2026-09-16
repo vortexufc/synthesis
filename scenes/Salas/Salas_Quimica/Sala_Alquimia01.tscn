@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://bu2kwtcyegw0r" path="res://scripts/levels/sala01.gd" id="1_level_script"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="1_oxtvn"]
-[ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_tjhdw"]
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="3_pocxu"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala01.tscn" id="4_tjhdw"]
 [ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_arpr6"]
@@ -17,15 +16,15 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="15_gt6bf"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="16_pergaminho"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="16_spvc0"]
-[ext_resource type="PackedScene" uid="uid://cy8k7baf" path="res://scenes/Entidades/ItemChave.tscn" id="18_mgcqj"]
-[ext_resource type="PackedScene" uid="uid://b88fskp86tqc2" path="res://scenes/Entidades/ItemMoeda.tscn" id="19_yo20j"]
-[ext_resource type="PackedScene" uid="uid://crfyxl12t7qm0" path="res://scenes/Entidades/ItemLivroFormula.tscn" id="20_qyqlx"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="21_71yqb"]
-[ext_resource type="PackedScene" path="res://scenes/Objetos/bau1.tscn" id="22_fe0vg"]
-[ext_resource type="PackedScene" path="res://scenes/Objetos/mimico.tscn" id="23_vc7er"]
+[ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="23_objetos"]
+[ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="24_spawner"]
+[ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="25_ponto"]
+[ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="26_item_spawner"]
+[ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="27_item_ponto"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dpstn"]
-texture = ExtResource("2_tjhdw")
+texture = ExtResource("23_objetos")
 8:22/size_in_atlas = Vector2i(1, 2)
 8:22/0 = 0
 72:35/0 = 0
@@ -336,22 +335,6 @@ position = Vector2(585, 1076)
 proxima_cena = "res://scenes/Salas/Salas_Quimica/Corredor.tscn"
 porta_de_retorno = true
 
-[node name="pergaminho" parent="." unique_id=1127676117 instance=ExtResource("16_pergaminho")]
-position = Vector2(599, 847)
-scale = Vector2(0.74600893, 0.68015295)
-
-[node name="ItemMoeda" parent="." unique_id=1086862922 instance=ExtResource("19_yo20j")]
-position = Vector2(328, 842)
-
-[node name="ItemMoeda2" parent="." unique_id=551682299 instance=ExtResource("19_yo20j")]
-position = Vector2(909, 399)
-
-[node name="ItemMoeda3" parent="." unique_id=14407109 instance=ExtResource("19_yo20j")]
-position = Vector2(1021, 739)
-
-[node name="ItemLivroFormula" parent="." unique_id=332044640 instance=ExtResource("20_qyqlx")]
-position = Vector2(966, 292)
-
 [node name="Tocha" parent="." unique_id=272830461 instance=ExtResource("21_71yqb")]
 position = Vector2(1072, 926.0001)
 rotation = -0.61086524
@@ -379,14 +362,64 @@ rotation = -5.2359877
 position = Vector2(94.99999, 358)
 rotation = -5.2359877
 
-[node name="ItemChave2" parent="." unique_id=1207849736 instance=ExtResource("18_mgcqj")]
-position = Vector2(802, 885)
+[node name="PontosDeBau" type="Node2D" parent="." unique_id=543473787]
+script = ExtResource("24_spawner")
+chance_mimico = 0.5
 
-[node name="ItemLivroFormula2" parent="." unique_id=91493795 instance=ExtResource("20_qyqlx")]
-position = Vector2(128, 434)
+[node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=1807948208]
+position = Vector2(599, 298)
+gizmo_extents = 24.0
+script = ExtResource("25_ponto")
 
-[node name="Bau1" parent="." unique_id=543473787 instance=ExtResource("22_fe0vg")]
-position = Vector2(856, 972)
+[node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=414017216]
+position = Vector2(948, 997)
+gizmo_extents = 24.0
+script = ExtResource("25_ponto")
 
-[node name="Mimico" parent="." unique_id=1973333797 instance=ExtResource("23_vc7er")]
-position = Vector2(405, 951)
+[node name="PontosDeLivro" type="Node2D" parent="." unique_id=699676829]
+script = ExtResource("26_item_spawner")
+tipo_item = 1
+chance_spawn = 0.5
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeLivro" unique_id=396187228]
+position = Vector2(122, 539)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeLivro" unique_id=278579542]
+position = Vector2(359, 295)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeLivro" unique_id=1704818133]
+position = Vector2(966, 292)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="PontosDeMoeda" type="Node2D" parent="." unique_id=1962052015]
+script = ExtResource("26_item_spawner")
+tipo_item = 4
+chance_spawn = 0.5
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=360541939]
+position = Vector2(180, 850)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeMoeda" unique_id=1881076950]
+position = Vector2(1011, 262)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=1741355871]
+position = Vector2(1024, 725)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="Ponto4" type="Marker2D" parent="PontosDeMoeda" unique_id=839145375]
+position = Vector2(520, 600)
+gizmo_extents = 20.0
+script = ExtResource("27_item_ponto")
+
+[node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_pergaminho")]
+position = Vector2(757, 905.00006)

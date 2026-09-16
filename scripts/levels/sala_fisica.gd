@@ -213,7 +213,7 @@ func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
 			var luz_bat = PointLight2D.new()
 			luz_bat.name = "LuzBateria"
 			luz_bat.texture = tex_luz
-			luz_bat.color = Color(1.0, 0.85, 0.25, 1.0) # Amarelo/dourado elétrico
+			luz_bat.color = Color(0.25, 0.75, 1.0, 1.0) # Azul elétrico / carga iônica
 			luz_bat.energy = 0.45
 			luz_bat.texture_scale = 0.65
 			item.add_child(luz_bat)
@@ -229,7 +229,7 @@ func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
 			faiscas.gravity = Vector2(0, -15)
 			faiscas.scale_amount_min = 1.0
 			faiscas.scale_amount_max = 2.0
-			faiscas.color = Color(1.0, 0.9, 0.4, 0.8)
+			faiscas.color = Color(1.0, 0.75, 0.25, 0.9) # Faíscas douradas do raio
 			item.add_child(faiscas)
 			
 		# 2. Pulso tecnológico nos Chips (ItemChip)
@@ -237,7 +237,7 @@ func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
 			var luz_chip = PointLight2D.new()
 			luz_chip.name = "LuzChip"
 			luz_chip.texture = tex_luz
-			luz_chip.color = Color(0.20, 0.85, 1.0, 1.0) # Ciano elétrico neon
+			luz_chip.color = Color(0.20, 0.95, 0.65, 1.0) # Esmeralda tecnológico neon
 			luz_chip.energy = 0.42
 			luz_chip.texture_scale = 0.55
 			item.add_child(luz_chip)

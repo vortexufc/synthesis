@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://npc_biologia01"]
+
+[ext_resource type="Script" path="res://scripts/NPCBiologia.gd" id="1_bio"]
+[ext_resource type="Texture2D" path="res://assets/sprites/Characters/npc_biologia.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bio"]
+radius = 80.0
+
+[node name="NPCBiologia" type="Area2D"]
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_bio")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(0, -48)
+scale = Vector2(1.6, 1.6)
+texture = ExtResource("2_tex")
+hframes = 2
+vframes = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_bio")

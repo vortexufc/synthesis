@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://pontos_spawn_moeda"]
+
+[ext_resource type="Script" path="res://scripts/GerenciadorSpawnItens.gd" id="1_spawner"]
+[ext_resource type="Script" path="res://scripts/PontoSpawnItem.gd" id="2_ponto"]
+
+[node name="PontosDeMoeda" type="Node2D"]
+script = ExtResource("1_spawner")
+tipo_item = 4
+qtd_itens_spawnar = 3
+
+[node name="Ponto1" type="Marker2D" parent="."]
+gizmo_extents = 20.0
+script = ExtResource("2_ponto")
+
+[node name="Ponto2" type="Marker2D" parent="."]
+position = Vector2(200, 80)
+gizmo_extents = 20.0
+script = ExtResource("2_ponto")
+
+[node name="Ponto3" type="Marker2D" parent="."]
+position = Vector2(-180, 120)
+gizmo_extents = 20.0
+script = ExtResource("2_ponto")
+
+[node name="Ponto4" type="Marker2D" parent="."]
+position = Vector2(80, 220)
+gizmo_extents = 20.0
+script = ExtResource("2_ponto")
+
+[node name="Ponto5" type="Marker2D" parent="."]
+position = Vector2(-120, -100)
+gizmo_extents = 20.0
+script = ExtResource("2_ponto")

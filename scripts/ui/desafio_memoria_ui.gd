@@ -118,6 +118,8 @@ const PARES_POR_ANDAR = {
 var _font_card: SystemFont
 
 func _ready() -> void:
+	add_to_group("minigame_ativo")
+	add_to_group("desafio_memoria")
 	layer = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_font_card = SystemFont.new()
@@ -147,6 +149,7 @@ func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 		
 	if player_ref and is_instance_valid(player_ref):
 		player_ref.travado = true
+		player_ref.em_interacao = true
 
 	tempo_restante = duracao_total
 	pares_encontrados = 0
@@ -607,10 +610,14 @@ func _finalizar_derrota() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("fail")
 		
-	lbl_banner_titulo.text = "O TEMPO ESGOTOU!"
+	# Causa dano de armadilha no jogador pelo tempo esgotado
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.sofrer_dano(15.0)
+		
+	lbl_banner_titulo.text = "ARMADILHA DO BAÚ DISPARADA!"
 	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	
-	lbl_banner_sub.text = "O selo da Pedra Rúnica se fechou.\nVocê pode tentar novamente quando desejar!"
+	lbl_banner_sub.text = "O tempo esgotou e o selo arcano entrou em colapso!\nVocê sofreu uma descarga de -15 HP de armadilha."
 	
 	banner_resultado.visible = true
 	banner_resultado.modulate.a = 0.0
@@ -631,7 +638,11 @@ func _desistir() -> void:
 
 func _fechar_e_emitir(vitoria: bool) -> void:
 	if player_ref and is_instance_valid(player_ref):
-		player_ref.travado = false
+		if player_ref.has_method("finalizar_interacao"):
+			player_ref.finalizar_interacao(0.8)
+		else:
+			player_ref.travado = false
+			player_ref.em_interacao = false
 		player_ref = null
 		
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)

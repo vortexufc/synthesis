@@ -20,6 +20,10 @@
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/slime_p_sala12.tscn" id="18_v4ikk"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="19_bieog"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="19_ccjui"]
+[ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="22_pff8g"]
+[ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="23_3ig80"]
+[ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
+[ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ttij3"]
@@ -1960,3 +1964,59 @@ position = Vector2(1799, 778)
 
 [node name="Tocha6" parent="." unique_id=643843806 instance=ExtResource("tocha_entidade")]
 position = Vector2(979, 996)
+
+[node name="PontosDeBau" type="Node2D" parent="." unique_id=1063768199]
+script = ExtResource("22_pff8g")
+chance_mimico = 0.5
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=886344109]
+position = Vector2(1724, 638)
+gizmo_extents = 24.0
+script = ExtResource("23_3ig80")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=175581247]
+position = Vector2(528, 384)
+gizmo_extents = 24.0
+script = ExtResource("23_3ig80")
+
+[node name="PontosDeLivro" type="Node2D" parent="." unique_id=750825533]
+script = ExtResource("spawner_item")
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeLivro" unique_id=1029501896]
+position = Vector2(750, 520)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeLivro" unique_id=1762225184]
+position = Vector2(1100, 750)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeLivro" unique_id=966042724]
+position = Vector2(1480, 620)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="PontosDeMoeda" type="Node2D" parent="." unique_id=1840964679]
+script = ExtResource("spawner_item")
+tipo_item = 4
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=1532408299]
+position = Vector2(420, 720)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeMoeda" unique_id=1947095622]
+position = Vector2(200, 397)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=641342464]
+position = Vector2(930, 631)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")
+
+[node name="Ponto4" type="Marker2D" parent="PontosDeMoeda" unique_id=638753848]
+position = Vector2(1695, 929)
+gizmo_extents = 20.0
+script = ExtResource("ponto_item")

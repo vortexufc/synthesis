@@ -19,6 +19,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="21_tocha"]
 [ext_resource type="PackedScene" uid="uid://mercador01" path="res://scenes/Entidades/NPCMercador.tscn" id="22_kvtps"]
 [ext_resource type="PackedScene" uid="uid://b88fskp86tqc2" path="res://scenes/Entidades/ItemMoeda.tscn" id="23_ncqp3"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/NPCBiologia.tscn" id="24_ddqsf"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="ext_pergaminho_hub"]
 [ext_resource type="Texture2D" uid="uid://d0lft226afsts" path="res://assets/sprites/tilesets/Biologia/porta.png" id="tex_biologia"]
 [ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="tex_fisica"]
@@ -1878,3 +1879,6 @@ position = Vector2(240, 476)
 
 [node name="ItemMoeda" parent="." unique_id=1086862922 instance=ExtResource("23_ncqp3")]
 position = Vector2(851, 847)
+
+[node name="NPCBiologia" parent="." unique_id=1037908605 instance=ExtResource("24_ddqsf")]
+position = Vector2(739, 383)

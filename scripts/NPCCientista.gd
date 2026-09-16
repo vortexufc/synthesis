@@ -1,5 +1,9 @@
 extends Area2D
 
+@export_group("Visual")
+## Quando ativado, o NPC fica na pose lateralizada (isométrica 3/4)
+@export var usar_angulo_isometrico: bool = false
+
 var player_perto: bool = false
 var ui_instancia: CanvasLayer = null
 
@@ -7,9 +11,9 @@ var _balao_interacao: Node2D = null
 var _indicador_quest: Label = null
 var _sprite: Sprite2D = null
 var _tempo_anim: float = 0.0
-var _base_balao_y: float = -105.0
-var _base_quest_y: float = -125.0
-var _curr_quest_y: float = -125.0
+var _base_balao_y: float = -145.0
+var _base_quest_y: float = -148.0
+var _curr_quest_y: float = -148.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -63,8 +67,11 @@ func _process(delta: float) -> void:
 	_tempo_anim += delta
 	var flutuacao = sin(_tempo_anim * 3.8) * 4.0
 	
-	if _sprite and _sprite.hframes > 1:
-		_sprite.frame = int(_tempo_anim * 2.0) % _sprite.hframes
+	if _sprite:
+		_sprite.flip_h = false
+		var frame_base = 2 if usar_angulo_isometrico else 0
+		var total_frames = _sprite.hframes * _sprite.vframes
+		_sprite.frame = (frame_base + (int(_tempo_anim * 2.0) % 2)) % max(1, total_frames)
 	
 	if _balao_interacao:
 		_balao_interacao.position.y = _base_balao_y + flutuacao

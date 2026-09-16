@@ -16,11 +16,20 @@ extends Area2D
 @export var frames_animacao: int = 1
 @export var stride_animacao: int = 0
 
+@export_category("Selo Rúnico")
+@export var tem_selo_runico: bool = false ## Ativa o minigame "Ordene a Sequência" para abrir esta porta após derrotar monstros
+@export_enum("auto", "quimica", "fisica", "geral") var selo_tema: String = "auto" ## Tema das sequências rúnicas
+
 var _sprite_porta: Sprite2D = null
 var _aguardando_confirmacao: bool = false
 var _base_region_rect: Rect2
 var _porta_aberta: bool = false
 var _checagem_timer: float = 0.0
+
+var _selo_ativo: bool = false
+var _selo_resolvido: bool = false
+var _minigame_selo_aberto: bool = false
+var _indicador_selo_node: Node2D = null
 
 # Cooldown para evitar teletransporte imediato ao carregar a cena (loop infinito)
 var _cooldown_ativo: bool = true
@@ -69,10 +78,85 @@ func _process(delta: float) -> void:
 	if _checagem_timer >= 0.5:
 		_checagem_timer = 0.0
 		
-		# Se não houver mais inimigos, abre a porta!
+		# Se não houver mais inimigos:
 		if not _tem_inimigos_vivos():
-			_porta_aberta = true
-			_abrir_porta_animacao()
+			if tem_selo_runico and not _selo_resolvido:
+				if not _selo_ativo:
+					_ativar_selo_runico()
+			else:
+				_porta_aberta = true
+				_abrir_porta_animacao()
+
+func _ativar_selo_runico() -> void:
+	_selo_ativo = true
+	_criar_indicador_selo()
+
+func _criar_indicador_selo() -> void:
+	if _indicador_selo_node and is_instance_valid(_indicador_selo_node):
+		return
+		
+	_indicador_selo_node = Node2D.new()
+	_indicador_selo_node.name = "IndicadorSeloRunico"
+	_indicador_selo_node.position = Vector2(0, -50)
+	add_child(_indicador_selo_node)
+	
+	var label = Label.new()
+	label.text = "✦ SELO RÚNICO ✦\n[Toque para Decifrar]"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.position = Vector2(-75, -20)
+	label.custom_minimum_size = Vector2(150, 40)
+	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
+	label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.15, 0.95))
+	label.add_theme_constant_override("outline_size", 4)
+	
+	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font:
+		label.add_theme_font_override("font", font)
+		
+	_indicador_selo_node.add_child(label)
+	
+	# Efeito de flutuação suave
+	var tw = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(_indicador_selo_node, "position:y", -55.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(_indicador_selo_node, "position:y", -48.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+func _remover_indicador_selo() -> void:
+	if _indicador_selo_node and is_instance_valid(_indicador_selo_node):
+		_indicador_selo_node.queue_free()
+		_indicador_selo_node = null
+
+func _abrir_minigame_selo_runico() -> void:
+	if _minigame_selo_aberto:
+		return
+	_minigame_selo_aberto = true
+	
+	var cena_minigame = load("res://scenes/ui/ordenar_sequencia_ui.tscn")
+	if not cena_minigame:
+		_minigame_selo_aberto = false
+		return
+		
+	var minigame = cena_minigame.instantiate()
+	get_tree().root.add_child(minigame)
+	minigame.sequencia_concluida.connect(_on_selo_sequencia_concluido)
+	
+	var tema = selo_tema
+	if tema == "auto" or tema == "":
+		var andar = _obter_andar_atual()
+		tema = "quimica" if andar == 1 else ("fisica" if andar == 2 else "geral")
+		
+	minigame.iniciar_minigame(tema)
+
+func _on_selo_sequencia_concluido(sucesso: bool) -> void:
+	_minigame_selo_aberto = false
+	if sucesso:
+		_selo_ativo = false
+		_selo_resolvido = true
+		_porta_aberta = true
+		_remover_indicador_selo()
+		_mostrar_feedback_hub("✦ Selo Rúnico Rompido! O portão se abriu! ✦", Color(1.0, 0.85, 0.25, 0.95))
+		await _abrir_porta_animacao()
 
 func _tem_inimigos_vivos() -> bool:
 	var inimigos = get_tree().get_nodes_in_group("inimigos")
@@ -356,6 +440,11 @@ func _on_body_entered(body: Node2D) -> void:
 			# REGRA 2: Bloqueio antigo por conter inimigos na sala
 			if not porta_de_retorno and _tem_inimigos_vivos():
 				_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
+				return
+				
+			# REGRA 3: Se a porta tiver Selo Rúnico e ainda não estiver resolvido
+			if tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
+				_abrir_minigame_selo_runico()
 				return
 			
 		# Lógica de porta de Hub

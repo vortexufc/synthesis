@@ -19,6 +19,8 @@
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/Slime_Boss_Roxo.tscn" id="16_rggn7"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="17_3rfjb"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="18_026i2"]
+[ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="21_2ao3w"]
+[ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="22_qn2gd"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5br0x"]
@@ -1820,3 +1822,22 @@ position = Vector2(61, 1124)
 
 [node name="Tocha6" parent="." unique_id=1445872646 instance=ExtResource("tocha_entidade")]
 position = Vector2(849, 1440)
+
+[node name="PontosDeBau" type="Node2D" parent="." unique_id=839580419]
+script = ExtResource("21_2ao3w")
+chance_mimico = 0.5
+
+[node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=1145598066]
+position = Vector2(162, 1042)
+gizmo_extents = 24.0
+script = ExtResource("22_qn2gd")
+
+[node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=1098048764]
+position = Vector2(152, 1638)
+gizmo_extents = 24.0
+script = ExtResource("22_qn2gd")
+
+[node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=739425775]
+position = Vector2(146, 347)
+gizmo_extents = 24.0
+script = ExtResource("22_qn2gd")
