@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="18_glvar"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="18_qs38v"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="19_dxlyw"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_djeh6"]
 texture = ExtResource("2_djeh6")
@@ -1901,3 +1902,21 @@ position = Vector2(485, 767)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_dxlyw")]
 position = Vector2(1459, 794)
+
+[node name="Tocha1" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(663, 294)
+
+[node name="Tocha2" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(1445, 294)
+
+[node name="Tocha3" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(196, 653)
+
+[node name="Tocha4" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(196, 1018)
+
+[node name="Tocha5" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(1912, 653)
+
+[node name="Tocha6" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(1912, 1018)

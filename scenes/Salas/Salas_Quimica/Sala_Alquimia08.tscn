@@ -20,6 +20,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="18_il4ey"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Slimes/Slime_Boss_Roxo.tscn" id="18_w60sk"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="19_7qren"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w60sk"]
 texture = ExtResource("3_cpqrk")
@@ -1805,3 +1806,21 @@ position = Vector2(1292, 422)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_7qren")]
 position = Vector2(1835.0001, 852)
+
+[node name="Tocha1" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(714, 328)
+
+[node name="Tocha2" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(1496, 328)
+
+[node name="Tocha3" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(247, 654)
+
+[node name="Tocha4" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(247, 980)
+
+[node name="Tocha5" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(1963, 654)
+
+[node name="Tocha6" parent="." instance=ExtResource("tocha_entidade")]
+position = Vector2(1963, 980)
