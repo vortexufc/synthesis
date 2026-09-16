@@ -290,7 +290,7 @@ func _transacionar_porta() -> void:
 			if is_hub_door:
 				var d_name = DatabaseManager.active_dungeon
 				if d_name == "Química":
-					cena_alvo = "res://scenes/Salas/Salas_Quimica/Salas_Ativas/Corredor.tscn"
+					cena_alvo = "res://scenes/Salas/Salas_Quimica/Corredor.tscn"
 				elif d_name == "Física":
 					cena_alvo = "res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn"
 			else:

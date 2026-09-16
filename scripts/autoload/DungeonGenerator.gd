@@ -1,41 +1,67 @@
 extends Node
 
 var hub_geral = "res://scenes/Salas/Comum/Hub_Geral.tscn"
-var sala_inicial = "res://scenes/Salas/Salas_Quimica/Salas_Ativas/Corredor.tscn"
-var sala_01 = "res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia01.tscn"
-var sala_boss_alquimia = "res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_BossAlquimia.tscn"
 
-# Pools organizadas por dificuldade TRI do ENEM para o Andar de Química (Limite de 8 salas):
-# 3 Fáceis (Slime Azul) + 2 Médias (Slime Verde) + 2 Difíceis (Slime Laranja) + 1 Boss Final (Slime Grandão Roxo)
-var salas_quimica_faceis: Array = [
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia01.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia02.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia03.tscn"
+# --- ANDAR DE QUÍMICA (ALQUIMIA) ---
+var sala_inicial = "res://scenes/Salas/Salas_Quimica/Corredor.tscn"
+var sala_01 = "res://scenes/Salas/Salas_Quimica/Sala_Alquimia01.tscn"
+var sala_boss_alquimia = "res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"
+
+# Pool das salas intermediárias de Química (02 a 14) sorteadas aleatoriamente a cada run
+var salas_alquimia_pool: Array = [
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia02.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia03.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia04.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia05.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia06.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia07.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia08.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia09.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia10.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia11.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia12.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia13.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia14.tscn"
 ]
 
-var salas_quimica_medias: Array = [
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia04.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia05.tscn"
-]
-
-var salas_quimica_dificeis: Array = [
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia06.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia07.tscn"
-]
-
-# Pool completa com as 8 salas ativas de Química (7 normais + 1 boss final)
+# Lista com todas as salas de Química (para referência e dev)
 var salas_alquimia: Array = [
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia01.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia02.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia03.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia04.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia05.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia06.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia07.tscn",
-	"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_BossAlquimia.tscn"
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia01.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia02.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia03.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia04.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia05.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia06.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia07.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia08.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia09.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia10.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia11.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia12.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia13.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_Alquimia14.tscn",
+	"res://scenes/Salas/Salas_Quimica/Sala_BossAlquimia.tscn"
 ]
 
-# Pool das 12 salas de Física
+# --- ANDAR DE FÍSICA ---
+var sala_01_fisica = "res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn"
+var sala_boss_fisica = "res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn"
+
+# Pool das salas intermediárias de Física (02 a 11) sorteadas aleatoriamente a cada run
+var salas_fisica_pool: Array = [
+	"res://scenes/Salas/Sala_Fisica/Sala_Física02.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física03.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física04.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física05.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física06.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física07.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física08.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física09.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física10.tscn",
+	"res://scenes/Salas/Sala_Fisica/Sala_Física11.tscn"
+]
+
+# Lista com todas as 12 salas de Física
 var salas_fisica: Array = [
 	"res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn",
 	"res://scenes/Salas/Sala_Fisica/Sala_Física02.tscn",
@@ -108,9 +134,9 @@ func get_index_da_cena(cena: String) -> int:
 	# Mapeamento de equivalências para nomes de sala e protótipos (apenas dentro da mesma matéria!)
 	var masmorra_atual = get_masmorra_do_percurso()
 	if masmorra_atual == "Química":
-		if "sala01.tscn" in cena_lower or "sala_alquimia01.tscn" in cena_lower or "sala_alquimia13.tscn" in cena_lower:
+		if "sala01.tscn" in cena_lower or "sala_alquimia01.tscn" in cena_lower:
 			return 1
-		if "sala_alquimia08.tscn" in cena_lower or "boss" in cena_lower:
+		if "boss" in cena_lower:
 			return percurso_salas.size() - 1
 	elif masmorra_atual == "Física":
 		if "sala_física01.tscn" in cena_lower or "sala_fisica01.tscn" in cena_lower:
@@ -177,7 +203,7 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 		return hub_geral
 
 	# Se estiver na Sala 01 de Química e voltar, vai sempre para o Corredor
-	if "sala01.tscn" in cena_lower or "sala_alquimia01.tscn" in cena_lower or "sala_alquimia13.tscn" in cena_lower:
+	if "sala01.tscn" in cena_lower or "sala_alquimia01.tscn" in cena_lower:
 		if not (sala_inicial.to_lower() in percurso_salas):
 			resetar_masmorra("Química")
 		indice_atual = 1
@@ -252,51 +278,29 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	percurso_salas.append(hub_geral)
 	
 	if active == "Física":
-		# Sala 01 de Física é fixa no início do percurso (conectada diretamente ao Hub)
-		percurso_salas.append("res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn")
+		# 1ª sala: Sala 01 de Física (fixa no início)
+		percurso_salas.append(sala_01_fisica)
 		
-		# Salas intermediárias (02 a 11) embaralhadas
-		var intermediarias = [
-			"res://scenes/Salas/Sala_Fisica/Sala_Física02.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física03.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física04.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física05.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física06.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física07.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física08.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física09.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física10.tscn",
-			"res://scenes/Salas/Sala_Fisica/Sala_Física11.tscn"
-		]
+		# 6 salas intermediárias sorteadas aleatoriamente da pool (02 a 11) sem repetição a cada run
+		var intermediarias = salas_fisica_pool.duplicate()
 		intermediarias.shuffle()
-		percurso_salas.append_array(intermediarias)
+		for i in range(min(6, intermediarias.size())):
+			percurso_salas.append(intermediarias[i])
 		
-		# Sala 12 final com o Boss Robô
-		percurso_salas.append("res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn")
-		print("[DungeonGenerator] Masmorra de Física gerada com ", percurso_salas.size(), " salas (Sala 01 -> intermediárias -> Boss 12).")
+		# 8ª sala: Sala do Boss Robô (fixa no final)
+		percurso_salas.append(sala_boss_fisica)
+		print("[DungeonGenerator] Masmorra de Física gerada com %d salas (Sala 01 -> 6 sorteadas -> Boss 12)." % [percurso_salas.size() - 1])
 	else:
 		# Padrão: Química (Alquimia)
-		# Estrutura de 8 salas no andar (7 normais + 1 boss final) conforme TRI:
-		# 1. Três primeiras salas: Questões Fáceis (Slime Azul)
-		# Fixa a sala_01 na primeira posição (conectada à porta do Corredor) e adiciona as outras fáceis
+		# 1ª sala: Sala 01 de Química (fixa no início)
 		percurso_salas.append(sala_01)
-		var outras_faceis = [
-			"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia02.tscn",
-			"res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia03.tscn"
-		]
-		outras_faceis.shuffle()
-		percurso_salas.append_array(outras_faceis)
 		
-		# 2. Duas salas intermediárias: Questões Médias (Slime Verde)
-		var medias = salas_quimica_medias.duplicate()
-		medias.shuffle()
-		percurso_salas.append_array(medias)
+		# 6 salas intermediárias sorteadas aleatoriamente da pool (02 a 14) sem repetição a cada run
+		var intermediarias = salas_alquimia_pool.duplicate()
+		intermediarias.shuffle()
+		for i in range(min(6, intermediarias.size())):
+			percurso_salas.append(intermediarias[i])
 		
-		# 3. Duas salas avançadas: Questões Difíceis (Slime Laranja)
-		var dificeis = salas_quimica_dificeis.duplicate()
-		dificeis.shuffle()
-		percurso_salas.append_array(dificeis)
-		
-		# 4. Sala Final: Desafio do Boss (Slime Grandão Roxo)
+		# 8ª sala: Sala do Boss Slime Roxo (fixa no final)
 		percurso_salas.append(sala_boss_alquimia)
-		print("[DungeonGenerator] Masmorra de Química gerada com exatamente ", percurso_salas.size() - 1, " salas (7 normais + 1 boss).")
+		print("[DungeonGenerator] Masmorra de Química gerada com %d salas (Sala 01 -> 6 sorteadas -> Boss Alquimia)." % [percurso_salas.size() - 1])

@@ -268,7 +268,7 @@ offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=200828411 instance=ExtResource("14_n8ijl")]
 position = Vector2(628, 269)
-proxima_cena = "res://scenes/Salas/Salas_Quimica/Salas_Ativas/Sala_Alquimia01.tscn"
+proxima_cena = "res://scenes/Salas/Salas_Quimica/Sala_Alquimia01.tscn"
 
 [node name="PortaRetorno" parent="." unique_id=1640528937 instance=ExtResource("14_n8ijl")]
 position = Vector2(628, 1237)
