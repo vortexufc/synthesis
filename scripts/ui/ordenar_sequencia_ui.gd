@@ -232,14 +232,14 @@ func _construir_ui() -> void:
 	lbl_tag.text = "✦ SELO RÚNICO DO PORTÃO ANCESTRAL ✦"
 	lbl_tag.add_theme_font_size_override("font_size", 13)
 	lbl_tag.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
-	_aplicar_fonte_pixel(lbl_tag)
+	_aplicar_fonte_bold(lbl_tag)
 	vbox_header.add_child(lbl_tag)
 	
 	_lbl_titulo = Label.new()
 	_lbl_titulo.text = "ORDENE A SEQUÊNCIA"
 	_lbl_titulo.add_theme_font_size_override("font_size", 22)
 	_lbl_titulo.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
-	_aplicar_fonte_pixel(_lbl_titulo)
+	_aplicar_fonte_bold(_lbl_titulo)
 	vbox_header.add_child(_lbl_titulo)
 	
 	_lbl_descricao = Label.new()
@@ -247,6 +247,7 @@ func _construir_ui() -> void:
 	_lbl_descricao.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_lbl_descricao.add_theme_font_size_override("font_size", 14)
 	_lbl_descricao.add_theme_color_override("font_color", Color(0.8, 0.85, 0.95))
+	_aplicar_fonte_normal(_lbl_descricao)
 	vbox_header.add_child(_lbl_descricao)
 	
 	# botao fechar
@@ -256,6 +257,7 @@ func _construir_ui() -> void:
 	btn_fechar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	btn_fechar.pressed.connect(_on_fechar_clicado)
 	_aplicar_estilo_botao_secundario(btn_fechar)
+	_aplicar_fonte_bold(btn_fechar)
 	hbox_top.add_child(btn_fechar)
 	
 	# separador
@@ -280,6 +282,7 @@ func _construir_ui() -> void:
 	_lbl_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lbl_status.add_theme_font_size_override("font_size", 13)
 	_lbl_status.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	_aplicar_fonte_normal(_lbl_status)
 	vbox_principal.add_child(_lbl_status)
 	
 	# rodape com botao
@@ -294,7 +297,7 @@ func _construir_ui() -> void:
 	_btn_verificar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_btn_verificar.pressed.connect(_on_verificar_clicado)
 	_aplicar_estilo_botao_dourado(_btn_verificar)
-	_aplicar_fonte_pixel(_btn_verificar)
+	_aplicar_fonte_bold(_btn_verificar)
 	hbox_acoes.add_child(_btn_verificar)
 	
 	var btn_desistir = Button.new()
@@ -303,6 +306,7 @@ func _construir_ui() -> void:
 	btn_desistir.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	btn_desistir.pressed.connect(_on_fechar_clicado)
 	_aplicar_estilo_botao_secundario(btn_desistir)
+	_aplicar_fonte_normal(btn_desistir)
 	hbox_acoes.add_child(btn_desistir)
 
 func _atualizar_textos_e_cards() -> void:
@@ -352,7 +356,7 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	lbl_pos.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl_pos.add_theme_font_size_override("font_size", 12)
 	lbl_pos.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5) if not eh_selecionado else Color(1.0, 1.0, 1.0))
-	_aplicar_fonte_pixel(lbl_pos)
+	_aplicar_fonte_bold(lbl_pos)
 	pnl_badge.add_child(lbl_pos)
 	vbox.add_child(pnl_badge)
 	
@@ -377,8 +381,9 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	sb_btn.set_corner_radius_all(6)
 	sb_btn.set_content_margin_all(8)
 	btn_corpo.add_theme_stylebox_override("normal", sb_btn)
-	btn_corpo.add_theme_font_size_override("font_size", 12)
+	btn_corpo.add_theme_font_size_override("font_size", 13)
 	btn_corpo.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
+	_aplicar_fonte_normal(btn_corpo)
 	vbox.add_child(btn_corpo)
 	
 	# setas de mover card
@@ -585,9 +590,30 @@ func _aplicar_estilo_seta(btn: Button) -> void:
 	sb.set_content_margin_all(4)
 	btn.add_theme_stylebox_override("normal", sb)
 	btn.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
-	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_font_size_override("font_size", 12)
+	_aplicar_fonte_bold(btn)
+
+var _font_sys_normal: SystemFont = null
+var _font_sys_bold: SystemFont = null
+
+func _obter_fonte_normal() -> SystemFont:
+	if _font_sys_normal == null:
+		_font_sys_normal = SystemFont.new()
+		_font_sys_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	return _font_sys_normal
+
+func _obter_fonte_bold() -> SystemFont:
+	if _font_sys_bold == null:
+		_font_sys_bold = SystemFont.new()
+		_font_sys_bold.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+		_font_sys_bold.font_weight = 700
+	return _font_sys_bold
+
+func _aplicar_fonte_normal(control: Control) -> void:
+	control.add_theme_font_override("font", _obter_fonte_normal())
+
+func _aplicar_fonte_bold(control: Control) -> void:
+	control.add_theme_font_override("font", _obter_fonte_bold())
 
 func _aplicar_fonte_pixel(control: Control) -> void:
-	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	if font:
-		control.add_theme_font_override("font", font)
+	_aplicar_fonte_bold(control)

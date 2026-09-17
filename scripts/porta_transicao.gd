@@ -9,6 +9,8 @@ extends Area2D
 @export var hub_dungeon_name: String = "" # Ex: "Química"
 @export var textura_porta: Texture2D
 
+@export_category("Tranca e Chave")
+@export var precisa_de_chave: bool = false
 @export var esta_trancada: bool = false
 @export var mensagem_customizada: String = ""
 
@@ -26,6 +28,12 @@ var _base_region_rect: Rect2
 var _porta_aberta: bool = false
 var _checagem_timer: float = 0.0
 
+var _chave_usada: bool = false
+var _player_no_alcance: bool = false
+var _canvas_prompt_chave: CanvasLayer = null
+var _panel_prompt_chave: PanelContainer = null
+var _label_prompt_chave: Label = null
+
 var _selo_ativo: bool = false
 var _selo_resolvido: bool = false
 var _minigame_selo_aberto: bool = false
@@ -33,6 +41,9 @@ var _indicador_selo_node: Node2D = null
 
 # Cooldown para evitar teletransporte imediato ao carregar a cena (loop infinito)
 var _cooldown_ativo: bool = true
+
+func _exit_tree() -> void:
+	_remover_prompt_tranca()
 
 func _ready() -> void:
 	add_to_group("porta_transicao")
@@ -64,9 +75,37 @@ func _ready() -> void:
 			_on_body_entered(body)
 			break
 
+func _player_esta_na_porta() -> bool:
+	if _player_no_alcance:
+		return true
+	for body in get_overlapping_bodies():
+		if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
+			_player_no_alcance = true
+			return true
+	return false
+
 func _on_body_exited(body: Node2D) -> void:
-	if body.name == "Player":
-		_fechar_prompt_hub()
+	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
+		_player_no_alcance = false
+		_remover_prompt_tranca()
+		if is_hub_door:
+			_fechar_prompt_hub()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not _player_esta_na_porta():
+		return
+		
+	var pressionou_f = false
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F or event.physical_keycode == KEY_F or event.key_label == KEY_F:
+			pressionou_f = true
+	if pressionou_f or event.is_action_pressed("interagir"):
+		if _sala_requer_chave() and not _chave_usada:
+			get_viewport().set_input_as_handled()
+			_tentar_abrir_com_chave_f()
+		elif tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
+			get_viewport().set_input_as_handled()
+			_abrir_minigame_selo_runico()
 
 func _process(delta: float) -> void:
 	# Apenas portas de avanço em salas de combate precisam abrir automaticamente
@@ -83,9 +122,135 @@ func _process(delta: float) -> void:
 			if tem_selo_runico and not _selo_resolvido:
 				if not _selo_ativo:
 					_ativar_selo_runico()
+			elif _sala_requer_chave() and not _chave_usada:
+				# apenas mantem o texto atualizado se o jogador estiver encostado
+				if _player_no_alcance:
+					_atualizar_texto_prompt_tranca()
 			else:
-				_porta_aberta = true
-				_abrir_porta_animacao()
+				# sem selo e sem chave: abre sozinha
+				if not _porta_aberta:
+					_porta_aberta = true
+					_abrir_porta_animacao()
+
+# checa se essa porta ou a sala atual exige chave para abrir
+func _sala_requer_chave() -> bool:
+	if porta_de_retorno or is_hub_door:
+		return false
+	if precisa_de_chave:
+		return true
+		
+	var cena = get_tree().current_scene
+	if cena and cena.get("dropar_chave_no_ultimo_monstro") == true:
+		return true
+		
+	var pai = get_parent()
+	if pai and pai.get("dropar_chave_no_ultimo_monstro") == true:
+		return true
+		
+	var dono = owner
+	if dono and dono.get("dropar_chave_no_ultimo_monstro") == true:
+		return true
+		
+	return false
+
+# mostra o prompt na tela igual a porta trancada
+func _exibir_prompt_tranca() -> void:
+	if _canvas_prompt_chave and is_instance_valid(_canvas_prompt_chave):
+		_atualizar_texto_prompt_tranca()
+		return
+		
+	_canvas_prompt_chave = CanvasLayer.new()
+	_canvas_prompt_chave.name = "PromptPortaTrancada"
+	add_child(_canvas_prompt_chave)
+	
+	_panel_prompt_chave = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.08, 0.12, 0.90)
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right = 6
+	style.set_content_margin_all(10)
+	style.border_width_bottom = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_color = Color(0.8, 0.8, 0.8, 0.95)
+	_panel_prompt_chave.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel_prompt_chave.add_theme_stylebox_override("panel", style)
+	
+	_label_prompt_chave = Label.new()
+	_label_prompt_chave.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_label_prompt_chave.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label_prompt_chave.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font_pixel:
+		_label_prompt_chave.add_theme_font_override("font", font_pixel)
+	_label_prompt_chave.add_theme_font_size_override("font_size", 18)
+	
+	_panel_prompt_chave.add_child(_label_prompt_chave)
+	_panel_prompt_chave.custom_minimum_size = Vector2(460, 50)
+	_canvas_prompt_chave.add_child(_panel_prompt_chave)
+	
+	_panel_prompt_chave.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_panel_prompt_chave.offset_top = -130
+	_panel_prompt_chave.offset_bottom = -80
+	_panel_prompt_chave.offset_left = 320
+	_panel_prompt_chave.offset_right = -320
+	
+	_atualizar_texto_prompt_tranca()
+
+func _atualizar_texto_prompt_tranca() -> void:
+	if not _label_prompt_chave or not is_instance_valid(_label_prompt_chave):
+		return
+		
+	var dev_mgr = get_node_or_null("/root/DevManager")
+	var ignorar = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
+	
+	var tem_chave = get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0
+	
+	if tem_chave or ignorar:
+		_label_prompt_chave.text = "Pressione [F] para Usar a Chave Secreta"
+		_label_prompt_chave.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+	else:
+		_label_prompt_chave.text = "Use a chave secreta para acessar essa porta."
+		_label_prompt_chave.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+
+func _remover_prompt_tranca() -> void:
+	if _canvas_prompt_chave and is_instance_valid(_canvas_prompt_chave):
+		_canvas_prompt_chave.queue_free()
+		_canvas_prompt_chave = null
+		_panel_prompt_chave = null
+		_label_prompt_chave = null
+
+# gasta a chave e abre a porta apenas quando o jogador aperta F
+func _tentar_abrir_com_chave_f() -> void:
+	var dev_mgr = get_node_or_null("/root/DevManager")
+	var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
+	
+	var tem_chave = get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0
+	
+	if not tem_chave and not ignorar_bloqueio:
+		_atualizar_texto_prompt_tranca()
+		return
+		
+	if tem_chave and not ignorar_bloqueio:
+		PlayerStats.chaves = max(0, PlayerStats.chaves - 1)
+		if PlayerStats.has_method("salvar"):
+			PlayerStats.salvar()
+			
+	_chave_usada = true
+	_remover_prompt_tranca()
+	
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("ui-1")
+		
+	_porta_aberta = true
+	await _abrir_porta_animacao()
+	
+	if _player_esta_na_porta():
+		_transacionar_porta()
 
 func _ativar_selo_runico() -> void:
 	_selo_ativo = true
@@ -153,10 +318,19 @@ func _on_selo_sequencia_concluido(sucesso: bool) -> void:
 	if sucesso:
 		_selo_ativo = false
 		_selo_resolvido = true
-		_porta_aberta = true
 		_remover_indicador_selo()
 		_mostrar_feedback_hub("✦ Selo Rúnico Rompido! O portão se abriu! ✦", Color(1.0, 0.85, 0.25, 0.95))
+		
+		# se apos romper o selo ainda requerer chave
+		if _sala_requer_chave() and not _chave_usada:
+			if _player_no_alcance:
+				_exibir_prompt_tranca()
+			return
+			
+		_porta_aberta = true
 		await _abrir_porta_animacao()
+		if _player_no_alcance:
+			_transacionar_porta()
 
 func _tem_inimigos_vivos() -> bool:
 	var inimigos = get_tree().get_nodes_in_group("inimigos")
@@ -401,6 +575,8 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 		
 	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
+		_player_no_alcance = true
+		
 		# cheat de passar portas do dev
 		var dev_mgr = get_node_or_null("/root/DevManager")
 		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
@@ -429,10 +605,9 @@ func _on_body_entered(body: Node2D) -> void:
 				return
 
 		if not ignorar_bloqueio:
-			# se tiver trancada
-			if esta_trancada:
-				var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
-				_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9))
+			# se tiver trancada fixa com mensagem customizada
+			if esta_trancada and mensagem_customizada != "":
+				_mostrar_feedback_hub(mensagem_customizada, Color(0.85, 0.25, 0.25, 0.9))
 				return
 				
 			# bloqueia se ainda tiver monstros vivos
@@ -443,6 +618,16 @@ func _on_body_entered(body: Node2D) -> void:
 			# se tem o minigame do selo runico
 			if tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
 				_abrir_minigame_selo_runico()
+				return
+				
+			# se precisa de chave para abrir
+			if _sala_requer_chave() and not _chave_usada:
+				_exibir_prompt_tranca()
+				return
+				
+			# tranca genérica caso esteja marcada como trancada sem chave
+			if esta_trancada:
+				_mostrar_feedback_hub("TRANCADO", Color(0.85, 0.25, 0.25, 0.9))
 				return
 			
 		# Lógica de porta de Hub

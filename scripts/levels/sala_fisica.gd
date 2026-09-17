@@ -4,6 +4,10 @@ extends Node2D
 
 var monstros_na_sala: int = 0
 
+@export_group("Recompensas")
+# ativa o drop de chave ao derrotar o ultimo monstro da sala
+@export var dropar_chave_no_ultimo_monstro: bool = false
+
 @export_group("Iluminação Ambiente")
 # cor da iluminacao da sala
 @export var cor_ambiente: Color = Color(0.74, 0.78, 0.84, 1.0)
@@ -459,8 +463,19 @@ func _iniciar_sistema_inimigos_e_portas() -> void:
 
 func _on_inimigo_derrotado(pos: Vector2) -> void:
 	monstros_na_sala -= 1
-	if monstros_na_sala <= 0:
+	if monstros_na_sala <= 0 and _deve_dropar_chave():
 		_dropar_recompensa(pos)
+
+func _deve_dropar_chave() -> bool:
+	if dropar_chave_no_ultimo_monstro:
+		return true
+	# detecta se tem alguma porta trancada precisando de chave
+	for p in get_tree().get_nodes_in_group("porta_transicao"):
+		if is_ancestor_of(p) and (p.get("esta_trancada") == true or p.get("precisa_de_chave") == true):
+			return true
+	if has_node("PortaTrancada") or has_node("PortaTrancadaTeste"):
+		return true
+	return false
 
 func _dropar_recompensa(pos: Vector2) -> void:
 	var cena_atual = scene_file_path.to_lower()
