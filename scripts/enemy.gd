@@ -1,45 +1,34 @@
 extends CharacterBody2D
 
-## [Dev-1] Script do Inimigo — variáveis exportáveis + patrulha aleatória
-## Move-se em direções aleatórias (8 direções) até encontrar o Player.
-## Ao receber o sinal de batalha, para completamente.
+# script do inimigo e movimentacao
 
 signal inimigo_derrotado(pos: Vector2)
 
-# ──────────────────────────────────────────
-# Atributos do Inimigo (configuráveis pelo Inspector)
-# ──────────────────────────────────────────
-@export var vida_maxima:       float = 100.0  ## HP total do inimigo
-@export var velocidade:        float =  55.0  ## Pixels/segundo na patrulha
-@export var dano:              float =  25.0  ## Dano base por erro do jogador
-@export var tempo_min_direcao: float =  0.8   ## Mínimo de segundos antes de sortear nova direção
-@export var tempo_max_direcao: float =  2.2   ## Máximo de segundos antes de sortear nova direção
-@export var chance_pausa:      float =  0.2   ## 0.0‒1.0 — chance de parar por um instante ao trocar direção
-@export var distancia_perseguicao: float = 200.0 ## Distância máxima para começar a perseguir o Player
-@export var velocidade_perseguicao: float = 75.0  ## Velocidade ao perseguir o Player
+@export var vida_maxima:       float = 100.0
+@export var velocidade:        float =  55.0
+@export var dano:              float =  25.0
+@export var tempo_min_direcao: float =  0.8
+@export var tempo_max_direcao: float =  2.2
+@export var chance_pausa:      float =  0.2
+@export var distancia_perseguicao: float = 200.0
+@export var velocidade_perseguicao: float = 75.0
 
-# ──────────────────────────────────────────
-# Atributos Especiais (Inimigo Rúnico / Campeão)
-# ──────────────────────────────────────────
 @export var eh_runico: bool = false
-@export var chance_ser_runico: float = 0.35 ## 35% de chance de nascer como Campeão Rúnico
+@export var chance_ser_runico: float = 0.35
 
-# ──────────────────────────────────────────
-# Estado interno
-# ──────────────────────────────────────────
 var vida_atual:      float
 var _em_batalha:     bool    = false
 var _sou_o_combatente: bool  = false
 var _em_pausa:       bool    = false
-var _direcao:        Vector2 = Vector2.RIGHT  ## Direção atual da patrulha (normalizada)
-var _timer_direcao:  float   = 0.0            ## Tempo restante nesta direção
-var _timer_pausa:    float   = 0.0            ## Tempo de pausa (imóvel)
+var _direcao:        Vector2 = Vector2.RIGHT
+var _timer_direcao:  float   = 0.0
+var _timer_pausa:    float   = 0.0
 var _player:         Node2D  = null
 var _perseguindo:    bool    = false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-# ── Direções possíveis (8 direções) — var pois .normalized() não é constante no GDScript 4 ──
+# 8 direcoes possiveis
 var DIRECOES: Array = [
 	Vector2(1, 0),                 # Direita
 	Vector2(-1, 0),                # Esquerda
@@ -207,12 +196,12 @@ func _criar_aura_runica() -> void:
 		else:
 			pos_y = 20.0
 
-	# 1. Círculo Rúnico Procedural (GradientTexture2D Radial)
+	# circulo de luz no chao pro runico
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([
-		Color(0.2, 0.9, 1.0, 0.75),   # Ciano cintilante no centro
-		Color(0.65, 0.25, 0.95, 0.45), # Roxo arcano
-		Color(0.1, 0.05, 0.4, 0.0)    # Fade total para o chão
+		Color(0.2, 0.9, 1.0, 0.75),
+		Color(0.65, 0.25, 0.95, 0.45),
+		Color(0.1, 0.05, 0.4, 0.0)
 	])
 	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
 
@@ -237,7 +226,7 @@ func _criar_aura_runica() -> void:
 	tw.tween_property(aura_runica_sprite, "scale", Vector2(2.4, 1.35), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(aura_runica_sprite, "scale", Vector2(1.8, 0.95), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
-	# 2. Partículas Procedurais Mágicas Subindo
+	# particulas saindo do chao
 	particulas_runicas = CPUParticles2D.new()
 	particulas_runicas.name = "ParticulasAura"
 	particulas_runicas.amount = 10
@@ -256,7 +245,7 @@ func _criar_aura_runica() -> void:
 	particulas_runicas.z_index = 2
 	add_child(particulas_runicas)
 
-	# 3. Tag / Glifo "✦ RÚNICO ✦" flutuando sobre o monstro
+	# texto de runico em cima da cabeca
 	tag_runico_label = Label.new()
 	tag_runico_label.name = "TagRunico"
 	tag_runico_label.text = "✦ RÚNICO ✦"
@@ -324,13 +313,14 @@ func _animar_sombra(delta: float) -> void:
 		shadow.scale.x = shadow_base_scale.x + onda * (shadow_base_scale.x * 0.04)
 		shadow.scale.y = shadow_base_scale.y + onda * (shadow_base_scale.y * 0.04)
 
-# ──────────────────────────────────────────
-# Loop de Patrulha Aleatória
-# ──────────────────────────────────────────
+# checa se o player ta ocupado com bau, dialogo ou tela
 func _player_em_interacao(p_node: Node2D = null) -> bool:
 	var pl = p_node if p_node else _player
 	if pl and is_instance_valid(pl):
-		if pl.has_method("esta_em_interacao"):
+		if pl.has_method("esta_imune_a_combate"):
+			if pl.esta_imune_a_combate():
+				return true
+		elif pl.has_method("esta_em_interacao"):
 			if pl.esta_em_interacao():
 				return true
 		elif pl.get("travado") == true or pl.get("em_interacao") == true:
@@ -445,56 +435,48 @@ func _physics_process(delta: float) -> void:
 					trigger._on_body_entered(collider)
 					return
 
-	# Se colidiu com parede (e não estiver perseguindo), sorteia nova direção imediatamente
+	# se bateu na parede, sorteia outro rumo
 	if not no_alcance and velocity.length() < 1.0 and not _em_pausa:
 		_sortear_nova_direcao()
 
-# ──────────────────────────────────────────
-# Sorteia uma nova direção e reseta o timer
-# ──────────────────────────────────────────
+# escolhe outra direcao e reseta o tempo
 func _sortear_nova_direcao() -> void:
 	_direcao       = DIRECOES[randi() % DIRECOES.size()]
 	_timer_direcao = randf_range(tempo_min_direcao, tempo_max_direcao)
 
-# ──────────────────────────────────────────
-# Reação aos Sinais de Batalha
-# ──────────────────────────────────────────
+# pausa ou volta a andar na batalha
 func _on_batalha_iniciada(enemy_data: Dictionary) -> void:
-	# Compara se o node referenciado em enemy_data["inimigo_node"] é esta própria instância
+	# para o monstro quando a batalha comeca
 	_sou_o_combatente = (enemy_data.get("inimigo_node") == self)
 
-	## Para a patrulha imediatamente — desliga o physics process no nível do engine
 	_em_batalha = true
 	_em_pausa   = false
 	velocity    = Vector2.ZERO
-	set_physics_process(false)  # Congelamento garantido, independente do pause da árvore
-	hide()                      # Esconde o inimigo enquanto a batalha ocorre
-	print("[Dev-1] Inimigo pausou patrulha — batalha iniciada.")
+	set_physics_process(false)  # trava o bicho
+	hide()                      # some da tela
+	print("inimigo pausado por causa da batalha")
 
 func _on_batalha_encerrada(vitoria: bool) -> void:
 	if vitoria:
 		if not _sou_o_combatente:
-			# Se o jogador venceu a batalha, mas não foi contra este monstro específico,
-			# este monstro deve reaparecer e continuar a patrulha normalmente.
+			# se ganhou de outro bicho, volto a andar
 			_em_batalha = false
 			show()
 			set_physics_process(true)
 			_sortear_nova_direcao()
-			print("[Prog-08] Inimigo secundário retomou patrulha — outro inimigo foi derrotado.")
+			print("outro inimigo morreu, voltando a patrulhar")
 	else:
-		# Se o jogador perdeu a batalha, todos os inimigos voltam a patrulhar
+		# se perdeu, todo mundo volta a patrulhar
 		_em_batalha = false
-		show()                      # Volta a exibir o inimigo no mapa
-		set_physics_process(true)   # Religa o movimento
+		show()                      # volta o bicho
+		set_physics_process(true)   # liga o movimento de novo
 		_sortear_nova_direcao()
-		print("[Dev-1] Inimigo retomou patrulha aleatória — jogador derrotado.")
+		print("player perdeu, voltando a patrulhar")
 
-# ──────────────────────────────────────────
-# Dano recebido (chamado pelo QuizManager via acerto do jogador)
-# ──────────────────────────────────────────
+# controle de dano e morte
 func sofrer_dano(quantidade: float) -> void:
 	vida_atual = max(0.0, vida_atual - quantidade)
-	print("[Dev-1] Inimigo recebeu %.0f de dano. Vida: %.0f / %.0f" % [quantidade, vida_atual, vida_maxima])
+	print("dano no monstro: ", quantidade, " vida: ", vida_atual)
 
 func derrotar() -> void:
 	_dropar_itens()
@@ -524,7 +506,7 @@ func _dropar_itens() -> void:
 	var is_boss_slime = is_quimica and (("boss" in enemy_id_lower) or ("roxo" in enemy_id_lower) or ("boss" in nome_baixo) or ("roxo" in nome_baixo) or ("boss_roxo" in sf_path))
 	var is_boss = is_boss_slime or ("boss" in enemy_id_lower) or (enemy_id_lower == "robo_g") or ("boss" in nome_baixo)
 
-	# [Regra Especial] Boss Slime Roxo não dropa fragmento, APENAS moeda!
+	# boss roxo só dá moeda
 	if is_boss_slime:
 		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
@@ -533,7 +515,7 @@ func _dropar_itens() -> void:
 			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 		return
 
-	# Chefe de física (Robô Grandão) ou outros chefes
+	# boss robo
 	if is_boss:
 		if is_fisica:
 			_instanciar_drop("res://scenes/Entidades/ItemChip.tscn")
@@ -543,8 +525,8 @@ func _dropar_itens() -> void:
 			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 		return
 
-	# Determina a cor do fragmento baseada na cor do slime derrotado
-	var cor_slime = "azul" # Padrão: Slime_P / Slime Azul
+	# acha a cor certa do slime
+	var cor_slime = "azul" 
 	if ("verde" in enemy_id_lower) or ("verde" in nome_baixo) or ("slime_verde" in sf_path):
 		cor_slime = "verde"
 	elif ("laranja" in enemy_id_lower) or ("vermelho" in enemy_id_lower) or ("slime_g" in enemy_id_lower) or ("laranja" in nome_baixo) or ("vermelho" in nome_baixo) or ("slime_g" in nome_baixo) or ("slime_g" in sf_path):
@@ -552,7 +534,7 @@ func _dropar_itens() -> void:
 	else:
 		cor_slime = "azul"
 
-	# Sempre dropa o item temático correspondente E moeda de ouro
+	# dropa item e moeda
 	if is_quimica:
 		_instanciar_drop("res://scenes/Entidades/ItemFragmentoGelatina.tscn", {"cor": cor_slime})
 		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
@@ -562,7 +544,7 @@ func _dropar_itens() -> void:
 	else:
 		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 
-	# Se for Campeão Rúnico, concede moedas extras em celebração à quebra de barreira!
+	# bicho runico da mais moeda
 	if eh_runico:
 		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
 		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
@@ -575,27 +557,28 @@ func _instanciar_drop(caminho: String, dados_custom: Dictionary = {}) -> void:
 	if dados_custom.has("cor") and item.has_method("configurar_cor"):
 		item.configurar_cor(dados_custom["cor"])
 	
-	# Direção base padrão aleatória
-	var angle = randf() * TAU
-	var dist = randf_range(65.0, 95.0)
-	
-	# Se o jogador estiver por perto, projeta o drop em um cone para LONGE dele
-	# Isso garante que o item não caia em cima do player (permitindo que ele veja o item antes de ir pegar)
-	var player = get_tree().get_first_node_in_group("player")
-	if player and is_instance_valid(player):
-		var dir_player = (global_position - player.global_position).normalized()
-		if dir_player != Vector2.ZERO:
-			# Dispersão de ±50 graus na direção oposta ao jogador
-			angle = dir_player.angle() + randf_range(-PI * 0.28, PI * 0.28)
-			
-	var dir = Vector2.from_angle(angle)
-	var pos_alvo = global_position + dir * dist
-	if caminho.ends_with("ItemChave.tscn"):
-		# Chave também salta um pouco para ser bem visível
-		dist = randf_range(55.0, 80.0)
+	# joga o item um pouco longe do player
+	var pos_alvo = global_position
+	var dir = Vector2.RIGHT
+	if _player and is_instance_valid(_player):
+		var dir_player = (global_position - _player.global_position).normalized()
+		var angulo_aleatorio = randf_range(-deg_to_rad(50.0), deg_to_rad(50.0))
+		var dir_drop = dir_player.rotated(angulo_aleatorio)
+		var distancia = randf_range(35.0, 65.0)
+		pos_alvo = global_position + dir_drop * distancia
+		dir = dir_drop
+	else:
+		var angle = randf() * TAU
+		var dist = randf_range(65.0, 95.0)
+		dir = Vector2.from_angle(angle)
 		pos_alvo = global_position + dir * dist
 
-	# Prevenção contra paredes: Raycast na camada 1 de colisão de cenário
+	if caminho.ends_with("ItemChave.tscn"):
+		# chave pula mais longe
+		var dist = randf_range(55.0, 80.0)
+		pos_alvo = global_position + dir * dist
+
+	# nao deixa o item parar dentro da parede
 	if is_inside_tree() and get_world_2d():
 		var space_state = get_world_2d().direct_space_state
 		if space_state:

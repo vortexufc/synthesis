@@ -1,8 +1,6 @@
 extends Area2D
 
-## [Armadilha Alquímica] Frasco de Reagente Instável
-## Parece um frasco de poção inofensivo no chão, mas ao ser inspecionado com [F],
-## detona uma reação exotérmica violenta causando -35 HP no jogador!
+# frasco falso (parece pocao no chao, mas explode com F)
 
 @export var dano: float = 35.0
 
@@ -30,8 +28,8 @@ func _gerar_aura_instavel() -> void:
 	if aura_brilho and not aura_brilho.texture:
 		var grad = Gradient.new()
 		grad.colors = PackedColorArray([
-			Color(1.0, 0.45, 0.1, 0.75), # Laranja fogo reagente
-			Color(0.9, 0.1, 0.3, 0.45), # Carmim instável
+			Color(1.0, 0.45, 0.1, 0.75),
+			Color(0.9, 0.1, 0.3, 0.45),
 			Color(0.0, 0.0, 0.0, 0.0)
 		])
 		grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
@@ -46,13 +44,13 @@ func _gerar_aura_instavel() -> void:
 		aura_brilho.texture = tex
 		
 	if aura_brilho:
-		# Efeito de tremor/instabilidade térmica
+		# aura tremendo de leve
 		var tw = create_tween().set_loops()
 		tw.tween_property(aura_brilho, "scale", Vector2(1.3, 1.3), 0.5).set_trans(Tween.TRANS_SINE)
 		tw.tween_property(aura_brilho, "scale", Vector2(0.9, 0.9), 0.5).set_trans(Tween.TRANS_SINE)
 		
 	if sprite_frasco:
-		# Leve jittering / tremidinha de substância volátil fervendo
+		# frasco balançando
 		var tw_f = create_tween().set_loops()
 		tw_f.tween_property(sprite_frasco, "rotation", 0.08, 0.25)
 		tw_f.tween_property(sprite_frasco, "rotation", -0.08, 0.25)
@@ -81,16 +79,16 @@ func detonar_reagente() -> void:
 	_detonado = true
 	_remover_prompt()
 	
-	# Esconde o frasco e a aura
+	# esconde o frasco
 	if sprite_frasco: sprite_frasco.visible = false
 	if aura_brilho: aura_brilho.visible = false
 	
-	# 1. Partículas de explosão
+	# efeito de explosao
 	if particulas_explosao:
 		particulas_explosao.restart()
 		particulas_explosao.emitting = true
 		
-	# 2. Aplica dano ao jogador com shake violento
+	# tira vida do player
 	if _player_perto and is_instance_valid(_player_perto):
 		if _player_perto.has_method("receber_dano"):
 			_player_perto.receber_dano(dano, 16.0, "Reação Exotérmica")
@@ -101,7 +99,7 @@ func detonar_reagente() -> void:
 		AudioManager.play_sfx("ui-2")
 		AudioManager.tocar_som_dano()
 		
-	# 3. Exibe o aviso explicativo na tela (estilo o Mímico)
+	# popup avisando do dano
 	_exibir_modal_aviso_explosao()
 
 func _exibir_prompt() -> void:

@@ -1,12 +1,11 @@
 extends Node
 
-## Autoload responsável por gerar anotações de estudo ricas, detalhadas e explicativas.
-## Fornece explicações profundas sobre os conceitos das questões do andar, com suporte a rolagem.
+# gera os textos de estudo dos pergaminhos
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-## Gera até 4 páginas de anotações extensas com explicações detalhadas sobre os conceitos.
+# gera as paginas de resumo com base na materia
 func obter_paginas_dicas(andar_id: int = 1, questoes_custom: Array = [], num_paginas: int = 4) -> Array[String]:
 	var paginas: Array[String] = []
 	var max_paginas = clamp(num_paginas, 1, 4)
@@ -100,7 +99,7 @@ func _gerar_explicacao_conceitual(pergunta: String, resposta: String, _andar_id:
 	elif p_lower.contains("velocidade") or p_lower.contains("tempo") or p_lower.contains("distância"):
 		return "No Movimento Retilíneo Uniforme (MRU), a velocidade do objeto é constante e não nula. A velocidade média é definida pela variação do deslocamento dividida pelo intervalo de tempo decorrido (v = delta_s / delta_t)."
 		
-	# Fallback genérico explicativo
+	# texto padrao se nao achar a materia
 	if resposta != "":
 		return "Para responder corretamente a esta questão, é fundamental recordar que o princípio científico analisado demonstra que o resultado correto é: " + resposta + ". Estude as relações entre as variáveis e a teoria envolvida."
 	return "Estude detalhadamente as propriedades e princípios apresentados nas aulas teóricas para dominar este assunto."

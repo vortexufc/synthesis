@@ -1,12 +1,6 @@
 extends Node2D
 
-## Controlador da Cena do Corredor de Química
-## Aplica o sistema de iluminação realista da masmorra:
-## - Escuridão ambiente misteriosa (CanvasModulate)
-## - Tochas de parede com chamas vivas e flicker dinâmico
-## - Luz de caminhada do mago jogador clareando os passos
-## - Brilho químico sutil no frasco do Cientista
-## - Portais das extremidades do corredor com iluminação temática
+# script do corredor de quimica
 
 var _canvas_modulate: CanvasModulate = null
 var _luzes_tochas: Array = []
@@ -26,7 +20,7 @@ func _ready() -> void:
 	_configurar_sistema_iluminacao()
 
 func _obter_textura_luz() -> Texture2D:
-	# Textura radial nativa com decaimento cúbico suave e transparência perfeita
+	# cria a textura da luz
 	var grad_tex = GradientTexture2D.new()
 	var grad = Gradient.new()
 	grad.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CUBIC
@@ -47,13 +41,13 @@ func _obter_textura_luz() -> Texture2D:
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
 	
-	# 1. CanvasModulate: Tom azul-ardósia escuro da masmorra
+	# escurece o corredor
 	_canvas_modulate = CanvasModulate.new()
 	_canvas_modulate.name = "AmbienteMasmorra"
 	_canvas_modulate.color = Color(0.24, 0.24, 0.35, 1.0)
 	add_child(_canvas_modulate)
 	
-	# 2. Tochas: Iluminação quente e viva em todas as tochas das paredes do corredor
+	# luzes das tochas nas paredes
 	var decor_layer = find_child("Decoration", true, false) as TileMapLayer
 	if decor_layer:
 		var cells = decor_layer.get_used_cells()
@@ -68,7 +62,7 @@ func _configurar_sistema_iluminacao() -> void:
 			luz.energy = 0.55
 			luz.texture_scale = 1.55
 			add_child(luz)
-			# Alinha a luz exatamente no topo da tocha onde a chama queima
+			# ajusta altura da luz na tocha
 			luz.global_position = pos_global + Vector2(0, -18)
 			
 			_luzes_tochas.append({
@@ -79,7 +73,7 @@ func _configurar_sistema_iluminacao() -> void:
 				"speed": randf_range(7.0, 12.0)
 			})
 	
-	# 3. Aura do Jogador: Clareia o chão e as paredes por onde o mago caminha
+	# luz que segue o player
 	var player = find_child("Player", true, false)
 	if player:
 		_luz_player = PointLight2D.new()
@@ -91,7 +85,7 @@ func _configurar_sistema_iluminacao() -> void:
 		_luz_player.position = Vector2(0, -10)
 		player.add_child(_luz_player)
 	
-	# 4. Brilho Alquímico no Frasco do Cientista
+	# luz no frasco do cientista
 	var cientista = find_child("NPCCientista", true, false)
 	if cientista:
 		_luz_frasco_cientista = PointLight2D.new()
@@ -103,7 +97,7 @@ func _configurar_sistema_iluminacao() -> void:
 		_luz_frasco_cientista.position = Vector2(18, -98) # Posição exata do frasco na mão do cientista
 		cientista.add_child(_luz_frasco_cientista)
 	
-	# 5. Portais nas extremidades do corredor
+	# portais nas pontas do corredor
 	_criar_luz_portal("PortaTransicao", Color(0.85, 0.38, 1.0, 1.0)) # Saída para Química - Roxo arcano
 	_criar_luz_portal("PortaRetorno", Color(0.60, 0.65, 1.0, 1.0))    # Retorno ao Hub - Azul misterioso
 
@@ -137,7 +131,7 @@ func _process(delta: float) -> void:
 	_tempo_luz_tick = 0.0
 	_tempo_iluminacao += dt
 	
-	# 1. Efeito de chamas tremeluzindo nas tochas das paredes
+	# pisca a luz das tochas
 	for tocha in _luzes_tochas:
 		var node = tocha["node"] as PointLight2D
 		if not node or not is_instance_valid(node):
@@ -149,17 +143,17 @@ func _process(delta: float) -> void:
 		var flicker = f1 + f2
 		node.energy = tocha["base_energy"] + flicker
 	
-	# 2. Pulso suave da aura de caminhada do mago jogador
+	# pulso da luz do player
 	if _luz_player and is_instance_valid(_luz_player):
 		var pulso_p = sin(_tempo_iluminacao * 2.0) * 0.02
 		_luz_player.energy = 0.34 + pulso_p
 		
-	# 3. Pulso sutil no frasco químico do Cientista
+	# pulso no frasco do npc
 	if _luz_frasco_cientista and is_instance_valid(_luz_frasco_cientista):
 		var pulso_c = sin(_tempo_iluminacao * 2.6) * 0.02
 		_luz_frasco_cientista.energy = 0.18 + pulso_c
 	
-	# 4. Pulso místico nos portais
+	# pulso nos portais
 	for portal_info in _luzes_portais:
 		var luz_p = portal_info["node"] as PointLight2D
 		if luz_p and is_instance_valid(luz_p):

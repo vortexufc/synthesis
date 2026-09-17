@@ -1,14 +1,6 @@
 extends Node2D
 
-## Controlador Base de Iluminação e Visual Realista para as Salas de Química
-## Aplica a atmosfera misteriosa e imersiva:
-## - Escuridão ambiente misteriosa da masmorra (CanvasModulate)
-## - Aura mágica acolhedora no pé do mago jogador (PointLight2D suave)
-## - Portais das portas com iluminação temática (Violeta na saída e Ciano/Azul no retorno)
-## - Brilho alquímico e vapor/bolhas mágicas no caldeirão borbulhante
-## - Cintilação mágica em frascos de cristal e poções de laboratório
-## - Posicionamento orgânico de tochas de parede com fogo vivo e brasas caso não existam
-## - Gerenciamento de inimigos, combate e drop de chaves de porta
+# script base das salas de quimica
 
 var monstros_na_sala: int = 0
 
@@ -82,7 +74,7 @@ func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2
 		"offset": randf() * 10.0
 	})
 	
-	# Vapor e bolhas mágicas saindo do caldeirão
+	# fumaca e bolhas do caldeirao
 	var part = CPUParticles2D.new()
 	part.name = "ParticulasCaldeirao_" + id_sufixo
 	part.position = pos + Vector2(0, -10)
@@ -114,14 +106,14 @@ func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
 	
-	# 1. CanvasModulate: Cria a atmosfera escura e profunda da masmorra
+	# escurece a masmorra
 	if not find_child("AmbienteMasmorra", true, false):
 		_canvas_modulate = CanvasModulate.new()
 		_canvas_modulate.name = "AmbienteMasmorra"
 		_canvas_modulate.color = Color(0.24, 0.24, 0.35, 1.0)
 		add_child(_canvas_modulate)
 	
-	# 2. Aura do Jogador: Clareia os passos do mago e o chão
+	# luz que segue o player
 	var player = find_child("Player", true, false)
 	if player and not player.get_node_or_null("AuraPlayer"):
 		_luz_player = PointLight2D.new()
@@ -135,14 +127,14 @@ func _configurar_sistema_iluminacao() -> void:
 	elif player:
 		_luz_player = player.get_node_or_null("AuraPlayer") as PointLight2D
 		
-	# 3. Luzes temáticas nos Portais
+	# luzes nos portais
 	_criar_luz_portal("PortaTransicao", Color(0.85, 0.38, 1.0, 1.0)) # Roxo químico arcano
 	_criar_luz_portal("PortaRetorno", Color(0.25, 0.78, 1.0, 1.0))   # Azul misterioso de retorno
 	
-	# 4. Detecção e iluminação automática de objetos alquímicos na decoração
+	# luzes nos caldeiroes e frascos
 	_configurar_props_alquimia(tex_luz)
 	
-	# 5. Tochas de parede: se a sala não possuir tochas instanciadas, gera tochas de parede orgânicas
+	# coloca tochas na parede se nao tiver
 	_garantir_tochas_na_sala()
 
 func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
@@ -157,13 +149,12 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 		var cell_world = decor.to_global(decor.map_to_local(cell))
 		var cell_id = str(cell.x) + "_" + str(cell.y)
 		
-		# Identifica textura de origem se disponível
+		# pega a textura do cenario
 		var src_id = decor.get_cell_source_id(cell)
 		var src = decor.tile_set.get_source(src_id) as TileSetAtlasSource if decor.tile_set else null
 		var tex_name = src.texture.resource_path.get_file() if (src and src.texture) else ""
 		
-		# 4.1 Marcas / Círculos Rúnicos no Chão em círculo.png (atlas 0:0, 6:0, 12:0)
-		# Apenas brilho suave de sua respectiva cor iluminando as bordas e runas, SEM bolhas nem vapor
+		# runas no chao
 		var is_circulo = (src and src.texture and ("círculo" in src.texture.resource_path or "circulo" in src.texture.resource_path.to_lower())) or ("c" in tex_name.to_lower() and "ulo" in tex_name.to_lower())
 		if is_circulo or (atlas.y == 0 and (atlas.x == 0 or atlas.x == 6 or atlas.x == 12) and ("OBJETOS" not in tex_name)):
 			var cor_runa = Color(1.0, 1.0, 1.0, 1.0)
@@ -171,17 +162,17 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 			var id_runa = ""
 			
 			if atlas.x == 0:
-				# Runa Verde no chão
+				# runa verde
 				cor_runa = Color(0.35, 0.95, 0.30, 1.0)
 				pos_runa = cell_world
 				id_runa = "RunaVerde_" + cell_id
 			elif atlas.x == 6:
-				# Runa Âmbar / Dourada no chão
+				# runa dourada
 				cor_runa = Color(0.95, 0.52, 0.18, 1.0)
 				pos_runa = cell_world + Vector2(-16, 0)
 				id_runa = "RunaAmbar_" + cell_id
 			elif atlas.x == 12:
-				# Runa Violeta / Roxa no chão
+				# runa roxa
 				cor_runa = Color(0.80, 0.32, 0.95, 1.0)
 				pos_runa = cell_world
 				id_runa = "RunaRoxa_" + cell_id
@@ -197,10 +188,10 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 				add_child(luz_runa)
 				_luzes_props.append({"node": luz_runa, "base_energy": 0.35, "speed": 1.5, "offset": randf() * 5.0})
 				
-		# 4.2 Caldeirões de Pé em OBJETOS02.png (atlas 0:6 = Amarelo/Âmbar, 8:6 = Verde/Ácido)
+		# caldeiroes de pe
 		elif atlas.y == 6 and (atlas.x == 0 or atlas.x == 8) and ("OBJETOS02" in tex_name or tex_name == ""):
 			if atlas.x == 0:
-				# Caldeirão de Pé Amarelo / Dourado (brilho quente + bolhas âmbar/ouro)
+				# caldeirao amarelo
 				_adicionar_caldeirao(
 					tex_luz, tex_bolha,
 					cell_world + Vector2(-4, -36),
@@ -214,7 +205,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 					"CaldeiraoAmarelo_" + cell_id
 				)
 			elif atlas.x == 8:
-				# Caldeirão de Pé Verde / Ácido (brilho verde-lima + bolhas verdes)
+				# caldeirao verde
 				_adicionar_caldeirao(
 					tex_luz, tex_bolha,
 					cell_world + Vector2(-4, -36),
@@ -228,7 +219,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 					"CaldeiraoVerde_" + cell_id
 				)
 				
-		# 4.3 Caldeirão de Pé Arcano em OBJETOS.png (atlas 91, 20)
+		# caldeirao roxo
 		elif atlas == Vector2i(91, 20):
 			_adicionar_caldeirao(
 				tex_luz, tex_bolha,
@@ -243,10 +234,10 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 				"ObjetosRoxo_" + cell_id
 			)
 			
-		# 4.4 Caldeirões Derramados / Tombados em OBJETOS02.png (atlas.y == 19)
+		# caldeiroes tombados no chao
 		elif atlas.y == 19 and ("OBJETOS02" in tex_name or tex_name == ""):
 			if atlas.x in [16, 17]:
-				# Caldeirão Tombado Azul Místico com poça derramada
+				# caldeirao azul tombado
 				_adicionar_caldeirao(
 					tex_luz, tex_bolha,
 					cell_world + Vector2(10, 14),
@@ -260,7 +251,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 					"TombadoAzul_" + cell_id
 				)
 			elif atlas.x in [24, 25]:
-				# Caldeirão Tombado Ciano / Turquesa com poça derramada
+				# caldeirao ciano tombado
 				_adicionar_caldeirao(
 					tex_luz, tex_bolha,
 					cell_world + Vector2(10, 14),
@@ -274,7 +265,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 					"TombadoCiano_" + cell_id
 				)
 			elif atlas.x in [32, 33]:
-				# Caldeirão Tombado Vermelho Carmesim / Sangue Alquímico com poça derramada
+				# caldeirao vermelho tombado
 				_adicionar_caldeirao(
 					tex_luz, tex_bolha,
 					cell_world + Vector2(10, 14),
@@ -287,9 +278,9 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 					Vector2(14, 6),
 					"TombadoVermelho_" + cell_id
 				)
-			# NOTA: atlas.x in [40, 41] é entulho de madeira/mesa quebrada, não é caldeirão e NÃO deve ter efeitos.
+			# ignora madeira quebrada
 				
-		# 4.5 Frasco de Cristais Arcanos (atlas 40, 20)
+		# frasco com cristais
 		elif atlas == Vector2i(40, 20):
 			var luz_cristal = PointLight2D.new()
 			luz_cristal.name = "LuzFrascoCristal_" + cell_id
@@ -301,7 +292,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 			add_child(luz_cristal)
 			_luzes_props.append({"node": luz_cristal, "base_energy": 0.40, "speed": 1.9, "offset": randf() * 5.0})
 			
-		# 4.5 Frasco de Alquimia Botânica (atlas 40, 32)
+		# frasco verde
 		elif atlas == Vector2i(40, 32):
 			var luz_planta = PointLight2D.new()
 			luz_planta.name = "LuzFrascoPlanta_" + cell_id
@@ -386,7 +377,7 @@ func _process(delta: float) -> void:
 	_tempo_luz_tick = 0.0
 	_tempo_iluminacao += dt
 	
-	# 1. Borbulhar dinâmico em todos os Caldeirões da sala
+	# animacao do borbulhar nos caldeiroes
 	for c_data in _luzes_caldeiroes:
 		var luz = c_data["node"] as PointLight2D
 		if luz and is_instance_valid(luz):
@@ -394,19 +385,19 @@ func _process(delta: float) -> void:
 			var borbulha = sin(t * 5.5) * 0.06 + sin(t * 9.2) * 0.03
 			luz.energy = c_data["base_energy"] + borbulha
 		
-	# 2. Pulso sutil da aura do mago jogador
+	# pulso da luz do mago
 	if _luz_player and is_instance_valid(_luz_player):
 		var pulso_p = sin(_tempo_iluminacao * 2.0) * 0.02
 		_luz_player.energy = 0.34 + pulso_p
 		
-	# 3. Pulsação dos portais das portas
+	# luz dos portais pulsando
 	for portal in _luzes_portais:
 		var node = portal["node"] as PointLight2D
 		if node and is_instance_valid(node):
 			var pulso = sin((_tempo_iluminacao + portal["offset"]) * 2.2) * 0.04
 			node.energy = portal["base_energy"] + pulso
 			
-	# 4. Cintilação mágica suave dos frascos de laboratório
+	# pisca luz dos frascos
 	for prop in _luzes_props:
 		var node = prop["node"] as PointLight2D
 		if node and is_instance_valid(node):

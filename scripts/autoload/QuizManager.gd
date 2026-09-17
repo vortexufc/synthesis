@@ -5,7 +5,7 @@ var shuffled_questions = []
 var current_index = 0
 var ultima_sala_sorteada: String = ""
 
-## [Local] Questões específicas do inimigo atual (sobrescrevem o banco)
+# questoes proprias desse inimigo (substituem o banco)
 var _questoes_locais_ativas: Array = []
 var perguntas_usadas: Array = []
 
@@ -29,7 +29,7 @@ var sprite_frames_inimigos = {
 	"slime_g": preload("res://assets/sprites/Sprite Frames/slime_g.tres"),
 	"slime_boss_roxo": preload("res://assets/sprites/Sprite Frames/slime_boss_roxo.tres"),
 	"slime_g_boss": preload("res://assets/sprites/Sprite Frames/slime_boss_roxo.tres"),
-	## [PROG-06] Inimigos do Andar 3 — Física
+	# monstros do andar de fisica
 	"robo_p_laranja": preload("res://assets/sprites/Sprite Frames/robo_p_laranja.tres"),
 	"robo_p_amarelo":  preload("res://assets/sprites/Sprite Frames/robo_p_amarelo.tres"),
 	"robo_p_ciano":    preload("res://assets/sprites/Sprite Frames/robo_p_ciano.tres"),
@@ -38,7 +38,7 @@ var sprite_frames_inimigos = {
 
 var sprite_frame_inimigo_atual
 
-# Banco dedicado de questões Verdadeiro ou Falso (V ou F) para o Boss Slime Roxo
+# perguntas de v ou f pro boss slime roxo
 const QUESTOES_VF_SLIME_BOSS = [
 	{
 		"question": "A queima completa de um pedaço de carvão é uma transformação física, pois a matéria não altera sua composição química.",
@@ -165,33 +165,33 @@ const QUESTOES_VF_SLIME_BOSS = [
 var _eh_slime_boss_roxo: bool = false
 var _dano_erro_inimigo: float = 25.0
 
-# Sinal que as outras tasks (ex: Combat-3) vão escutar!
+# sinal de inicio da batalha
 signal resultado_batalha(acertou: bool)
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS # Super importante para rodar no pause!
 	randomize()
 	
-	# Instancia o Game Over na raiz do jogo para ele sempre existir
+	# deixa o game over pronto na cena
 	var go_inst = game_over_cena.instantiate()
 	add_child(go_inst)
 	
-	# Assina no sinal do banco de dados e Manda baixar as do Chão 1 (padrão)
-	# [Dev-1] O andar real é definido pelo enemy_data.andar_id ao iniciar_batalha
+	# escuta o banco e carrega as perguntas do andar 1
+	# se for outro andar o enemy_data avisa
 	_andar_atual = 1
 	DatabaseManager.perguntas_recebidas.connect(_on_perguntas_chegaram)
 	DatabaseManager.puxar_perguntas(_andar_atual)
 	
-	# Escuta o sinal do NPC no mundo! (Task Combat-1 -> Combat-2 -> Combat-4)
+	# escuta quando encostar no inimigo
 	GlobalSignals.iniciar_batalha.connect(iniciar_batalha)
 
 func _on_perguntas_chegaram(dados: Array) -> void:
-	# Quando terminar o download na nuvem, salva na memória e prepara as variáveis
+	# salva as perguntas baixadas na memoria
 	questions = dados
 	reset_questions()
 
 func reset_questions():
-	# Garante seed diferente a cada chamada (autoload não reinicia com a cena)
+	# sorteia seed nova
 	randomize()
 	
 	var base_list: Array = []
@@ -200,7 +200,7 @@ func reset_questions():
 	else:
 		base_list = questions.duplicate()
 		
-	# Determina a dificuldade alvo com base no tipo de slime / progresso TRI da masmorra
+	# define a dificuldade de acordo com a sala e o tipo do bicho
 	var target_nivel: int = 1
 	var current_scene_path = ""
 	if get_tree() and get_tree().current_scene:
@@ -211,19 +211,33 @@ func reset_questions():
 	elif current_scene_path.to_lower().find("boss") != -1:
 		target_nivel = 3
 	else:
-		# Mapeamento TRI nas 8 salas do andar:
-		# Salas 1 a 3: Nível 1 (Fácil - Slime Azul)
-		# Salas 4 a 5: Nível 2 (Médio - Slime Verde)
-		# Salas 6 a 7: Nível 3 (Difícil - Slime Laranja)
-		# Sala 8: Boss Final (Nível 3 - Slime Grandão Roxo)
+		# dificuldade de acordo com a sala:
 		var sala_idx = DungeonGenerator.get_index_da_cena(current_scene_path)
+		var total_salas = DungeonGenerator.percurso_salas.size()
 		if sala_idx != -1:
-			if sala_idx <= 3:
-				target_nivel = 1
-			elif sala_idx <= 5:
-				target_nivel = 2
+			if total_salas > 8:
+				# salas de fisica:
+				# salas 1 a 4: nivel facil
+				# salas 5 a 8: nivel medio
+				# salas 9+: nivel dificil
+				if sala_idx <= 4:
+					target_nivel = 1
+				elif sala_idx <= 8:
+					target_nivel = 2
+				else:
+					target_nivel = 3
 			else:
-				target_nivel = 3
+				# salas de quimica:
+				# salas 1 a 3: facil (slime azul)
+				# salas 4 a 5: medio (slime verde)
+				# salas 6 a 7: dificil (slime laranja)
+				# sala 8: boss final (slime roxo)
+				if sala_idx <= 3:
+					target_nivel = 1
+				elif sala_idx <= 5:
+					target_nivel = 2
+				else:
+					target_nivel = 3
 		else:
 			target_nivel = 1
 		
@@ -236,7 +250,7 @@ func reset_questions():
 		if q_nivel == int(target_nivel) and q_text != "" and not (q_text in perguntas_usadas):
 			disponiveis.append(q)
 			
-	# Se esgotaram as do nível alvo, tenta pegar qualquer nível não usado do mesmo andar
+	# se acabaram as do nivel, pega qualquer outra que sobrou
 	if disponiveis.size() == 0 and base_list.size() > 0:
 		print("[QuizManager] Esgotadas as perguntas do nível %d. Buscando de outros níveis não usados." % target_nivel)
 		for q in base_list:
@@ -244,22 +258,22 @@ func reset_questions():
 			if q_text != "" and not (q_text in perguntas_usadas):
 				disponiveis.append(q)
 				
-	# Se todas as perguntas do andar inteiro foram usadas, reseta o histórico total do andar
+	# se usou todas do andar, reseta a lista
 	if disponiveis.size() == 0 and base_list.size() > 0:
 		print("[QuizManager] Todas as perguntas do andar foram usadas. Resetando histórico total.")
 		for q in base_list:
 			perguntas_usadas.erase(q.get("question", ""))
-		# Tenta pegar novamente do nível alvo
+		# tenta pegar do nivel certo de novo
 		for q in base_list:
 			var q_text = q.get("question", "")
 			var q_nivel = int(q.get("nivel_progresso", 1))
 			if q_nivel == int(target_nivel) and q_text != "" and not (q_text in perguntas_usadas):
 				disponiveis.append(q)
-		# Se ainda assim estiver vazio (ex: andar sem perguntas do nível alvo), pega tudo
+		# se ainda tiver vazio pega qualquer uma
 		if disponiveis.size() == 0:
 			disponiveis = base_list.duplicate()
 		
-	# Sorteia as perguntas de forma aleatória para a batalha
+	# sorteia a ordem das perguntas
 	if disponiveis.size() > 0:
 		shuffled_questions = disponiveis
 		shuffled_questions.shuffle()
@@ -268,9 +282,7 @@ func reset_questions():
 	if get_tree() and get_tree().current_scene:
 		ultima_sala_sorteada = get_tree().current_scene.scene_file_path
 
-## [PROG-02] Agrupa as perguntas por nível de dificuldade e embaralha dentro de cada grupo.
-## Se a pergunta não tiver o campo nivel_progresso (perguntas antigas), usa nível 1.
-## Resultado: Fácil (1) → Médio (2) → Difícil (3), com variedade dentro de cada grupo.
+# organiza as perguntas de facil pra dificil e embaralha dentro de cada grupo
 func _ordenar_por_progressao(lista: Array) -> Array:
 	var grupos: Dictionary = {}
 	for pergunta in lista:
@@ -292,7 +304,7 @@ func _ordenar_por_progressao(lista: Array) -> Array:
 func shuffle_questions(q):
 	var new_q = q.duplicate(true)
 	
-	# Se for pergunta de Verdadeiro ou Falso (V ou F), mantemos sempre Verdadeiro na opção 0 e Falso na opção 1
+	# se for V ou F, mantem verdadeiro na 0 e falso na 1
 	if new_q.has("options") and new_q["options"].size() == 2:
 		var opt0 = str(new_q["options"][0]).strip_edges().to_lower()
 		var opt1 = str(new_q["options"][1]).strip_edges().to_lower()
@@ -301,7 +313,7 @@ func shuffle_questions(q):
 			
 	var correct_answer = new_q["options"][new_q["answer"]]
 	
-	# [GOD MODE / DEV TOOL] Resposta A sempre correta para apresentações rápidas
+	# modo dev: forca resposta A correta
 	var dev_mgr = get_node_or_null("/root/DevManager")
 	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.god_mode_resposta_a:
 		new_q["options"].erase(correct_answer)
@@ -314,12 +326,12 @@ func shuffle_questions(q):
 	new_q["answer"] = new_q["options"].find(correct_answer)
 	return new_q
 
-## [GOD MODE / DEV TOOL] Derrota instantânea para apresentações
+# modo dev: mata o inimigo na hora
 func derrotar_inimigo_atual() -> void:
 	if _processando_resposta:
 		return
 	if ui_instancia != null and is_instance_valid(ui_instancia) and pergunta_atual != null:
-		print("[DevManager] Auto-Win ativado! Vencendo monstro atual...")
+		print("auto-win: vencendo monstro...")
 		vida_atual_inimigo = 0
 		_on_resposta_recebida(pergunta_atual["answer"], _duracao_batalha)
 
@@ -329,26 +341,24 @@ func get_random_question():
 	var q = shuffled_questions[current_index]
 	current_index += 1
 	
-	# Registra como usada pelo texto da pergunta para não repetir no decorrer do jogo
+	# guarda o texto pra nao repetir a pergunta
 	var q_text = q.get("question", "")
 	if q_text != "" and not (q_text in perguntas_usadas):
 		perguntas_usadas.append(q_text)
 		
 	return shuffle_questions(q)
 
-# ================================
-# TASK COMBAT-2: FLUXO DE BATALHA COM HP
-# ================================
+# fluxo da batalha e barra de vida
 
 # Variáveis do inimigo
 var vida_maxima_inimigo: float = 100.0
 var vida_atual_inimigo: float = 100.0
 
-# [Combat-4] Dados do inimigo atual (definidos pelo EnemyTrigger da cena)
-var _num_questoes: int = 5           ## Máximo de rodadas desta batalha
-var _rodada_atual: int = 0           ## Contador de rodadas jogadas
-var _duracao_batalha: float = 300.0  ## Duração total do timer (usado no cálculo de rapidez)
-var _andar_atual: int = 1            ## [Dev-1] Andar atual → filtra perguntas (1=Biologia, 2=Química, 3=Física)
+# dados do inimigo da luta atual
+var _num_questoes: int = 5           # maximo de rodadas
+var _rodada_atual: int = 0           # rodadas jogadas
+var _duracao_batalha: float = 300.0  # tempo da batalha
+var _andar_atual: int = 1            # andar atual (1=Bio, 2=Quim, 3=Fis)
 
 var _jogador_batalha: Node2D = null
 
@@ -366,21 +376,20 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		return
 	em_batalha = true
 
-	# [PROG-02 / Offline Fix] Lê as questões locais PRIMEIRO, antes de qualquer await.
-	# Se o inimigo tiver questões hardcoded, a batalha inicia sem precisar do banco.
+	# se o inimigo tiver questoes proprias ja inicia sem esperar o banco
 	_questoes_locais_ativas = enemy_data.get("questoes_locais", [])
 
-	# Só aguarda o banco se NÃO tiver questões locais E o banco ainda não carregou
+	# so espera o banco se nao tiver questoes locais
 	if _questoes_locais_ativas.size() == 0 and questions.size() == 0:
 		print("Aguardando download do banco de dados das perguntas...")
 		await DatabaseManager.perguntas_recebidas
 
-	# [Combat-4 / Dev-1] Carrega os dados do inimigo (com fallback seguro)
+	# carrega informacoes do monstro
 	_num_questoes    = enemy_data.get("num_questoes",    5)
 	_duracao_batalha = enemy_data.get("duracao_batalha", 300.0)
 	_rodada_atual    = 0
 
-	# [Dev-1] Se o andar mudou, re-busca as perguntas do novo andar antes de começar
+	# se mudou de andar busca as perguntas novas
 	var novo_andar: int = enemy_data.get("andar_id", 1)
 	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
 	if id_do_inimigo.to_lower().begins_with("slime"):
@@ -390,7 +399,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	var id_lower = id_do_inimigo.to_lower()
 	var nivel_explicit: int = int(enemy_data.get("nivel_dificuldade", 0))
 	
-	# Identificação de Chefe para ativação da "Fúria do Chefe"
+	# checa se e boss
 	_eh_chefe_atual = enemy_data.get("eh_boss", false)
 	var cena_atual_str = ""
 	if get_tree() and get_tree().current_scene:
@@ -405,21 +414,21 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	
 	if nivel_explicit > 0:
 		_nivel_dificuldade_alvo = nivel_explicit
-	elif "boss" in id_lower or "roxo" in id_lower:
+	elif "boss" in id_lower or "roxo" in id_lower or "robo_g" in id_lower or "wizard" in id_lower or _eh_chefe_atual:
 		_nivel_dificuldade_alvo = 3
-	elif "verde" in id_lower:
+	elif "laranja" in id_lower or "vermelho" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower:
+		_nivel_dificuldade_alvo = 3
+	elif "verde" in id_lower or "ciano" in id_lower:
 		_nivel_dificuldade_alvo = 2
-	elif "laranja" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower:
-		_nivel_dificuldade_alvo = 3
-	elif "azul" in id_lower or "slime_p" in id_lower:
+	elif "azul" in id_lower or "amarelo" in id_lower or "slime_p" in id_lower or "robo_p" in id_lower:
 		_nivel_dificuldade_alvo = 1
 	else:
 		_nivel_dificuldade_alvo = 0
 
-	# Detecção específica do Boss Slime Roxo
+	# checa se e o boss slime roxo
 	_eh_slime_boss_roxo = ("slime_boss" in id_lower) or ("roxo" in id_lower) or ("slime_g_boss" in id_lower) or (("boss" in cena_atual_str or "sala_boss" in cena_atual_str) and "slime" in id_lower)
 
-	# Calibra vida do monstro e dano recebido pelo player por erro
+	# ajusta vida do monstro e dano de erro
 	vida_maxima_inimigo = float(enemy_data.get("vida_maxima", 100.0))
 	_dano_erro_inimigo = float(enemy_data.get("dano", 25.0))
 	
@@ -431,16 +440,16 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		print("[QuizManager] 🟣 BOSS SLIME ROXO DETECTADO! 130 HP, dano de 30 por erro e Fúria do Chefe armada com V ou F!")
 
 	if _questoes_locais_ativas.size() > 0:
-		# Usa as questões locais — ignora banco para esta batalha (funciona offline)
+		# usa as questoes locais direto
 		print("[Local] Batalha com questões locais (%d questões)" % _questoes_locais_ativas.size())
 		reset_questions()
 	elif novo_andar != _andar_atual or questions.size() == 0:
 		_andar_atual = novo_andar
-		print("[Dev-1] Carregando perguntas do Andar %d..." % _andar_atual)
+		print("carregando perguntas do andar: ", _andar_atual)
 		DatabaseManager.puxar_perguntas(_andar_atual)
 		await DatabaseManager.perguntas_recebidas
 	else:
-		# Mesmo andar. Se já sorteamos as perguntas quando o pergaminho dessa sala foi lido, não sorteamos de novo pra não desalinhar as dicas!
+		# se ja sorteou antes mantem as mesmas pra bater com as dicas
 		var sala_atual = ""
 		if get_tree() and get_tree().current_scene:
 			sala_atual = get_tree().current_scene.scene_file_path
@@ -450,7 +459,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		else:
 			print("[QuizManager] As perguntas desta sala já haviam sido sorteadas pelo Pergaminho. Mantendo-as.")
 
-	print("[Dev-1 / Combat-4] Batalha: %d questões / %.0fs — Andar %d" % [_num_questoes, _duracao_batalha, _andar_atual])
+	print("iniciando batalha, andar: ", _andar_atual)
 
 	_acertos_batalha = 0
 	_erros_batalha = 0
@@ -460,10 +469,10 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	print("Batalha Iniciada! Congelando o tempo do mundo...")
 	get_tree().paused = true
 	
-	# Apenas resetamos a vida do inimigo, a vida do jogador é persistente no PlayerStats
+	# reseta a vida do monstro
 	vida_atual_inimigo = vida_maxima_inimigo
 	
-	# Define o sprite frame do inimigo atual dinamicamente para esta batalha
+	# poe a animacao certa do monstro
 	var enemy_id = enemy_data.get("id_inimigo", "slime_g")
 	sprite_frame_inimigo_atual = sprite_frames_inimigos.get(enemy_id, sprite_frames_inimigos["slime_g"])
 	
@@ -473,45 +482,43 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
 	else:
 		ui_instancia.show() # Garante que está visível se foi reciclada
-		# Se a UI já existia, atualiza os sprite frames do monstro de forma explícita
+		# atualiza o sprite se a tela ja tava criada
 		var anim_sprite = ui_instancia.get_node_or_null("Control/SpriteMonstro/AnimatedSprite2D")
 		if anim_sprite:
 			anim_sprite.sprite_frames = sprite_frame_inimigo_atual
 			anim_sprite.play("default")
 
 		
-	# Configura o sprite do inimigo usando a função exposta na UI
+	# passa o sprite pro painel de batalha
 	var current_id = enemy_data.get("id_inimigo", "")
 	if enemy_data.has("sprite_frames"):
 		ui_instancia.configurar_inimigo(enemy_data["sprite_frames"], current_id)
 	elif sprite_frame_inimigo_atual != null:
 		ui_instancia.configurar_inimigo(sprite_frame_inimigo_atual, current_id)
 		
-	# Inseta o Modelo Verdeiro do Mago ali dentro da tela
+	# cria o bonequinho do mago na tela de luta
 	if is_instance_valid(_jogador_batalha):
 		_jogador_batalha.queue_free()
 	
 	var jogador_cena = load("res://scenes/Entidades/player.tscn")
 	_jogador_batalha = jogador_cena.instantiate()
-	# Arranca fora todo o cérebro/script do Boneco-Clone para ele virar um manequim animado! 
+	# tira o script da copia do player pra nao se mover 
 	_jogador_batalha.set_script(null)
 	
-	# Arranca a Câmera, Colisão e Áudio da cópia para ela não bagunçar a tela.
-	# Remove os nós imediatamente e chama free() síncrono para que a Camera2D da cópia
-	# nunca entre ativa na Scene Tree e evite reposicionar o viewport / desalinhamento da UI.
+	# remove camera, colisao e audio pra nao bugar a visualizacao da tela
 	for child in _jogador_batalha.get_children():
 		if child is Camera2D or child is CollisionShape2D or child is AudioStreamPlayer2D:
 			_jogador_batalha.remove_child(child)
 			child.free()
 	
-	# Põe ele na UI e vira ele pra Direita (pra ele olhar pro Golem)
+	# poe o boneco na ui virado pra direita
 	ui_instancia.get_node("Control/PosicaoMago").call_deferred("add_child", _jogador_batalha)
 	_jogador_batalha.get_node("sprite").call_deferred("play", "idle_direita")
 	
-	# Reinicia Barras visuais
+	# reseta as barras de vida
 	ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador / PlayerStats.vida_maxima_jogador, 1.0)
 
-	# [Minigame Conexão Rúnica] Se o inimigo for Campeão Rúnico, abre o desafio de ligar pares
+	# se for campeao runico abre o minigame de ligar pares
 	var eh_runico: bool = enemy_data.get("eh_runico", false)
 	if eh_runico:
 		print("[QuizManager] Inimigo Campeão Rúnico detectado! Iniciando Conexão Rúnica...")
@@ -545,11 +552,11 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 						tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
 						tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
 
-	# [Combat-4] Inicia o timer com a duração do inimigo (não resetado entre rodadas)
+	# inicia o tempo da batalha
 	if is_instance_valid(ui_instancia):
 		ui_instancia.iniciar_timer(_duracao_batalha)
 	
-	# Puxa o Rodada 1
+	# comeca a primeira rodada
 	_nova_rodada()
 
 func _nova_rodada() -> void:
@@ -557,7 +564,7 @@ func _nova_rodada() -> void:
 		print("[QuizManager] _nova_rodada cancelada: ui_instancia é nula ou foi fechada.")
 		return
 	_rodada_atual += 1
-	print("[Combat-4] Rodada %d / %d" % [_rodada_atual, _num_questoes])
+	print("rodada: ", _rodada_atual, " de ", _num_questoes)
 	pergunta_atual = get_random_question()
 	if pergunta_atual != null and is_instance_valid(ui_instancia):
 		ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
@@ -577,7 +584,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
 	var dano_final = 0
 	
-	# POST RESPOSTA PARA ESTATÍSTICA DO PAINEL ADMIN
+	# manda a resposta pro painel admin
 	if pergunta_atual.has("id"):
 		var data_resp = {
 			"pergunta_id": int(pergunta_atual["id"]),
@@ -585,7 +592,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			"andar_id": int(pergunta_atual.get("andar_id", 1)),
 			"aluno_nick": DatabaseManager.user_nick
 		}
-		# Fogo e esquece (fire and forget)
+		# requisicao em background
 		DatabaseManager.request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, data_resp)
 	
 	if acertou:
@@ -596,7 +603,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	
 	resultado_batalha.emit(acertou)
 	
-	# aguarda o fim da animação e feedback pedagógico de erro
+	# espera terminar o feedback de erro
 	if is_instance_valid(ui_instancia):
 		await ui_instancia.mostrar_resultado(acertou, pergunta_atual["answer"], dano_final, pergunta_atual)
 	
@@ -610,25 +617,25 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		PlayerStats.sofrer_dano(dano_final)
 		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_final, PlayerStats.vida_atual_jogador])
 		
-		# feedback visual
+		# pisca feedback
 		if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
 			var sprite_mago = _jogador_batalha.get_node("sprite")
 			var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 			tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
 			tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
 			
-	# atualiza as barras na interface se ainda for válida
+	# atualiza a barra de vida se o no existir
 	if is_instance_valid(ui_instancia):
 		ui_instancia.atualizar_vida(float(PlayerStats.vida_atual_jogador) / float(PlayerStats.vida_maxima_jogador), float(vida_atual_inimigo) / float(vida_maxima_inimigo))
 	
-	# delay antes da proxima pergunta
+	# tempinho antes da proxima questao
 	await get_tree().create_timer(1.2, true).timeout
 	
 	if not is_instance_valid(ui_instancia):
 		_processando_resposta = false
 		return
 	
-	# [Modo Fúria do Chefe] Se a vida do chefe caiu para <= 50%, dispara o evento de QTE combo!
+	# quando a vida do boss cai abaixo de 50% ativa a furia
 	if _eh_chefe_atual and not _furia_chefe_executada and vida_atual_inimigo <= (vida_maxima_inimigo * 0.5) and vida_atual_inimigo > 0 and PlayerStats.vida_atual_jogador > 0:
 		_furia_chefe_executada = true
 		await _executar_furia_do_chefe()
@@ -670,7 +677,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 func _executar_furia_do_chefe() -> void:
 	print("[QuizManager] ⚡ FÚRIA DO CHEFE INICIADA! Vida do Chefe: %.1f/%.1f" % [vida_atual_inimigo, vida_maxima_inimigo])
 	
-	# Pausa o timer da batalha principal durante o evento
+	# pausa o tempo enquanto rola a furia
 	if is_instance_valid(ui_instancia):
 		ui_instancia.tempo_rodando = false
 		
@@ -707,10 +714,10 @@ func _executar_furia_do_chefe() -> void:
 				)
 				ui_instancia.mostrar_feedback_critico_parry("GOLPE DO CHEFE ACERTOU! DANO DEVASTADOR (-30 HP)!", false)
 				
-		# Intervalo para o jogador absorver o impacto visual (leitura confortável)
+		# tempinho pro jogador ver o resultado
 		await get_tree().create_timer(2.2, true).timeout
 		
-	# Retoma o timer da batalha principal se ambos continuarem vivos
+	# volta o tempo da batalha se ninguem morreu
 	if is_instance_valid(ui_instancia) and vida_atual_inimigo > 0 and PlayerStats.vida_atual_jogador > 0:
 		ui_instancia.tempo_rodando = true
 

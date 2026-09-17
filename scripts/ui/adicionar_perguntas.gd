@@ -1,11 +1,8 @@
 extends Control
 
-# ==============================================================================
-# GERENCIADOR DE PERGUNTAS - CADASTRO DE NOVA QUESTÃO
-# Design System alinhado ao Painel Administrativo do Synthesis
-# ==============================================================================
+# tela de cadastro de perguntas
 
-# Cores e Design System
+# cores da tela
 const COLOR_BG_DARK = Color(0.06, 0.08, 0.12, 1.0)
 const COLOR_HEADER_BG = Color(0.10, 0.13, 0.19, 1.0)
 const COLOR_PANEL_BG = Color(0.11, 0.14, 0.21, 0.95)
@@ -20,19 +17,19 @@ const COLOR_TAXA = Color(0.96, 0.78, 0.20, 1.0)       # Amarelo Ouro
 const COLOR_TEXT_MUTED = Color(0.62, 0.68, 0.78, 1.0)
 const COLOR_TEXT_BRIGHT = Color(0.95, 0.97, 1.0, 1.0)
 
-# Disciplinas
+# materias disponiveis
 var disciplinas_info = {
 	1: {"nome": "Química (Andar 1)", "cor": Color(0.70, 0.40, 0.95)},
 	2: {"nome": "Física (Andar 2)", "cor": Color(0.20, 0.70, 0.95)},
 	3: {"nome": "Biologia (Andar 3)", "cor": Color(0.35, 0.85, 0.45)}
 }
 
-# Limites de Caracteres para perfeita visualização na Batalha e Pergaminho
+# limites de texto
 const MAX_CHARS_PERGUNTA: int = 280
 const MAX_CHARS_DICA: int = 250
 const MAX_CHARS_ALTERNATIVA: int = 80
 
-# Referências de Componentes
+# referencias da tela
 var opt_disciplina: OptionButton
 var opt_dificuldade: OptionButton
 var badge_preview_disc: PanelContainer
@@ -57,19 +54,19 @@ var btn_limpar: Button
 var lbl_status: Label
 var panel_status: PanelContainer
 
-# Toast
+# aviso flutuante
 var toast_notificacao: PanelContainer
 var toast_label: Label
 var toast_timer: Timer
 
 func _ready() -> void:
-	# Fundo Escuro Profissional
+	# fundo escuro
 	var bg = ColorRect.new()
 	bg.color = COLOR_BG_DARK
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	
-	# Margens Principais (Viewport 1280x720 calibrado)
+	# margens da tela
 	var margem = MarginContainer.new()
 	margem.add_theme_constant_override("margin_left", 24)
 	margem.add_theme_constant_override("margin_right", 24)
@@ -84,10 +81,10 @@ func _ready() -> void:
 	vbox_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margem.add_child(vbox_root)
 	
-	# 1. Cabeçalho Superior Alinhado ao Painel Admin
+	# cabecalho
 	_criar_cabecalho(vbox_root)
 	
-	# 2. Área Rolável Central (Scroll Vertical Apenas)
+	# area de scroll
 	var scroll = ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -99,28 +96,26 @@ func _ready() -> void:
 	vbox_form.add_theme_constant_override("separation", 14)
 	scroll.add_child(vbox_form)
 	
-	# 3. Card 1: Configuração Pedagógica (Disciplina e Grau TRI)
+	# materia e dificuldade
 	_criar_card_configuracao(vbox_form)
 	
-	# 4. Card 2: Enunciado da Pergunta e Dica
+	# enunciado e dica
 	_criar_card_enunciado(vbox_form)
 	
-	# 5. Card 3: Alternativas de Resposta e Seleção do Gabarito
+	# opcoes e resposta certa
 	_criar_card_alternativas(vbox_form)
 	
-	# 6. Card 4: Ações de Salvamento e Status
+	# botoes de salvar
 	_criar_card_acoes(vbox_form)
 	
-	# 7. Toast Notificação Flutuante
+	# aviso toast
 	_criar_toast(self)
 	
-	# Inicializa destaques visuais
+	# atualiza visual
 	_atualizar_badges_preview()
 	_atualizar_destaque_gabarito()
 
-# ==============================================================================
-# CONSTRUÇÃO DOS COMPONENTES VISUAIS
-# ==============================================================================
+# montagem visual da tela
 
 func _criar_cabecalho(parent: Control) -> void:
 	var panel_cab = PanelContainer.new()
@@ -137,7 +132,7 @@ func _criar_cabecalho(parent: Control) -> void:
 	hbox.add_theme_constant_override("separation", 14)
 	panel_cab.add_child(hbox)
 	
-	# Título e Subtítulo
+	# titulo
 	var vbox_titulos = VBoxContainer.new()
 	vbox_titulos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox_titulos.add_theme_constant_override("separation", 2)
@@ -162,7 +157,7 @@ func _criar_cabecalho(parent: Control) -> void:
 	lbl_sub.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	vbox_titulos.add_child(lbl_sub)
 	
-	# Botão Voltar ao Painel
+	# botao voltar pro painel
 	var btn_voltar = _criar_botao_acao("Voltar ao Painel", Color(0.45, 0.50, 0.62))
 	btn_voltar.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/painel_admin.tscn"))
 	hbox.add_child(btn_voltar)
@@ -179,7 +174,7 @@ func _criar_card_configuracao(parent: Control) -> void:
 	grid.add_theme_constant_override("separation", 24)
 	vbox.add_child(grid)
 	
-	# Coluna 1: Disciplina
+	# seletor de materia
 	var col_disc = VBoxContainer.new()
 	col_disc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col_disc.add_theme_constant_override("separation", 6)
@@ -209,7 +204,7 @@ func _criar_card_configuracao(parent: Control) -> void:
 	opt_disciplina.item_selected.connect(func(_idx): _atualizar_badges_preview())
 	col_disc.add_child(opt_disciplina)
 	
-	# Coluna 2: Grau de Dificuldade (TRI)
+	# seletor de dificuldade
 	var col_dif = VBoxContainer.new()
 	col_dif.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col_dif.add_theme_constant_override("separation", 6)
@@ -245,7 +240,7 @@ func _criar_card_enunciado(parent: Control) -> void:
 	vbox.add_theme_constant_override("separation", 12)
 	card.add_child(vbox)
 	
-	# Cabeçalho com Contador de Caracteres da Pergunta
+	# contador de caracteres
 	var hbox_header = HBoxContainer.new()
 	vbox.add_child(hbox_header)
 	
@@ -272,7 +267,7 @@ func _criar_card_enunciado(parent: Control) -> void:
 	lbl_contador_pergunta.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 	hbox_header.add_child(lbl_contador_pergunta)
 	
-	# Caixa de Enunciado
+	# campo do enunciado
 	input_pergunta = TextEdit.new()
 	input_pergunta.custom_minimum_size = Vector2(0, 95)
 	input_pergunta.placeholder_text = "Digite aqui o enunciado completo da pergunta..."
@@ -281,7 +276,7 @@ func _criar_card_enunciado(parent: Control) -> void:
 	input_pergunta.text_changed.connect(_on_pergunta_text_changed)
 	vbox.add_child(input_pergunta)
 	
-	# Campo Opcional de Dica para os Pergaminhos
+	# dica pro pergaminho
 	var vbox_dica = VBoxContainer.new()
 	vbox_dica.add_theme_constant_override("separation", 4)
 	vbox.add_child(vbox_dica)
@@ -333,7 +328,7 @@ func _criar_card_alternativas(parent: Control) -> void:
 		vbox.add_child(hbox_linha)
 		containers_linhas_alt.append(hbox_linha)
 		
-		# Badge da Letra
+		# letra da alternativa
 		var badge_letra = _criar_badge("Alternativa " + letra, Color(0.15, 0.18, 0.26), COLOR_TEXT_MUTED)
 		badge_letra.custom_minimum_size = Vector2(105, 36)
 		var lbl_letra = badge_letra.get_child(0) as Label
@@ -342,7 +337,7 @@ func _criar_card_alternativas(parent: Control) -> void:
 		badges_letras_alt.append(badge_letra)
 		labels_letras_alt.append(lbl_letra)
 		
-		# Campo de Texto
+		# texto da alternativa
 		var input_alt = LineEdit.new()
 		input_alt.max_length = MAX_CHARS_ALTERNATIVA
 		input_alt.custom_minimum_size = Vector2(0, 36)
@@ -352,7 +347,7 @@ func _criar_card_alternativas(parent: Control) -> void:
 		hbox_linha.add_child(input_alt)
 		inputs_alternativas.append(input_alt)
 		
-		# Botão rápido para marcar como correta
+		# marcar como certa
 		var btn_marcar = Button.new()
 		btn_marcar.text = "Marcar como Correta"
 		btn_marcar.focus_mode = Control.FOCUS_NONE
@@ -365,7 +360,7 @@ func _criar_card_alternativas(parent: Control) -> void:
 		hbox_linha.add_child(btn_marcar)
 		botoes_marcar_correta.append(btn_marcar)
 	
-	# Seletor de Gabarito Oficial Inferior
+	# seletor da resposta certa
 	var hbox_gabarito = HBoxContainer.new()
 	hbox_gabarito.add_theme_constant_override("separation", 12)
 	hbox_gabarito.alignment = BoxContainer.ALIGNMENT_BEGIN
@@ -400,7 +395,7 @@ func _criar_card_acoes(parent: Control) -> void:
 	hbox_botoes.add_theme_constant_override("separation", 16)
 	vbox.add_child(hbox_botoes)
 	
-	# Botão Salvar
+	# botao salvar
 	btn_salvar = Button.new()
 	btn_salvar.text = "  Salvar Nova Pergunta  "
 	btn_salvar.focus_mode = Control.FOCUS_NONE
@@ -420,7 +415,7 @@ func _criar_card_acoes(parent: Control) -> void:
 	btn_salvar.pressed.connect(_on_salvar_pressed)
 	hbox_botoes.add_child(btn_salvar)
 	
-	# Botão Limpar
+	# botao limpar
 	btn_limpar = Button.new()
 	btn_limpar.text = "Limpar Formulário"
 	btn_limpar.focus_mode = Control.FOCUS_NONE
@@ -429,7 +424,7 @@ func _criar_card_acoes(parent: Control) -> void:
 	btn_limpar.pressed.connect(_limpar_formulario)
 	hbox_botoes.add_child(btn_limpar)
 	
-	# Painel de Status
+	# status do salvamento
 	panel_status = PanelContainer.new()
 	panel_status.visible = false
 	var style_status = _criar_stylebox(Color(0.08, 0.10, 0.15, 0.95), COLOR_BORDER_SUBTLE, 6, 1)
@@ -443,9 +438,7 @@ func _criar_card_acoes(parent: Control) -> void:
 	lbl_status.add_theme_font_size_override("font_size", 13)
 	panel_status.add_child(lbl_status)
 
-# ==============================================================================
-# LOGICA VISUAL E DINÂMICA (PREVIEWS & GABARITO)
-# ==============================================================================
+# estilizacao das alternativas selecionadas
 
 func _atualizar_badges_preview() -> void:
 	var id_disc = opt_disciplina.get_selected_id()
@@ -488,7 +481,7 @@ func _atualizar_destaque_gabarito() -> void:
 		var btn_marcar = botoes_marcar_correta[i]
 		
 		if eh_correta:
-			# Estilo de Destaque para a Alternativa Correta
+			# alternativa correta
 			lbl_letra.text = "Alternativa " + letra + " (Correta)"
 			lbl_letra.add_theme_color_override("font_color", COLOR_FACIL)
 			var sb_badge = _criar_stylebox(COLOR_FACIL * 0.22, COLOR_FACIL, 5, 1)
@@ -506,7 +499,7 @@ func _atualizar_destaque_gabarito() -> void:
 			btn_marcar.add_theme_stylebox_override("hover", sb_btn)
 			btn_marcar.add_theme_color_override("font_color", COLOR_FACIL)
 		else:
-			# Estilo Padrão para as outras
+			# alternativas normais
 			lbl_letra.text = "Alternativa " + letra
 			lbl_letra.add_theme_color_override("font_color", COLOR_TEXT_MUTED)
 			var sb_badge = _criar_stylebox(Color(0.12, 0.15, 0.22), COLOR_BORDER_SUBTLE, 5, 1)
@@ -520,9 +513,7 @@ func _atualizar_destaque_gabarito() -> void:
 			btn_marcar.text = "Marcar como Correta"
 			_estilizar_botao_secundario(btn_marcar)
 
-# ==============================================================================
-# SALVAMENTO E SINCRONIZAÇÃO
-# ==============================================================================
+# envio pro banco e salvamento local
 
 func _on_salvar_pressed() -> void:
 	if input_pergunta.text.strip_edges().is_empty():
@@ -565,7 +556,7 @@ func _on_salvar_pressed() -> void:
 		_mostrar_status("Pergunta cadastrada com sucesso no jogo!", COLOR_FACIL)
 		_exibir_toast("Questão cadastrada com sucesso!")
 		
-		# Salva também no arquivo local questions.json associando a dica para os pergaminhos
+		# salva tambem no questions.json local
 		var dados_para_salvar = dados_supabase.duplicate()
 		if res.get("data") is Array and res["data"].size() > 0:
 			dados_para_salvar = res["data"][0].duplicate()
@@ -637,9 +628,7 @@ func _mostrar_erro(msg: String) -> void:
 	_mostrar_status("ATENÇÃO: " + msg, COLOR_DIFICIL)
 	_exibir_toast(msg)
 
-# ==============================================================================
-# HELPERS DE DESIGN SYSTEM E ESTILOS
-# ==============================================================================
+# funcoes auxiliares de estilo
 
 func _criar_card_base(parent: Control) -> PanelContainer:
 	var card = PanelContainer.new()

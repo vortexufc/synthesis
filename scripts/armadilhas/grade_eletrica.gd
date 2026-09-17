@@ -1,8 +1,7 @@
 extends Area2D
 
-## [Andar 2 - Física] Grade de Sobrecarga Elétrica / Bobina em Curto
-## Alterna periodicamente entre DESLIGADO (Seguro), AVISO (Amarelo) e ATIVO (Choque).
-## Exige timing do aluno para atravessar com segurança.
+# grade de choque (andar de fisica)
+# fica alternando: desligado -> aviso -> choque
 
 @export var dano: float = 25.0
 @export var tempo_desligado: float = 2.2
@@ -91,7 +90,7 @@ func _trocar_estado(novo: Estado) -> void:
 			_tempo_estado = tempo_aviso
 			faíscas.emitting = true
 			faíscas.amount = 4
-			faíscas.color = Color(1.0, 0.85, 0.2, 0.9) # Faíscas amarelas de aviso
+			faíscas.color = Color(1.0, 0.85, 0.2, 0.9) # faíscas amarelas avisando
 			if luz_aura: luz_aura.modulate = Color(1.0, 0.8, 0.2, 0.25)
 			_atualizar_borda(Color(1.0, 0.8, 0.2), Color(0.20, 0.18, 0.10))
 			if get_node_or_null("/root/AudioManager"):
@@ -100,12 +99,12 @@ func _trocar_estado(novo: Estado) -> void:
 			_tempo_estado = tempo_ativo
 			faíscas.emitting = true
 			faíscas.amount = 24
-			faíscas.color = Color(0.3, 0.95, 1.0, 1.0) # Arcos azuis e brancos
+			faíscas.color = Color(0.3, 0.95, 1.0, 1.0) # choque azul
 			if luz_aura: luz_aura.modulate = Color(0.2, 0.9, 1.0, 0.85)
 			_atualizar_borda(Color(0.4, 0.95, 1.0), Color(0.12, 0.28, 0.40))
 			if get_node_or_null("/root/AudioManager"):
 				AudioManager.play_sfx("ui-3")
-			# Se o player já estiver pisando na hora da descarga
+			# acertou quem tava em cima
 			if _player_dentro:
 				_aplicar_choque()
 

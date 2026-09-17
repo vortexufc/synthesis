@@ -1,29 +1,29 @@
 extends Node
 
-# Cena base para SFX (deve ser AudioStreamPlayer na raiz)
+# cena base pros efeitos sonoros
 var audio_scene = preload("res://scenes/Mecanicas/audio.tscn")
 
-# Player de música
+# toca as musicas
 var music_player: AudioStreamPlayer
 var battle_player: AudioStreamPlayer
 
-# Controle da música atual
+# controle da musica atual
 var current_music: AudioStream = null
 var previous_music: AudioStream = null
 
-# Controle dos sons de passos
+# som dos passos
 var pode_tocar_passo := true
 
-# Controle dos sons de dano
+# sons de dano
 var pode_tocar_dano := true
 var pode_tocar_ataque := true
 
-# Controle de musica da cena
+# musica do mapa
 var musica_atual := -1
 var music_state = MusicState.MENU
 const MUSIC_FADE_TIME := 1.0
 
-# Dicionário de SFX
+# lista de efeitos sonoros
 var sfx = {
 	"ui-1": preload("res://assets/audio/sfx/ui-1.wav"),
 	"ui-2": preload("res://assets/audio/sfx/ui-2.wav"),
@@ -44,13 +44,13 @@ var sfx = {
 	"moeda": preload("res://assets/audio/sfx/acerto_1.wav")
 }
 
-# Lista de sons ao caminhar
+# sons de passos
 var sfx_caminhar = [
 	preload("res://assets/audio/sfx/passo_pedra_1.wav"),
 	preload("res://assets/audio/sfx/passo_pedra_2.wav")
 ]
 
-# Lista de sons ao tomar dano
+# sons quando toma dano
 var sfx_tomar_dano = [
 	preload("res://assets/audio/sfx/dano_1.wav"),
 	preload("res://assets/audio/sfx/dano_2.wav"),
@@ -58,14 +58,14 @@ var sfx_tomar_dano = [
 	preload("res://assets/audio/sfx/dano_4.wav")
 ]
 
-# Lista de sons ao atacar
+# sons de ataque
 var sfx_atacar = [
 	preload("res://assets/audio/sfx/ataque_1.wav"),
 	preload("res://assets/audio/sfx/ataque_2.wav"),
 	preload("res://assets/audio/sfx/ataque_3.wav")
 ]
 
-# Lista de musicas ao longo das salas
+# musicas de fundo
 var playlist = [
 	preload("res://assets/audio/ost/1.wav"),
 	preload("res://assets/audio/ost/3.wav"),
@@ -79,7 +79,7 @@ enum MusicState {
 }
 
 func _ready():
-	# cria player de música persistente
+	# cria o player de musica
 	music_player = AudioStreamPlayer.new()
 	music_player.bus = "Music"
 	add_child(music_player)
@@ -92,7 +92,7 @@ func _ready():
 	music_player.volume_db = 0
 	battle_player.volume_db = 0
 
-# SFX (efeitos sonoros)
+# toca efeito sonoro
 func play_sfx(audio: String) -> void:
 	if not sfx.has(audio):
 		push_error("SFX não encontrado: " + audio)
@@ -110,7 +110,7 @@ func play_sfx(audio: String) -> void:
 		player.queue_free()
 	)
 
-# MÚSICA (BGM contínua)
+# toca musica de fundo
 func play_music(music: AudioStream) -> void:
 	if music == null:
 		push_error("Tentou tocar música nula")

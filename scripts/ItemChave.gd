@@ -28,7 +28,7 @@ func _iniciar_efeito_brilho() -> void:
 				sprite = child as Sprite2D
 				break
 				
-	# 1. Glow translúcido amarelo atrás da chave (idêntico ao pergaminho)
+	# glow amarelo atras
 	var glow: Sprite2D = get_node_or_null("GlowSprite") as Sprite2D
 	if glow == null:
 		glow = Sprite2D.new()
@@ -36,7 +36,7 @@ func _iniciar_efeito_brilho() -> void:
 		var tex_glow = load("res://assets/sprites/ui/glow_yellow.png") as Texture2D
 		if tex_glow:
 			glow.texture = tex_glow
-			glow.scale = Vector2(0.4, 0.4) # Proporcional ao tamanho da chave
+			glow.scale = Vector2(0.4, 0.4)
 			glow.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 			add_child(glow)
 			move_child(glow, 0)
@@ -47,7 +47,7 @@ func _iniciar_efeito_brilho() -> void:
 		_tween_glow.tween_property(glow, "modulate:a", 0.85, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_tween_glow.tween_property(glow, "modulate:a", 0.35, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
-	# 2. Pulsação de brilho e flutuação suave na própria chave
+	# chave flutuando
 	if sprite:
 		_tween_brilho = create_tween().set_loops()
 		_tween_brilho.tween_property(sprite, "modulate", Color(1.7, 1.45, 0.35, 1.0), 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
@@ -58,7 +58,7 @@ func _iniciar_efeito_brilho() -> void:
 		_tween_bob.tween_property(sprite, "position:y", pos_y - 4.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_tween_bob.tween_property(sprite, "position:y", pos_y + 4.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
-		# Sombra realista no chão acompanhando a flutuação
+		# sombra no chao
 		_criar_sombra()
 		if _shadow:
 			var tw_s = create_tween().set_loops()
@@ -89,7 +89,7 @@ func _criar_sombra() -> void:
 		add_child(_shadow)
 		move_child(_shadow, 0)
 
-	# 3. Luz 2D suave ambiente para iluminar as paredes e o chão ao redor
+	# luz no chao
 	var luz: PointLight2D = get_node_or_null("LuzChave") as PointLight2D
 	if luz == null:
 		luz = PointLight2D.new()
@@ -204,12 +204,11 @@ func coletar() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# Efeito suave de coleta: cresce um pouquinho e desvanece
+	# animacao e particulas de coleta
 	if _tween_brilho and _tween_brilho.is_valid(): _tween_brilho.kill()
 	if _tween_glow and _tween_glow.is_valid(): _tween_glow.kill()
 	if _tween_bob and _tween_bob.is_valid(): _tween_bob.kill()
 	
-	# Burst de partículas mágicas na coleta da chave
 	var part = CPUParticles2D.new()
 	part.global_position = global_position
 	part.z_index = 10
@@ -248,7 +247,6 @@ func coletar() -> void:
 	part.emitting = true
 	get_tree().create_timer(0.7).timeout.connect(part.queue_free)
 	
-	# Animação de salto e brilho da chave
 	var tween_coleta = create_tween()
 	tween_coleta.set_parallel(true)
 	tween_coleta.tween_property(self, "position:y", position.y - 34.0, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

@@ -17,7 +17,7 @@ var chaves: int = 0
 var moedas: int = 0
 var vinhetas_desbloqueadas: Array = []
 
-# Buff temporário de masmorra (Escudo Arcano)
+# buff temporario de escudo
 var buff_escudo_salas_restantes: int = 0
 var bonus_vida_escudo: float = 10.0
 var tem_buff_escudo: bool = false
@@ -99,12 +99,12 @@ func desbloquear_vinheta(andar_id: int) -> void:
 		print("[PlayerStats] Nova Vinheta Desbloqueada para o Andar %d!" % andar_id)
 
 
-## Limpa todos os pergaminhos salvos no Grimório
+# limpa os pergaminhos lidos
 func limpar_grimorio() -> void:
 	grimorio.clear()
 	salvar()
 
-## [DEV / GOD MODE] Limpa completamente o inventário (itens, poções, grimório, chaves e moedas)
+# limpa a mochila inteira (pra testes)
 func limpar_inventario_e_moedas() -> void:
 	itens.clear()
 	pocoes.clear()
@@ -124,14 +124,14 @@ func curar_vida(valor: float) -> void:
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	salvar()
 
-## Adiciona moedas de ouro e emite atualização
+# da moedas pro player
 func adicionar_moedas(quantidade: int) -> void:
 	moedas += quantidade
 	salvar()
 	quests_atualizadas.emit()
 	print("[PlayerStats] +%d moedas adicionadas. Total: %d" % [quantidade, moedas])
 
-## Adiciona uma poção ao inventário (acumula se já existir)
+# guarda pocao na bolsa
 func adicionar_pocao(nome: String = "Poção de Cura", cura: int = 40, desc: String = "Cura 40 HP", qtd: int = 1) -> void:
 	for p in pocoes:
 		if p is Dictionary and p.get("nome") == nome:
@@ -150,7 +150,7 @@ func adicionar_pocao(nome: String = "Poção de Cura", cura: int = 40, desc: Str
 	quests_atualizadas.emit()
 	print("[PlayerStats] Nova poção adicionada: ", nome)
 
-## Aplica o Buff de Escudo Arcano (+HP Máximo temporário que dura por X salas)
+# da escudo temporario pro player
 func aplicar_buff_escudo(salas: int = 2, bonus_hp: float = 10.0) -> void:
 	bonus_vida_escudo = bonus_hp
 	buff_escudo_salas_restantes = salas
@@ -161,7 +161,7 @@ func aplicar_buff_escudo(salas: int = 2, bonus_hp: float = 10.0) -> void:
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	print("[PlayerStats] Buff de Escudo Arcano ativo! +%.0f Vida Máxima por %d salas." % [bonus_vida_escudo, buff_escudo_salas_restantes])
 
-## Decrementa 1 sala de duração do Buff de Escudo ao entrar em nova sala da dungeon
+# gasta 1 sala da duracao do escudo
 func decrementar_buff_escudo() -> void:
 	if not tem_buff_escudo:
 		return
@@ -170,7 +170,7 @@ func decrementar_buff_escudo() -> void:
 	if buff_escudo_salas_restantes <= 0:
 		remover_buff_escudo()
 
-## Remove o Buff de Escudo Arcano e restaura a vida máxima padrão
+# tira o escudo e volta a vida normal
 func remover_buff_escudo() -> void:
 	if not tem_buff_escudo:
 		return
@@ -182,12 +182,12 @@ func remover_buff_escudo() -> void:
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	print("[PlayerStats] Buff de Escudo Arcano expirou!")
 
-## Adiciona um pergaminho coletado ao Grimório do jogador
+# salva pergaminho no grimorio
 func adicionar_pergaminho(titulo: String, paginas: Array[String], desc: String = "") -> void:
-	# Verifica se já possui o pergaminho para não duplicar
+	# checa se ja tem pra nao duplicar
 	for item in grimorio:
 		if item.get("titulo") == titulo:
-			# Atualiza as páginas se já existia
+			# atualiza as paginas
 			item["paginas"] = paginas
 			salvar()
 			return
@@ -205,7 +205,7 @@ func adicionar_pergaminho(titulo: String, paginas: Array[String], desc: String =
 	salvar()
 	print("[PlayerStats] Pergaminho adicionado ao Grimório: ", titulo)
 
-## Adiciona um Códice Científico/Mural Interativo ao Grimório do jogador
+# salva o mural que o player leu
 func adicionar_codice_mural(id_codice: String, titulo: String, andar: int, desc: String = "") -> bool:
 	for item in grimorio:
 		if item is Dictionary and (item.get("id_codice") == id_codice or item.get("titulo") == titulo):
@@ -223,7 +223,7 @@ func adicionar_codice_mural(id_codice: String, titulo: String, andar: int, desc:
 	print("[PlayerStats] Novo Códice Científico adicionado ao Grimório: ", titulo)
 	return true
 
-## Verifica se o jogador já possui um Códice específico no Grimório
+# checa se ja leu o mural
 func possui_codice(id_codice: String) -> bool:
 	for item in grimorio:
 		if item is Dictionary and item.get("id_codice") == id_codice:
@@ -239,10 +239,10 @@ func resetar_vida() -> void:
 
 # funcao de tomar dano
 func sofrer_dano(valor: float) -> void:
-	# [GOD MODE / DEV TOOL] Ignora dano se o modo invencível estiver ativo
+	# se tiver invencivel nao toma dano
 	var dev_mgr = get_node_or_null("/root/DevManager")
 	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.invencivel:
-		print("[DevManager] Dano de %.0f bloqueado pela invencibilidade!" % valor)
+		print("dano bloqueado pela invencibilidade: ", valor)
 		return
 
 	AudioManager.tocar_som_dano()

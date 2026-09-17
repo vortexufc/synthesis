@@ -17,8 +17,8 @@ extends Area2D
 @export var stride_animacao: int = 0
 
 @export_category("Selo Rúnico")
-@export var tem_selo_runico: bool = false ## Ativa o minigame "Ordene a Sequência" para abrir esta porta após derrotar monstros
-@export_enum("auto", "quimica", "fisica", "geral") var selo_tema: String = "auto" ## Tema das sequências rúnicas
+@export var tem_selo_runico: bool = false # minigame de ordenar sequencia
+@export_enum("auto", "quimica", "fisica", "geral") var selo_tema: String = "auto"
 
 var _sprite_porta: Sprite2D = null
 var _aguardando_confirmacao: bool = false
@@ -165,9 +165,9 @@ func _tem_inimigos_vivos() -> bool:
 			return true
 	return false
 
-# Agora a função aceita Texto e Cor de Borda dinamicamente!
+# mostra mensagem de aviso na tela
 func _mostrar_feedback_hub(mensagem: String, cor_borda: Color) -> void:
-	# Evita acumular múltiplas mensagens se o jogador ficar colidindo repetidamente
+	# evita spam de mensagem se o player ficar encostando
 	if get_node_or_null("FeedbackMensagem"):
 		return
 		
@@ -180,16 +180,14 @@ func _mostrar_feedback_hub(mensagem: String, cor_borda: Color) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
-	# Usar fonte customizada PixelifySans do projeto
 	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 	if font:
 		label.add_theme_font_override("font", font)
 		label.add_theme_font_size_override("font_size", 16)
 	
-	# Usar painel com estilo premium integrado à lore
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.1, 0.85) # Escuro translúcido arcano
+	style.bg_color = Color(0.08, 0.08, 0.1, 0.85)
 	style.corner_radius_top_left = 6
 	style.corner_radius_top_right = 6
 	style.corner_radius_bottom_left = 6
@@ -199,7 +197,7 @@ func _mostrar_feedback_hub(mensagem: String, cor_borda: Color) -> void:
 	style.border_width_left = 2
 	style.border_width_right = 2
 	style.border_width_top = 2
-	style.border_color = cor_borda # Cor injetada dinamicamente
+	style.border_color = cor_borda
 	
 	panel.add_theme_stylebox_override("panel", style)
 	panel.add_child(label)
@@ -403,14 +401,14 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 		
 	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
-		# [DEV TOOL] Verifica se o cheat de ignorar portas trancadas está ativo
+		# cheat de passar portas do dev
 		var dev_mgr = get_node_or_null("/root/DevManager")
 		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
 
-		# LÓGICA EXCLUSIVA PARA A SALA DO CHEFE (BOSS)
+		# sala do boss
 		if _is_sala_boss():
 			if porta_de_retorno:
-				# Na sala do chefe, a porta de volta é permanentemente bloqueada (mesmo com chave)
+				# nao pode voltar na sala do boss
 				if not ignorar_bloqueio:
 					if _tem_inimigos_vivos():
 						_mostrar_feedback_hub("A entrada da arena foi selada! Derrote o Chefe para sobreviver.", Color(0.85, 0.25, 0.25, 0.9))
@@ -418,12 +416,12 @@ func _on_body_entered(body: Node2D) -> void:
 						_mostrar_feedback_hub("O caminho de volta desmoronou! Avance pelo portal dimensional do Chefe.", Color(0.85, 0.25, 0.25, 0.9))
 					return
 			else:
-				# Porta de avanço (saída do Chefe)
+				# saida do boss
 				if _tem_inimigos_vivos() and not ignorar_bloqueio:
 					_mostrar_feedback_hub("Portão ancestral selado pela aura do Chefe! Derrote o monstro para abrir.", Color(0.85, 0.25, 0.25, 0.9))
 					return
 				
-				# Chefe derrotado: ao passar pela porta, dispara a vinheta da história e vai para o Hub!
+				# se venceu o boss, vai pra vinheta e volta pro hub
 				_cooldown_ativo = true
 				set_deferred("monitoring", false)
 				var andar_id = _obter_andar_atual()
@@ -431,18 +429,18 @@ func _on_body_entered(body: Node2D) -> void:
 				return
 
 		if not ignorar_bloqueio:
-			# REGRA 1: Se a porta for do Hub e estiver marcada como trancada
+			# se tiver trancada
 			if esta_trancada:
 				var texto = mensagem_customizada if mensagem_customizada != "" else "TRANCADO"
-				_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9)) # Borda Vermelha
+				_mostrar_feedback_hub(texto, Color(0.85, 0.25, 0.25, 0.9))
 				return
 				
-			# REGRA 2: Bloqueio antigo por conter inimigos na sala
+			# bloqueia se ainda tiver monstros vivos
 			if not porta_de_retorno and _tem_inimigos_vivos():
 				_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
 				return
 				
-			# REGRA 3: Se a porta tiver Selo Rúnico e ainda não estiver resolvido
+			# se tem o minigame do selo runico
 			if tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
 				_abrir_minigame_selo_runico()
 				return

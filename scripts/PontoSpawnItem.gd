@@ -2,11 +2,7 @@
 extends Marker2D
 class_name PontoSpawnItem
 
-## ==============================================================================
-## PONTO DE SPAWN DE ITEM COLETÁVEL COM PREVIEW DIRETO NO EDITOR (SEM NÓS FILHOS)
-## Exibe o holograma/ícone do item no Editor da Godot via _draw().
-## Não se desmembra ao arrastar com o mouse e não deixa nenhum rastro em jogo!
-## ==============================================================================
+# ponto de spawn de item na sala (mostra icone no editor)
 
 enum TipoItemPreview {
 	HERDAR_DO_GERENCIADOR = 0,
@@ -24,7 +20,6 @@ enum TipoItemPreview {
 		if Engine.is_editor_hint():
 			queue_redraw()
 
-# Texturas cacheadas para desenho rápido no editor
 static var _tex_pergaminho: Texture2D = null
 static var _tex_livro: Texture2D = null
 static var _tex_bateria: Texture2D = null
@@ -66,20 +61,18 @@ func _obter_tipo_resolvido() -> int:
 		
 	var pai = get_parent()
 	if pai != null and "tipo_item" in pai:
-		# Mapeia tipo_item do GerenciadorSpawnItens (0..5) para TipoItemPreview (1..6)
 		return int(pai.tipo_item) + 1
 		
 	return TipoItemPreview.PERGAMINHO
 
 func _draw() -> void:
-	# Só desenha no Editor da Godot! Em tempo de jogo real, nada é renderizado.
 	if not Engine.is_editor_hint():
 		return
 		
 	_carregar_texturas()
 	var tipo = _obter_tipo_resolvido()
 	
-	# Desenha uma aura circular de destaque suave com borda
+	# circulo de destaque
 	var cor_aura = Color(0.2, 0.8, 1.0, 0.20)
 	var cor_borda = Color(0.2, 0.85, 1.0, 0.80)
 	

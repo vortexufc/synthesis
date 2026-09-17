@@ -1,7 +1,6 @@
 extends CanvasLayer
 
-## Interface Profissional da Bolsa Arcana (Inventário RPG)
-## Apresenta cartas de itens com slots moldurados, pedestais arcanos de detalhes e badges dourados.
+# tela de inventario do jogador
 
 @onready var tab_container: TabContainer = $Control/MarginContainer/Panel/VBox/HBox/MarginTabs/TabContainer
 @onready var grid_pocoes: HFlowContainer = $Control/MarginContainer/Panel/VBox/HBox/MarginTabs/TabContainer/Pocoes/ScrollContainer/GridPocoes
@@ -48,13 +47,13 @@ func _ready() -> void:
 	
 	_criar_estilos_slots()
 	
-	# Nomes estilizados das Abas
+	# nomes das abas
 	if tab_container:
 		tab_container.set_tab_title(0, " 🧪 Poções ")
 		tab_container.set_tab_title(1, " 🗝️ Relíquias ")
 		tab_container.set_tab_title(2, " 📜 Grimório ")
 
-	# Configura a barra de descarte
+	# barra pra descartar item
 	box_descarte = HBoxContainer.new()
 	box_descarte.alignment = BoxContainer.ALIGNMENT_CENTER
 	box_descarte.add_theme_constant_override("separation", 10)
@@ -98,7 +97,7 @@ func _ready() -> void:
 	atlas_pergaminho_aberto.atlas = tex_pergaminho
 	atlas_pergaminho_aberto.region = Rect2(64, 0, 64, 64)
 	
-	# Fundo de pergaminho aberto dinâmico para leitura
+	# fundo do pergaminho
 	var fundo_pergaminho = TextureRect.new()
 	fundo_pergaminho.texture = atlas_pergaminho_aberto
 	fundo_pergaminho.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -113,7 +112,7 @@ func _ready() -> void:
 	margem_leitura.add_theme_constant_override("margin_top", 170)
 	margem_leitura.add_theme_constant_override("margin_bottom", 170)
 	
-	# Botões de paginação da leitura
+	# botoes de passar pagina
 	var hbox_nav = HBoxContainer.new()
 	hbox_nav.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_nav.add_theme_constant_override("separation", 20)
@@ -137,7 +136,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS 
 	add_to_group("inventario_ui") 
 	
-	# Badge Elegante de Moedas (Cofre Dourado)
+	# contador de moedas
 	lbl_moedas_inv = Button.new()
 	var tex_coin_inv = load("res://assets/sprites/ui/coin.png") as Texture2D
 	if tex_coin_inv:
@@ -180,7 +179,7 @@ func _ready() -> void:
 	lbl_moedas_inv.offset_right = -24
 
 func _criar_estilos_slots() -> void:
-	# Normal: Fundo recessed obsidian com moldura metálica
+	# estilo normal do slot
 	_style_slot_normal = StyleBoxFlat.new()
 	_style_slot_normal.bg_color = Color(0.12, 0.08, 0.18, 0.95)
 	_style_slot_normal.border_width_left = 2
@@ -193,7 +192,7 @@ func _criar_estilos_slots() -> void:
 	_style_slot_normal.corner_radius_bottom_right = 8
 	_style_slot_normal.corner_radius_bottom_left = 8
 
-	# Hover: Iluminação violeta com borda dourada acentuada
+	# estilo quando passa o mouse
 	_style_slot_hover = StyleBoxFlat.new()
 	_style_slot_hover.bg_color = Color(0.24, 0.16, 0.36, 1.0)
 	_style_slot_hover.border_width_left = 2
@@ -208,7 +207,7 @@ func _criar_estilos_slots() -> void:
 	_style_slot_hover.shadow_size = 6
 	_style_slot_hover.shadow_color = Color(0.95, 0.78, 0.32, 0.3)
 
-	# Selected: Ouro brilhante
+	# estilo selecionado
 	_style_slot_selected = StyleBoxFlat.new()
 	_style_slot_selected.bg_color = Color(0.30, 0.20, 0.44, 1.0)
 	_style_slot_selected.border_width_left = 2
@@ -322,7 +321,7 @@ func _atualizar_listas() -> void:
 	if get_node_or_null("/root/PlayerStats") and lbl_moedas_inv:
 		lbl_moedas_inv.text = " 🪙  %d Moedas " % PlayerStats.moedas
 	
-	# 1. Carrega Poções
+	# carrega pocoes
 	if PlayerStats.pocoes.is_empty():
 		_add_mensagem_vazia(grid_pocoes, tex_pocao, "Nenhuma Poção na Bolsa", "Visite o Mercador ou explore as salas para coletar novos elixires.")
 	else:
@@ -331,7 +330,7 @@ func _atualizar_listas() -> void:
 			var card = _criar_slot_card(tex_pocao, po["nome"], po["qtd"], func(): _selecionar_item(po, "pocao", i))
 			grid_pocoes.add_child(card)
 			
-	# 2. Carrega Relíquias e Itens Chave
+	# carrega itens e chaves
 	var tem_qualquer_item = false
 	
 	if get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0:
@@ -341,7 +340,7 @@ func _atualizar_listas() -> void:
 		var card = _criar_slot_card(icone_chave, "Chave de Porta", PlayerStats.chaves, func(): _selecionar_item(dic_chave, "item", -1))
 		grid_itens.add_child(card)
 		
-	# Agrupa itens repetidos por nome
+	# junta itens iguais por nome
 	var itens_agrupados: Dictionary = {}
 	for it in PlayerStats.itens:
 		var nome = it.get("nome", "Item Desconhecido")
@@ -401,7 +400,7 @@ func _atualizar_listas() -> void:
 		var icone_reliquia_padrao = load("res://assets/sprites/ui/icon_key_transparent.png")
 		_add_mensagem_vazia(grid_itens, icone_reliquia_padrao, "Sem Relíquias no Momento", "Resolva enigmas ou derrote guardiões para obter artefatos e chaves.")
 			
-	# 3. Carrega Páginas do Grimório
+	# carrega folhas do grimorio
 	if PlayerStats.grimorio.is_empty():
 		_add_mensagem_vazia(grid_grimorio, atlas_pergaminho_fechado, "Grimório em Branco", "Descubra pergaminhos antigos pelas masmorras para registrar fórmulas.")
 	else:
@@ -415,7 +414,7 @@ func _atualizar_listas() -> void:
 			var card = _criar_slot_card(icone_doc, doc["titulo"], 1, func(): _selecionar_item(doc, "grimorio", i))
 			grid_grimorio.add_child(card)
 
-## Cria um Card de Slot de Inventário com moldura de alta qualidade, ícone e badge de quantidade
+# monta o slot do item na grade
 func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callable) -> Control:
 	var btn = Button.new()
 	btn.custom_minimum_size = Vector2(118, 118)
@@ -425,7 +424,7 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.clip_contents = true
 	
-	# MarginContainer interno para acolchoamento e alinhamento perfeito
+	# margem do slot
 	var margin = MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 6)
@@ -441,7 +440,7 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	margin.add_child(vbox)
 	
-	# Ícone Central
+	# icone do item
 	var tex_rect = TextureRect.new()
 	tex_rect.texture = icone
 	tex_rect.custom_minimum_size = Vector2(46, 46)
@@ -451,7 +450,7 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 	tex_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	vbox.add_child(tex_rect)
 	
-	# Rótulo com nome completo do item (com quebra natural de palavras, sem cortar com ..)
+	# nome do item
 	var lbl_nome = Label.new()
 	lbl_nome.text = nome
 	lbl_nome.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -465,7 +464,7 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 	lbl_nome.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(lbl_nome)
 	
-	# Badge de Quantidade organizado no canto inferior direito do bloco
+	# quantidade do item
 	if qtd > 1:
 		var badge_panel = PanelContainer.new()
 		var sb_badge = StyleBoxFlat.new()
@@ -500,14 +499,14 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 		badge_panel.add_child(lbl_qtd)
 		btn.add_child(badge_panel)
 		
-	# Efeito dinâmico de clique e foco
+	# efeito de clique
 	btn.pressed.connect(func():
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-1")
 		callback.call()
 	)
 	
-	# Animação suave ao passar o mouse
+	# animacao de hover
 	btn.mouse_entered.connect(func():
 		var tw = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tw.tween_property(btn, "scale", Vector2(1.03, 1.03), 0.08)

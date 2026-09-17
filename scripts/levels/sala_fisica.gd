@@ -1,23 +1,11 @@
 extends Node2D
 
-## Controlador Base de Iluminação e Visual de Laboratório para as Salas de Física
-## Aplica a atmosfera industrial, eletromagnética e de alta tecnologia:
-## - Ambiente de laboratório metálico iluminado (CanvasModulate azul-chumbo frio)
-## - Aura elétrica no pé do jogador (PointLight2D com luz branca fria)
-## - Portais energizados (Azul elétrico de avanço e Ciano quântico de retorno)
-## - Telas e monitores com iluminação fosforescente e flicker de varredura
-## - Canos com liberação de vapor de pressão e ventiladores com exaustão
-## - Baterias elétricas emitindo brilho dourado e faíscas estáticas
-## - Chips eletrônicos pulsando em ciano neon
-## - Robôs com sensores ópticos/olhos luminosos patrulhando a sala
-## - Luminárias industriais de parede distribuídas pelo laboratório
-## - Gerenciamento de inimigos, combate e drop de chaves de progressão
+# script base das salas de fisica
 
 var monstros_na_sala: int = 0
 
 @export_group("Iluminação Ambiente")
-## Tom de iluminação ambiente do laboratório.
-## Tons claros (ex: 0.74, 0.78, 0.84) mantêm a sala bem iluminada e nítida como um laboratório de ponta.
+# cor da iluminacao da sala
 @export var cor_ambiente: Color = Color(0.74, 0.78, 0.84, 1.0)
 @export var energia_aura_player: float = 0.38
 
@@ -79,8 +67,7 @@ func _obter_textura_vapor() -> Texture2D:
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
 	
-	# 1. CanvasModulate: Ambiente de laboratório tecnológico e metálico claro
-	# (Visual límpido e iluminado de laboratório, sem a escuridão pesada da masmorra de alquimia)
+	# modulacao de cor do mapa
 	if not find_child("AmbienteLaboratorio", true, false) and not find_child("AmbienteMasmorra", true, false):
 		_canvas_modulate = CanvasModulate.new()
 		_canvas_modulate.name = "AmbienteLaboratorio"
@@ -91,7 +78,7 @@ func _configurar_sistema_iluminacao() -> void:
 		if _canvas_modulate:
 			_canvas_modulate.color = cor_ambiente
 	
-	# 2. Aura Elétrica do Jogador: Projeção limpa de luz branca-fria
+	# luz que segue o player
 	var player = find_child("Player", true, false)
 	if player and not player.get_node_or_null("AuraPlayer"):
 		_luz_player = PointLight2D.new()
@@ -105,17 +92,17 @@ func _configurar_sistema_iluminacao() -> void:
 	elif player:
 		_luz_player = player.get_node_or_null("AuraPlayer") as PointLight2D
 		
-	# 3. Luzes temáticas nos Portais de Física
+	# luzes dos portais
 	_criar_luz_portal("PortaTransicao", Color(0.20, 0.75, 1.0, 1.0)) # Azul elétrico de avanço
 	_criar_luz_portal("PortaRetorno", Color(0.15, 0.90, 0.85, 1.0))   # Ciano quântico de retorno
 	
-	# 4. Detecção e iluminação automática de máquinas, telas e canos na camada Decoration
+	# poe luz nos monitores e canos
 	_configurar_props_fisica(tex_luz)
 	
-	# 5. Efeitos visuais em itens colecionáveis e sensores dos robôs
+	# efeitos visuais dos itens e robos
 	_configurar_itens_e_entidades(tex_luz)
 	
-	# 6. Luminárias industriais de parede caso a sala não possua iluminação manual
+	# coloca luminarias na parede
 	_garantir_luminarias_na_sala()
 
 func _configurar_props_fisica(tex_luz: Texture2D) -> void:
@@ -131,9 +118,9 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 		var cell_id = str(cell.x) + "_" + str(cell.y)
 		var src_id = decor.get_cell_source_id(cell)
 		
-		# 4.1 Monitores, Consoles e Painéis Computadorizados (Source 3: objetos.png)
+		# monitores e paineis
 		if src_id == 3:
-			# Grandes terminais com monitores luminosos
+			# luz dos monitores
 			if atlas in [Vector2i(0, 0), Vector2i(10, 0), Vector2i(0, 11), Vector2i(10, 11), Vector2i(20, 14), Vector2i(30, 3), Vector2i(30, 14), Vector2i(80, 0), Vector2i(90, 0), Vector2i(100, 0), Vector2i(110, 0)]:
 				var luz_tela = PointLight2D.new()
 				luz_tela.name = "LuzMonitor_" + cell_id
@@ -149,7 +136,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 					"speed": randf_range(5.0, 9.0),
 					"offset": randf() * 10.0
 				})
-			# Painéis elétricos secundários / medidores
+			# luz dos paineis eletricos
 			elif atlas in [Vector2i(44, 7), Vector2i(40, 7), Vector2i(76, 13), Vector2i(66, 6), Vector2i(72, 13), Vector2i(60, 17), Vector2i(65, 17)]:
 				var luz_painel = PointLight2D.new()
 				luz_painel.name = "LuzPainel_" + cell_id
@@ -166,7 +153,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 					"offset": randf() * 10.0
 				})
 				
-		# 4.2 Ventiladores Industriais (Source 1: ventiladores.png)
+		# ventiladores
 		elif src_id == 1:
 			var part_vento = CPUParticles2D.new()
 			part_vento.name = "ExaustaoVentilador_" + cell_id
@@ -185,9 +172,9 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 			part_vento.color = Color(1, 1, 1, 0.25)
 			add_child(part_vento)
 			
-		# 4.3 Válvulas e Canos de Pressão (Source 2: canos2.png)
+		# canos de pressao
 		elif src_id == 2:
-			# Pequenos vazamentos de vapor em conexões selecionadas
+			# solta fumaca dos canos
 			if atlas in [Vector2i(7, 5), Vector2i(55, 14), Vector2i(145, 3), Vector2i(151, 3)]:
 				var part_vapor = CPUParticles2D.new()
 				part_vapor.name = "VaporCano_" + cell_id
@@ -207,7 +194,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 				add_child(part_vapor)
 
 func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
-	# 1. Brilho elétrico nas Baterias (ItemBateria)
+	# brilho nas baterias
 	for item in get_children():
 		if item.name.begins_with("ItemBateria") and not item.get_node_or_null("LuzBateria"):
 			var luz_bat = PointLight2D.new()
@@ -219,7 +206,7 @@ func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
 			item.add_child(luz_bat)
 			_luzes_itens.append({"node": luz_bat, "base_energy": 0.45, "speed": 4.0, "offset": randf() * 5.0})
 			
-			# Faíscas estáticas na bateria
+			# faiscas na bateria
 			var faiscas = CPUParticles2D.new()
 			faiscas.name = "FaiscasBateria"
 			faiscas.amount = 3
@@ -232,7 +219,7 @@ func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
 			faiscas.color = Color(1.0, 0.75, 0.25, 0.9) # Faíscas douradas do raio
 			item.add_child(faiscas)
 			
-		# 2. Pulso tecnológico nos Chips (ItemChip)
+		# pulso de luz nos chips
 		elif item.name.begins_with("ItemChip") and not item.get_node_or_null("LuzChip"):
 			var luz_chip = PointLight2D.new()
 			luz_chip.name = "LuzChip"
@@ -243,7 +230,7 @@ func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
 			item.add_child(luz_chip)
 			_luzes_itens.append({"node": luz_chip, "base_energy": 0.42, "speed": 5.5, "offset": randf() * 5.0})
 			
-		# 3. Sensores ópticos / olhos luminosos nos Robôs
+		# luz nos olhos dos robos
 		elif (item.name.begins_with("Robo_P") or item.name.begins_with("Robo_G")) and not item.get_node_or_null("LuzSensorRobo"):
 			var cor_olho = Color(1.0, 0.85, 0.2, 1.0)
 			if "Ciano" in item.name:
@@ -308,17 +295,17 @@ func _garantir_luminarias_na_sala() -> void:
 	var min_world = floor_layer.to_global(floor_layer.map_to_local(rect.position))
 	var max_world = floor_layer.to_global(floor_layer.map_to_local(rect.end))
 	
-	# Detectar portas na sala para evitar que luminárias fiquem sobrepostas a elas
+	# acha as portas pra nao colocar luminaria em cima
 	var porta = find_child("PortaTransicao", true, false) as Node2D
 	var porta_pos = porta.global_position if porta else Vector2(-9999, -9999)
 	
 	var room_w = max_world.x - min_world.x
 	var room_h = max_world.y - min_world.y
 	
-	# 1. Y da parede norte: elevado para o painel metálico superior da parede
+	# altura da parede norte
 	var north_wall_y = min_world.y - 100.0
 	
-	# Distribuição ao longo da parede Norte
+	# espalha as luminarias na parede norte
 	var fractions: Array = []
 	if room_w > 1200:
 		fractions = [0.15, 0.38, 0.62, 0.85]
@@ -330,7 +317,7 @@ func _garantir_luminarias_na_sala() -> void:
 	var luminarias_info: Array = []
 	for frac in fractions:
 		var lx = min_world.x + room_w * frac
-		# Evitar sobreposição com a porta
+		# pula se tiver perto da porta
 		if abs(lx - porta_pos.x) < 70 and abs(north_wall_y - porta_pos.y) < 75:
 			var offset_x = 80.0 if lx >= porta_pos.x else -80.0
 			lx += offset_x
@@ -339,14 +326,14 @@ func _garantir_luminarias_na_sala() -> void:
 			"orient": 0 # NORTE
 		})
 		
-	# 2. Paredes laterais (Oeste e Leste): detecta a coluna da parede para encostar com precisão
+	# luminarias das paredes laterais
 	var wall_layer = get_node_or_null("Wall") as TileMapLayer
 	var side_fractions = [0.35, 0.65] if room_h > 900 else [0.50]
 	for sfrac in side_fractions:
 		var sy = min_world.y + room_h * sfrac
 		var map_y = int(rect.position.y + rect.size.y * sfrac)
 		
-		# Buscar coluna da parede esquerda
+		# acha a parede esquerda
 		var left_wall_x = min_world.x - 69.0
 		if wall_layer:
 			var achou_esq = false
@@ -359,7 +346,7 @@ func _garantir_luminarias_na_sala() -> void:
 				if achou_esq:
 					break
 					
-		# Buscar coluna da parede direita
+		# acha a parede direita
 		var right_wall_x = max_world.x + 42.0
 		if wall_layer:
 			var achou_dir = false
@@ -400,7 +387,7 @@ func _process(delta: float) -> void:
 	_tempo_luz_tick = 0.0
 	_tempo_iluminacao += dt
 	
-	# 1. Flicker sutil e scanlines de telas e monitores
+	# pisca a luz dos monitores
 	for i in range(_luzes_telas.size() - 1, -1, -1):
 		var tela = _luzes_telas[i]
 		var raw_node = tela.get("node")
@@ -412,14 +399,14 @@ func _process(delta: float) -> void:
 		var osc = sin(t) * 0.04 + sin(t * 2.3) * 0.02
 		node.energy = tela["base_energy"] + osc
 			
-	# 2. Pulso sutil da aura elétrica do jogador
+	# pulso da luz do player
 	if is_instance_valid(_luz_player):
 		var pulso_p = sin(_tempo_iluminacao * 2.5) * 0.02
 		_luz_player.energy = energia_aura_player + pulso_p
 	else:
 		_luz_player = null
 		
-	# 3. Pulsação dos portais eletromagnéticos
+	# animacao dos portais
 	for i in range(_luzes_portais.size() - 1, -1, -1):
 		var portal = _luzes_portais[i]
 		var raw_node = portal.get("node")
@@ -430,7 +417,7 @@ func _process(delta: float) -> void:
 		var pulso = sin((_tempo_iluminacao + portal["offset"]) * 2.8) * 0.05
 		node.energy = portal["base_energy"] + pulso
 			
-	# 4. Brilho oscilante dos itens (Baterias e Chips - removidos ao coletar)
+	# pisca luz das baterias e chips
 	for i in range(_luzes_itens.size() - 1, -1, -1):
 		var item_luz = _luzes_itens[i]
 		var raw_node = item_luz.get("node")
@@ -441,7 +428,7 @@ func _process(delta: float) -> void:
 		var pulso = sin((_tempo_iluminacao + item_luz["offset"]) * item_luz["speed"]) * 0.05
 		node.energy = item_luz["base_energy"] + pulso
 			
-	# 5. Pulsação dos olhos/sensores dos robôs (removidos ao derrotar)
+	# luz dos olhos dos robos
 	for i in range(_luzes_robos.size() - 1, -1, -1):
 		var robo_luz = _luzes_robos[i]
 		var raw_node = robo_luz.get("node")
@@ -479,7 +466,7 @@ func _dropar_recompensa(pos: Vector2) -> void:
 	var cena_atual = scene_file_path.to_lower()
 	if "boss" in cena_atual or "fisica12" in cena_atual or "física12" in cena_atual:
 		return
-	# Prioriza dropar a chave da porta ou uma bateria restauradora
+	# dropa a chave da porta
 	var cena_chave = load("res://scenes/Entidades/ItemChave.tscn")
 	if cena_chave:
 		var chave = cena_chave.instantiate()

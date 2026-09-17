@@ -1,10 +1,9 @@
 extends Area2D
 
-## NPC da Biologia (Botânica e Bióloga Arcana)
-## Fica localizada na sala de teste enquanto o andar de Biologia está em desenvolvimento.
+# npc da biologia (fica na sala de testes por enquanto)
 
 @export_group("Visual")
-## Quando ativado, o NPC fica na pose lateralizada (isométrica 3/4)
+# pose isometrica 3/4
 @export var usar_angulo_isometrico: bool = false
 
 var player_perto: bool = false
@@ -38,7 +37,8 @@ func _quando_corpo_sai(corpo: Node2D) -> void:
 	if corpo.is_in_group("player") or corpo.name.begins_with("Player"):
 		player_perto = false
 		_esconder_prompt()
-		_fechar_interface()
+		if ui_instancia and is_instance_valid(ui_instancia):
+			_fechar_interface()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if ui_instancia and is_instance_valid(ui_instancia):
@@ -117,7 +117,7 @@ func _criar_balao() -> void:
 	_balao_interacao.add_child(panel)
 	add_child(_balao_interacao)
 	
-	# 2. Indicador de Interação/Quest flutuante acima da cabeça (!)
+	# icone de exclamacao
 	_indicador_quest = Label.new()
 	_indicador_quest.name = "IndicadorQuestBio"
 	_indicador_quest.z_index = 26
@@ -159,13 +159,12 @@ func _abrir_interface() -> void:
 	ui_instancia.add_to_group("dialogo_ativo")
 	add_child(ui_instancia)
 	
-	# Fundo escurecido
+	# escurece o fundo
 	var bg = ColorRect.new()
 	bg.color = Color(0, 0, 0, 0.65)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	ui_instancia.add_child(bg)
 	
-	# Painel do Diálogo
 	var panel = PanelContainer.new()
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = Color(0.06, 0.11, 0.08, 0.96)
@@ -196,7 +195,6 @@ func _abrir_interface() -> void:
 	vbox.add_theme_constant_override("separation", 12)
 	panel.add_child(vbox)
 	
-	# Fontes normais e legíveis
 	var font_normal = SystemFont.new()
 	font_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	
@@ -204,7 +202,6 @@ func _abrir_interface() -> void:
 	font_bold.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_bold.font_weight = 700
 	
-	# Cabeçalho (sem emoji de planta)
 	var lbl_titulo = Label.new()
 	lbl_titulo.text = "Dra. Flora - Botânica & Bióloga Arcana"
 	lbl_titulo.add_theme_font_override("font", font_bold)
@@ -212,13 +209,11 @@ func _abrir_interface() -> void:
 	lbl_titulo.add_theme_color_override("font_color", Color(0.45, 1.0, 0.6))
 	vbox.add_child(lbl_titulo)
 	
-	# Divisória visual
 	var hline = ColorRect.new()
 	hline.custom_minimum_size = Vector2(0, 2)
 	hline.color = Color(0.3, 0.7, 0.4, 0.5)
 	vbox.add_child(hline)
 	
-	# Texto de lore / introdução
 	var lbl_msg = RichTextLabel.new()
 	lbl_msg.bbcode_enabled = true
 	lbl_msg.text = "[color=#d8f5dc]\"Saudações, nobre Mago! Estou analisando os espécimes celulares e esporos vegetais da masmorra.\n\nO [color=#55ff88][b]Andar de Biologia[/b][/color] ainda está sendo feito, em breve trarei missões.\"[/color]"
@@ -267,16 +262,17 @@ func _abrir_interface() -> void:
 		AudioManager.play_sfx("ui-1")
 
 func _fechar_interface() -> void:
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		if player.has_method("finalizar_interacao"):
-			player.finalizar_interacao(0.6)
-		else:
-			player.travado = false
-			player.em_interacao = false
-			
 	if ui_instancia and is_instance_valid(ui_instancia):
 		ui_instancia.queue_free()
 		ui_instancia = null
+		
+		var player = get_tree().get_first_node_in_group("player")
+		if player:
+			if player.has_method("finalizar_interacao"):
+				player.finalizar_interacao(0.4)
+			else:
+				player.travado = false
+				player.em_interacao = false
+				
 		if player_perto:
 			_mostrar_prompt()

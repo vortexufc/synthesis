@@ -1,8 +1,6 @@
 extends CanvasLayer
 
-## [Minigame] Ligar Pares - Conexão Rúnica Elemental
-## Abre durante a batalha contra Inimigos Campeões Rúnicos para quebrar a barreira mágica.
-## O jogador clica em um bloco e clica no correspondente para conectá-los e dissipá-los.
+# minigame de ligar pares
 
 signal conexao_concluida(vitoria: bool)
 
@@ -15,7 +13,7 @@ var bloqueio_input: bool = false
 var pares_conectados: int = 0
 var bloco_selecionado: Button = null
 
-# Referências visuais
+# referencias da interface
 var backdrop: ColorRect
 var painel_central: PanelContainer
 var lbl_timer: Label
@@ -27,7 +25,7 @@ var banner_resultado: PanelContainer
 var lbl_banner_titulo: Label
 var lbl_banner_sub: Label
 
-# Banco de dados de pares científicos por andar
+# pares por materia
 const PARES_POR_ANDAR = {
 	1: [ # Química (Andar 1)
 		{"termo_a": "H₂O", "termo_b": "Água"},
@@ -127,7 +125,7 @@ func _process(delta: float) -> void:
 	if tempo_restante <= 0.0:
 		_finalizar_derrota()
 
-## Inicia a Conexão Rúnica com base no andar da masmorra
+# inicia o minigame com base no andar
 func iniciar_conexao(p_andar_id: int = 1) -> void:
 	andar_id = p_andar_id
 	tempo_restante = duracao_total
@@ -163,7 +161,7 @@ func _construir_interface() -> void:
 	font_titulo.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_titulo.font_weight = 700
 
-	# CenterContainer para o painel
+	# container central
 	var center_painel = CenterContainer.new()
 	center_painel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center_painel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -197,7 +195,7 @@ func _construir_interface() -> void:
 	vbox_main.add_theme_constant_override("separation", 12)
 	painel_central.add_child(vbox_main)
 	
-	# Top bar
+	# cabecalho
 	var vbox_titulos = VBoxContainer.new()
 	vbox_titulos.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox_titulos.add_theme_constant_override("separation", 2)
@@ -219,10 +217,10 @@ func _construir_interface() -> void:
 	lbl_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox_titulos.add_child(lbl_sub)
 	
-	# Divisória
+	# separador
 	vbox_main.add_child(HSeparator.new())
 	
-	# Timer e Status
+	# tempo e instrucoes
 	var hbox_status = HBoxContainer.new()
 	hbox_status.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_status.add_theme_constant_override("separation", 24)
@@ -266,7 +264,7 @@ func _construir_interface() -> void:
 	lbl_pares.add_theme_color_override("font_color", Color(0.95, 0.82, 0.35))
 	hbox_status.add_child(lbl_pares)
 	
-	# Área das 2 Colunas de Conexão
+	# duas colunas de blocos
 	var hbox_colunas = HBoxContainer.new()
 	hbox_colunas.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_colunas.add_theme_constant_override("separation", 36)
@@ -285,7 +283,7 @@ func _construir_interface() -> void:
 	col_b_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_colunas.add_child(col_b_container)
 	
-	# Banner de Resultado
+	# aviso de resultado
 	var center_banner = CenterContainer.new()
 	center_banner.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -333,7 +331,7 @@ func _construir_interface() -> void:
 	center_banner.add_child(banner_resultado)
 
 func _gerar_blocos() -> void:
-	# Limpa nós anteriores
+	# limpa blocos antigos
 	for child in col_a_container.get_children():
 		child.queue_free()
 	for child in col_b_container.get_children():
@@ -352,7 +350,7 @@ func _gerar_blocos() -> void:
 		lista_a.append({"par_id": i, "texto": p["termo_a"], "coluna": "A"})
 		lista_b.append({"par_id": i, "texto": p["termo_b"], "coluna": "B"})
 		
-	# Embaralha cada coluna independentemente
+	# embaralha as colunas
 	lista_a.shuffle()
 	lista_b.shuffle()
 	
@@ -413,14 +411,14 @@ func _ao_clicar_bloco(btn: Button) -> void:
 	if not is_instance_valid(btn) or btn.get_meta("resolvido", false):
 		return
 		
-	# Se clicou no mesmo que já estava selecionado, desseleciona
+	# se clicou no mesmo desmarca
 	if bloco_selecionado == btn:
 		_desselecionar_bloco()
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-1")
 		return
 		
-	# Se ainda não tinha nenhum bloco selecionado
+	# seleciona o primeiro
 	if bloco_selecionado == null:
 		bloco_selecionado = btn
 		_destacar_bloco(btn, true)
@@ -428,7 +426,7 @@ func _ao_clicar_bloco(btn: Button) -> void:
 			AudioManager.play_sfx("ui-1")
 		return
 		
-	# Já tinha um bloco selecionado e clicou no segundo!
+	# seleciona o segundo
 	bloqueio_input = true
 	var b1: Button = bloco_selecionado
 	var b2: Button = btn
@@ -440,9 +438,9 @@ func _ao_clicar_bloco(btn: Button) -> void:
 	var col_1: String = b1.get_meta("coluna", "A")
 	var col_2: String = b2.get_meta("coluna", "B")
 	
-	# Verifica se formam o par correto (mesmo par_id e colunas distintas)
+	# checa se os dois formam par
 	if par_id_1 >= 0 and par_id_1 == par_id_2 and col_1 != col_2:
-		# PAR CORRETO! Conexão Rúnica estabelecida!
+		# par correto
 		b1.set_meta("resolvido", true)
 		b2.set_meta("resolvido", true)
 		b1.disabled = true
@@ -457,7 +455,7 @@ func _ao_clicar_bloco(btn: Button) -> void:
 		_aplicar_cor_bloco(b1, Color(0.2, 0.95, 0.45))
 		_aplicar_cor_bloco(b2, Color(0.2, 0.95, 0.45))
 		
-		# Animação de dissolução / explosão mágica suave
+		# animacao de sumir os blocos
 		var tw = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tw.tween_property(b1, "scale", Vector2(1.12, 1.12), 0.15)
 		tw.tween_property(b2, "scale", Vector2(1.12, 1.12), 0.15)
@@ -474,14 +472,14 @@ func _ao_clicar_bloco(btn: Button) -> void:
 		if pares_conectados >= 3:
 			_finalizar_vitoria()
 	else:
-		# PAR INCORRETO!
+		# par errado
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-2")
 			
 		_aplicar_cor_bloco(b1, Color(0.95, 0.25, 0.25))
 		_aplicar_cor_bloco(b2, Color(0.95, 0.25, 0.25))
 		
-		# Tremor nos dois blocos
+		# treme os dois blocos
 		var tw1 = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tw1.tween_property(b1, "position:x", b1.position.x + 8.0, 0.05)
 		tw1.tween_property(b1, "position:x", b1.position.x - 8.0, 0.05)

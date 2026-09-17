@@ -66,7 +66,7 @@ func _iniciar_efeito_brilho() -> void:
 		_tween_bob.tween_property(sprite, "position:y", pos_y - 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_tween_bob.tween_property(sprite, "position:y", pos_y + 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
-		# Sombra realista no chão acompanhando a flutuação
+		# sombra
 		_criar_sombra()
 		if _shadow:
 			var tw_s = create_tween().set_loops()
@@ -106,7 +106,7 @@ func _gerar_dicas_dinamicas() -> void:
 	_gerando_dicas = true
 	var q_manager = get_node("/root/QuizManager")
 	
-	# Verifica em qual andar estamos baseado no nome da cena
+	# ve qual andar ta pelo nome da cena
 	if get_tree() and get_tree().current_scene:
 		var current_scene_path = get_tree().current_scene.scene_file_path.to_lower()
 		var andar_correto = q_manager.get("_andar_atual")
@@ -118,7 +118,7 @@ func _gerar_dicas_dinamicas() -> void:
 		elif "biologia" in current_scene_path:
 			andar_correto = 3
 			
-		# Se estivermos testando uma sala (F6) e o QuizManager estiver com o andar errado, forçamos a troca
+		# forca trocar andar se tiver testando a sala no F6
 		if q_manager.get("_andar_atual") != andar_correto:
 			q_manager.set("_andar_atual", andar_correto)
 			q_manager.set("questions", [])
@@ -126,13 +126,12 @@ func _gerar_dicas_dinamicas() -> void:
 			if get_node_or_null("/root/DatabaseManager"):
 				DatabaseManager.puxar_perguntas(andar_correto)
 	
-	# Se o QuizManager ainda estiver baixando do banco, esperamos ele terminar (máximo de 5 segundos pra não travar)
+	# espera o banco carregar as perguntas se ainda tiver vazio
 	var tempo_espera = 0.0
 	while typeof(q_manager.get("questions")) == TYPE_ARRAY and q_manager.get("questions").size() == 0 and tempo_espera < 5.0:
 		await get_tree().create_timer(0.5).timeout
 		tempo_espera += 0.5
 	
-	# Se as perguntas ainda não foram preparadas para esta sala, força a preparação
 	if q_manager.has_method("reset_questions"):
 		var precisa_sortear = false
 		var current_shuffled = q_manager.get("shuffled_questions")
@@ -143,7 +142,6 @@ func _gerar_dicas_dinamicas() -> void:
 		if get_tree() and get_tree().current_scene:
 			sala_atual = get_tree().current_scene.scene_file_path
 		
-		# Se o pergaminho estiver numa sala nova que ainda não sorteou as questões, a gente força o sorteio!
 		if q_manager.get("ultima_sala_sorteada") != sala_atual:
 			precisa_sortear = true
 			
@@ -156,17 +154,16 @@ func _gerar_dicas_dinamicas() -> void:
 		var novas_paginas: Array[String] = []
 		var max_dicas = 4
 		
-		# Pega as primeiras perguntas sorteadas que o jogador vai enfrentar
+		# pega as dicas das perguntas sorteadas
 		for i in range(min(max_dicas, sorteados.size())):
 			var q = sorteados[i]
 			var pergunta_texto = q.get("question", "")
 			
-			# Tenta buscar a coluna "dica" ou "explicacao" do banco de dados primeiro (Supabase)
 			var dica = q.get("dica", "")
 			if dica == "" or dica == null:
 				dica = q.get("explicacao", "")
 			
-			# Se não vier nada do Supabase, tenta resgatar a dica que a IA salvou no arquivo JSON local!
+			# tenta pegar do json local se o banco nao tiver
 			if dica == "" or dica == null:
 				var file_questions = FileAccess.open("res://data/questions.json", FileAccess.READ)
 				if file_questions:
@@ -179,10 +176,9 @@ func _gerar_dicas_dinamicas() -> void:
 									dica = local_dica
 									break
 			
-			# Se não tiver dica no banco nem no JSON local, usamos um fallback visual provisório
 			if dica == "" or dica == null:
 				var preview = pergunta_texto.substr(0, 45) + "..." if pergunta_texto.length() > 45 else pergunta_texto
-				dica = "Estude com atenção o seguinte tema:\n'%s'\n\n(Dica ainda não gerada pela IA no banco de dados!)" % preview
+				dica = "Estude com atenção o seguinte tema:\n'%s'" % preview
 				
 			var texto_dica = "FRAGMENTO DE SABEDORIA %d:\n\n" % (i + 1)
 			texto_dica += dica
@@ -285,11 +281,11 @@ func coletar() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 
-	# Salva no Inventário
+	# salva no grimorio
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.adicionar_pergaminho(titulo_pergaminho, paginas)
 
-	# Abre o pergaminho na tela dinamicamente ao coletar com a tecla F
+	# abre o pergaminho
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
@@ -297,7 +293,6 @@ func coletar() -> void:
 	if ui and ui.has_method("abrir_pergaminho"):
 		ui.abrir_pergaminho(paginas, player_ref)
 
-	# Remove o pergaminho do mapa
 	queue_free()
 
 

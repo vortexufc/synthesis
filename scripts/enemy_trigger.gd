@@ -1,25 +1,19 @@
 extends Area2D
 
-## [Dev-1 / Combat-4] EnemyTrigger — Área de detecção do inimigo.
-## Ao entrar, para a patrulha do inimigo-pai e emite iniciar_batalha.
+# area de deteccao do inimigo
+# quando o player entra aqui comeca a batalha
 
-# ──────────────────────────────────────────
-# Dados configuráveis pelo Inspector
-# ──────────────────────────────────────────
 @export var id_inimigo:        String = "slime_p"
-@export var num_questoes:      int   = 5      ## Rodadas de quiz desta batalha
-@export var duracao_batalha:   float = 300.0  ## Segundos totais (5 min = Golem Andar 1)
-@export var andar_id:          int   = 1      ## [Dev-1] Identifica o andar → QuizManager carrega Biologia
-@export var nivel_dificuldade: int   = 0      ## [TRI] 1=Fácil, 2=Médio, 3=Difícil (0=Automático por monstro/sala)
-@export var eh_boss: bool           = false  ## Força este encontro a ser Batalha de Chefe (Fúria + Vinheta)
-@export var eh_runico: bool          = false  ## Força este encontro a ser Campeão Rúnico
+@export var num_questoes:      int   = 5
+@export var duracao_batalha:   float = 300.0
+@export var andar_id:          int   = 1
+@export var nivel_dificuldade: int   = 0 # 1=facil, 2=medio, 3=dificil, 0=auto
+@export var eh_boss: bool           = false
+@export var eh_runico: bool          = false
 
-## [Local] Questões hardcoded para este inimigo (ex: builds de teste).
-## Cada item deve ter: { question, options: [], answer (índice) }
-## Quando preenchido, substitui o banco de dados para este inimigo.
+# questoes especificas de teste caso nao queira usar o banco
 @export var questoes_locais: Array = []
 
-# Constantes de referência para configuração rápida via código
 const GOLEM_MENOR = { "num_questoes": 3, "duracao_batalha": 300.0 }
 const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 
@@ -62,7 +56,10 @@ func _player_em_interacao(p_node: Node2D = null) -> bool:
 		if players.size() > 0:
 			pl = players[0]
 	if pl and is_instance_valid(pl):
-		if pl.has_method("esta_em_interacao"):
+		if pl.has_method("esta_imune_a_combate"):
+			if pl.esta_imune_a_combate():
+				return true
+		elif pl.has_method("esta_em_interacao"):
 			if pl.esta_em_interacao():
 				return true
 		elif pl.get("travado") == true or pl.get("em_interacao") == true:
@@ -100,14 +97,12 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 
 	if not vitoria:
 		show()
-		# [Bugfix] Espera meio segundo (sem rodar no pause) antes de ativar a colisão. 
-		# Isso impede que a batalha reinicie no micro-segundo em que o Game Over 
-		# despausa o jogo para transitar para o Menu.
+		# espera um pouco antes de reativar pra nao reabrir a batalha no pause
 		await get_tree().create_timer(0.5, false).timeout
 		if is_instance_valid(self):
 			set_deferred("monitoring", true)
 	else:
-		# Se venceu, deleta o inimigo do mapa e registra como derrotado
+		# se venceu, remove o monstro da sala
 		var pai = get_parent()
 		if pai:
 			if get_node_or_null("/root/DungeonGenerator"):
@@ -177,7 +172,7 @@ func _on_body_entered(body: Node2D) -> void:
 		"dano":               dano_val,
 	}
 
-	# [Fix-9] Fallback inteligente do Sprite do inimigo
+	# pega o sprite do inimigo pro card da batalha
 	if QuizManager.sprite_frames_inimigos.has(id_inimigo):
 		enemy_data["sprite_frames"] = QuizManager.sprite_frames_inimigos[id_inimigo]
 	else:
@@ -186,16 +181,10 @@ func _on_body_entered(body: Node2D) -> void:
 		elif node_pai and node_pai.has_node("sprite"):
 			enemy_data["sprite_frames"] = node_pai.get_node("sprite").sprite_frames
 
-	# [Local] Se houver questões hardcoded, injeta no enemy_data
 	if questoes_locais.size() > 0:
 		enemy_data["questoes_locais"] = questoes_locais
-		print("[Local] Usando %d questões locais para '%s'" % [questoes_locais.size(), id_inimigo])
 
-	print("[Combat-5] Batalha: %d questões / %ds / Andar %d" % [
-		num_questoes, int(duracao_batalha), andar_id
-	])
-
-	# Para a patrulha do inimigo-pai (se este trigger for filho de um enemy.gd)
+	# para o monstro de patrulhar enquanto luta
 	if node_pai and node_pai.has_method("_on_batalha_iniciada"):
 		node_pai._on_batalha_iniciada(enemy_data)
 

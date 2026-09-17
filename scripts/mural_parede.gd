@@ -1,11 +1,9 @@
 extends Area2D
 
-## [Lore & Ensino Visual] Objeto do Mural Rúnico / Inscrição na Parede
-## O jogador se aproxima e aperta [F] para examinar a inscrição.
-## Abre a interface interativa mural_ui.tscn correspondente ao andar.
+# mural na parede com infografico (aperta F pra ver)
 
 @export_enum("Automático (Detectar pela Sala)", "Andar 1 (Química)", "Andar 2 (Física)", "Andar 3 (Biologia)") var forcar_andar: int = 0
-@export var recompensa_descoberta: int = 0 ## Sem moedas, pura exploração e estudo
+@export var recompensa_descoberta: int = 0
 
 var ja_examinado: bool = false
 var player_perto: bool = false
@@ -32,13 +30,13 @@ func _criar_aura_brilho() -> void:
 	var cor_brilho_meio = Color(0.7, 0.3, 1.0, 0.30)
 	
 	match andar:
-		1: # Química: Ciano & Violeta Arcano
+		1: # quimica
 			cor_brilho_centro = Color(0.25, 0.85, 1.0, 0.55)
 			cor_brilho_meio = Color(0.75, 0.35, 1.0, 0.32)
-		2: # Física: Ouro Solar & Laranja do Prisma
+		2: # fisica
 			cor_brilho_centro = Color(1.0, 0.88, 0.25, 0.60)
 			cor_brilho_meio = Color(1.0, 0.48, 0.12, 0.35)
-		3: # Biologia: Esmeralda & Verde Vital
+		3: # biologia
 			cor_brilho_centro = Color(0.25, 1.0, 0.55, 0.55)
 			cor_brilho_meio = Color(0.12, 0.75, 0.38, 0.32)
 

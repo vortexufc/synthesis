@@ -1,7 +1,6 @@
 extends Node2D
 
-## Controlador da Cena do Hub Geral
-## Executa a cutscene in-game ao clicar em Jogar com iluminação misteriosa, sem duplicatas de nos e transicao ao fechar pergaminho.
+# script da sala principal (hub)
 
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
@@ -28,7 +27,7 @@ func _ready() -> void:
 		call_deferred("_executar_cutscene_inicial")
 
 func _obter_textura_luz() -> Texture2D:
-	# Gera uma textura radial nativa com decaimento cúbico suave e transparência perfeita
+	# cria a textura da luz
 	var grad_tex = GradientTexture2D.new()
 	var grad = Gradient.new()
 	grad.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CUBIC
@@ -66,15 +65,15 @@ func _obter_textura_brasa() -> Texture2D:
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
 	
-	# 1. CanvasModulate: Cria a escuridão ambiente misteriosa e profunda da masmorra
+	# escurece o hub
 	_canvas_modulate = CanvasModulate.new()
 	_canvas_modulate.name = "AmbienteMasmorra"
 	_canvas_modulate.color = Color(0.24, 0.24, 0.35, 1.0) # Tom azul-ardósia escuro da masmorra
 	add_child(_canvas_modulate)
 	
-	# 2. Tochas: Cada tocha instanciada gerencia autonomamente suas chamas, luzes e brasas via Tocha.gd
+	# tochas do mapa
 	
-	# 3. Orbe Mágico do Mago Mercador: Brilho sutil no topo do cajado
+	# luz no cajado do mercador
 	var mercador = find_child("NPCMercador", true, false)
 	if mercador:
 		_luz_cajado = PointLight2D.new()
@@ -86,7 +85,7 @@ func _configurar_sistema_iluminacao() -> void:
 		_luz_cajado.position = Vector2(46, -58) # Posição exata do orbe no cajado
 		mercador.add_child(_luz_cajado)
 	
-	# 4. Aura do Jogador: Clareia o chão e o ambiente por onde o mago caminha
+	# luz no pe do player
 	var player = find_child("Player", true, false)
 	if player:
 		_luz_player = PointLight2D.new()
@@ -98,7 +97,7 @@ func _configurar_sistema_iluminacao() -> void:
 		_luz_player.position = Vector2(0, -10)
 		player.add_child(_luz_player)
 	
-	# 5. Caldeirão Alquímico e Frascos de Cristais (Bioluminescência Realista)
+	# luz no caldeirao e frascos
 	var frascos_pos: Array[Vector2] = []
 	var pos_caldeirao: Vector2 = Vector2(921, 910)
 	
@@ -113,7 +112,7 @@ func _configurar_sistema_iluminacao() -> void:
 				var cell_world = decor.to_global(decor.map_to_local(cell))
 				pos_caldeirao = cell_world + Vector2(-20, -32)
 				
-	# 5.1. Caldeirão Alquímico: Brilho violeta concentrado na boca borbulhante do caldeirão
+	# luz roxa no caldeirao
 	_luz_caldeirao = PointLight2D.new()
 	_luz_caldeirao.name = "LuzCaldeirao"
 	_luz_caldeirao.texture = tex_luz
@@ -123,7 +122,7 @@ func _configurar_sistema_iluminacao() -> void:
 	_luz_caldeirao.global_position = pos_caldeirao
 	add_child(_luz_caldeirao)
 	
-	# Partículas de vapor e bolhas mágicas saindo do Caldeirão (grandes, brilhantes e com z_index)
+	# fumaca e bolhas saindo do caldeirao
 	var part_caldeirao = CPUParticles2D.new()
 	part_caldeirao.name = "ParticulasCaldeirao"
 	part_caldeirao.global_position = pos_caldeirao + Vector2(0, -10)
@@ -166,7 +165,7 @@ func _configurar_sistema_iluminacao() -> void:
 	part_caldeirao.color_ramp = grad_c
 	add_child(part_caldeirao)
 	
-	# 5.2. Frascos de Cristais Arcanos na Mesa de Alquimia (Bioluminescência Ciano/Azul)
+	# luz nos frascos da mesa
 	frascos_pos.sort_custom(func(a, b): return a.x < b.x)
 	if frascos_pos.size() < 2:
 		frascos_pos = [Vector2(195, 665), Vector2(285, 665)]
@@ -189,7 +188,7 @@ func _configurar_sistema_iluminacao() -> void:
 			"offset": i * 1.5
 		})
 	
-	# 6. Luzes temáticas realistas nos Portais das Masmorras
+	# luzes nos portais dos andares
 	_criar_luz_portal("PortaTransicao", Color(0.85, 0.38, 1.0, 1.0), Color(0.14, 0.06, 0.20))   # Alquimia - Roxo arcano
 	_criar_luz_portal("PortaTransicao3", Color(0.25, 0.78, 1.0, 1.0), Color(0.05, 0.12, 0.22))  # Física - Azul elétrico
 	_criar_luz_portal("PortaTransicao2", Color(0.32, 0.95, 0.50, 1.0), Color(0.05, 0.18, 0.09))  # Biologia - Verde vivo
@@ -199,12 +198,12 @@ func _criar_luz_portal(nome_porta: String, cor_luz: Color, cor_fundo: Color) -> 
 	if not porta:
 		return
 		
-	# 1. Ajusta o fundo interior do portal para refletir sutilmente a dimensão
+	# cor do fundo do portal
 	var fundo = porta.get_node_or_null("FundoPreto") as ColorRect
 	if fundo:
 		fundo.color = cor_fundo
 		
-	# 2. Luz de portal: posicionada na soleira (Y=-25) para banhar o arco e o piso à frente
+	# luz do chao do portal
 	var luz = PointLight2D.new()
 	luz.name = "LuzPortal_" + nome_porta
 	luz.texture = _obter_textura_luz()
@@ -230,7 +229,7 @@ func _process(delta: float) -> void:
 	_tempo_luz_tick = 0.0
 	_tempo_iluminacao += dt
 	
-	# 1. Efeito dinâmico de chamas tremeluzindo (flicker suave)
+	# efeito de tremor na chama das tochas
 	for tocha in _luzes_tochas:
 		var node = tocha["node"] as PointLight2D
 		if not node or not is_instance_valid(node):
@@ -242,17 +241,17 @@ func _process(delta: float) -> void:
 		var flicker = f1 + f2
 		node.energy = tocha["base_energy"] + flicker
 	
-	# 2. Pulso mágico sutil do orbe do cajado
+	# pulso da luz do cajado
 	if _luz_cajado and is_instance_valid(_luz_cajado):
 		var pulso = sin(_tempo_iluminacao * 2.5) * 0.02
 		_luz_cajado.energy = 0.18 + pulso
 	
-	# 3. Pulso suave da aura de caminhada do mago jogador
+	# pulso de luz do player
 	if _luz_player and is_instance_valid(_luz_player):
 		var pulso_p = sin(_tempo_iluminacao * 2.0) * 0.02
 		_luz_player.energy = 0.34 + pulso_p
 	
-	# 4. Pulso místico suave dos portais das masmorras
+	# pulso dos portais
 	for portal_info in _luzes_portais:
 		var luz_p = portal_info["node"] as PointLight2D
 		if luz_p and is_instance_valid(luz_p):
@@ -260,12 +259,12 @@ func _process(delta: float) -> void:
 			var pulso_portal = sin((_tempo_iluminacao + off_p) * 2.2) * 0.04
 			luz_p.energy = portal_info["base_energy"] + pulso_portal
 			
-	# 5. Borbulhar dinâmico no Caldeirão Alquímico do Hub
+	# bolhas no caldeirao
 	if _luz_caldeirao and is_instance_valid(_luz_caldeirao):
 		var borbulha = sin(_tempo_iluminacao * 5.5) * 0.06 + sin(_tempo_iluminacao * 9.2) * 0.03
 		_luz_caldeirao.energy = 0.52 + borbulha
 		
-	# 6. Cintilação mágica suave dos frascos de cristais da mesa de alquimia
+	# pisca a luz dos frascos
 	for prop in _luzes_props:
 		var node = prop["node"] as PointLight2D
 		if node and is_instance_valid(node):
@@ -280,7 +279,7 @@ func _executar_cutscene_inicial() -> void:
 	if player == null:
 		return
 
-	# Trava a movimentação do jogador
+	# trava o player na cutscene
 	player.travado = true
 	player.global_position = Vector2(580, 946)
 	
@@ -288,13 +287,13 @@ func _executar_cutscene_inicial() -> void:
 	if sprite:
 		sprite.play("correr_cima")
 		
-	# 1. Deslocamento vertical para CIMA até Y=710 com passos
+	# anda pra cima
 	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 	tween.tween_property(player, "global_position:y", 710.0, 3.0)
 	_tocar_passos_cutscene(3.0)
 	await tween.finished
 	
-	# 2. Mudança de direção para a ESQUERDA até a mesa (X=263, Y=710) com passos
+	# vira pra esquerda ate a mesa
 	if sprite:
 		sprite.play("correr_esquerda")
 		
@@ -303,25 +302,25 @@ func _executar_cutscene_inicial() -> void:
 	_tocar_passos_cutscene(4.0)
 	await tween2.finished
 	
-	# 3. Mago para em frente à mesa olhado para CIMA
+	# para na mesa olhando pra cima
 	if sprite:
 		sprite.play("idle_cima")
 		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# 4. Remove o pergaminho visual da mesa (pois foi coletado!)
+	# some o pergaminho da mesa
 	var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
 	if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
 		if pergaminho_mesa.has_method("_remover_prompt_tela"):
 			pergaminho_mesa._remover_prompt_tela()
 		pergaminho_mesa.queue_free()
 		
-	# 5. Salva no Inventário (Grimório)
+	# salva o pergaminho no grimorio
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
 
-	# 6. Abre a interface do Pergaminho na tela com os textos de lore
+	# abre o pergaminho na tela
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)

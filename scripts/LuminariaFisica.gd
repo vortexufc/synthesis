@@ -1,9 +1,7 @@
 @tool
 extends Node2D
 
-## Script da Luminária Industrial do Andar de Física
-## Simula uma lâmpada industrial/fluorescente blindada montada na parede,
-## com luz fria estável, micro-vibrações de voltagem e ocasionais quedas rápidas de tensão (flicker de fábrica).
+# luminaria da parede do andar de fisica
 
 enum Orientacao { NORTE = 0, OESTE = 1, LESTE = 2 }
 
@@ -114,15 +112,14 @@ func _process(delta: float) -> void:
 	if not _luz:
 		return
 		
-	# 1. Micro-vibração suave de corrente alternada (AC hum)
+	# leve oscilacao na luz
 	var zumbido = sin((_tempo + _offset) * 16.0) * 0.015 + sin((_tempo + _offset) * 32.0) * 0.008
 	var energia_alvo = energia_base + zumbido
 	
-	# 2. Queda rápida de tensão ocasional (estilo lâmpada industrial/fluorescente falhando levemente)
+	# pisca de vez em quando dando impressao de falha
 	if habilitar_flicker:
 		if _duracao_flicker > 0.0:
 			_duracao_flicker -= delta
-			# Durante o flicker rápido, a intensidade oscila bruscamente
 			energia_alvo *= randf_range(0.35, 0.95)
 			if _faiscas and randf() < 0.15:
 				_faiscas.emitting = true

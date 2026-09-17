@@ -378,8 +378,6 @@ script = ExtResource("25_ponto")
 
 [node name="PontosDeLivro" type="Node2D" parent="." unique_id=699676829]
 script = ExtResource("26_item_spawner")
-tipo_item = 1
-chance_spawn = 0.5
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeLivro" unique_id=396187228]
 position = Vector2(122, 539)
@@ -399,7 +397,6 @@ script = ExtResource("27_item_ponto")
 [node name="PontosDeMoeda" type="Node2D" parent="." unique_id=1962052015]
 script = ExtResource("26_item_spawner")
 tipo_item = 4
-chance_spawn = 0.5
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=360541939]
 position = Vector2(180, 850)

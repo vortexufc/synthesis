@@ -1,7 +1,7 @@
 extends Node2D
 
-## [Andar 3 - Biologia] Esporos Tóxicos / Fungo Venenoso
-## Reage à proximidade do jogador: incha rapidamente e libera uma nuvem de esporos cáusticos.
+# cogumelo com esporos (andar de biologia)
+# incha e solta veneno se o player chegar perto
 
 @export var dano: float = 20.0
 @export var tempo_recarga: float = 4.0
@@ -25,12 +25,12 @@ func _ready() -> void:
 func _desenhar_fungo_procedural() -> void:
 	if sprite_chapeu and sprite_chapeu.texture:
 		return
-	# Chapéu do cogumelo em gradiente orgânico púrpura/amarelo
+	# gradiente do cogumelo caso nao tenha sprite
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([
-		Color(0.95, 0.85, 0.15, 0.95), # Esporo central amarelo tóxico
-		Color(0.65, 0.15, 0.85, 0.90), # Meio roxo venenoso
-		Color(0.25, 0.05, 0.35, 0.80), # Borda escura
+		Color(0.95, 0.85, 0.15, 0.95),
+		Color(0.65, 0.15, 0.85, 0.90),
+		Color(0.25, 0.05, 0.35, 0.80),
 		Color(0.0, 0.0, 0.0, 0.0)
 	])
 	grad.offsets = PackedFloat32Array([0.0, 0.45, 0.85, 1.0])
@@ -74,7 +74,7 @@ func _disparar_esporos() -> void:
 	if _tween_respiracao and _tween_respiracao.is_running():
 		_tween_respiracao.kill()
 		
-	# 1. Incha violentamente como aviso prévio (0.35s)
+	# incha avisando que vai estourar
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
@@ -84,7 +84,7 @@ func _disparar_esporos() -> void:
 	
 	await tw_infla.finished
 	
-	# 2. EXPLOSÃO DE ESPOROS!
+	# solta as partículas de veneno
 	if nuvem_esporos:
 		nuvem_esporos.restart()
 		nuvem_esporos.emitting = true
@@ -92,22 +92,22 @@ func _disparar_esporos() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-2")
 		
-	# Murcha o fungo após soltar os esporos
+	# murcha depois de soltar
 	var tw_murcha = create_tween()
 	tw_murcha.tween_property(corpo_fungo, "scale", Vector2(0.5, 0.5), 0.20)
 	tw_murcha.parallel().tween_property(sprite_chapeu, "modulate", Color(0.5, 0.5, 0.5, 0.5), 0.20)
 	
-	# Aplica dano se o jogador estiver na área da nuvem
+	# da dano se o player tiver perto
 	if _player_perto and is_instance_valid(_player_perto):
 		if _player_perto.has_method("receber_dano"):
 			_player_perto.receber_dano(dano, 8.0, "Esporos Tóxicos")
 		elif get_node_or_null("/root/PlayerStats"):
 			PlayerStats.sofrer_dano(dano)
 			
-	# 3. Tempo de recarga para brotar novamente
+	# espera um tempo pra brotar de novo
 	await get_tree().create_timer(tempo_recarga).timeout
 	
-	# Renasce o cogumelo
+	# volta ao normal
 	var tw_renasce = create_tween()
 	tw_renasce.tween_property(corpo_fungo, "scale", Vector2.ONE, 0.50).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	tw_renasce.parallel().tween_property(sprite_chapeu, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.50)

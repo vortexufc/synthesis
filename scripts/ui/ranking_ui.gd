@@ -5,8 +5,7 @@ extends Control
 @onready var btn_clas = $PainelCentro/HBoxAbas/BtnClas
 @onready var btn_voltar = $PainelCentro/BtnVoltar
 
-# Vamos usar uma cena separada para cada linha (jogador/clã) do ranking
-# Você deve salvar essa mini-cena em res://scenes/ui/ranking_item.tscn
+# cena de cada item da lista do ranking
 var item_cena = preload("res://scenes/ui/ranking_item.tscn")
 
 enum ModoRanking { GERAL, CLAS }
@@ -19,20 +18,20 @@ func _ready():
 	btn_clas.pressed.connect(_on_btn_clas_pressed)
 	btn_voltar.pressed.connect(_on_btn_voltar_pressed)
 	
-	# Conecta ao sinal para atualizar a tela quando o online carregar
+	# conecta ao sinal pra recarregar a tela
 	RankingManager.ranking_atualizado.connect(_atualizar_lista)
 
-	# Força reload do online e atualiza a lista
+	# recarrega a lista do banco
 	RankingManager.load_ranking()
 	_atualizar_lista()
 
 func _aplicar_visual():
-	# Carrega as imagens e fontes
+	# fontes e imagens
 	var tex_fundo_tela = load("res://assets/sprites/ui/ranking/painel_fundo.png") # o fundo com árvores/torre
 	var tex_painel_central = load("res://assets/sprites/ui/ranking/item_fundo.png") # o "MENU quadrado" azul
 	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 	
-	# Substitui o ColorRect genérico pelo fundo pintado da tela toda
+	# imagem de fundo
 	if get_node_or_null("ColorRect"):
 		$ColorRect.hide()
 		
@@ -43,13 +42,13 @@ func _aplicar_visual():
 	add_child(rect_fundo)
 	move_child(rect_fundo, 0)
 	
-	# Aplica a imagem azul do Figma apenas no Painel Central
+	# fundo do painel central
 	var style_centro = StyleBoxTexture.new()
 	if tex_painel_central:
 		style_centro.texture = tex_painel_central
 	$PainelCentro.add_theme_stylebox_override("panel", style_centro)
 	
-	# Aplica a fonte e cor branca no título
+	# estilo do titulo
 	if font:
 		$PainelCentro/LblTitulo.add_theme_font_override("font", font)
 		$PainelCentro/LblTitulo.add_theme_font_size_override("font_size", 32)
@@ -58,7 +57,7 @@ func _aplicar_visual():
 		btn_clas.add_theme_font_override("font", font)
 		btn_voltar.add_theme_font_override("font", font)
 		
-	# Estilo do botão voltar (Azul escuro com borda azul vibrante)
+	# estilo do botao voltar
 	var style_voltar = StyleBoxFlat.new()
 	style_voltar.bg_color = Color("142240")
 	style_voltar.border_color = Color("0088ff")
@@ -67,19 +66,19 @@ func _aplicar_visual():
 	btn_voltar.add_theme_stylebox_override("hover", style_voltar)
 	btn_voltar.add_theme_color_override("font_color", Color.WHITE)
 	
-	# Empurra o botão Voltar para baixo, totalmente fora do PainelCentral azul
+	# posiciona o botao voltar
 	btn_voltar.position.y = 520
 		
 	_atualizar_botoes()
 
 func _atualizar_botoes():
-	# Estilo Azul (Ativo)
+	# aba ativa
 	var style_ativo = StyleBoxFlat.new()
 	style_ativo.bg_color = Color("284eed")
 	style_ativo.border_color = Color("686ff8")
 	style_ativo.set_border_width_all(3)
 	
-	# Estilo Branco/Cinza (Inativo)
+	# aba inativa
 	var style_inativo = StyleBoxFlat.new()
 	style_inativo.bg_color = Color("d9d9d9")
 	style_inativo.border_color = Color("686ff8")
@@ -107,7 +106,7 @@ func _atualizar_botoes():
 		btn_clas.add_theme_color_override("font_hover_color", Color.WHITE)
 
 func _on_btn_geral_pressed():
-	# Efeito do botao geral
+	# troca pra aba geral
 	AudioManager.play_sfx("ui-1")
 	
 	modo_atual = ModoRanking.GERAL
@@ -115,7 +114,7 @@ func _on_btn_geral_pressed():
 	_atualizar_botoes()
 
 func _on_btn_clas_pressed():
-	# Efeito do botao clas
+	# troca pra aba de clas
 	AudioManager.play_sfx("ui-1")
 	
 	modo_atual = ModoRanking.CLAS
@@ -123,13 +122,13 @@ func _on_btn_clas_pressed():
 	_atualizar_botoes()
 
 func _on_btn_voltar_pressed():
-	# Efeito do botao voltar
+	# volta pro menu
 	AudioManager.play_sfx("ui_5")
 	
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
 
 func _atualizar_lista():
-	# Limpa a lista atual
+	# limpa a lista
 	for child in container_lista.get_children():
 		child.queue_free()
 		
@@ -138,13 +137,13 @@ func _atualizar_lista():
 	if modo_atual == ModoRanking.GERAL:
 		lista_dados = RankingManager.ranking_geral
 	else:
-		# Pega do ClanManager (que tem os dados online do Supabase)
+		# pega dados de cla do clan manager
 		var clans = ClanManager.get_top_clans()
 		for c in clans:
 			lista_dados.append({"name": c["name"], "score": c["score"]})
 		eh_cla = true
 		
-	# Adiciona os itens na UI
+	# adiciona cada linha na tela
 	var pos = 1
 	for item in lista_dados:
 		var node = item_cena.instantiate()

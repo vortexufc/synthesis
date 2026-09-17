@@ -1,12 +1,11 @@
 extends CanvasLayer
 
-## Interface do Pergaminho Arcano com estilo Pixel Art
-## Exibe anotações educativas detalhadas com suporte a rolagem interna e navegação por páginas.
+# tela de leitura dos pergaminhos
 
-# Fonte pixelada oficial do jogo (com fallback nativo de emojis e símbolos)
+# fonte do pergaminho
 var font_pixel: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 
-# Nós da interface
+# referencias da interface
 var backdrop: ColorRect
 var painel_pergaminho: PanelContainer
 var lbl_titulo: Label
@@ -16,7 +15,7 @@ var btn_esquerda: Button
 var btn_direita: Button
 var btn_fechar_topo: Button
 
-# Estado da leitura
+# pagina atual e total
 var paginas_do_texto: Array[String] = []
 var pagina_atual: int = 0
 var player_ref: Node2D = null
@@ -29,13 +28,13 @@ func _ready() -> void:
 	_construir_interface_pixel()
 	hide()
 
-## Constrói um painel de pergaminho limpo, bonito e legível com rolagem interna
+# monta o painel do pergaminho
 func _construir_interface_pixel() -> void:
-	# Limpa nós antigos para evitar bugs de layout
+	# limpa nos antigos
 	for c in get_children():
 		c.queue_free()
 		
-	# 1. Fundo escuro semi-transparente
+	# fundo escuro
 	backdrop = ColorRect.new()
 	backdrop.name = "Backdrop"
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -43,7 +42,7 @@ func _construir_interface_pixel() -> void:
 	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(backdrop)
 	
-	# 2. Painel Central do Pergaminho (Dimensão espaçosa)
+	# painel central
 	painel_pergaminho = PanelContainer.new()
 	painel_pergaminho.name = "PainelPergaminho"
 	painel_pergaminho.anchor_left = 0.5
@@ -74,13 +73,13 @@ func _construir_interface_pixel() -> void:
 	painel_pergaminho.add_theme_stylebox_override("panel", style_pergaminho)
 	add_child(painel_pergaminho)
 	
-	# Container Vertical Principal
+	# container principal
 	var vbox_main = VBoxContainer.new()
 	vbox_main.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vbox_main.add_theme_constant_override("separation", 10)
 	painel_pergaminho.add_child(vbox_main)
 	
-	# --- CABEÇALHO / TÍTULO ---
+	# titulo
 	var hbox_header = HBoxContainer.new()
 	vbox_main.add_child(hbox_header)
 	
@@ -96,7 +95,7 @@ func _construir_interface_pixel() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hbox_header.add_child(spacer)
 	
-	# ÚNICO botão de fechar: o "X" no canto superior direito
+	# botao de fechar
 	btn_fechar_topo = Button.new()
 	btn_fechar_topo.text = " X "
 	if font_pixel:
@@ -106,13 +105,13 @@ func _construir_interface_pixel() -> void:
 	_estilar_botao(btn_fechar_topo, true)
 	hbox_header.add_child(btn_fechar_topo)
 	
-	# Linha divisora
+	# separador
 	var linha_divisora = ColorRect.new()
 	linha_divisora.custom_minimum_size = Vector2(0, 2)
 	linha_divisora.color = Color(0.55, 0.38, 0.18, 0.6)
 	vbox_main.add_child(linha_divisora)
 	
-	# --- CORPO DO TEXTO (COM ROLAGEM INTERNA HABILITADA) ---
+	# texto da pagina com scroll
 	texto_dica = RichTextLabel.new()
 	texto_dica.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	texto_dica.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -128,7 +127,7 @@ func _construir_interface_pixel() -> void:
 	texto_dica.add_theme_font_size_override("bold_font_size", 19)
 	texto_dica.add_theme_color_override("default_color", Color(0.18, 0.10, 0.04))
 	
-	# Estilo suave para a barra de rolagem interna
+	# estilo da barra de scroll
 	var scroll_bar = texto_dica.get_v_scroll_bar()
 	if scroll_bar:
 		var style_scroll_grab = StyleBoxFlat.new()
@@ -140,13 +139,13 @@ func _construir_interface_pixel() -> void:
 		
 	vbox_main.add_child(texto_dica)
 	
-	# Linha divisora inferior
+	# separador inferior
 	var linha_divisora2 = ColorRect.new()
 	linha_divisora2.custom_minimum_size = Vector2(0, 2)
 	linha_divisora2.color = Color(0.55, 0.38, 0.18, 0.4)
 	vbox_main.add_child(linha_divisora2)
 	
-	# --- BARRA DE NAVEGAÇÃO ---
+	# navegacao de paginas
 	var hbox_footer = HBoxContainer.new()
 	hbox_footer.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_footer.add_theme_constant_override("separation", 25)
@@ -178,7 +177,7 @@ func _construir_interface_pixel() -> void:
 	_estilar_botao(btn_direita)
 	hbox_footer.add_child(btn_direita)
 
-## Aplica estilização de botão pixel art
+# estilo dos botoes
 func _estilar_botao(btn: Button, destaque: bool = false) -> void:
 	var style_normal = StyleBoxFlat.new()
 	style_normal.bg_color = Color(0.35, 0.20, 0.08) if not destaque else Color(0.55, 0.15, 0.10)
@@ -236,7 +235,7 @@ func atualizar_tela() -> void:
 		
 	texto_dica.text = paginas_do_texto[pagina_atual]
 	
-	# Reseta o scroll para o topo ao trocar de página
+	# volta o scroll pro topo ao virar pagina
 	var v_scroll = texto_dica.get_v_scroll_bar()
 	if v_scroll:
 		v_scroll.value = 0

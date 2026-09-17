@@ -17,11 +17,11 @@ func _ready():
 func _aplicar_visual():
 	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 	
-	# Zera o fundo de cada jogador para que as linhas do "MENU Quadrado" que estão lá atrás apareçam
+	# tira o fundo pra nao cobrir o painel
 	var style_vazio = StyleBoxEmpty.new()
 	add_theme_stylebox_override("panel", style_vazio)
 	
-	# Aplica o mago
+	# icone do mago
 	if tex_mago:
 		icone_mago.texture = tex_mago
 	
@@ -36,21 +36,21 @@ func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false) -> v
 	if not is_node_ready():
 		await ready
 		
-	# Textos básicos
+	# preenche os textos
 	label_nome.text = nome
 	label_score.text = str(score) + " PTS"
 	
-	# Esconde o capuz se for aba de clã
+	# esconde o capuz na aba de clas
 	if eh_cla:
 		icone_mago.hide()
 	else:
 		icone_mago.show()
 	
-	# Faz com que a label e a medalha ocupem exatamente a mesma largura, para o Capuz não "pular"
+	# alinha o espaco da medalha
 	label_posicao.custom_minimum_size.x = 60
 	icone_medalha.custom_minimum_size.x = 60
 	
-	# Medalhas originais do figma substituindo o número nas primeiras posições
+	# medalhas do top 3
 	if posicao == 1:
 		label_posicao.hide()
 		icone_medalha.show()

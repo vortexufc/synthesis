@@ -20,11 +20,11 @@ var _botoes: Array = []
 # [BugFix] Flag que bloqueia chamadas duplicadas enquanto uma resposta está sendo processada
 var _processando_resposta: bool = false
 
-# [Combat-4] O timer corre de forma contínua durante toda a batalha.
+# o timer corre continuo durante a batalha
 # tempo_restante só é (re)definido por iniciar_timer() — nunca em atualizar_pergunta().
 var tempo_restante: float = 300.0
 var tempo_rodando: bool = false
-var _duracao_batalha: float = 300.0 ## Espelho da duração do inimigo (para exibição futura)
+var _duracao_batalha: float = 300.0 # tempo total da batalha
 var _ultimo_botao_clicado: int = -1
 var _tween_botoes: Tween
 var _eh_pergunta_vf: bool = false
@@ -104,7 +104,7 @@ func _process(delta: float) -> void:
 		var segundos = int(tempo_restante) % 60
 		label_tempo.text = "TEMPO:\n%02d:%02d" % [minutos, segundos]
 
-# [Combat-4] Inicia o timer com a duração correta do inimigo.
+# inicia o timer da luta
 # Deve ser chamado UMA ÚNICA VEZ por batalha, antes da primeira rodada.
 func iniciar_timer(duracao: float) -> void:
 	_duracao_batalha = duracao

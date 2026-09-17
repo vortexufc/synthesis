@@ -1,9 +1,6 @@
 extends Node
 
-# ============================================================
-# RankingManager — Ranking de Players Online (Supabase)
-# Segue o mesmo padrão do ClanManager.gd para consistência.
-# ============================================================
+# ranking dos jogadores online
 
 signal ranking_atualizado
 
@@ -13,11 +10,11 @@ var ranking_diario: Array = []   # score_diario
 var ranking_semanal: Array = [] # score_semanal
 var ranking_mensal: Array = []  # score_mensal
 
-# ---- ARQUIVO LOCAL (Fallback offline) ----
+# salva offline se tiver sem net
 const RANKING_FILE = "user://ranking.json"
 const PENDING_SYNC_FILE = "user://pending_sync.json"
 
-# ---- CONTA VISITANTE (Guest) ----
+# dados de conta de visitante
 const GUEST_FILE = "user://guest_config.json"
 var local_guest_nick: String = ""
 
@@ -28,9 +25,7 @@ func _ready() -> void:
 	await load_ranking_periodo("fisica")
 	await load_ranking_periodo("biologia")
 
-# ============================================================
-# CARREGAR DO SUPABASE
-# ============================================================
+# busca o ranking no supabase
 func load_ranking() -> void:
 	print("[RankingManager] Buscando ranking online...")
 	var res = await DatabaseManager.request_async(
@@ -41,8 +36,7 @@ func load_ranking() -> void:
 	print("[RankingManager] Resposta: success=%s | code=%s" % [res["success"], res.get("code", "?")])
 
 	if res["success"] and res["data"] is Array:
-		# Se a requisição teve sucesso, significa que temos internet!
-		# Tenta sincronizar qualquer pontuação pendente antes de reconstruir o ranking
+		# se deu certo, aproveita pra mandar as pontuacoes pendentes
 		if not DatabaseManager.user_token.is_empty():
 			await sync_pending_scores()
 			
@@ -53,20 +47,17 @@ func load_ranking() -> void:
 				"score": int(row.get("score", 0))
 			})
 		
-		# Injeta o score do visitante local para ele aparecer no ranking
-		# mesmo sem ter conta, junto com os players online!
+		# poe o visitante local na lista pra aparecer na tela
 		_injetar_guest_no_ranking()
 		
 		ranking_atualizado.emit()
 		print("[RankingManager] Ranking online: %d players (incl. guest)." % ranking_geral.size())
 	else:
-		# Supabase falhou → carrega o cache local como fallback
+		# se der erro carrega do arquivo local
 		print("[RankingManager] ERRO: %s — usando cache local." % res.get("message", "sem detalhes"))
 		_carregar_local()
 
-# ============================================================
-# CARREGAR DO SUPABASE — RANKINGS DE PERÍODO
-# ============================================================
+# busca rankings por periodo
 func load_ranking_periodo(periodo: String) -> void:
 	var coluna: String
 	match periodo:
@@ -95,9 +86,7 @@ func load_ranking_periodo(periodo: String) -> void:
 	
 	ranking_atualizado.emit()
 	
-# ============================================================
-# BUSCAR RANKING CONFORME PERÍODO
-# ============================================================
+# pega o ranking pelo periodo
 func get_ranking_por_periodo(periodo: String) -> Array:
 	match periodo:
 		"quimica":  return ranking_diario
@@ -105,37 +94,35 @@ func get_ranking_por_periodo(periodo: String) -> Array:
 		"biologia":  return ranking_mensal
 		_: return ranking_geral
 
-# ============================================================
-# SALVAR / ATUALIZAR PONTUAÇÃO DO PLAYER
-# ============================================================
+# salva ou atualiza a pontuacao
 func add_score(player_name: String, cla: String, pontos: int) -> void:
 	if player_name.is_empty():
 		return
 
-	# --- ONLINE: Upsert no Supabase se estiver logado ---
+	# salva no banco se tiver logado
 	if not DatabaseManager.user_token.is_empty():
 		var success = await _upsert_score_online(player_name, pontos)
 		if success:
-			# Se conseguiu, tenta sincronizar outros pendentes
+			# se enviou, tenta mandar os pendentes
 			await sync_pending_scores()
 		else:
-			# Se falhou, salva como pendente e no ranking local
+			# se der erro salva local e poe na fila
 			_add_pending_score(player_name, pontos)
 			_add_score_local(player_name, pontos)
 	else:
-		# --- OFFLINE: só salva localmente ---
+		# offline: salva so no arquivo local
 		_add_score_local(player_name, pontos)
 
-	# Atualiza os pontos do clã (já feito pelo ClanManager quando ativo)
+	# atualiza os pontos do cla
 	if not cla.is_empty() and cla != "Nenhum" and not DatabaseManager.user_token.is_empty():
 		if ClanManager.has_method("adicionar_pontos_cla"):
 			await ClanManager.adicionar_pontos_cla(cla, player_name, pontos)
 
-	# Recarrega o ranking mais recente
+	# recarrega a lista
 	await load_ranking()
 
 func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
-	# 1. Pega o score atual do player no banco
+	# ve quanto o player ja tem no banco
 	var end_player = "/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode() + "&select=*"
 	var res = await DatabaseManager.request_async(end_player, HTTPClient.METHOD_GET)
 
@@ -168,7 +155,7 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 	var res_update: Dictionary
 
 	if existe:
-		# PATCH: atualiza geral + períodos
+		# se ja existe atualiza
 		res_update = await DatabaseManager.request_async(
 			"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
 			HTTPClient.METHOD_PATCH,
@@ -177,7 +164,7 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 			 "updated_at": "now()"}
 		)
 	else:
-		# POST: insere novo jogador
+		# senao cria novo registro
 		res_update = await DatabaseManager.request_async(
 			"/rest/v1/rankinggeral",
 			HTTPClient.METHOD_POST,
@@ -193,11 +180,9 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		print("[RankingManager] Erro ao salvar score online de %s." % player_name)
 		return false
 
-# ============================================================
-# CACHE LOCAL (Fallback + Convidados)
-# ============================================================
+# funcoes de cache local
 func _add_score_local(player_name: String, pontos: int) -> void:
-	# 1. Carrega todas as entradas existentes do arquivo local
+	# abre o json local
 	var local_data = {"geral": []}
 	if FileAccess.file_exists(RANKING_FILE):
 		var file_r = FileAccess.open(RANKING_FILE, FileAccess.READ)
@@ -207,7 +192,7 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 		if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
 			local_data = json.data
 
-	# 2. Encontra o player e atualiza, ou adiciona se não existir
+	# acha o player e atualiza os pontos
 	var list_geral = local_data.get("geral", [])
 	var score_atual = 0
 	var achou_no_arquivo = false
@@ -222,13 +207,13 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 
 	local_data["geral"] = list_geral
 
-	# 3. Salva de volta
+	# salva no arquivo
 	var file_w = FileAccess.open(RANKING_FILE, FileAccess.WRITE)
 	if file_w:
 		file_w.store_string(JSON.stringify(local_data, "\t"))
 		file_w.close()
 
-	# 4. Atualiza também a memória ranking_geral e reordena
+	# reordena a lista na memoria
 	var achou_na_memoria = false
 	var novo_score = score_atual + pontos
 	for item in ranking_geral:
@@ -275,21 +260,21 @@ func _remover_player_local(player_name: String) -> void:
 			file_w.close()
 
 func _injetar_guest_no_ranking() -> void:
-	# Se não há guest nesta máquina, nada a fazer
+	# se nao tem visitante ignora
 	var nick_guest = get_local_nick()
 	if nick_guest.is_empty():
 		return
 	
-	# Evita duplicar se já está logado (aí o guest sumiu)
+	# se ja ta logado nao precisa de visitante
 	if not DatabaseManager.user_token.is_empty():
 		return
 	
-	# Lê o score salvo localmente
+	# le os pontos salvos do visitante
 	var score_guest = _ler_score_guest_local(nick_guest)
 	if score_guest <= 0:
 		return
 	
-	# Adiciona o guest na lista (sem duplicar)
+	# adiciona o visitante na lista
 	for item in ranking_geral:
 		if item["name"] == nick_guest:
 			return # já está
@@ -321,9 +306,7 @@ func _carregar_local() -> void:
 
 	ranking_atualizado.emit()
 
-# ============================================================
-# FILA DE PENDÊNCIAS OFFLINE
-# ============================================================
+# fila de pontuacoes pendentes pra sincronizar
 func _add_pending_score(player_name: String, pontos: int) -> void:
 	var pending = _load_pending_scores()
 	var current = pending.get(player_name, 0)
@@ -368,11 +351,11 @@ func sync_pending_scores() -> void:
 		if success:
 			players_to_remove.append(player_name)
 		else:
-			# Se falhar uma vez, interrompe (provavelmente ainda sem conexão)
+			# se der erro para pra nao travar
 			print("[RankingManager] Sincronização falhou. Parando por enquanto.")
 			break
 
-	# Remove os jogadores que foram sincronizados com sucesso
+	# tira os que ja sincronizou
 	var changed = false
 	for player in players_to_remove:
 		pending.erase(player)
@@ -381,9 +364,7 @@ func sync_pending_scores() -> void:
 	if changed:
 		_save_pending_scores(pending)
 
-# ============================================================
-# SISTEMA DE CONTA VISITANTE (Guest)
-# ============================================================
+# controle da conta de convidado
 func get_local_nick() -> String:
 	if local_guest_nick != "":
 		return local_guest_nick
@@ -398,7 +379,7 @@ func get_local_nick() -> String:
 				local_guest_nick = json.data["guest_nick"]
 				return local_guest_nick
 
-	# Cria um ID permanente de visitante para este dispositivo
+	# id do visitante pra este pc
 	randomize()
 	local_guest_nick = "Mago_" + str(randi() % 9000 + 1000)
 	var file = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
@@ -407,9 +388,7 @@ func get_local_nick() -> String:
 
 	return local_guest_nick
 
-# ============================================================
-# MIGRAÇÃO: Conta Guest → Conta Oficial ao fazer Login
-# ============================================================
+# passa os pontos do visitante pra conta oficial no login
 func fundir_conta_guest(nick_real: String, cla_real: String) -> void:
 	if local_guest_nick == "":
 		get_local_nick()
@@ -417,30 +396,30 @@ func fundir_conta_guest(nick_real: String, cla_real: String) -> void:
 	if local_guest_nick.is_empty():
 		return
 
-	# Lê o score diretamente do ARQUIVO LOCAL (fonte confiável)
+	# le o score do json local
 	var score_acumulado: int = _ler_score_guest_local(local_guest_nick)
 
 	if score_acumulado > 0:
 		print("[RankingManager] Migrando %d pts de '%s' para '%s'..." % [score_acumulado, local_guest_nick, nick_real])
 		
-		# Envia para o Supabase com o nick oficial
+		# manda pro supabase com o nick da conta
 		var success = await _upsert_score_online(nick_real, score_acumulado)
 
 		if not success:
-			# Se falhou, salva como pontos pendentes para o nick real!
+			# se der erro poe na fila sob o nick real
 			_add_pending_score(nick_real, score_acumulado)
-			# E também adiciona localmente sob o nick real
+			# e salva local com o nick novo
 			_add_score_local(nick_real, score_acumulado)
 
-		# Atualiza os pontos do clã se tiver
+		# atualiza os pontos do cla
 		if not cla_real.is_empty() and cla_real != "Nenhum":
 			if ClanManager.has_method("adicionar_pontos_cla"):
 				await ClanManager.adicionar_pontos_cla(cla_real, nick_real, score_acumulado)
 
-	# E remove a entrada do guest do RANKING_FILE, mas mantém o resto!
+	# remove o visitante do arquivo
 	_remover_player_local(local_guest_nick)
 
-	# [Segurança] Destrói o Guest para evitar duplicação
+	# limpa o visitante pra nao duplicar
 	if FileAccess.file_exists(GUEST_FILE):
 		DirAccess.remove_absolute(GUEST_FILE)
 	local_guest_nick = ""

@@ -1,7 +1,7 @@
 extends Area2D
 
-## [Andar 1 - Química] Poça de Reagente Corrosivo / Ácido Alquímico
-## Causa dano contínuo e imediato ao pisar desatento pelo chão da sala.
+# poca de acido (andar de quimica)
+# da dano se o player pisar em cima
 
 @export var dano: float = 15.0
 @export var intervalo_dano: float = 1.2
@@ -14,7 +14,7 @@ var _tempo_proximo_dano: float = 0.0
 
 func _ready() -> void:
 	collision_layer = 0
-	collision_mask = 15 # Detecta o player
+	collision_mask = 15 # player
 	
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -28,13 +28,13 @@ func _gerar_visual_procedural() -> void:
 		tw.tween_property(sprite_poca, "scale", Vector2(0.96, 1.05), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		return
 
-	# Textura radial de poça líquida química
+	# textura verde caso nao tenha sprite pronto
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([
-		Color(0.25, 0.95, 0.20, 0.85), # Centro verde ácido tóxico
-		Color(0.12, 0.70, 0.35, 0.70), # Meio esmeralda reagente
-		Color(0.35, 0.08, 0.55, 0.40), # Borda violeta química
-		Color(0.0, 0.0, 0.0, 0.0)      # Transparente
+		Color(0.25, 0.95, 0.20, 0.85),
+		Color(0.12, 0.70, 0.35, 0.70),
+		Color(0.35, 0.08, 0.55, 0.40),
+		Color(0.0, 0.0, 0.0, 0.0)
 	])
 	grad.offsets = PackedFloat32Array([0.0, 0.45, 0.75, 1.0])
 	
@@ -44,11 +44,11 @@ func _gerar_visual_procedural() -> void:
 	tex.fill_from = Vector2(0.5, 0.5)
 	tex.fill_to = Vector2(0.5, 0.0)
 	tex.width = 72
-	tex.height = 48 # Elíptica para perspectiva top-down 2D
+	tex.height = 48
 	
 	if sprite_poca:
 		sprite_poca.texture = tex
-		# Efeito orgânico de pulso da poça líquida
+		# deixa a poca pulsando de leve
 		var tw = create_tween().set_loops()
 		tw.tween_property(sprite_poca, "scale", Vector2(1.06, 0.96), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_property(sprite_poca, "scale", Vector2(0.96, 1.05), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
@@ -80,7 +80,7 @@ func _aplicar_dano_acido() -> void:
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-2")
 			
-		# Efeito de respingo de bolhas ao queimar
+		# borbulha mais quando pisa
 		if bolhas:
 			bolhas.amount = 16
 			bolhas.speed_scale = 1.6

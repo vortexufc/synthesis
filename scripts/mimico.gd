@@ -1,16 +1,10 @@
-## [Trap-1] Armadilha: O Mímico (Baú Falso)
-## Lore: Criado para punir aprendizes que buscam atalhos fáceis.
-## Fluxo: player entra na área → travado → tremor + flash vermelho → -70 HP → banner explicativo → libera.
+# bau falso que morde o player e da dano
 extends Area2D
 
-# Controla se a armadilha já foi ativada (dispara uma única vez)
 var ja_ativado: bool = false
 
-# Duração do tremor em segundos
 @export var duracao_tremor: float = 0.5
-# Intensidade do tremor (deslocamento em pixels)
 @export var intensidade_tremor: float = 8.0
-# Dano massivo causado pela mordida do Mímico
 @export var dano: float = 70.0
 
 @onready var sprite: Sprite2D = $BauSprite if has_node("BauSprite") else null
@@ -25,30 +19,26 @@ func _ready() -> void:
 		tex_aberto.region = Rect2(1024, 528, 48, 48)
 
 func _on_body_entered(body: Node2D) -> void:
-	# Só ativa uma vez e só para o Player
 	if ja_ativado:
 		return
 	if not body.name == "Player":
 		return
 
 	ja_ativado = true
-	set_deferred("monitoring", false) # desativa colisão futura
+	set_deferred("monitoring", false)
 
-	# Emite sinal global (pode ser ouvido pela HUD)
 	GlobalSignals.mimico_ativado.emit(body)
-
-	# Inicia a sequência assíncrona da armadilha
 	_sequencia_mimico(body)
 
 func _sequencia_mimico(player: Node2D) -> void:
-	# 1) Trava o movimento do player
+	# trava o player
 	player.travado = true
 
-	# Habilita o StaticBody2D para que o jogador não possa passar por cima do baú
+	# ativa colisao pro player nao passar por cima
 	if has_node("StaticBody2D/CollisionShape2D"):
 		$StaticBody2D/CollisionShape2D.set_deferred("disabled", false)
 
-	# Abre o baú com dentes/saliva avermelhada
+	# animacao do bau abrindo e mordendo
 	if sprite and tex_aberto:
 		sprite.texture = tex_aberto
 		sprite.self_modulate = Color(2.0, 0.35, 0.35)
@@ -61,27 +51,26 @@ func _sequencia_mimico(player: Node2D) -> void:
 		AudioManager.play_sfx("ui-2")
 		AudioManager.play_sfx("fail")
 
-	# 2) Tremor + flash vermelho simultâneos
+	# treme a tela e pisca vermelho
 	_executar_tremor(player)
 	_flash_vermelho(player)
 
-	# 3) Aplica o dano de 70 HP e feedback no player
+	# da o dano da mordida
 	await get_tree().create_timer(duracao_tremor * 0.4).timeout
 	player.receber_dano_mimico(dano)
 
-	# 4) Exibe alerta explicativo na tela para o jogador entender o ocorrido
+	# popup avisando
 	_exibir_alerta_mimico(dano)
 
-	# 5) Libera o movimento após o tremor inicial
+	# destrava o player
 	await get_tree().create_timer(0.4).timeout
 	player.travado = false
 
-## Tremor: oscila a posição do player rapidamente
+# efeito de shake no player
 func _executar_tremor(player: Node2D) -> void:
 	var pos_original: Vector2 = player.position
 	var tween = create_tween()
 
-	# Monta sequência de chacoalhadas
 	var passos: int = int(duracao_tremor / 0.05)
 	for i in passos:
 		var offset := Vector2(
@@ -89,30 +78,26 @@ func _executar_tremor(player: Node2D) -> void:
 			randf_range(-intensidade_tremor * 0.5, intensidade_tremor * 0.5)
 		)
 		tween.tween_property(player, "position", pos_original + offset, 0.04)
-	# Volta à posição original no fim
 	tween.tween_property(player, "position", pos_original, 0.06)
 
-## Flash vermelho: ColorRect vermelho semi-transparente sobre a tela
+# pisca vermelho na tela
 func _flash_vermelho(player: Node2D) -> void:
-	# Cria o overlay vermelho como filho do CanvasLayer do player (ou da cena)
 	var canvas := CanvasLayer.new()
-	canvas.layer = 10 # acima de tudo
+	canvas.layer = 10
 	var rect := ColorRect.new()
 	rect.color = Color(1, 0, 0, 0.0)
 	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	canvas.add_child(rect)
 	player.add_child(canvas)
 
-	# Fade in → fade out vermelho
 	var tween = create_tween()
 	tween.tween_property(rect, "color", Color(1, 0, 0, 0.45), 0.08)
 	tween.tween_property(rect, "color", Color(1, 0, 0, 0.0), 0.35)
 	await tween.finished
 
-	# Remove o overlay da memória
 	canvas.queue_free()
 
-## Exibe um banner imersivo na tela explicando o ataque do Mímico com botão para fechar
+# modal avisando que era mimico
 func _exibir_alerta_mimico(dano_causado: float) -> void:
 	var canvas = CanvasLayer.new()
 	canvas.layer = 106

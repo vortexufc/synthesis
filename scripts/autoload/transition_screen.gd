@@ -16,7 +16,7 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 		return
 	is_transitioning = true
 	
-	# Cancela qualquer batalha pendente para nunca vazar para a próxima sala
+	# cancela batalha se tiver mudando de sala
 	if get_node_or_null("/root/QuizManager"):
 		var qm = get_node("/root/QuizManager")
 		if qm.has_method("fechar_ui_batalha"):
@@ -27,9 +27,7 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	
 	var mat = color_rect.material as ShaderMaterial if color_rect else null
 	
-	# Determina o estilo da transição:
-	# Menus e UI usam o Fade com Vinheta suave (modo = 1)
-	# Masmorras e portas usam o Portal Iris Mágico circular (modo = 0)
+	# tipo de transicao: fade pra menu e portal iris pras salas
 	var eh_menu = "/ui/" in target_scene or "menu" in target_scene.to_lower() or "login" in target_scene.to_lower() or "cadastro" in target_scene.to_lower()
 	if get_tree().current_scene:
 		var cena_antiga = get_tree().current_scene.scene_file_path.to_lower()
@@ -43,14 +41,14 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	if color_rect:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 		
-	# Bloqueia input do player pra não mexer durante o loading
+	# trava o player durante a transicao
 	get_tree().get_root().set_disable_input(true)
 	
-	# Som de transição suave
+	# toca som de transicao
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("transicao-1")
 		
-	# Fecha o portal / transição in
+	# fecha o portal
 	if mat:
 		var tween_in = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween_in.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 0.0, 1.0, 0.36).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
@@ -58,32 +56,32 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	else:
 		await get_tree().create_timer(0.3, true, false, true).timeout
 	
-	# Verifica se é para pular a animação (ir para o Corredor, para o Hub, ou qualquer tela de UI/Menu)
+	# se for pro hub, corredor ou menu pula a animacao
 	var pular_animacao = false
 	if "Corredor.tscn" in target_scene or "Hub_Geral" in target_scene or "/ui/" in target_scene or "Menu" in target_scene:
 		pular_animacao = true
 		
-	# Também pula se a gente estiver saindo do corredor para outra sala
+	# pula se estiver saindo do corredor
 	if get_tree().current_scene and "Corredor.tscn" in get_tree().current_scene.scene_file_path:
 		pular_animacao = true
 		
-	# Retira a cutscene nas portas de Física e Biologia (pois o corredor atual é de Química)
+	# por enquanto so toca cutscene em quimica
 	if "Fisica" in target_scene or "Física" in target_scene or "Biologia" in target_scene:
 		pular_animacao = true
 	
 	if not pular_animacao:
 		await _tocar_animacao_corredor(vp_size, porta_de_retorno)
 	else:
-		# Pausa super rápida enquanto a tela tá coberta
+		# pausa rapida com a tela escura
 		await get_tree().create_timer(0.18, true, false, true).timeout
 
-	# Muda a cena de verdade no jogo
+	# troca a cena
 	get_tree().change_scene_to_file(target_scene)
 	
-	# Faz um tempinho pro novo mapa carregar
+	# espera carregar
 	await get_tree().create_timer(0.08, true, false, true).timeout
 	
-	# Abre o portal / clareia revelando a nova sala!
+	# abre a transicao revelando o mapa
 	if mat:
 		var tween_out = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween_out.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 1.0, 0.0, 0.40).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -92,12 +90,12 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	if color_rect:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
-	# Garante que, ao carregar a nova sala, o jogo não fique pausado
+	# despausa o jogo
 	get_tree().paused = false
 	get_tree().get_root().set_disable_input(false)
 	is_transitioning = false
 	
-	# Decrementa o buff de escudo se entrou em uma sala de jogo da masmorra
+	# diminui 1 sala do buff de escudo
 	var t_lower = target_scene.to_lower()
 	var eh_sala_masmorra = not ("/ui/" in t_lower or "menu" in t_lower or "hub" in t_lower or "login" in t_lower or "cadastro" in t_lower or "config" in t_lower)
 	if eh_sala_masmorra and get_node_or_null("/root/PlayerStats"):
@@ -122,7 +120,7 @@ func _obter_textura_luz() -> Texture2D:
 	return grad_tex
 
 func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
-	# 2. Cria um SubViewport para renderizar o Corredor real em 2D na tela!
+	# viewport pra renderizar a animacao do corredor
 	var vp_container = SubViewportContainer.new()
 	vp_container.anchors_preset = Control.PRESET_FULL_RECT
 	
@@ -133,7 +131,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	add_child(vp_container)
 	move_child(vp_container, -1)
 	
-	# Carrega o mini corredor de transição dedicado pré-configurado
+	# carrega a ceninha do corredor
 	var cena_corredor = load("res://scenes/Salas/Comum/MiniCorredorTransicao.tscn")
 	var corredor = cena_corredor.instantiate()
 	vp.add_child(corredor)
@@ -141,10 +139,10 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	var porta_cima = corredor.get_node_or_null("PortaTransicao")
 	var porta_baixo = corredor.get_node_or_null("PortaRetorno")
 
-	# ===== SISTEMA DE ILUMINAÇÃO MÍSTICA DOS PORTAIS =====
+	# luzes dos portais
 	var tex_luz = _obter_textura_luz()
 				
-	# 3. Luz mística nos Portais
+	# luz nos portais
 	if porta_cima:
 		var luz_p_cima = PointLight2D.new()
 		luz_p_cima.name = "LuzPortalCima"
@@ -164,7 +162,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 		luz_p_baixo.position = Vector2(0, -25)
 		porta_baixo.add_child(luz_p_baixo)
 	
-	# 4. Coloca uma Câmera apontando pro início/fim do corredor
+	# camera focada no corredor
 	var cam = corredor.get_node_or_null("Camera2D") as Camera2D
 	if not cam:
 		cam = Camera2D.new()
@@ -174,7 +172,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	else:
 		cam.position = Vector2(628, 1150) # Câmera na base
 	
-	# 5. Pega o Sprite do Player
+	# cria o bonequinho do mago correndo
 	var dummy = load("res://scenes/Entidades/player.tscn").instantiate()
 	dummy.set_script(null)
 	for child in dummy.get_children():
@@ -187,7 +185,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 		dummy.position = Vector2(628, 1250) # Boneco dentro da porta de baixo
 	vp.add_child(dummy)
 	
-	# Aura mágica de caminhada do mago clareando seus passos
+	# luz que segue os passos dele
 	var luz_player = PointLight2D.new()
 	luz_player.name = "AuraPlayer"
 	luz_player.texture = tex_luz
@@ -204,7 +202,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 		else:
 			sprite.play("correr_cima")
 			
-	# Toca o som de passo a cada 0.3s
+	# som de passos
 	var passo_timer = Timer.new()
 	passo_timer.wait_time = 0.28
 	passo_timer.autostart = true
@@ -215,7 +213,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	add_child(passo_timer)
 	if get_node_or_null("/root/AudioManager"): AudioManager.tocar_som_caminhada()
 
-	# Efeito orgânico de flicker nas tochas durante a travessia
+	# pisca a luz das tochas
 	var luzes_tochas: Array = corredor.find_children("", "PointLight2D", true, false)
 	var tween_flicker = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween_flicker.tween_callback(func():
@@ -226,7 +224,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 			luz_player.energy = randf_range(0.35, 0.41)
 	).set_delay(0.08)
 		
-	# 6. Anima o boneco E a câmera (transição rápida ajustada pro novo tamanho)
+	# move o boneco e a camera pro fim
 	var tween_walk = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	if porta_de_retorno:
 		tween_walk.tween_property(dummy, "position:y", 1250, 1.0)
@@ -239,5 +237,5 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	tween_flicker.kill()
 	passo_timer.queue_free()
 		
-	# Limpa o render 3D/2D
+	# limpa o viewport
 	vp_container.queue_free()

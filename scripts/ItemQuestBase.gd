@@ -25,7 +25,7 @@ func _ready() -> void:
 		tween_float.tween_property(sprite, "position:y", -8.0, 1.0).as_relative().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tween_float.tween_property(sprite, "position:y", 8.0, 1.0).as_relative().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
-		# Sombra realista no chão acompanhando a flutuação
+		# sombra
 		_criar_sombra()
 		if _shadow:
 			var tw_s = create_tween().set_loops()
@@ -80,7 +80,7 @@ func _coletar(corpo: Node2D) -> void:
 					if it.get("nome") == nome_item: total += 1
 				hud.mostrar_mensagem(nome_item + " (" + str(total) + "/5)")
 				
-		# Burst de partículas mágicas brilhantes do item coletado
+		# particulas de coleta
 		var part = CPUParticles2D.new()
 		part.global_position = global_position
 		part.z_index = 10
@@ -119,7 +119,7 @@ func _coletar(corpo: Node2D) -> void:
 		part.emitting = true
 		get_tree().create_timer(0.65).timeout.connect(part.queue_free)
 		
-		# Animação clara de salto (Hop & Pop)
+		# animacao pulando e sumindo
 		var tween_coleta = create_tween()
 		tween_coleta.set_parallel(true)
 		tween_coleta.tween_property(self, "position:y", position.y - 32.0, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

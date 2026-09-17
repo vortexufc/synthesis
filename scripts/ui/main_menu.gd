@@ -10,7 +10,7 @@ extends Control
 @onready var vbox_buttons = find_child("VBoxButtons", true, false) as VBoxContainer
 @onready var leaderboard_panel_node = find_child("LeaderboardPanel", true, false) as PanelContainer
 
-# Guardamos referências para poder atualizar dinamicamente
+# referencias dos nos da tela
 var _lbl_nome: Label = null
 var _btn_avatar: TextureButton = null
 
@@ -20,7 +20,7 @@ var _bg_base_pos: Vector2 = Vector2.ZERO
 var _parallax_offset: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
-	# Musica da cena começa a tocar
+	# toca musica do menu
 	AudioManager.play_menu_music()
 	
 	if logo:
@@ -28,7 +28,7 @@ func _ready() -> void:
 	if bg:
 		_bg_base_pos = bg.position
 	
-	# Conectando os sinais 'pressed' aos seus respectivos callbacks
+	# conecta os cliques dos botoes
 	btn_jogar.pressed.connect(_on_btn_jogar_pressed)
 	btn_ranking.pressed.connect(_on_btn_ranking_pressed)
 	btn_clas.pressed.connect(_on_btn_clas_pressed)
@@ -42,12 +42,12 @@ func _ready() -> void:
 		vbox.add_child(btn_admin)
 		vbox.move_child(btn_admin, 0) # Coloca no topo
 		
-	# Efeitos visuais modernos: partículas no fundo, animações nos botões e entrada suave
+	# animacoes dos botoes e particulas no fundo
 	_criar_particulas_magicas()
 	_configurar_animacoes_botoes()
 	_animar_entrada_menu()
 	
-	# ========= SISTEMA DE PERFIL (BACKEND-6) =========
+	# perfil do jogador
 	var hbox_perfil = HBoxContainer.new()
 	hbox_perfil.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	hbox_perfil.position = Vector2(24, 24)
@@ -80,22 +80,21 @@ func _ready() -> void:
 	hbox_perfil.add_child(_btn_avatar)
 	hbox_perfil.add_child(_lbl_nome)
 	add_child(hbox_perfil)
-	# =================================================
 	
-	# ========= LEADERBOARD COM PERÍODOS (ONLINE) =========
+	
+	# leaderboard online
 	_inicializar_leaderboard()
-	# Re-atualiza quando ClanManager ou RankingManager terminarem de carregar
+	# atualiza quando carregar os clas e ranking
 	ClanManager.clan_list_updated.connect(_atualizar_leaderboard)
 	RankingManager.ranking_atualizado.connect(_atualizar_leaderboard)
-	# Atualiza o perfil quando o check_membership_sync corrigir um clã fantasma
+	# atualiza o perfil se mudar de cla
 	ClanManager.clan_updated.connect(_atualizar_perfil)
-	# ====================================================
 
 func _atualizar_perfil() -> void:
 	if _lbl_nome == null or DatabaseManager.user_token == "":
 		return
 	_lbl_nome.text = DatabaseManager.user_nick.to_upper() + "\nCLÃ: " + DatabaseManager.user_cla.to_upper()
-	# Carrega a foto do mago do ranking se ainda não foi carregada
+	# icone do mago no perfil
 	if _btn_avatar != null:
 		var tex_mago = load("res://assets/sprites/ui/ranking/icone_mago.png") as Texture2D
 		if tex_mago:
@@ -105,7 +104,7 @@ func _atualizar_perfil() -> void:
 func _on_btn_jogar_pressed() -> void:
 	print("Botão JOGAR pressionado")
 	
-	# Efeito do botao jogar
+	# clique em jogar
 	AudioManager.play_sfx("ui_5")
 	
 	if get_node_or_null("/root/DungeonGenerator"):
@@ -114,14 +113,14 @@ func _on_btn_jogar_pressed() -> void:
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
 		
-	# Efeito de transicao
+	# troca de cena pro hub
 	AudioManager.play_sfx("transicao-1")
 	TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
 	
-	# Efeito do botao do ranking
+	# abre ranking
 	AudioManager.play_sfx("ui_5")
 	
 	TransitionScreen.change_scene("res://scenes/ui/ranking_ui.tscn")
@@ -129,7 +128,7 @@ func _on_btn_ranking_pressed() -> void:
 func _on_btn_clas_pressed() -> void:
 	print("Botão CLÃS pressionado - abrindo TelaClas")
 	
-	# Efeito do botao dos clas
+	# abre clas
 	AudioManager.play_sfx("ui_5")
 	
 	TransitionScreen.change_scene("res://scenes/ui/TelaClas.tscn")
@@ -137,21 +136,18 @@ func _on_btn_clas_pressed() -> void:
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")
 	
-	# Efeito do botao de configuraçoes
+	# abre configuracoes
 	AudioManager.play_sfx("ui_5")
 	
 	TransitionScreen.change_scene("res://scenes/ui/configuracoes.tscn")
 
-# ---------------------------------------------------------
-# LIDERANÇA — Alimentada pelo ClanManager online
-# Suporta 3 períodos: diario / semanal / mensal
-# ---------------------------------------------------------
+# leaderboard com filtro de periodo
 
-# Período atual exibido no painel
+# periodo atual do filtro
 var _periodo_atual: String = "quimica"
 var _periodos: Array = ["quimica", "fisica", "biologia"]
 
-# Referências aos nós do leaderboard (cacheadas para não re-buscar toda hora)
+# referencias dos nos da lista
 var _leaderboard_panel: PanelContainer = null
 var _lbl_title: Label = null
 var _btn_prev: Button = null
@@ -165,13 +161,13 @@ func _inicializar_leaderboard() -> void:
 	_btn_prev  = _leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/HeaderHBox/HBoxDots/BtnPrev")
 	_btn_next  = _leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/HeaderHBox/HBoxDots/BtnNext")
 	
-	# ◄ vai para o período anterior (ciclo)
+	# volta periodo
 	if _btn_prev:
 		_btn_prev.pressed.connect(func():
 			var idx = _periodos.find(_periodo_atual)
 			_trocar_periodo(_periodos[(idx - 1 + _periodos.size()) % _periodos.size()])
 		)
-	# ► vai para o próximo período (ciclo)
+	# avanca periodo
 	if _btn_next:
 		_btn_next.pressed.connect(func():
 			var idx = _periodos.find(_periodo_atual)
@@ -188,14 +184,14 @@ func _atualizar_leaderboard() -> void:
 	if _leaderboard_panel == null:
 		return
 	
-	# Atualiza o título
+	# atualiza o titulo
 	if _lbl_title:
 		match _periodo_atual:
 			"quimica":  _lbl_title.text = "LIDERANÇA QUIMICA"
 			"fisica": _lbl_title.text = "LIDERANÇA FISICA"
 			"biologia":  _lbl_title.text = "LIDERANÇA BIOLOGIA"
 	
-	# Atualiza o ranking de acordo com o período
+	# busca o ranking do periodo
 	var lista: Array = RankingManager.get_ranking_por_periodo(_periodo_atual)
 	
 	for i in range(1, 4):
@@ -220,12 +216,12 @@ func _atualizar_leaderboard() -> void:
 func _process(delta: float) -> void:
 	_tempo_menu += delta
 	
-	# 1. Flutuação mágica e suave do Logo do jogo
+	# animacao de flutuar do logo
 	if logo and is_instance_valid(logo):
 		logo.position.y = _logo_base_y + sin(_tempo_menu * 1.7) * 5.5
 		logo.rotation = sin(_tempo_menu * 0.85) * 0.012
 		
-	# 2. Efeito Parallax sutil do fundo reagindo à posição do mouse
+	# parallax com o mouse
 	if bg and is_instance_valid(bg):
 		var vp_rect = get_viewport_rect()
 		var mouse_pos = get_viewport().get_mouse_position()
@@ -245,7 +241,7 @@ func _configurar_animacoes_botoes() -> void:
 				_animar_botao(child)
 
 func _animar_botao(btn: Button) -> void:
-	# Centraliza o pivot no botão para que a escala cresça harmonicamente
+	# centraliza o pivot
 	btn.resized.connect(func(): btn.pivot_offset = btn.size * 0.5)
 	btn.pivot_offset = btn.size * 0.5
 	
@@ -274,7 +270,7 @@ func _animar_botao(btn: Button) -> void:
 	)
 
 func _animar_entrada_menu() -> void:
-	# Entrada suave dos botões com leve efeito escalonado (stagger)
+	# animacao de entrada dos botoes
 	if vbox_buttons:
 		var delay = 0.04
 		for child in vbox_buttons.get_children():
@@ -286,7 +282,7 @@ func _animar_entrada_menu() -> void:
 				tw.tween_property(child, "position:x", 0.0, 0.35).set_delay(delay)
 				delay += 0.06
 				
-	# Entrada suave do Leaderboard
+	# animacao de entrada da lista
 	if leaderboard_panel_node:
 		var base_x = leaderboard_panel_node.position.x
 		leaderboard_panel_node.modulate.a = 0.0

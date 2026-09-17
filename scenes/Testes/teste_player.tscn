@@ -21,8 +21,12 @@
 [ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="22_robopc"]
 [ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robos/Robo_G.tscn" id="23_robog"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/NPCBiologia.tscn" id="24_bio"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/poca_acido.tscn" id="24_n2wle"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/esporos_toxicos.tscn" id="25_cvi65"]
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="25_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/grade_eletrica.tscn" id="26_ftl5b"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="26_ponto"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="27_cvi65"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
 radius = 26.0
@@ -699,3 +703,15 @@ script = ExtResource("26_ponto")
 position = Vector2(640, 360)
 gizmo_extents = 24.0
 script = ExtResource("26_ponto")
+
+[node name="PocaAcido" parent="." unique_id=205988574 instance=ExtResource("24_n2wle")]
+position = Vector2(187, 614)
+
+[node name="EsporosToxicos" parent="." unique_id=1906546870 instance=ExtResource("25_cvi65")]
+position = Vector2(185, 522)
+
+[node name="GradeEletrica" parent="." unique_id=187696593 instance=ExtResource("26_ftl5b")]
+position = Vector2(301, 606)
+
+[node name="FrascoInstavel" parent="." unique_id=1218942874 instance=ExtResource("27_cvi65")]
+position = Vector2(302, 534)

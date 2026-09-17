@@ -2,11 +2,7 @@ extends CanvasLayer
 
 signal furia_concluida(sucesso: bool)
 
-## [Fúria do Chefe] Minigame de Ação Rápida: Verdadeiro ou Falso em Combo
-## Disparado quando o Chefe do Andar atinge <= 50% de Vida.
-## 1º Passo: Apresenta a Lore dramática do golpe do chefe e instruções para o jogador ler com calma.
-## 2º Passo: O jogador aperta [PREPARAR DEFESA] e enfrenta 3 afirmações rápidas (6s cada).
-## 3º Passo: Se acertar as 3, executa PARRY CRÍTICO (-40 HP). Se errar/tempo acabar, sofre -30 HP.
+# minigame de furia do boss
 
 const TEMPO_POR_AFIRMACAO: float = 6.0
 const META_COMBO: int = 3
@@ -25,18 +21,18 @@ var _respondendo: bool = false
 var _resultado_sucesso: bool = false
 var _ja_emitiu: bool = false
 
-# Nós da Interface
+# referencias dos nos
 var _banner_alerta: PanelContainer
 var _lbl_titulo_alerta: Label
 var _lbl_subtitulo_alerta: Label
 
-# Painel 1: Lore e Instruções Pré-Batalha
+# painel de instrucoes antes do golpe
 var _painel_lore: PanelContainer
 var _lbl_lore_titulo: Label
 var _lbl_lore_texto: Label
 var _btn_iniciar_defesa: Button
 
-# Painel 2: Quiz Rápido V ou F
+# painel de perguntas rapidas V ou F
 var _painel_quiz: VBoxContainer
 var _hbox_orbes: HBoxContainer
 var _orbes: Array[PanelContainer] = []
@@ -48,7 +44,7 @@ var _btn_verdadeiro: Button
 var _btn_falso: Button
 var _lbl_dica_continuar: Label
 
-# Lores temáticas por Andar
+# textos de lore por andar
 var lores_chefe = {
 	1: {
 		"golpe": "🔥 REAÇÃO EM CADEIA EXOTÉRMICA!",
@@ -64,7 +60,7 @@ var lores_chefe = {
 	}
 }
 
-# Base de Dados de Afirmações Rápidas (Verdadeiro ou Falso) por Andar
+# perguntas rapidas por andar
 var banco_afirmacoes = {
 	1: [ # Química (Andar 1)
 		{"texto": "A água (H₂O) é formada por 2 átomos de hidrogênio e 1 de oxigênio.", "correta": true},
@@ -130,7 +126,7 @@ func _construir_interface() -> void:
 	_root_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root_container)
 	
-	# 1. Backdrop escuro com tonalidade carmesim dramática
+	# fundo escuro avermelhado
 	var bg = ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.color = Color(0.04, 0.01, 0.02, 0.90)
@@ -144,7 +140,7 @@ func _construir_interface() -> void:
 	font_titulo.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_titulo.font_weight = 700
 	
-	# 2. Container Central
+	# container central
 	var center = CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root_container.add_child(center)
@@ -154,7 +150,7 @@ func _construir_interface() -> void:
 	vbox_root.add_theme_constant_override("separation", 14)
 	center.add_child(vbox_root)
 	
-	# 3. Banner Superior de Alerta Máximo (Comum a todas as fases)
+	# banner de alerta no topo
 	_banner_alerta = PanelContainer.new()
 	var sb_banner = StyleBoxFlat.new()
 	sb_banner.bg_color = Color(0.38, 0.06, 0.08, 0.96)
@@ -191,9 +187,7 @@ func _construir_interface() -> void:
 	_lbl_subtitulo_alerta.add_theme_font_override("font", font_sans)
 	vbox_topo.add_child(_lbl_subtitulo_alerta)
 	
-	# =========================================================================
-	# PAINEL 1: TELA DE LORE & PREPARAÇÃO (Sem timer! O jogador lê com calma)
-	# =========================================================================
+	# painel de instrucao antes da acao
 	_painel_lore = PanelContainer.new()
 	_painel_lore.custom_minimum_size = Vector2(680, 210)
 	var sb_lore = StyleBoxFlat.new()
@@ -232,7 +226,7 @@ func _construir_interface() -> void:
 	_lbl_lore_texto.add_theme_font_override("font", font_sans)
 	vbox_lore_conteudo.add_child(_lbl_lore_texto)
 	
-	# Badges Visuais de Regras Rápidas (Pills) em vez de parágrafos extensos
+	# regras da disputa
 	var hbox_regras = HBoxContainer.new()
 	hbox_regras.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_regras.add_theme_constant_override("separation", 14)
@@ -289,16 +283,14 @@ func _construir_interface() -> void:
 	_btn_iniciar_defesa.pressed.connect(_iniciar_desafio_quiz)
 	vbox_lore_conteudo.add_child(_btn_iniciar_defesa)
 	
-	# =========================================================================
-	# PAINEL 2: QUIZ RÁPIDO V ou F (Inicialmente Oculto)
-	# =========================================================================
+	# quiz rapido V ou F
 	_painel_quiz = VBoxContainer.new()
 	_painel_quiz.alignment = BoxContainer.ALIGNMENT_CENTER
 	_painel_quiz.add_theme_constant_override("separation", 14)
 	_painel_quiz.visible = false
 	vbox_root.add_child(_painel_quiz)
 	
-	# Orbes de Combo
+	# orbes de acerto
 	_hbox_orbes = HBoxContainer.new()
 	_hbox_orbes.alignment = BoxContainer.ALIGNMENT_CENTER
 	_hbox_orbes.add_theme_constant_override("separation", 16)
@@ -327,7 +319,7 @@ func _construir_interface() -> void:
 		_hbox_orbes.add_child(orbe)
 		_orbes.append(orbe)
 		
-	# Card da Afirmação
+	# card da frase
 	_painel_card_pergunta = PanelContainer.new()
 	_painel_card_pergunta.custom_minimum_size = Vector2(640, 160)
 	var sb_card = StyleBoxFlat.new()
@@ -360,7 +352,7 @@ func _construir_interface() -> void:
 	_lbl_afirmacao.add_theme_font_override("font", font_sans)
 	vbox_card.add_child(_lbl_afirmacao)
 	
-	# Barra de Tempo Rápida (6s)
+	# barra de tempo
 	var hbox_tempo = HBoxContainer.new()
 	hbox_tempo.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_tempo.add_theme_constant_override("separation", 10)
@@ -384,7 +376,7 @@ func _construir_interface() -> void:
 	_lbl_tempo.add_theme_font_override("font", font_titulo)
 	hbox_tempo.add_child(_lbl_tempo)
 	
-	# Botões Gigantes: VERDADEIRO e FALSO
+	# botoes verdadeiro e falso
 	var hbox_botoes = HBoxContainer.new()
 	hbox_botoes.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_botoes.add_theme_constant_override("separation", 24)
@@ -458,7 +450,7 @@ func _construir_interface() -> void:
 	_btn_falso.pressed.connect(func(): _responder(false))
 	hbox_botoes.add_child(_btn_falso)
 	
-	# Aviso discreto para pular resultado
+	# dica pra pular resultado
 	_lbl_dica_continuar = Label.new()
 	_lbl_dica_continuar.text = "( Pressione ESPAÇO ou ENTER para continuar )"
 	_lbl_dica_continuar.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -477,20 +469,20 @@ func iniciar_furia(andar_id: int, nome_chefe: String = "Chefe Supremo") -> void:
 	_respondendo = false
 	_fase_atual = Fase.LORE
 	
-	# Sorteia as 3 afirmações
+	# sorteia 3 frases
 	var pool = banco_afirmacoes.get(_andar_atual, banco_afirmacoes[1]).duplicate()
 	pool.shuffle()
 	_perguntas_ativas = pool.slice(0, mini(META_COMBO, pool.size()))
 	_indice_pergunta = 0
 	
-	# Atualiza o texto de Lore baseado no andar
+	# texto do boss do andar
 	var info_lore = lores_chefe.get(_andar_atual, lores_chefe[1])
 	_lbl_titulo_alerta.text = "⚠️ GOLPE SUPREMO DO CHEFE PREPARANDO! ⚠️"
 	_lbl_subtitulo_alerta.text = "A vida do monstro caiu pela metade! Prepare sua defesa arcana."
 	_lbl_lore_titulo.text = info_lore["golpe"]
 	_lbl_lore_texto.text = info_lore.get("lore", "O monstro está prestes a desferir um ataque devastador!")
 	
-	# Configura visual inicial dos painéis
+	# visual inicial
 	_painel_lore.visible = true
 	_painel_quiz.visible = false
 	_lbl_dica_continuar.visible = false
@@ -500,11 +492,11 @@ func iniciar_furia(andar_id: int, nome_chefe: String = "Chefe Supremo") -> void:
 	
 	_atualizar_orbes_ui()
 	
-	# Toca som de alerta dramático
+	# som de alerta
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("transicao-1")
 		
-	# Animação cinematográfica suave no painel de lore
+	# animacao do painel
 	_painel_lore.modulate.a = 0.0
 	_banner_alerta.scale = Vector2(0.85, 0.85)
 	
@@ -523,7 +515,7 @@ func _iniciar_desafio_quiz() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# Oculta lore e transiciona para o painel de quiz
+	# comeca o quiz
 	_painel_lore.visible = false
 	_painel_quiz.visible = true
 	_painel_quiz.modulate.a = 0.0
@@ -698,7 +690,7 @@ func _concluir_vitoria_parry() -> void:
 	tw.tween_property(_painel_card_pergunta, "scale", Vector2(1.04, 1.04), 0.12)
 	tw.tween_property(_painel_card_pergunta, "scale", Vector2.ONE, 0.12)
 	
-	# Aguarda 2.2s ou o jogador apertar Espaço/Enter
+	# espera ou aperta enter
 	await get_tree().create_timer(2.2, true).timeout
 	if _fase_atual == Fase.RESULTADO and not _ja_emitiu:
 		_fechar_e_emitir(true)
@@ -733,7 +725,7 @@ func _concluir_falha_generica() -> void:
 	tw.tween_property(_painel_card_pergunta, "position:x", _painel_card_pergunta.position.x - 8.0, 0.04)
 	tw.tween_property(_painel_card_pergunta, "position:x", _painel_card_pergunta.position.x, 0.04)
 	
-	# Aguarda 2.2s ou o jogador apertar Espaço/Enter
+	# espera ou aperta enter
 	await get_tree().create_timer(2.2, true).timeout
 	if _fase_atual == Fase.RESULTADO and not _ja_emitiu:
 		_fechar_e_emitir(false)
@@ -744,7 +736,7 @@ func _fechar_e_emitir(sucesso: bool) -> void:
 	_ja_emitiu = true
 	_em_andamento = false
 	
-	# Fallback timer de segurança para garantir a liberação em no máximo 0.25s
+	# timer pra liberar
 	get_tree().create_timer(0.25, true).timeout.connect(func():
 		if is_instance_valid(self) and not is_queued_for_deletion():
 			furia_concluida.emit(sucesso)

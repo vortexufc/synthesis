@@ -1,9 +1,7 @@
 extends Control
 
-# ==============================================================================
 # PAINEL ADMINISTRATIVO & PEDAGÓGICO - SYNTHESIS
 # Gestão de Questões, Análise TRI e Estatísticas de Desempenho
-# ==============================================================================
 
 # Cores e Design System
 const COLOR_BG_DARK = Color(0.06, 0.08, 0.12, 1.0)
@@ -116,9 +114,7 @@ func _ready() -> void:
 	# Carrega os dados iniciais
 	_carregar_dados()
 
-# ==============================================================================
 # CONSTRUÇÃO DE COMPONENTES VISUAIS
-# ==============================================================================
 
 func _criar_cabecalho(parent: Control) -> void:
 	var panel_cab = PanelContainer.new()
@@ -391,9 +387,7 @@ func _on_busca_alterada(novo_texto: String) -> void:
 	texto_pesquisa = novo_texto.strip_edges().to_lower()
 	_renderizar_lista()
 
-# ==============================================================================
 # CARREGAMENTO E PROCESSAMENTO DE DADOS
-# ==============================================================================
 
 func _carregar_dados() -> void:
 	lbl_total_questoes_val.text = "..."
@@ -555,9 +549,7 @@ func _atualizar_rotulos_botoes_filtro(f: int, m: int, d: int, total: int) -> voi
 	if btn_filtros.has("dificil"):
 		btn_filtros["dificil"]["btn"].text = "Difícil (%d)" % d
 
-# ==============================================================================
 # RENDERIZAÇÃO DA LISTA DE CARDS DE QUESTÃO
-# ==============================================================================
 
 func _renderizar_lista() -> void:
 	for child in tabela_dados.get_children():
@@ -826,9 +818,7 @@ func _mostrar_mensagem_tabela(msg: String, cor: Color) -> void:
 	lbl.add_theme_font_size_override("font_size", 14)
 	panel.add_child(lbl)
 
-# ==============================================================================
 # MODAL DE REMOÇÃO DE QUESTÃO (COM CONFIRMAÇÃO)
-# ==============================================================================
 
 func _abrir_modal_confirmar_remocao(item: Dictionary) -> void:
 	if modal_exclusao != null and is_instance_valid(modal_exclusao):
@@ -975,9 +965,7 @@ func _recalcular_metricas_apos_remocao() -> void:
 	lbl_total_respostas_sub.text = "%d Acertos  |  %d Erros" % [soma_acertos, soma_erros]
 	_atualizar_rotulos_botoes_filtro(cont_facil, cont_medio, cont_dificil, lista_questoes_processadas.size())
 
-# ==============================================================================
 # MODAL DE RESET GERAL DO JOGO (COM SENHA)
-# ==============================================================================
 
 func _abrir_popup_reset() -> void:
 	if popup_reset != null and is_instance_valid(popup_reset):
@@ -1078,9 +1066,7 @@ func _confirmar_reset() -> void:
 		line_edit_senha.text = ""
 		line_edit_senha.placeholder_text = "Senha incorreta! Acesso negado."
 
-# ==============================================================================
-# SISTEMA DE NOTIFICAÇÃO TOAST
-# ==============================================================================
+# notificacao flutuante
 
 func _criar_toast(parent: Control) -> void:
 	toast_notificacao = PanelContainer.new()
@@ -1119,9 +1105,7 @@ func _exibir_toast(mensagem: String) -> void:
 		toast_notificacao.visible = true
 		toast_timer.start()
 
-# ==============================================================================
-# HELPERS DE ESTILO E DESIGN SYSTEM
-# ==============================================================================
+# funcoes auxiliares de estilo
 
 func _criar_stylebox(bg: Color, border_c: Color = Color(0, 0, 0, 0), radius: int = 6, border_w: int = 0) -> StyleBoxFlat:
 	var sb = StyleBoxFlat.new()

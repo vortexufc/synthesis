@@ -1,15 +1,13 @@
 extends CanvasLayer
 
-## [Lore & Ensino Visual] Mural Rúnico / Inscrição Ancestral
-## Interface de infográfico interativo gerado 100% no motor Godot (sem imagens externas).
-## Apresenta diagramas visuais explicativos e interativos para Química, Física e Biologia.
+# tela do mural de inscricoes das salas
 
 signal mural_fechado()
 
 var andar_id: int = 1
 var player_ref: Node2D = null
 
-# Referências de interface
+# referencias da interface
 var backdrop: ColorRect
 var painel_central: PanelContainer
 var lbl_titulo_mural: Label
@@ -57,7 +55,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		fechar_mural()
 
-## Abre a inscrição rúnica do andar correspondente
+# abre o mural do andar certo
 func abrir_mural(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 	andar_id = p_andar_id
 	player_ref = p_player
@@ -146,7 +144,7 @@ func _construir_base_ui() -> void:
 	vbox_main.add_theme_constant_override("separation", 10)
 	painel_central.add_child(vbox_main)
 
-	# 1. Barra Superior com Título e Fechar [X]
+	# titulo e fechar
 	var hbox_top = HBoxContainer.new()
 	hbox_top.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox_main.add_child(hbox_top)
@@ -198,13 +196,13 @@ func _construir_base_ui() -> void:
 
 	vbox_main.add_child(HSeparator.new())
 
-	# 2. Área do Diagrama Interativo
+	# area do diagrama
 	container_diagrama = VBoxContainer.new()
 	container_diagrama.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	container_diagrama.add_theme_constant_override("separation", 10)
 	vbox_main.add_child(container_diagrama)
 
-	# 3. Painel Inferior de Detalhes e Explicação
+	# explicacao embaixo
 	painel_detalhes = PanelContainer.new()
 	painel_detalhes.custom_minimum_size = Vector2(760, 115)
 	
@@ -249,7 +247,7 @@ func _construir_base_ui() -> void:
 	lbl_detalhe_dica.add_theme_color_override("font_color", Color(1.0, 0.84, 0.35))
 	vbox_det.add_child(lbl_detalhe_dica)
 
-	# 4. Rodapé
+	# rodape
 	var hbox_bot = HBoxContainer.new()
 	hbox_bot.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_bot.add_theme_constant_override("separation", 16)
@@ -292,7 +290,7 @@ func _construir_base_ui() -> void:
 func _montar_conteudo_andar(p_andar: int) -> void:
 	andar_id = p_andar
 
-	# Limpa nós do diagrama anterior
+	# limpa o diagrama antigo
 	for c in container_diagrama.get_children():
 		c.queue_free()
 
@@ -306,16 +304,14 @@ func _montar_conteudo_andar(p_andar: int) -> void:
 		_:
 			_construir_diagrama_quimica()
 
-# ─────────────────────────────────────────────────────────────
-# 1. DIAGRAMA DE QUÍMICA: TABELA PERIÓDICA COMPLETA DOS ELEMENTOS
-# ─────────────────────────────────────────────────────────────
+# diagrama de quimica: tabela periodica
 func _construir_diagrama_quimica() -> void:
 	lbl_titulo_mural.text = "✦ TABELA PERIÓDICA DOS ELEMENTOS ✦"
 	lbl_subtitulo_mural.text = "A grande tábua da matéria universal. Clique nos filtros para destacar famílias ou em qualquer elemento!"
 
 	botoes_elementos.clear()
 
-	# 1. Filtros de Categoria no Topo
+	# filtros no topo
 	var hbox_filtros = HBoxContainer.new()
 	hbox_filtros.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_filtros.add_theme_constant_override("separation", 8)
@@ -336,7 +332,7 @@ func _construir_diagrama_quimica() -> void:
 	var btn_f_gases = _criar_botao_filtro("🔮 GASES NOBRES", Color(0.85, 0.45, 1.0), func(): _filtrar_tabela_periodica("gases_nobres"))
 	hbox_filtros.add_child(btn_f_gases)
 
-	# 2. Grade da Tabela Periódica Oficial (18 Colunas x 6 Linhas = 108 slots)
+	# grade da tabela periodica
 	var grid = GridContainer.new()
 	grid.columns = 18
 	grid.add_theme_constant_override("h_separation", 2)
@@ -345,12 +341,12 @@ func _construir_diagrama_quimica() -> void:
 	container_diagrama.add_child(grid)
 
 	var dados_tabela = [
-		# Linha 1 (Período 1)
+		# linha 1
 		[1, "H", "Hidrogênio", "hidrogenio"],
 		null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 		[2, "He", "Hélio", "gases_nobres"],
 
-		# Linha 2 (Período 2)
+		# linha 2
 		[3, "Li", "Lítio", "metais"],
 		[4, "Be", "Berílio", "metais"],
 		null, null, null, null, null, null, null, null, null, null,
@@ -361,7 +357,7 @@ func _construir_diagrama_quimica() -> void:
 		[9, "F", "Flúor", "ametais"],
 		[10, "Ne", "Neônio", "gases_nobres"],
 
-		# Linha 3 (Período 3)
+		# linha 3
 		[11, "Na", "Sódio", "metais"],
 		[12, "Mg", "Magnésio", "metais"],
 		null, null, null, null, null, null, null, null, null, null,
@@ -372,7 +368,7 @@ func _construir_diagrama_quimica() -> void:
 		[17, "Cl", "Cloro", "ametais"],
 		[18, "Ar", "Argônio", "gases_nobres"],
 
-		# Linha 4 (Período 4: Metais de Transição e Representativos)
+		# linha 4
 		[19, "K", "Potássio", "metais"],
 		[20, "Ca", "Cálcio", "metais"],
 		[21, "Sc", "Escândio", "metais"],
@@ -392,7 +388,7 @@ func _construir_diagrama_quimica() -> void:
 		[35, "Br", "Bromo", "ametais"],
 		[36, "Kr", "Criptônio", "gases_nobres"],
 
-		# Linha 5 (Período 5)
+		# linha 5
 		[37, "Rb", "Rubídio", "metais"],
 		[38, "Sr", "Estrôncio", "metais"],
 		[39, "Y", "Ítrio", "metais"],
@@ -412,7 +408,7 @@ func _construir_diagrama_quimica() -> void:
 		[53, "I", "Iodo", "ametais"],
 		[54, "Xe", "Xenônio", "gases_nobres"],
 
-		# Linha 6 (Período 6: Inclui Ouro, Platina, Mercúrio, Chumbo)
+		# linha 6
 		[55, "Cs", "Césio", "metais"],
 		[56, "Ba", "Bário", "metais"],
 		[57, "La", "Lantânio", "metais"],
@@ -704,20 +700,18 @@ func _obter_descricao_elemento(simb: String, nome: String, z: int, cat: String) 
 						"dica": "💡 Parte integrante do mapa primordial dos elementos de Synthesis."
 					}
 
-# ─────────────────────────────────────────────────────────────
-# 2. DIAGRAMA DE FÍSICA: O PRISMA DE NEWTON & DECOMPOSIÇÃO DA LUZ
-# ─────────────────────────────────────────────────────────────
+# diagrama de fisica: prisma de newton
 func _construir_diagrama_fisica() -> void:
 	lbl_titulo_mural.text = "✦ REGISTRO ÓPTICO: A DECOMPOSIÇÃO DA LUZ ✦"
 	lbl_subtitulo_mural.text = "A luz do Sol oculta todas as cores da criação. Clique nas cores do espectro para entender a refração!"
 
-	# Painel do Prisma e Feixes
+	# feixe de luz
 	var hbox_prisma = HBoxContainer.new()
 	hbox_prisma.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_prisma.add_theme_constant_override("separation", 18)
 	container_diagrama.add_child(hbox_prisma)
 
-	# Feixe de entrada
+	# luz branca de entrada
 	var btn_luz_branca = _criar_cartao_prisma(
 		"Luz Branca\n(Policromática)",
 		"Feixe Incidente",
@@ -727,14 +721,14 @@ func _construir_diagrama_fisica() -> void:
 	)
 	hbox_prisma.add_child(btn_luz_branca)
 
-	# Seta indicativa
+	# seta
 	var lbl_seta1 = Label.new()
 	lbl_seta1.text = "━━━▶"
 	lbl_seta1.add_theme_font_override("font", font_sans)
 	lbl_seta1.add_theme_color_override("font_color", Color(0.9, 0.9, 1.0))
 	hbox_prisma.add_child(lbl_seta1)
 
-	# Prisma Central
+	# prisma de vidro
 	var btn_prisma = _criar_cartao_prisma(
 		"▲\nPRISMA DE VIDRO\n(Refração)",
 		"Meio Óptico Mais Denso",
@@ -745,14 +739,14 @@ func _construir_diagrama_fisica() -> void:
 	btn_prisma.custom_minimum_size = Vector2(180, 75)
 	hbox_prisma.add_child(btn_prisma)
 
-	# Seta indicativa
+	# seta
 	var lbl_seta2 = Label.new()
 	lbl_seta2.text = "━━━▶"
 	lbl_seta2.add_theme_font_override("font", font_sans)
 	lbl_seta2.add_theme_color_override("font_color", Color(0.9, 0.9, 1.0))
 	hbox_prisma.add_child(lbl_seta2)
 
-	# As 7 Cores do Arco-Íris
+	# decomposicao das cores
 	var vbox_cores = VBoxContainer.new()
 	vbox_cores.add_theme_constant_override("separation", 3)
 	hbox_prisma.add_child(vbox_cores)
@@ -803,9 +797,7 @@ func _exibir_info_fisica(tipo: String, nome_cor: String = "", onda: String = "")
 			lbl_detalhe_corpo.text = "Cada cor do arco-íris representa uma onda eletromagnética vibrando em uma frequência específica que é interpretada pelos olhos como uma cor diferente."
 			lbl_detalhe_dica.text = "💡 ORDEM DO ARCO-ÍRIS: Vermelho, Laranja, Amarelo, Verde, Azul, Anil e Violeta!"
 
-# ─────────────────────────────────────────────────────────────
-# 3. DIAGRAMA DE BIOLOGIA: A MÁQUINA CELULAR & ORGANELAS
-# ─────────────────────────────────────────────────────────────
+# diagrama de biologia: celula e organelas
 func _construir_diagrama_biologia() -> void:
 	lbl_titulo_mural.text = "✦ MANUSCRITO CELULAR: A ARQUITETURA DA VIDA ✦"
 	lbl_subtitulo_mural.text = "Toda criatura nesta masmorra é sustentada por micromáquinas vivas. Clique nas organelas para conhecê-las!"
@@ -867,9 +859,7 @@ func _exibir_info_biologia(chave: String) -> void:
 			lbl_detalhe_corpo.text = "Função Vital: Traduzem as mensagens enviadas pelo RNA Mensageiro (RNAm) para montar cadeias de aminoácidos, gerando enzimas, hormônios e anticorpos essenciais."
 			lbl_detalhe_dica.text = "💡 PRESENÇA UNIVERSAL: Ribossomos estão presentes em TODAS as células vivas conhecidas, desde a bactéria mais simples até os monstros da masmorra!"
 
-# ─────────────────────────────────────────────────────────────
-# AUXILIARES DE ESTILO & BOTÕES INTERATIVOS
-# ─────────────────────────────────────────────────────────────
+# funcoes de estilo dos botoes
 func _criar_cartao_categoria(titulo: String, subtitulo: String, cor_borda: Color, callback: Callable) -> Control:
 	var card = PanelContainer.new()
 	card.custom_minimum_size = Vector2(240, 68)

@@ -7,13 +7,13 @@ var direcao_vertical: float
 
 var ultima_direcao = "baixo"
 
-# [Trap-1] Mímico / Minigames — flag que trava o movimento do player
+# trava o movimento durante interacoes
 var travado: bool = false
 var em_interacao: bool = false
 var _tempo_imunidade_pos_interacao: float = 0.0
 
 func esta_em_interacao() -> bool:
-	if travado or em_interacao or _tempo_imunidade_pos_interacao > 0.0:
+	if travado or em_interacao:
 		return true
 	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
 		return true
@@ -24,12 +24,15 @@ func esta_em_interacao() -> bool:
 			return true
 	return false
 
+func esta_imune_a_combate() -> bool:
+	return esta_em_interacao() or _tempo_imunidade_pos_interacao > 0.0
+
 func finalizar_interacao(tempo_graca: float = 0.8) -> void:
 	travado = false
 	em_interacao = false
 	_tempo_imunidade_pos_interacao = tempo_graca
 
-# [Fix-1] HP unificado: gerenciado exclusivamente pelo autoload PlayerStats
+# hp gerenciado pelo PlayerStats
 var _vida_anterior: float = 100.0
 var _shake_tempo: float = 0.0
 var _shake_intensidade: float = 0.0
@@ -100,8 +103,8 @@ func _physics_process(delta: float) -> void:
 	if _tempo_imunidade_pos_interacao > 0.0:
 		_tempo_imunidade_pos_interacao -= delta
 
-	# Se travado por minigame/mímico/interação, não processa input de movimento
-	if travado or em_interacao:
+	# se tiver em dialogo ou minigame, nao move
+	if esta_em_interacao():
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
@@ -146,7 +149,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	# Se o jogador colidiu com um inimigo hostil enquanto andava, aciona a batalha imediatamente!
 	var em_transicao = get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning
-	if not em_transicao and not esta_em_interacao():
+	if not em_transicao and not esta_imune_a_combate():
 		for i in range(get_slide_collision_count()):
 			var col = get_slide_collision(i)
 			var collider = col.get_collider()
@@ -180,17 +183,15 @@ func _animar_sombra(delta: float) -> void:
 	var shadow = $Shadow
 	
 	if velocity.length() > 10.0:
-		# Andando: leve efeito elástico (squash & stretch) sincronizado com os passos
 		var onda = sin(tempo_anim_sombra * 16.0)
 		shadow.scale.x = SOMBRA_BASE_X + onda * 0.15
 		shadow.scale.y = SOMBRA_BASE_Y - onda * 0.10
 	else:
-		# Parado (Idle): pulso suave e sutil acompanhando a respiração do mago
 		var onda = sin(tempo_anim_sombra * 3.5)
 		shadow.scale.x = SOMBRA_BASE_X + onda * 0.06
 		shadow.scale.y = SOMBRA_BASE_Y + onda * 0.04
 
-## Aplica Screen Shake dinâmico na câmera do jogador
+# shake na camera do player
 func aplicar_shake(intensidade: float = 6.0, duracao: float = 0.2) -> void:
 	_shake_intensidade = max(_shake_intensidade, intensidade)
 	_shake_tempo = max(_shake_tempo, duracao)
@@ -206,12 +207,12 @@ func _process_shake(delta: float) -> void:
 	else:
 		$Camera2D.offset = Vector2.ZERO
 
-# [Fix-1] Chamado pelo Mímico para aplicar penalidade e feedback visual
+# dano do mimico
 func receber_dano_mimico(quantidade: float = 70.0) -> void:
 	receber_dano(quantidade, 14.0, "Mímico")
 	print("[Mímico] Jogador mordido pelo Mímico! Dano: %.0f | HP restante: %.0f / %.0f" % [quantidade, PlayerStats.vida_atual_jogador, PlayerStats.vida_maxima_jogador])
 
-## Aplica dano ao jogador por armadilhas e perigos ambientais com feedback visual e texto flutuante
+# dano de armadilha / perigo do cenario
 func receber_dano(quantidade: float = 15.0, intensidade_shake: float = 8.0, motivo: String = "") -> void:
 	PlayerStats.sofrer_dano(quantidade)
 	aplicar_shake(intensidade_shake, 0.28)

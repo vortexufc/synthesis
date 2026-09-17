@@ -13,7 +13,7 @@ func _ready() -> void:
 	_atualizar_tela()
 
 func _on_btn_voltar_pressed() -> void:
-	# Efeito do botao voltar
+	# volta pro menu
 	AudioManager.play_sfx("ui_5")
 	
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
@@ -21,18 +21,18 @@ func _on_btn_voltar_pressed() -> void:
 var _is_loading: bool = false
 
 func _on_clan_updated() -> void:
-	# Só reconstrói a tela se não estivermos no meio de um carregamento explícito da TelaClas
+	# evita reconstruir se ja tiver carregando
 	if not _is_loading:
 		_montar_tela()
 
 func _atualizar_tela() -> void:
 	_is_loading = true
 	
-	# Limpa instâncias anteriores
+	# limpa tela anterior
 	for child in dynamic_container.get_children():
 		child.queue_free()
 		
-	# Feedback visual de carregamento
+	# texto de carregando
 	var lbl_loading: Label = Label.new()
 	var font: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 	if font:
@@ -43,10 +43,10 @@ func _atualizar_tela() -> void:
 	lbl_loading.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dynamic_container.add_child(lbl_loading)
 	
-	# Carrega os clãs da nuvem
+	# busca os clas do banco
 	await ClanManager.load_clans()
 	
-	# Remove feedback
+	# tira o carregando
 	if is_instance_valid(lbl_loading):
 		lbl_loading.queue_free()
 		
@@ -92,7 +92,7 @@ func _aplicar_visual() -> void:
 		$PainelCentro/LblTitulo.add_theme_color_override("font_color", Color.WHITE)
 		btn_voltar.add_theme_font_override("font", font)
 		
-	# Botão Voltar styling
+	# estilo do botao voltar
 	var style_voltar: StyleBoxFlat = StyleBoxFlat.new()
 	style_voltar.bg_color = Color("142240")
 	style_voltar.border_color = Color("0088ff")

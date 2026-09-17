@@ -1,9 +1,8 @@
 extends Node2D
 
-## Script da Tocha da Masmorra
-## Executa a animação de chama viva e a cintilação dinâmica da luz.
+# tocha da masmorra com animacao e luz oscilando
 
-@export var linha_frames: int = 0 # 0 para tocha de parede (Row 0), 2 para tocha de chão/poste (Row 2)
+@export var linha_frames: int = 0 # 0 = parede, 2 = chao
 @export var cor_luz: Color = Color(1.0, 0.70, 0.35, 1.0)
 @export var energia_base: float = 0.55
 @export var escala_base: float = 1.55
@@ -28,13 +27,13 @@ func _ready() -> void:
 	_brasas = get_node_or_null("Brasas")
 	
 	if linha_frames == 2:
-		# Tocha de poste/chão: a chama fica centralizada no topo
+		# tocha de chao: centraliza a luz
 		if _luz:
 			_luz.position = Vector2(0, -16)
 		if _brasas:
 			_brasas.position = Vector2(0, -18)
 	elif linha_frames == 0:
-		# Tocha de parede: a chama fica alinhada à bacia
+		# tocha de parede: alinha com o sprite
 		if _luz:
 			_luz.position = Vector2(-12, -16)
 		if _brasas:
@@ -52,13 +51,13 @@ func _process(delta: float) -> void:
 	_tempo += delta
 	_anim_timer += delta
 	
-	# 1. Animação suave dos frames da chama (ciclo de 7 frames)
+	# passa os frames da animacao
 	if _sprite and _anim_timer >= 0.11:
 		_anim_timer = 0.0
 		_frame_offset = (_frame_offset + 1) % 7
 		_sprite.frame = (linha_frames * 7) + _frame_offset
 		
-	# 2. Flicker orgânico de chama tremeluzindo
+	# efeito da chama tremendo
 	if _luz:
 		var f1 = sin((_tempo + _offset) * _velocidade) * 0.03
 		var f2 = sin((_tempo + _offset * 1.7) * (_velocidade * 1.5)) * 0.02

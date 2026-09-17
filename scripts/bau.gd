@@ -1,8 +1,6 @@
 extends Area2D
 
-## [Pergaminho/Baú] Componente de Baú com Pergaminhos Arcanos.
-## Revela um pergaminho de até 4 páginas com dicas sobre as questões do andar/sala.
-## Salva o pergaminho no inventário do jogador (Aba Grimório).
+# script do bau (abre pergaminho de dica ou minigame da memoria)
 
 @export var titulo_pergaminho: String = "Pergaminho Arcano"
 @export var usar_paginas_custom: bool = false
@@ -20,7 +18,7 @@ var ja_aberto: bool = false
 
 @onready var sprite: Sprite2D = $BauSprite if has_node("BauSprite") else null
 
-# Texturas da folha de sprite Alquimia/OBJETOS.png (48x48)
+# sprites do tileset de objetos
 var tex_fechado: AtlasTexture
 var tex_aberto: AtlasTexture
 
@@ -30,13 +28,12 @@ var canvas_prompt: CanvasLayer = null
 var panel_prompt: PanelContainer = null
 
 func _ready() -> void:
-	# Define se é desafio de memória baseado no modo_conteudo (padrão: Desafio da Memória)
 	if modo_conteudo == 0:
 		eh_desafio_memoria = true
 	elif modo_conteudo == 1:
 		eh_desafio_memoria = false
 
-	# Prepara as texturas para o baú fechado e aberto usando os sprites reais de OBJETOS.png
+	# recorta o sprite aberto e fechado
 	var base_tex = load("res://assets/sprites/tilesets/Alquimia/OBJETOS.png")
 	if base_tex:
 		tex_fechado = AtlasTexture.new()
@@ -46,13 +43,13 @@ func _ready() -> void:
 		tex_aberto.atlas = base_tex
 		
 		match tipo_bau:
-			0: # Baú 1: Madeira
+			0: # madeira
 				tex_fechado.region = Rect2(1024, 336, 48, 48)
 				tex_aberto.region = Rect2(1024, 528, 48, 48)
-			1: # Baú 2: Arcano (Roxo)
+			1: # arcano
 				tex_fechado.region = Rect2(896, 336, 48, 48)
 				tex_aberto.region = Rect2(896, 528, 48, 48)
-			2: # Baú 3: Ferro (Cinza)
+			2: # ferro
 				tex_fechado.region = Rect2(768, 336, 48, 48)
 				tex_aberto.region = Rect2(768, 528, 48, 48)
 		
@@ -154,15 +151,14 @@ func abrir_bau() -> void:
 	ja_aberto = true
 	_remover_prompt_tela()
 	
-	# Transiciona o sprite para o estado Aberto
+	# muda pro sprite aberto
 	if sprite and tex_aberto:
 		sprite.texture = tex_aberto
 
-	# Toca efeito sonoro se disponível
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 
-	# Obtém as páginas do pergaminho (até 4 páginas)
+	# pega o conteudo das paginas de dica
 	var paginas: Array[String] = []
 	if usar_paginas_custom and paginas_custom.size() > 0:
 		paginas = paginas_custom
@@ -172,7 +168,7 @@ func abrir_bau() -> void:
 			andar_id = QuizManager._andar_atual
 		paginas = PergaminhoManager.obter_paginas_dicas(andar_id, [], num_paginas)
 
-	# Salva o pergaminho no Inventário (Aba Grimório)
+	# guarda no grimorio
 	if get_node_or_null("/root/PlayerStats"):
 		var nome_sala = ""
 		if get_tree() and get_tree().current_scene:
@@ -182,7 +178,7 @@ func abrir_bau() -> void:
 			titulo_final += " (" + nome_sala + ")"
 		PlayerStats.adicionar_pergaminho(titulo_final, paginas)
 
-	# Localiza a UI do Pergaminho e abre
+	# abre a tela do pergaminho
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
@@ -192,11 +188,11 @@ func abrir_bau() -> void:
 	else:
 		push_warning("[Bau] ParchmentUI não foi encontrado na cena!")
 
-## Inicia o minigame Desafio da Memória Arcana
+# minigame de cartas da memoria
 func _iniciar_desafio_memoria() -> void:
 	_remover_prompt_tela()
 	
-	# Determina o andar correspondente (1 = Química, 2 = Física, 3 = Biologia)
+	# pega o andar certo
 	var andar_id = 1
 	if forcar_andar > 0:
 		andar_id = forcar_andar
@@ -230,7 +226,7 @@ func _on_desafio_memoria_concluido(vitoria: bool) -> void:
 			sprite.texture = tex_aberto
 			
 		if get_node_or_null("/root/PlayerStats"):
-			# Recompensas: Poção de Cura + Moedas de Ouro + Buff de Escudo (+10 HP Máx por 2 salas)
+			# recompensas: pocao, moedas e escudo temporario
 			PlayerStats.adicionar_pocao(recompensa_pocao, 40, "Cura 40 HP (Baú Arcano)", 1)
 			PlayerStats.adicionar_moedas(recompensa_moedas)
 			PlayerStats.aplicar_buff_escudo(duracao_buff_salas, 10.0)
@@ -238,20 +234,20 @@ func _on_desafio_memoria_concluido(vitoria: bool) -> void:
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("mostrar_notificacao_quest"):
 			hud.mostrar_notificacao_quest(
-				"✨ DESAFIO CONCLUÍDO!",
+				"DESAFIO CONCLUÍDO!",
 				"+1 Poção, +%d Moedas e Escudo Arcano (+10 HP Máx)!" % recompensa_moedas,
 				Color(0.7, 0.45, 1.0),
 				"ui_1"
 			)
 	else:
-		# Se perdeu ou o tempo esgotou, exibe aviso e permite tentar novamente se sobreviver
+		# se errou ou acabou o tempo, toma dano
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("mostrar_notificacao_quest"):
 			hud.mostrar_notificacao_quest(
-				"⚠️ ARMADILHA DO BAÚ!",
+				"ARMADILHA DO BAÚ!",
 				"O tempo esgotou! Você sofreu -15 HP de dano da runa.",
 				Color(1.0, 0.35, 0.35),
-				"" # Não repete o som de derrota, pois o minigame já tocou ao encerrar
+				""
 			)
 		if player_perto:
 			_exibir_prompt_tela()

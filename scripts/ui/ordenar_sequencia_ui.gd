@@ -1,12 +1,10 @@
 extends CanvasLayer
 
-## [Minigame] Selo Rúnico da Porta - "Ordene a Sequência"
-## Minigame rápido acionado em portas com Selo Rúnico.
-## O jogador deve organizar 3 cards científicos na ordem cronológica correta (1 → 2 → 3).
+# minigame de ordenar sequencia
 
 signal sequencia_concluida(sucesso: bool)
 
-# Banco de Sequências Científicas por tema
+# sequencias por materia
 const SEQUENCIAS = {
 	"quimica": [
 		{
@@ -130,7 +128,7 @@ var _cards_ordenados: Array = []
 var _card_selecionado_idx: int = -1
 var _resolvido: bool = false
 
-# Elementos visuais
+# referencias da tela
 var _painel_central: PanelContainer
 var _lbl_titulo: Label
 var _lbl_descricao: Label
@@ -160,7 +158,7 @@ func iniciar_minigame(tema: String = "auto") -> void:
 	var lista = SEQUENCIAS[_tema_atual]
 	_sequencia_atual = lista[randi() % lista.size()]
 	
-	# Pega os 3 passos e embaralha garantindo que NÃO comece já na ordem correta
+	# embaralha os passos
 	var passos = _sequencia_atual["passos"].duplicate(true)
 	var tentativas = 0
 	while tentativas < 20:
@@ -181,18 +179,18 @@ func _esta_na_ordem(lista: Array) -> bool:
 	return lista[0]["id"] == 1 and lista[1]["id"] == 2 and lista[2]["id"] == 3
 
 func _construir_ui() -> void:
-	# 1. Backdrop escuro translúcido com leve tom místico
+	# fundo escuro
 	var backdrop = ColorRect.new()
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backdrop.color = Color(0.04, 0.04, 0.07, 0.88)
 	add_child(backdrop)
 	
-	# 2. Container Centralizado
+	# container central
 	var center = CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	
-	# 3. Painel Principal Arcano
+	# painel principal
 	_painel_central = PanelContainer.new()
 	_painel_central.custom_minimum_size = Vector2(900, 520)
 	
@@ -221,7 +219,7 @@ func _construir_ui() -> void:
 	vbox_principal.alignment = BoxContainer.ALIGNMENT_CENTER
 	_painel_central.add_child(vbox_principal)
 	
-	# Top bar com título e botão de fechar
+	# titulo e botao fechar
 	var hbox_top = HBoxContainer.new()
 	vbox_principal.add_child(hbox_top)
 	
@@ -251,7 +249,7 @@ func _construir_ui() -> void:
 	_lbl_descricao.add_theme_color_override("font_color", Color(0.8, 0.85, 0.95))
 	vbox_header.add_child(_lbl_descricao)
 	
-	# Botão fechar (X)
+	# botao fechar
 	var btn_fechar = Button.new()
 	btn_fechar.text = " ✕ "
 	btn_fechar.custom_minimum_size = Vector2(36, 36)
@@ -260,7 +258,7 @@ func _construir_ui() -> void:
 	_aplicar_estilo_botao_secundario(btn_fechar)
 	hbox_top.add_child(btn_fechar)
 	
-	# Separador dourado
+	# separador
 	var sep = HSeparator.new()
 	var sep_style = StyleBoxLine.new()
 	sep_style.color = Color(0.95, 0.78, 0.25, 0.4)
@@ -268,7 +266,7 @@ func _construir_ui() -> void:
 	sep.add_theme_stylebox_override("separator", sep_style)
 	vbox_principal.add_child(sep)
 	
-	# HBox dos 3 Cards
+	# linha dos 3 cards
 	_hbox_cards = HBoxContainer.new()
 	_hbox_cards.add_theme_constant_override("separation", 20)
 	_hbox_cards.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -276,7 +274,7 @@ func _construir_ui() -> void:
 	_hbox_cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox_principal.add_child(_hbox_cards)
 	
-	# Status / Instrução de swap
+	# texto de instrucao
 	_lbl_status = Label.new()
 	_lbl_status.text = "💡 Clique em um card e depois em outro para trocar, ou use as setas [ ◀ ] [ ▶ ]."
 	_lbl_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -284,7 +282,7 @@ func _construir_ui() -> void:
 	_lbl_status.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 	vbox_principal.add_child(_lbl_status)
 	
-	# Rodapé de Ações
+	# rodape com botao
 	var hbox_acoes = HBoxContainer.new()
 	hbox_acoes.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_acoes.add_theme_constant_override("separation", 24)
@@ -313,12 +311,12 @@ func _atualizar_textos_e_cards() -> void:
 	if _sequencia_atual.has("descricao"):
 		_lbl_descricao.text = str(_sequencia_atual["descricao"])
 		
-	# Limpa cards existentes
+	# limpa cards antigos
 	for child in _hbox_cards.get_children():
 		child.queue_free()
 	_card_nodes.clear()
 	
-	# Constrói os 3 cards
+	# cria os 3 cards
 	for i in range(_cards_ordenados.size()):
 		var dado_card = _cards_ordenados[i]
 		var card_widget = _criar_widget_card(i, dado_card)
@@ -338,7 +336,7 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	card.add_child(vbox)
 	
-	# Badge de posição no topo
+	# numero da posicao
 	var pnl_badge = PanelContainer.new()
 	var sb_badge = StyleBoxFlat.new()
 	sb_badge.bg_color = Color(0.18, 0.22, 0.35, 0.95) if not eh_selecionado else Color(0.2, 0.6, 0.8, 0.95)
@@ -358,14 +356,14 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	pnl_badge.add_child(lbl_pos)
 	vbox.add_child(pnl_badge)
 	
-	# Ícone / Glifo
+	# icone
 	var lbl_icone = Label.new()
 	lbl_icone.text = dado.get("icone", "✦")
 	lbl_icone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl_icone.add_theme_font_size_override("font_size", 34)
 	vbox.add_child(lbl_icone)
 	
-	# Botão clicável de seleção do corpo do card
+	# botao pra selecionar card
 	var btn_corpo = Button.new()
 	btn_corpo.text = dado.get("texto", "")
 	btn_corpo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -383,7 +381,7 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	btn_corpo.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
 	vbox.add_child(btn_corpo)
 	
-	# Setas de movimentação rápida (◀ Mover / Mover ▶)
+	# setas de mover card
 	var hbox_setas = HBoxContainer.new()
 	hbox_setas.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_setas.add_theme_constant_override("separation", 10)
@@ -414,7 +412,7 @@ func _on_card_clicado(idx: int) -> void:
 		return
 		
 	if _card_selecionado_idx == -1:
-		# Seleciona este card para troca
+		# seleciona card
 		_card_selecionado_idx = idx
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui_1")
@@ -422,13 +420,13 @@ func _on_card_clicado(idx: int) -> void:
 		_lbl_status.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
 		_atualizar_textos_e_cards()
 	elif _card_selecionado_idx == idx:
-		# Deseleciona
+		# tira selecao
 		_card_selecionado_idx = -1
 		_lbl_status.text = "Seleção desfeita. Clique em um card ou use as setas para ordenar."
 		_lbl_status.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 		_atualizar_textos_e_cards()
 	else:
-		# Troca de posição entre os dois cards
+		# troca os dois cards de lugar
 		var origem = _card_selecionado_idx
 		var destino = idx
 		_card_selecionado_idx = -1
@@ -469,14 +467,14 @@ func _executar_vitoria() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("acerto_1")
 		
-	# Brilho dourado cintilante nos cards
+	# brilho de acerto
 	for card in _card_nodes:
 		_aplicar_estilo_card(card, false, true)
 		var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tw.tween_property(card, "scale", Vector2(1.05, 1.05), 0.2)
 		tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.2)
 		
-	# Pequeno intervalo celebrativo antes de fechar
+	# espera antes de fechar
 	await get_tree().create_timer(1.2).timeout
 	var p = get_tree().get_first_node_in_group("player")
 	if p:
@@ -495,7 +493,7 @@ func _executar_erro() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("erro_1")
 		
-	# Efeito de tremor (shake) no painel
+	# treme o painel ao errar
 	var pos_original = _painel_central.position
 	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(_painel_central, "position", pos_original + Vector2(12, 0), 0.05)
@@ -516,9 +514,7 @@ func _on_fechar_clicado() -> void:
 	sequencia_concluida.emit(false)
 	queue_free()
 
-# ──────────────────────────────────────────
-# Estilizações Visuais Arcanas
-# ──────────────────────────────────────────
+# estilos visuais dos cards
 func _aplicar_estilo_card(card: PanelContainer, selecionado: bool, sucesso: bool) -> void:
 	var sb = StyleBoxFlat.new()
 	sb.set_corner_radius_all(10)

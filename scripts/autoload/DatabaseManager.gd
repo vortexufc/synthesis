@@ -2,16 +2,16 @@ extends Node
 
 # chaves do nosso banco no supabase
 var supabase_url: String = "https://uszmgqludyymspsarciw.supabase.co"
-# chave lida do ProjectSettings pra nao ficar exposta no codigo
+# chave do supabase via project settings
 var supabase_key: String = ProjectSettings.get_setting("application/config/supabase_key", "")
 
-# ---- SESSAO ATIVA DO JOGADOR ----
+# dados do jogador logado
 var user_token: String = ""
 var user_nick: String = ""
 var user_cla: String = "Nenhum"
 var active_dungeon: String = "" # Registra a masmorra escolhida no hub
 var is_admin: bool = false # Define se a conta atual é um professor/pesquisador
-# ---------------------------------
+
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
 signal dados_recebidos(dados: Array)
@@ -22,11 +22,11 @@ signal auth_sucesso(token: String)
 signal auth_erro(mensagem: String)
 signal reset_senha_enviado()
 
-# no q cuida das requisições
+# no de requisicoes http
 var http_request: HTTPRequest
 
 func _ready() -> void:
-	# cria e add o http na cena
+	# cria o no http
 	http_request = HTTPRequest.new()
 	http_request.accept_gzip = false
 	add_child(http_request)
@@ -35,7 +35,7 @@ func _ready() -> void:
 	carregar_progresso()
 	print("banco carregado!")
 
-# --- FUNCOES DE PROGRESSO LOCAL ---
+# progresso salvo localmente
 const SAVE_FILE = "user://progresso.json"
 
 func salvar_progresso() -> void:
@@ -58,8 +58,8 @@ func carregar_progresso() -> void:
 	file.close()
 
 
-# funcao pra montar o header e mandar o get/post...
-# endpoint tipo: "/rest/v1/alunos"
+# monta o header e envia requisicao pro supabase
+# exemplo: /rest/v1/alunos
 func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> void:
 	var url: String = supabase_url + endpoint
 	
@@ -67,7 +67,7 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	http.accept_gzip = false
 	add_child(http)
 	
-	# headers q o supabase pede
+	# headers obrigatorios
 	var auth_bearer = user_token if not user_token.is_empty() else supabase_key
 	var headers: PackedStringArray = [
 		"apikey: " + supabase_key,
@@ -77,7 +77,7 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	]
 	
 	var body: String = ""
-	# converte pra json se tiver data
+	# converte pra json se tiver corpo
 	if not data.is_empty():
 		body = JSON.stringify(data)
 
@@ -86,7 +86,7 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 		http.queue_free()
 	)
 
-	# manda a req asincrona
+	# dispara requisicao
 	var error = http.request(url, headers, method, body)
 	
 	if error != OK:
@@ -94,7 +94,7 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 		http.queue_free()
 		auth_erro.emit("Falha de conexão com o servidor (" + str(error) + ")")
 
-# quando o supabase responde cai aqui
+# retorno do supabase
 func _on_request_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	var body_text = body.get_string_from_utf8()
 	var json: JSON = JSON.new()
@@ -131,7 +131,7 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 					user_nick = "Admin" if is_admin else "Mago Desconhecido"
 					user_cla = "Nenhum"
 				
-				# Funde o progresso de Convidado assim que logar ou se registrar!
+				# transfere o progresso de convidado ao logar
 				if RankingManager.has_method("fundir_conta_guest"):
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
@@ -144,13 +144,13 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				user_cla = user_data.user_metadata.get("cla", user_cla)
 				print("Metadata do usuario atualizada! Nick: ", user_nick, " Cla: ", user_cla)
 			
-			# Se veio de cadastrar (sem token de sessao ativa), emite sucesso. Senao, avisa dados_recebidos.
+			# avisa se o login ou cadastro deu certo
 			if dados.has("user") and not dados.has("access_token") and user_token.is_empty():
 				auth_sucesso.emit("cadastrado_ok")
 			else:
 				dados_recebidos.emit(dados)
 		elif body_text == "{}" or body_text == "":
-			# a rota de recuperar senha da 200 mas retorna body vazio
+			# recuperacao de senha retorna body vazio
 			print("Email de recuperacao enviado!")
 			reset_senha_enviado.emit()
 		else:
@@ -161,7 +161,7 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				print("dados gerais chegaram.")
 				dados_recebidos.emit(dados)
 	else:
-		# qndo da erro (senha errada, etc)
+		# caso de erro
 		var msg_erro = "Erro da API"
 		if typeof(dados) == TYPE_DICTIONARY:
 			if dados.has("error_description"):
@@ -171,7 +171,7 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 		push_error("erro http: " + str(response_code) + " | " + msg_erro)
 		auth_erro.emit(msg_erro)
 
-# --- FUNCOES DA TASK 3 (AUTH) ---
+# funcoes de login e cadastro
 
 func cadastrar_usuario(email: String, senha: String, nick: String) -> void:
 	print("tentando cadastrar: ", email)
@@ -183,7 +183,7 @@ func cadastrar_usuario(email: String, senha: String, nick: String) -> void:
 			"cla": "Nenhum"
 		}
 	}
-	# endpoint do supabase pra criar conta
+	# rota pra criar conta
 	make_request("/auth/v1/signup", HTTPClient.METHOD_POST, data)
 
 func fazer_login(email: String, senha: String) -> void:
@@ -192,7 +192,7 @@ func fazer_login(email: String, senha: String) -> void:
 		"email": email,
 		"password": senha
 	}
-	# endpoint do supabase pra pegar o token de login
+	# rota de login com token
 	make_request("/auth/v1/token?grant_type=password", HTTPClient.METHOD_POST, data)
 
 func recuperar_senha(email: String) -> void:
@@ -200,15 +200,15 @@ func recuperar_senha(email: String) -> void:
 	var data = {
 		"email": email
 	}
-	# endpoint do supabase pra mandar o email de reset
+	# rota pra recuperar senha
 	make_request("/auth/v1/recover", HTTPClient.METHOD_POST, data)
 
-# --- FUNCOES DA TASK 2 ---
+# busca perguntas do jogo
 
-# testa puxar geral da tabela de alunos
+# puxa perguntas do banco
 func puxar_alunos() -> void:
 	print("tentando buscar os alunos no banco...")
-	# "/rest/v1/nome_tabela" -> o select=* puxa todas colunas
+	# rota da tabela no supabase
 	make_request("/rest/v1/alunos?select=*", HTTPClient.METHOD_GET)
 
 func puxar_perguntas(andar_id: int = 1) -> void:
@@ -252,7 +252,7 @@ func carregar_perguntas_locais(andar_id: int = 0) -> Array:
 		push_error("Erro ao fazer parse de data/questions.json")
 		return []
 
-# --- FUNCOES DO CLÃ ---
+# funcoes de cla no banco
 
 func atualizar_cla_usuario(novo_cla: String) -> void:
 	print("tentando atualizar cla do usuario para: ", novo_cla)
@@ -269,7 +269,7 @@ func atualizar_cla_usuario(novo_cla: String) -> void:
 	}
 	make_request("/auth/v1/user", HTTPClient.METHOD_PUT, data)
 
-# Realiza uma requisição HTTP assíncrona ao Supabase e aguarda seu retorno
+# faz requisicao http e espera resposta
 func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
 	var url: String = supabase_url + endpoint
 	var http: HTTPRequest = HTTPRequest.new()
@@ -315,19 +315,19 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 			error_msg = res_data[0].get("message", "Erro desconhecido")
 		return {"success": false, "code": response_code, "message": error_msg}
 
-# Remove pergunta no Supabase e no arquivo local
+# deleta pergunta no supabase e no json local
 func remover_pergunta(pergunta_id: int) -> Dictionary:
 	print("[DatabaseManager] Solicitando exclusao da pergunta #", pergunta_id)
-	# 1. Remove respostas vinculadas para evitar conflito de chave estrangeira
+	# remove respostas vinculadas primeiro
 	await request_async("/rest/v1/respostas?pergunta_id=eq." + str(pergunta_id), HTTPClient.METHOD_DELETE)
 	
-	# 2. Deleta a questao no banco
+	# deleta a pergunta no banco
 	var res = await request_async("/rest/v1/perguntas?id=eq." + str(pergunta_id), HTTPClient.METHOD_DELETE)
 	
-	# 3. Remove do arquivo local de fallback caso exista
+	# remove do json local
 	remover_pergunta_local(pergunta_id)
 	
-	# 4. Remove do cache em memoria do QuizManager
+	# remove da memoria
 	if QuizManager:
 		var nova_lista = []
 		for q in QuizManager.questions:
@@ -339,7 +339,7 @@ func remover_pergunta(pergunta_id: int) -> Dictionary:
 		
 	return res
 
-# Remove questao do arquivo json local (questions.json)
+# tira questao do questions.json local
 func remover_pergunta_local(pergunta_id: int) -> bool:
 	var path = "res://data/questions.json"
 	if not FileAccess.file_exists(path):
@@ -368,7 +368,7 @@ func remover_pergunta_local(pergunta_id: int) -> bool:
 				return true
 	return false
 
-# Adiciona ou atualiza questao no arquivo json local (questions.json)
+# salva questao no questions.json local
 func salvar_pergunta_local(dados: Dictionary) -> bool:
 	var path = "res://data/questions.json"
 	var todas: Array = []

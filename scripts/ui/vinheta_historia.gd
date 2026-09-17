@@ -2,15 +2,13 @@ extends CanvasLayer
 
 signal vinheta_concluida
 
-## [Mini-Histórias em Vinhetas / Quadrinhos entre os Andares]
-## Exibida após a derrota do Chefe de cada Andar para contextualizar a história da ciência humana.
-## Apresenta 3 quadrinhos ilustrados com narrativa histórica, citações célebres e revelação progressiva.
+# vinheta com historinhas entre os andares
 
 var _andar_atual: int = 1
 var _quadro_revelado: int = 0
 var _concluida: bool = false
 
-# Referências de Nós
+# referencias dos nos
 var _lbl_capitulo: Label
 var _lbl_titulo: Label
 var _lbl_subtitulo: Label
@@ -18,7 +16,7 @@ var _quadros_nodes: Array[PanelContainer] = []
 var _btn_avancar: Button
 var _lbl_contador: Label
 
-# Dados Narrativos dos 3 Capítulos da Ciência
+# textos dos 3 capitulos da historia
 var capitulos = {
 	1: { # Transição Química -> Física (Ao derrotar o Chefe de Alquimia)
 		"capitulo": "CAPÍTULO I: DA ALQUIMIA À QUÍMICA MODERNA",
@@ -122,7 +120,7 @@ func iniciar_vinheta(andar_id: int) -> void:
 	_quadro_revelado = 0
 	_concluida = false
 	
-	# Salva o desbloqueio no PlayerStats
+	# salva que o player ja viu
 	if get_node_or_null("/root/PlayerStats") and PlayerStats.has_method("desbloquear_vinheta"):
 		PlayerStats.desbloquear_vinheta(_andar_atual)
 		
@@ -138,7 +136,7 @@ func iniciar_vinheta(andar_id: int) -> void:
 			_quadros_nodes[i].scale = Vector2(0.9, 0.9)
 			_quadros_nodes[i].visible = false
 			
-	# Revela o primeiro quadro com estilo
+	# mostra o primeiro quadrinho
 	_revelar_proximo_quadro()
 
 func _construir_layout() -> void:
@@ -150,7 +148,7 @@ func _construir_layout() -> void:
 	font_sans.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_sans.font_weight = 500
 	
-	# 1. Fundo escuro com vinheta mágica e poeira estelar
+	# fundo escuro
 	var bg = ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.color = Color(0.04, 0.05, 0.09, 0.96)
@@ -170,7 +168,7 @@ func _construir_layout() -> void:
 	vbox_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margin.add_child(vbox_root)
 	
-	# 2. Barra Superior (Cabeçalho do Capítulo + Botão Pular)
+	# cabecalho e botao pular
 	var hbox_topo = HBoxContainer.new()
 	hbox_topo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox_root.add_child(hbox_topo)
@@ -194,11 +192,11 @@ func _construir_layout() -> void:
 	_lbl_subtitulo.add_theme_color_override("font_color", Color(0.7, 0.8, 0.95))
 	vbox_titulos.add_child(_lbl_subtitulo)
 	
-	# Separador sutil dourado
+	# separador
 	var sep = HSeparator.new()
 	vbox_root.add_child(sep)
 	
-	# 3. Área Central dos 3 Quadrinhos (Side-by-Side)
+	# area dos 3 quadrinhos
 	var hbox_quadros = HBoxContainer.new()
 	hbox_quadros.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hbox_quadros.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -211,7 +209,7 @@ func _construir_layout() -> void:
 		hbox_quadros.add_child(card)
 		_quadros_nodes.append(card)
 		
-	# 4. Barra Inferior de Navegação
+	# barra de navegacao embaixo
 	var hbox_rodape = HBoxContainer.new()
 	hbox_rodape.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hbox_rodape.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -289,7 +287,7 @@ func _criar_estrutura_quadro(indice: int) -> PanelContainer:
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	card.add_child(vbox)
 	
-	# 1. Badge Superior (QUADRO I, II, III)
+	# numero do quadro
 	var lbl_badge = Label.new()
 	lbl_badge.name = "LblBadge"
 	lbl_badge.text = "QUADRO %d" % (indice + 1)
@@ -298,7 +296,7 @@ func _criar_estrutura_quadro(indice: int) -> PanelContainer:
 	lbl_badge.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
 	vbox.add_child(lbl_badge)
 	
-	# 2. Título do Quadro
+	# titulo do quadro
 	var lbl_titulo_q = Label.new()
 	lbl_titulo_q.name = "LblTitulo"
 	lbl_titulo_q.text = "Título do Quadro"
@@ -308,7 +306,7 @@ func _criar_estrutura_quadro(indice: int) -> PanelContainer:
 	lbl_titulo_q.add_theme_color_override("font_color", Color(1.0, 0.95, 0.9))
 	vbox.add_child(lbl_titulo_q)
 	
-	# 3. Tela de Ilustração Pixel Art (CanvasItem customizado)
+	# desenho em pixel art
 	var moldura_ilustracao = PanelContainer.new()
 	moldura_ilustracao.custom_minimum_size = Vector2(0, 130)
 	moldura_ilustracao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -319,7 +317,7 @@ func _criar_estrutura_quadro(indice: int) -> PanelContainer:
 	sb_mold.set_corner_radius_all(6)
 	moldura_ilustracao.add_theme_stylebox_override("panel", sb_mold)
 	
-	# Cria nó customizado para desenhar o ícone/arte procedimental temática
+	# no pra desenhar a arte
 	var canvas_arte = Control.new()
 	canvas_arte.name = "CanvasArte"
 	canvas_arte.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -328,7 +326,7 @@ func _criar_estrutura_quadro(indice: int) -> PanelContainer:
 	moldura_ilustracao.add_child(canvas_arte)
 	vbox.add_child(moldura_ilustracao)
 	
-	# 4. Texto da História
+	# texto da historia
 	var lbl_texto = RichTextLabel.new()
 	lbl_texto.name = "LblTexto"
 	lbl_texto.bbcode_enabled = true
@@ -339,7 +337,7 @@ func _criar_estrutura_quadro(indice: int) -> PanelContainer:
 	lbl_texto.add_theme_font_size_override("normal_font_size", 13)
 	vbox.add_child(lbl_texto)
 	
-	# 5. Citação / Marco Científico
+	# citacao cientifica
 	var painel_marco = PanelContainer.new()
 	painel_marco.name = "PainelMarco"
 	var sb_marco = StyleBoxFlat.new()
@@ -376,13 +374,13 @@ func _configurar_quadro_conteudo(card: PanelContainer, dados: Dictionary) -> voi
 	if lbl_texto: lbl_texto.text = "[color=#d8e2f0]" + dados.get("texto", "") + "[/color]"
 	if lbl_marco: lbl_marco.text = dados.get("marco", "")
 	
-	# Guarda os metadados de arte no canvas para o evento _draw
+	# guarda os dados do desenho
 	if canvas_arte:
 		canvas_arte.set_meta("tipo", dados.get("icone_tipo", "alquimia"))
 		canvas_arte.set_meta("cor", dados.get("cor", Color.GOLD))
 		canvas_arte.queue_redraw()
 
-## Desenho procedural de Pixel Art elegante para cada tema da vinheta
+# desenha a arte do quadrinho
 func _desenhar_arte_quadro(canvas: Control) -> void:
 	var rect = canvas.get_rect()
 	var center = rect.size * 0.5
@@ -391,33 +389,33 @@ func _desenhar_arte_quadro(canvas: Control) -> void:
 	
 	match tipo:
 		"alquimia":
-			# Caldeirão Alquímico Místico com poções borbulhantes
+			# caldeirao borbulhando
 			canvas.draw_circle(center + Vector2(0, 10), 32.0, Color(0.2, 0.22, 0.28))
 			canvas.draw_circle(center + Vector2(0, 10), 28.0, Color(0.12, 0.08, 0.18))
-			# Líquido mágico brilhante
+			# liquido no caldeirao
 			canvas.draw_circle(center + Vector2(0, 4), 22.0, cor)
 			canvas.draw_circle(center + Vector2(-6, -2), 6.0, Color(1.0, 0.8, 1.0, 0.9))
-			# Bolhas mágicas
+			# bolhas
 			canvas.draw_circle(center + Vector2(-12, -22), 4.0, cor)
 			canvas.draw_circle(center + Vector2(8, -28), 5.0, Color(0.9, 0.5, 1.0))
 			canvas.draw_circle(center + Vector2(18, -16), 3.0, cor)
-			# Frasco de Alquimia ao lado
+			# frasco de pocao
 			canvas.draw_rect(Rect2(center.x + 40, center.y - 15, 18, 28), Color(0.4, 0.85, 1.0, 0.6), false, 2.0)
 			canvas.draw_rect(Rect2(center.x + 42, center.y - 5, 14, 16), Color(0.3, 0.7, 1.0, 0.9))
 			
 		"balanca":
-			# Balança de Precisão de Lavoisier (Haste central, travessão e pratos)
+			# balanca de lavoisier
 			canvas.draw_line(center + Vector2(0, -35), center + Vector2(0, 40), Color(0.95, 0.8, 0.3), 4.0)
-			# Base da balança
+			# base da balanca
 			canvas.draw_line(center + Vector2(-30, 40), center + Vector2(30, 40), Color(0.95, 0.8, 0.3), 6.0)
-			# Travessão horizontal com pivô central
+			# barra da balanca
 			canvas.draw_line(center + Vector2(-55, -20), center + Vector2(55, -20), Color(1.0, 0.9, 0.4), 3.0)
 			canvas.draw_circle(center + Vector2(0, -20), 6.0, Color(1.0, 0.7, 0.2))
-			# Cordas e Pratos (Esquerda e Direita em perfeito equilíbrio)
+			# pratos da balanca
 			canvas.draw_line(center + Vector2(-55, -20), center + Vector2(-68, 10), Color(0.8, 0.8, 0.9), 1.5)
 			canvas.draw_line(center + Vector2(-55, -20), center + Vector2(-42, 10), Color(0.8, 0.8, 0.9), 1.5)
 			canvas.draw_line(center + Vector2(-75, 12), center + Vector2(-35, 12), Color(1.0, 0.85, 0.3), 3.5)
-			# Pesos/cristais no prato
+			# pesos no prato
 			canvas.draw_circle(center + Vector2(-55, 6), 6.0, Color(0.3, 0.9, 1.0))
 			
 			canvas.draw_line(center + Vector2(55, -20), center + Vector2(42, 10), Color(0.8, 0.8, 0.9), 1.5)
@@ -426,10 +424,10 @@ func _desenhar_arte_quadro(canvas: Control) -> void:
 			canvas.draw_circle(center + Vector2(55, 6), 6.0, Color(1.0, 0.3, 0.3))
 			
 		"atomo":
-			# Modelo Atômico Moderno com elétrons em órbita elíptica
+			# modelo atomico
 			canvas.draw_circle(center, 12.0, cor)
 			canvas.draw_circle(center, 7.0, Color(1.0, 1.0, 0.6))
-			# Órbitas cruzadas
+			# orbitas dos eletrons
 			var r_orbit = 48.0
 			for angle in [0.0, 60.0, 120.0]:
 				var rad = deg_to_rad(angle)
@@ -439,22 +437,22 @@ func _desenhar_arte_quadro(canvas: Control) -> void:
 				canvas.draw_circle(p1, 4.0, Color(0.4, 1.0, 0.8))
 				
 		"newton":
-			# Gravidade e Órbita de Newton (Planeta + Maçã radiante com vetor)
+			# gravidade de newton
 			canvas.draw_circle(center + Vector2(-30, 15), 26.0, Color(0.2, 0.45, 0.85))
 			canvas.draw_arc(center + Vector2(-30, 15), 36.0, -PI*0.4, PI*0.6, 24, Color(1.0, 1.0, 1.0, 0.4), 2.0)
-			# Maçã caindo com vetor de força
+			# maca caindo
 			var pos_maca = center + Vector2(35, -15)
 			canvas.draw_circle(pos_maca, 12.0, Color(0.95, 0.2, 0.2))
 			canvas.draw_line(pos_maca, pos_maca + Vector2(0, 32), Color(1.0, 0.85, 0.2), 3.0)
-			# Ponta da flecha
+			# ponta da seta
 			canvas.draw_line(pos_maca + Vector2(0, 32), pos_maca + Vector2(-5, 24), Color(1.0, 0.85, 0.2), 3.0)
 			canvas.draw_line(pos_maca + Vector2(0, 32), pos_maca + Vector2(5, 24), Color(1.0, 0.85, 0.2), 3.0)
 			
 		"raio":
-			# Bobina eletromagnética e arcos de relâmpago
+			# bobina eletromagnetica
 			canvas.draw_circle(center + Vector2(-45, 0), 16.0, Color(0.8, 0.5, 0.2))
 			canvas.draw_circle(center + Vector2(45, 0), 16.0, Color(0.8, 0.5, 0.2))
-			# Relâmpagos em zig-zag entre polos
+			# faíscas eletricas
 			var pontos = PackedVector2Array([
 				center + Vector2(-30, 0),
 				center + Vector2(-15, -18),
@@ -466,11 +464,11 @@ func _desenhar_arte_quadro(canvas: Control) -> void:
 			canvas.draw_polyline(pontos, Color(1.0, 1.0, 1.0), 2.0)
 			
 		"otica":
-			# Lente convexa convergindo raios de luz focais
+			# lente convergente
 			canvas.draw_circle(center, 34.0, Color(0.3, 0.6, 1.0, 0.25))
 			canvas.draw_arc(center, 34.0, -PI*0.5, PI*0.5, 24, Color(0.5, 0.85, 1.0), 3.0)
 			canvas.draw_arc(center, 34.0, PI*0.5, PI*1.5, 24, Color(0.5, 0.85, 1.0), 3.0)
-			# Raios de luz convergindo ao ponto focal
+			# raios de luz
 			canvas.draw_line(center + Vector2(-60, -18), center + Vector2(0, -18), Color(1.0, 0.9, 0.4), 2.0)
 			canvas.draw_line(center + Vector2(-60, 18), center + Vector2(0, 18), Color(1.0, 0.9, 0.4), 2.0)
 			canvas.draw_line(center + Vector2(0, -18), center + Vector2(50, 0), Color(1.0, 0.9, 0.4), 2.0)
@@ -478,31 +476,31 @@ func _desenhar_arte_quadro(canvas: Control) -> void:
 			canvas.draw_circle(center + Vector2(50, 0), 5.0, Color(1.0, 1.0, 1.0))
 			
 		"celula":
-			# Célula Vegetal com Núcleo, Membrana e Cloroplastos
+			# celula vegetal
 			canvas.draw_rect(Rect2(center.x - 45, center.y - 30, 90, 60), Color(0.15, 0.5, 0.25), false, 4.0)
 			canvas.draw_circle(center, 14.0, Color(0.85, 0.35, 0.6)) # Núcleo
 			canvas.draw_circle(center, 6.0, Color(1.0, 0.7, 0.9))
-			# Cloroplastos verdes
+			# cloroplastos
 			canvas.draw_circle(center + Vector2(-28, -14), 7.0, Color(0.3, 0.9, 0.3))
 			canvas.draw_circle(center + Vector2(28, -12), 8.0, Color(0.3, 0.9, 0.3))
 			canvas.draw_circle(center + Vector2(-22, 16), 6.0, Color(0.3, 0.9, 0.3))
 			canvas.draw_circle(center + Vector2(24, 15), 7.0, Color(0.3, 0.9, 0.3))
 			
 		"dna":
-			# Espiral em Dupla Hélice com pares de bases coloridos (A-T, C-G)
+			# dupla helice de dna
 			for step in range(-4, 5):
 				var y_pos = center.y + (step * 8)
 				var offset_x = sin(step * 0.8) * 32.0
-				# Fios principais
+				# fios do dna
 				canvas.draw_circle(Vector2(center.x - offset_x, y_pos), 4.5, Color(0.3, 0.85, 1.0))
 				canvas.draw_circle(Vector2(center.x + offset_x, y_pos), 4.5, Color(1.0, 0.4, 0.8))
-				# Degraus de bases pareadas
+				# bases pareadas
 				if abs(offset_x) > 4:
 					canvas.draw_line(Vector2(center.x - offset_x, y_pos), Vector2(center.x, y_pos), Color(0.3, 1.0, 0.4), 2.5)
 					canvas.draw_line(Vector2(center.x, y_pos), Vector2(center.x + offset_x, y_pos), Color(1.0, 0.8, 0.2), 2.5)
 					
 		"sintese":
-			# Selo da Grande Síntese: Triângulo Elemental unindo Química, Física e Biologia
+			# triangulo dos tres elementos
 			var p_top = center + Vector2(0, -32)
 			var p_left = center + Vector2(-36, 24)
 			var p_right = center + Vector2(36, 24)
@@ -540,7 +538,7 @@ func _revelar_proximo_quadro() -> void:
 	var card = _quadros_nodes[idx]
 	card.visible = true
 	
-	# Som de avanço de página / transição
+	# som de passar pagina
 	if get_node_or_null("/root/AudioManager"):
 		if _quadro_revelado == 3:
 			AudioManager.play_sfx("win")
@@ -552,7 +550,7 @@ func _revelar_proximo_quadro() -> void:
 	tw.tween_property(card, "modulate:a", 1.0, 0.35)
 	tw.tween_property(card, "scale", Vector2.ONE, 0.35)
 	
-	# Atualiza o botão dependendo do progresso
+	# atualiza o botao
 	if _quadro_revelado == 3:
 		_btn_avancar.text = "Descer ao Próximo Andar (Ir ao Hub) ▶ (Espaço)"
 			
@@ -577,7 +575,7 @@ func _encerrar_vinheta() -> void:
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
 		
-	# Transiciona para o Hub Geral
+	# volta pro hub
 	if get_node_or_null("/root/TransitionScreen"):
 		TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
 	else:

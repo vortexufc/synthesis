@@ -12,7 +12,7 @@ func _ready() -> void:
 	await load_clans()
 	await check_membership_sync()
 
-# ---- CARREGAR E SALVAR DADOS NO SUPABASE ----
+# requisicoes de cla no supabase
 func load_clans() -> bool:
 	var res = await DatabaseManager.request_async("/rest/v1/Clas?select=*,MembrosCla(*)", HTTPClient.METHOD_GET)
 	if not res["success"]:
@@ -34,7 +34,7 @@ func load_clans() -> bool:
 					"score": int(m.get("score_individual", 0))
 				})
 				
-		# Ordena os membros (Líder primeiro, depois por score)
+		# ordena membros: lider primeiro e depois pontuacao
 		members_list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			if a["role"] == "Líder" and b["role"] != "Líder":
 				return true
@@ -57,7 +57,7 @@ func load_clans() -> bool:
 	clan_updated.emit()
 	return true
 
-# ---- SELETORES DE INFORMAÇÃO ----
+# filtros e buscas
 func get_player_nick() -> String:
 	if not DatabaseManager.user_token.is_empty():
 		return DatabaseManager.user_nick
@@ -77,23 +77,23 @@ func get_clan_info(clan_name: String) -> Dictionary:
 			return c
 	return {}
 
-# Retorna os clãs ordenados por score — usado apenas pela aba de Ranking
+# lista de clas por score pro ranking
 func get_top_clans() -> Array:
 	var list: Array = clans_list.duplicate(true)
 	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["score"] > b["score"])
 	return list
 
-# Retorna sugestões de clãs EMBARALHADAS (sem ordem por ranking) — usado pela TelaClas.
+# sugestoes de clas embaralhadas pra tela de clas
 func get_sugestoes_clas() -> Array:
 	var disponiveis: Array = []
 	var meu_cla: String = DatabaseManager.user_cla
 	
-	# Inclui apenas clãs que o jogador ainda não participa
+	# so mostra clas que o player nao esta
 	for c in clans_list:
 		if c["name"] != meu_cla:
 			disponiveis.append(c.duplicate(true))
 			
-	# Embaralha usando Fisher-Yates
+	# embaralha a lista
 	randomize()
 	for i in range(disponiveis.size() - 1, 0, -1):
 		var j: int = randi() % (i + 1)
@@ -103,7 +103,7 @@ func get_sugestoes_clas() -> Array:
 		
 	return disponiveis
 
-# Busca por nome/tag
+# procura por nome ou tag
 func search_clans(query: String) -> Array:
 	var q: String = query.strip_edges().to_lower()
 	if q.is_empty():
@@ -115,13 +115,13 @@ func search_clans(query: String) -> Array:
 			filtered.append(c)
 	return filtered
 
-# ---- OPERAÇÕES DE MEMBRO E CONTROLE ONLINE ----
+# operacoes de membros
 func check_membership_sync() -> void:
 	var nick: String = get_player_nick()
 	if nick.is_empty():
 		return
 		
-	# Consulta na tabela MembrosCla se o jogador está cadastrado em algum clã
+	# checa se o jogador ta em algum cla
 	var endpoint = "/rest/v1/MembrosCla?player_name=eq." + nick.uri_encode() + "&select=*"
 	var res = await DatabaseManager.request_async(endpoint, HTTPClient.METHOD_GET)
 	if not res["success"]:
@@ -134,7 +134,7 @@ func check_membership_sync() -> void:
 		if DatabaseManager.user_cla != cla_nome:
 			DatabaseManager.atualizar_cla_usuario(cla_nome)
 	else:
-		# Se não retornou nada, ele não está em clã
+		# se nao achou nada ta sem cla
 		if DatabaseManager.user_cla != "Nenhum":
 			DatabaseManager.atualizar_cla_usuario("Nenhum")
 
@@ -155,7 +155,7 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 		
 	var score: int = get_player_score()
 	
-	# 1. Tenta criar o clã na tabela Clas
+	# tenta criar o cla no banco
 	var clan_data = {
 		"nome": name_clean,
 		"tag": tag_clean,
@@ -171,7 +171,7 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 			msg = "Nome ou TAG de clã já estão em uso!"
 		return {"success": false, "message": msg}
 		
-	# 2. Tenta inserir o líder na tabela MembrosCla
+	# coloca o jogador como lider
 	var member_data = {
 		"player_name": nick,
 		"cla_nome": name_clean,
@@ -180,11 +180,11 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 	}
 	var res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
 	if not res_member["success"]:
-		# Exclui o clã caso não registre o líder para evitar orfandade
+		# se der erro ao criar lider apaga o cla
 		await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + name_clean.uri_encode(), HTTPClient.METHOD_DELETE)
 		return {"success": false, "message": "Erro ao registrar líder do clã: " + res_member["message"]}
 		
-	# 3. Sincroniza local e carrega lista
+	# sincroniza a lista de clas
 	DatabaseManager.atualizar_cla_usuario(name_clean)
 	await load_clans()
 	return {"success": true, "message": "Clã criado com sucesso!"}
@@ -194,7 +194,7 @@ func join_clan(clan_name: String) -> Dictionary:
 	if nick.is_empty() or nick == "NÃO LOGADO":
 		return {"success": false, "message": "Você precisa estar logado para entrar em um clã!"}
 	
-	# Impede se já pertencer a um clã
+	# bloqueia se ja tiver cla
 	if DatabaseManager.user_cla != "Nenhum" and not DatabaseManager.user_cla.is_empty():
 		return {"success": false, "message": "Você já faz parte de um clã!"}
 		
@@ -206,12 +206,12 @@ func join_clan(clan_name: String) -> Dictionary:
 		"score_individual": score
 	}
 	
-	# 1. Tenta inserir na tabela de membros
+	# adiciona o player na tabela de membros
 	var res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
 	if not res_member["success"]:
 		return {"success": false, "message": "Erro ao se juntar ao clã: " + res_member["message"]}
 		
-	# 2. Obter membros atuais para atualizar o score do clã
+	# busca membros pra somar o score
 	var res_all = await DatabaseManager.request_async("/rest/v1/MembrosCla?cla_nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_GET)
 	var novo_score: int = score
 	if res_all["success"] and res_all["data"] is Array:
@@ -219,7 +219,7 @@ func join_clan(clan_name: String) -> Dictionary:
 		for m in res_all["data"]:
 			novo_score += int(m.get("score_individual", 0))
 			
-	# 3. Patch no score do clã
+	# atualiza os pontos do cla
 	await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_PATCH, {"score": novo_score})
 	
 	DatabaseManager.atualizar_cla_usuario(clan_name)
@@ -233,14 +233,14 @@ func leave_clan() -> Dictionary:
 	if clan_name == "Nenhum" or clan_name.is_empty():
 		return {"success": false, "message": "Você não pertence a nenhum clã!"}
 		
-	# 1. Puxa os membros atuais do clã
+	# busca quem esta no cla
 	var res_members = await DatabaseManager.request_async("/rest/v1/MembrosCla?cla_nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_GET)
 	if not res_members["success"] or not res_members["data"] is Array:
 		return {"success": false, "message": "Erro ao ler membros do clã no Supabase: " + res_members["message"]}
 		
 	var members: Array = res_members["data"]
 	
-	# Achar a linha do jogador atual
+	# acha a linha do jogador
 	var member_row = null
 	for m in members:
 		if m.get("player_name", "") == nick:
@@ -255,12 +255,12 @@ func leave_clan() -> Dictionary:
 	
 	if cargo == "Líder":
 		if members.size() <= 1:
-			# Único membro e líder: desfaz o clã
+			# se for o unico membro deleta o cla
 			var res_del = await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_DELETE)
 			if not res_del["success"]:
 				return {"success": false, "message": "Erro ao desfazer o clã: " + res_del["message"]}
 		else:
-			# Promove o próximo membro com maior pontuação (excluindo a si mesmo)
+			# passa a lideranca pro proximo com maior pontuacao
 			var candidatos: Array = []
 			for m in members:
 				if m.get("player_name", "") != nick:
@@ -271,27 +271,27 @@ func leave_clan() -> Dictionary:
 			)
 			var novo_lider: String = candidatos[0].get("player_name", "")
 			
-			# 1. Promove em MembrosCla
+			# atualiza o lider em MembrosCla
 			await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=eq." + novo_lider.uri_encode(), HTTPClient.METHOD_PATCH, {"cargo": "Líder"})
 			
-			# 2. Atualiza líder em Clas
+			# atualiza o lider em Clas
 			await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_PATCH, {"lider": novo_lider})
 			
-			# 3. Deleta o jogador atual
+			# remove o jogador
 			await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=eq." + nick.uri_encode(), HTTPClient.METHOD_DELETE)
 			
-			# 4. Recalcula score total do clã
+			# recalcula pontuacao total
 			var novo_score: int = 0
 			for m in candidatos:
 				novo_score += int(m.get("score_individual", 0))
 			await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + clan_name.uri_encode(), HTTPClient.METHOD_PATCH, {"score": novo_score})
 	else:
-		# Apenas deleta de MembrosCla
+		# remove da tabela de membros
 		var res_del = await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=eq." + nick.uri_encode(), HTTPClient.METHOD_DELETE)
 		if not res_del["success"]:
 			return {"success": false, "message": "Erro ao sair do clã: " + res_del["message"]}
 			
-		# Recalcula score total
+		# recalcula pontos
 		var novo_score: int = 0
 		for m in members:
 			if m.get("player_name", "") != nick:
@@ -314,12 +314,12 @@ func expel_member(member_name: String) -> Dictionary:
 	if member_name == get_player_nick():
 		return {"success": false, "message": "Você não pode expulsar a si mesmo!"}
 		
-	# 1. Deleta a linha do jogador na tabela MembrosCla
+	# deleta o membro do banco
 	var res_del = await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=eq." + member_name.uri_encode(), HTTPClient.METHOD_DELETE)
 	if not res_del["success"]:
 		return {"success": false, "message": "Erro ao expulsar membro do Supabase: " + res_del["message"]}
 		
-	# 2. Recalcula o score total
+	# recalcula pontos
 	var novo_score: int = 0
 	for m in clan["members"]:
 		if m["name"] != member_name:
@@ -333,25 +333,25 @@ func adicionar_pontos_cla(clan_name: String, member_name: String, pontos: int) -
 	if clan_name == "Nenhum" or clan_name.is_empty():
 		return
 		
-	# 1. Busca os dados atuais do membro no banco
+	# pega dados do membro no banco
 	var end_memb = "/rest/v1/MembrosCla?player_name=eq." + member_name.uri_encode() + "&select=*"
 	var res_memb = await DatabaseManager.request_async(end_memb, HTTPClient.METHOD_GET)
 	var score_atual: int = 0
 	if res_memb["success"] and res_memb["data"] is Array and res_memb["data"].size() > 0:
 		score_atual = int(res_memb["data"][0].get("score_individual", 0))
 		
-	# 2. Atualiza o score_individual dele
+	# atualiza o score individual
 	var novo_score_ind = score_atual + pontos
 	await DatabaseManager.request_async(end_memb, HTTPClient.METHOD_PATCH, {"score_individual": novo_score_ind})
 	
-	# 3. Busca o score atual do clã
+	# pega pontuacao do cla
 	var end_clan = "/rest/v1/Clas?nome=eq." + clan_name.uri_encode() + "&select=*"
 	var res_clan = await DatabaseManager.request_async(end_clan, HTTPClient.METHOD_GET)
 	var score_clan_atual: int = 0
 	if res_clan["success"] and res_clan["data"] is Array and res_clan["data"].size() > 0:
 		score_clan_atual = int(res_clan["data"][0].get("score", 0))
 		
-	# 4. Atualiza o score total do clã
+	# salva nova pontuacao do cla
 	var novo_score_clan = score_clan_atual + pontos
 	await DatabaseManager.request_async(end_clan, HTTPClient.METHOD_PATCH, {"score": novo_score_clan})
 	

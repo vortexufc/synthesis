@@ -47,7 +47,7 @@ func _process(delta: float) -> void:
 		_indicador_loja.scale = Vector2(pulso, pulso)
 
 func _criar_balao_e_indicadores() -> void:
-	# 1. Balão de Interação Flutuante [ F ] Loja
+	# balao de interacao [F]
 	_balao_interacao = Node2D.new()
 	_balao_interacao.name = "BalaoInteracaoMercador"
 	_balao_interacao.position = Vector2(0, _base_balao_y)
@@ -58,7 +58,7 @@ func _criar_balao_e_indicadores() -> void:
 	var panel = PanelContainer.new()
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = Color(0.08, 0.08, 0.14, 0.95)
-	sb.border_color = Color(1.0, 0.85, 0.3, 1.0) # Dourado Mercador
+	sb.border_color = Color(1.0, 0.85, 0.3, 1.0)
 	sb.border_width_left = 2
 	sb.border_width_right = 2
 	sb.border_width_top = 2
@@ -89,7 +89,7 @@ func _criar_balao_e_indicadores() -> void:
 	_balao_interacao.add_child(panel)
 	add_child(_balao_interacao)
 	
-	# 2. Ícone flutuante de Moeda acima do Mercador (Emoji 🪙)
+	# icone de moeda em cima
 	_indicador_loja = Label.new()
 	_indicador_loja.name = "IndicadorLoja"
 	_indicador_loja.z_index = 26

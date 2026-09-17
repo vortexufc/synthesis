@@ -21,6 +21,7 @@
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="18_fvd5t"]
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="21_q1aqj"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="22_l4atu"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/poca_acido.tscn" id="25_7n60l"]
 [ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
 [ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
@@ -1924,3 +1925,18 @@ script = ExtResource("ponto_item")
 position = Vector2(1400, 850)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
+
+[node name="PocaAcido" parent="." unique_id=1049051436 instance=ExtResource("25_7n60l")]
+position = Vector2(257, 507)
+
+[node name="PocaAcido2" parent="." unique_id=567961936 instance=ExtResource("25_7n60l")]
+position = Vector2(316, 506)
+
+[node name="PocaAcido3" parent="." unique_id=923853769 instance=ExtResource("25_7n60l")]
+position = Vector2(389, 425)
+
+[node name="PocaAcido4" parent="." unique_id=300701091 instance=ExtResource("25_7n60l")]
+position = Vector2(449, 391)
+
+[node name="PocaAcido5" parent="." unique_id=297046141 instance=ExtResource("25_7n60l")]
+position = Vector2(481, 343)

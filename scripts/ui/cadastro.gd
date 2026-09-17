@@ -51,7 +51,7 @@ func _on_btn_create_pressed() -> void:
 func _on_auth_sucesso(token: String) -> void:
 	print("Conta criada com sucesso!")
 	
-	# Instanciando o Painel Verde dinamicamente pedida na Task 6
+	# cria o painel verde de confirmacao
 	var panel = Panel.new()
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.1, 0.7, 0.3, 0.95) # Verde

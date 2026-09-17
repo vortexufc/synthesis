@@ -276,7 +276,8 @@ proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
 porta_de_retorno = true
 
 [node name="NPCCientista" parent="." unique_id=371639914 instance=ExtResource("14_wlvpg")]
-position = Vector2(555, 787)
+position = Vector2(594, 803)
+usar_angulo_isometrico = true
 
 [node name="MuralParede" parent="." unique_id=1541649523 instance=ExtResource("15_mural")]
 position = Vector2(699, 769)

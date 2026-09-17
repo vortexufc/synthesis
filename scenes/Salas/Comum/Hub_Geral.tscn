@@ -1881,4 +1881,4 @@ position = Vector2(240, 476)
 position = Vector2(851, 847)
 
 [node name="NPCBiologia" parent="." unique_id=1037908605 instance=ExtResource("24_ddqsf")]
-position = Vector2(739, 383)
+position = Vector2(734, 399)

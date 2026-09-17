@@ -1,8 +1,6 @@
 extends Node
 
-## Gerenciador Global de Pausa e Configurações in-game (ESC)
-## Permite abrir a tela de configurações em qualquer sala do jogo pressionando ESC,
-## pausando a ação e permitindo ajustar áudio, joystick, deslogar ou voltar ao menu principal.
+# gerencia o menu de pausa no esc
 
 var cena_configuracoes = preload("res://scenes/ui/configuracoes.tscn")
 var _canvas_layer: CanvasLayer = null
@@ -39,7 +37,7 @@ func _processar_tecla_esc() -> void:
 		
 	var caminho_cena = cena_atual.scene_file_path.to_lower()
 	
-	# Se a tela de pausa já estiver aberta pelo ESC, verifica se há popup de confirmação aberto
+	# se ja ta aberto no esc checa se tem popup de confirmacao
 	if menu_aberto:
 		get_viewport().set_input_as_handled()
 		if _config_instancia and is_instance_valid(_config_instancia):
@@ -51,11 +49,11 @@ func _processar_tecla_esc() -> void:
 		fechar_menu()
 		return
 		
-	# Não abre o menu in-game se estivermos nas telas iniciais / autenticação
+	# nao abre nas telas de login ou menu inicial
 	if not _eh_cena_de_jogo(caminho_cena):
 		return
 		
-	# 1. Se o Inventário estiver aberto, ESC fecha o inventário primeiro
+	# se a mochila ta aberta fecha ela primeiro
 	var ui_inv = get_tree().get_first_node_in_group("inventario_ui")
 	if ui_inv == null:
 		ui_inv = cena_atual.find_child("InventarioUI", true, false)
@@ -68,7 +66,7 @@ func _processar_tecla_esc() -> void:
 			get_tree().paused = false
 		return
 		
-	# 2. Se um Pergaminho estiver aberto na tela, ESC fecha o pergaminho primeiro
+	# se tem pergaminho na tela fecha ele primeiro
 	var ui_pergaminho = get_tree().get_first_node_in_group("parchment_ui")
 	if ui_pergaminho == null:
 		ui_pergaminho = cena_atual.find_child("ParchmentUI", true, false)
@@ -80,7 +78,7 @@ func _processar_tecla_esc() -> void:
 			ui_pergaminho.visible = false
 		return
 		
-	# 3. Se nenhum modal prioritário estiver aberto, abre a tela de configurações in-game!
+	# se nao tem nada na tela abre as configuracoes
 	get_viewport().set_input_as_handled()
 	abrir_menu()
 

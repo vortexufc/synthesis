@@ -1,15 +1,13 @@
 extends CanvasLayer
 
-## [Minigame] Desafio da Memória Arcana (Memory Rush)
-## Minigame rápido de 15 segundos ativado em Baús Rúnicos/Arcanos.
-## Grade 3x2 (6 cartas). O jogador deve encontrar os 3 pares conceituais da disciplina do andar.
+# minigame do jogo da memoria
 
 signal desafio_concluido(vitoria: bool)
 
-# Referência do jogador travado
+# referencia do player
 var player_ref: Node2D = null
 
-# Configurações do jogo
+# configuracoes do minigame
 var andar_id: int = 1
 var duracao_total: float = 15.0
 var tempo_restante: float = 15.0
@@ -20,7 +18,7 @@ var pares_encontrados: int = 0
 var cartas_viradas: Array = [] # [card_data, card_data]
 var cartas_nodes: Array = []
 
-# Referências de UI
+# referencias da interface
 var backdrop: ColorRect
 var painel_central: PanelContainer
 var lbl_titulo: Label
@@ -33,7 +31,7 @@ var banner_resultado: PanelContainer
 var lbl_banner_titulo: Label
 var lbl_banner_sub: Label
 
-# Banco de dados de pares científicos por andar (24 pares por matéria -> mais de 2.000 combinações únicas)
+# pares de cartas por materia
 const PARES_POR_ANDAR = {
 	1: [ # Química (Andar 1)
 		{"termo_a": "H₂O", "termo_b": "Água"},
@@ -140,7 +138,7 @@ func _process(delta: float) -> void:
 	if tempo_restante <= 0.0:
 		_finalizar_derrota()
 
-## Inicia o minigame configurando o andar e travando o jogador
+# inicia o minigame e trava o player
 func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 	andar_id = p_andar_id
 	player_ref = p_player
@@ -161,7 +159,7 @@ func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 	
 	jogo_ativo = true
 	
-	# Animação de entrada suave
+	# animacao de abrir a tela
 	if painel_central:
 		painel_central.modulate.a = 0.0
 		painel_central.scale = Vector2(0.85, 0.85)
@@ -173,7 +171,7 @@ func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 		AudioManager.play_sfx("ui_5")
 
 func _construir_interface() -> void:
-	# Fundo vinheta escuro
+	# fundo escuro
 	backdrop = ColorRect.new()
 	backdrop.color = Color(0.03, 0.02, 0.06, 0.85)
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -188,7 +186,7 @@ func _construir_interface() -> void:
 	font_titulo.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_titulo.font_weight = 700
 
-	# Painel Central
+	# painel central
 	painel_central = PanelContainer.new()
 	painel_central.custom_minimum_size = Vector2(720, 520)
 	painel_central.pivot_offset = Vector2(360, 260)
@@ -210,7 +208,7 @@ func _construir_interface() -> void:
 	style_panel.content_margin_right = 24
 	style_panel.content_margin_top = 20
 	style_panel.content_margin_bottom = 20
-	# Center Container para o Painel Central
+	# container central
 	var center_painel = CenterContainer.new()
 	center_painel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center_painel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -222,11 +220,11 @@ func _construir_interface() -> void:
 	vbox_main.add_theme_constant_override("separation", 10)
 	painel_central.add_child(vbox_main)
 	
-	# Top bar (Título e Botão Fechar)
+	# titulo e botao fechar
 	var hbox_top = HBoxContainer.new()
 	vbox_main.add_child(hbox_top)
 	
-	# Espaçador invisível à esquerda para balancear com o botão fechar e centralizar perfeitamente os títulos
+	# espacador pra alinhar o titulo
 	var spacer_left = Control.new()
 	spacer_left.custom_minimum_size = Vector2(36, 32)
 	hbox_top.add_child(spacer_left)
@@ -261,11 +259,11 @@ func _construir_interface() -> void:
 	btn_fechar.pressed.connect(_desistir)
 	hbox_top.add_child(btn_fechar)
 	
-	# Linha divisória mágica
+	# separador
 	var hsep = HSeparator.new()
 	vbox_main.add_child(hsep)
 	
-	# Seção do Timer e Pares
+	# timer e contador de pares
 	var hbox_status = HBoxContainer.new()
 	hbox_status.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox_status.add_theme_constant_override("separation", 20)
@@ -310,7 +308,7 @@ func _construir_interface() -> void:
 	lbl_pares.add_theme_color_override("font_color", Color(0.95, 0.82, 0.35))
 	hbox_status.add_child(lbl_pares)
 	
-	# Grade 3x2 de Cartas
+	# grade das cartas
 	var margin_grid = MarginContainer.new()
 	margin_grid.add_theme_constant_override("margin_top", 12)
 	margin_grid.add_theme_constant_override("margin_bottom", 8)
@@ -324,7 +322,7 @@ func _construir_interface() -> void:
 	grid_cartas.add_theme_constant_override("v_separation", 16)
 	margin_grid.add_child(grid_cartas)
 	
-	# Banner de Resultado (Vitória / Derrota)
+	# banner de vitoria ou derrota
 	banner_resultado = PanelContainer.new()
 	banner_resultado.custom_minimum_size = Vector2(500, 180)
 	banner_resultado.visible = false
@@ -375,18 +373,18 @@ func _atualizar_textos_andar() -> void:
 		lbl_subtitulo.text = "Encontre os 3 pares correspondentes!"
 
 func _gerar_cartas() -> void:
-	# Limpa nós anteriores
+	# limpa cartas antigas
 	for child in grid_cartas.get_children():
 		child.queue_free()
 	cartas_nodes.clear()
 	
-	# Seleciona 3 pares aleatórios do andar
+	# sorteia 3 pares do andar
 	var pool_pares: Array = PARES_POR_ANDAR.get(andar_id, PARES_POR_ANDAR[1]).duplicate()
 	pool_pares.shuffle()
 	
 	var pares_selecionados = pool_pares.slice(0, 3)
 	
-	# Monta as 6 cartas (2 para cada par)
+	# monta as 6 cartas
 	var lista_cartas = []
 	for i in range(pares_selecionados.size()):
 		var p = pares_selecionados[i]
@@ -403,7 +401,7 @@ func _gerar_cartas() -> void:
 			"resolvida": false
 		})
 		
-	# Embaralha as posições na grade
+	# embaralha a posicao das cartas
 	lista_cartas.shuffle()
 	
 	for idx in range(lista_cartas.size()):
@@ -415,7 +413,7 @@ func _gerar_cartas() -> void:
 		if _font_card:
 			btn.add_theme_font_override("font", _font_card)
 		
-		# Estilo do Verso da Carta (Runa mágica virada para baixo)
+		# verso da carta
 		_aplicar_estilo_verso(btn)
 		
 		btn.pressed.connect(func(): _ao_clicar_carta(btn, dados))
@@ -479,15 +477,15 @@ func _ao_clicar_carta(btn: Button, dados: Dictionary) -> void:
 	if dados["virada"] or dados["resolvida"]:
 		return
 		
-	# Vira a carta atual
+	# vira a carta
 	dados["virada"] = true
 	cartas_viradas.append(dados)
 	
-	# Efeito sonoro
+	# som da carta
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# Animação de Flip da Carta (scale.x 1.0 -> 0.0 -> 1.0)
+	# animacao de virar a carta
 	var tween = create_tween()
 	tween.tween_property(btn, "scale:x", 0.0, 0.10).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func():
@@ -495,7 +493,7 @@ func _ao_clicar_carta(btn: Button, dados: Dictionary) -> void:
 	)
 	tween.tween_property(btn, "scale:x", 1.0, 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	
-	# Se virou 2 cartas, verifica par
+	# se virou duas cartas checa se sao iguais
 	if cartas_viradas.size() >= 2:
 		bloqueio_input = true
 		_verificar_par()
@@ -505,21 +503,21 @@ func _verificar_par() -> void:
 	var c2 = cartas_viradas[1]
 	
 	if c1["par_id"] == c2["par_id"]:
-		# PAR ENCONTRADO!
+		# acertou o par
 		c1["resolvida"] = true
 		c2["resolvida"] = true
 		pares_encontrados += 1
 		lbl_pares.text = "PARES: %d / 3" % pares_encontrados
 		
-		# Som de acerto
+		# som de acerto
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("acerto_1")
 			
-		# Feedback visual verde/dourado nas cartas correspondentes
+		# pisca verde
 		_aplicar_estilo_frente(c1["node"], c1["texto"], Color(0.2, 0.95, 0.45))
 		_aplicar_estilo_frente(c2["node"], c2["texto"], Color(0.2, 0.95, 0.45))
 		
-		# Pulsar levemente as cartas que acertaram
+		# pulso nas cartas certas
 		for c in [c1, c2]:
 			var tw = create_tween().set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 			tw.tween_property(c["node"], "scale", Vector2(1.08, 1.08), 0.12)
@@ -528,19 +526,19 @@ func _verificar_par() -> void:
 		cartas_viradas.clear()
 		bloqueio_input = false
 		
-		# Verifica se ganhou o minigame
+		# checa se achou todos os pares
 		if pares_encontrados >= 3:
 			_finalizar_vitoria()
 	else:
-		# ERROU O PAR!
-		# Feedback visual vermelho
+		# errou o par
+		# pisca vermelho
 		_aplicar_estilo_frente(c1["node"], c1["texto"], Color(0.95, 0.25, 0.25))
 		_aplicar_estilo_frente(c2["node"], c2["texto"], Color(0.95, 0.25, 0.25))
 		
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-2")
 			
-		# Aguarda 0.6s para memorização e desvira
+		# espera um pouco e desvira
 		await get_tree().create_timer(0.60, true, false, true).timeout
 		
 		for c in [c1, c2]:
@@ -610,7 +608,7 @@ func _finalizar_derrota() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("fail")
 		
-	# Causa dano de armadilha no jogador pelo tempo esgotado
+	# da dano se o tempo acabar
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.sofrer_dano(15.0)
 		

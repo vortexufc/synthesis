@@ -58,10 +58,10 @@ func _coletar(corpo: Node2D) -> void:
 					if it.get("nome") == nome_item: total += 1
 				hud.mostrar_mensagem(nome_item + " (" + str(total) + "/5)")
 				
-		# Partículas mágicas na cor exata do fragmento coletado
+		# particulas de coleta
 		_emitir_particulas_coleta()
 		
-		# Animação clara de salto e desaparecimento (Hop & Pop)
+		# animacao de pulo
 		var tween_coleta = create_tween()
 		tween_coleta.set_parallel(true)
 		tween_coleta.tween_property(self, "position:y", position.y - 32.0, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

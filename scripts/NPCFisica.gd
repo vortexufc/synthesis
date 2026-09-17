@@ -1,7 +1,7 @@
 extends Area2D
 
 @export_group("Visual")
-## Quando ativado, o NPC fica na pose lateralizada (isométrica 3/4)
+# pose isometrica 3/4
 @export var usar_angulo_isometrico: bool = false
 
 var player_perto: bool = false

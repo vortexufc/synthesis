@@ -7,13 +7,13 @@ var label_prompt: Label = null
 var porta_original_ref: Node2D = null
 
 func _ready() -> void:
-	# Cria a área de interação via código para facilitar
+	# cria a area de interacao
 	var area = Area2D.new()
 	area.collision_layer = 0
-	area.collision_mask = 15 # Máscara 15 (Pega layers 1, 2, 3 e 4 - impossível errar o player)
+	area.collision_mask = 15
 	var shape = CollisionShape2D.new()
 	var circle = CircleShape2D.new()
-	circle.radius = 65.0 # Bem perto da porta
+	circle.radius = 65.0
 	shape.shape = circle
 	area.add_child(shape)
 	add_child(area)
@@ -83,10 +83,10 @@ func _atualizar_texto_prompt() -> void:
 		
 	if tem_chave or ignorar:
 		label_prompt.text = "Pressione [F] para Usar a Chave Secreta"
-		label_prompt.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3)) # Verde
+		label_prompt.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	else:
 		label_prompt.text = "Use a chave secreta para acessar essa porta."
-		label_prompt.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3)) # Vermelho
+		label_prompt.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 
 func _remover_prompt_tela() -> void:
 	if canvas_prompt and is_instance_valid(canvas_prompt):
@@ -128,14 +128,13 @@ func tentar_abrir() -> void:
 			print("Porta aberta! Chaves restantes: ", player_stats.chaves)
 		
 		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-1") # Pode trocar por som de porta depois
+			AudioManager.play_sfx("ui-1")
 			
 		_remover_prompt_tela()
 		
-		# Recupera a PortaTransicao original via referência direta e reativa ela
+		# reativa a porta original
 		var porta_original = porta_original_ref
 		if not porta_original:
-			# Fallback caso não tenha sido injetado
 			var pai = get_parent()
 			if pai:
 				porta_original = pai.get_node_or_null("PortaTransicao")
@@ -148,16 +147,14 @@ func tentar_abrir() -> void:
 			if porta_original.has_method("_abrir_porta_animacao"):
 				porta_original._abrir_porta_animacao()
 			
-			# Força a transição, pois o player já está encostado nela
 			if porta_original.has_method("_transacionar_porta"):
 				porta_original._transacionar_porta()
 				
-		queue_free() # Destrói a tranca, liberando a porta original
+		queue_free()
 	else:
-		# Feedback visual de erro, balançando o texto
+		# treme o texto avisando que nao tem chave
 		if label_prompt:
 			var tween = create_tween()
 			var pos_x = label_prompt.position.x
 			tween.tween_property(label_prompt, "position:x", pos_x - 5, 0.05)
-			tween.tween_property(label_prompt, "position:x", pos_x + 5, 0.05)
 			tween.tween_property(label_prompt, "position:x", pos_x, 0.05)

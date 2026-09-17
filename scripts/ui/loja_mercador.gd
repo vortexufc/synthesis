@@ -42,13 +42,13 @@ func _ready() -> void:
 	name = "LojaUI"
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
-	# Fundo escurecido translúcido
+	# fundo escuro
 	var bg_rect = ColorRect.new()
 	bg_rect.color = Color(0, 0, 0, 0.72)
 	bg_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg_rect)
 	
-	# Painel principal da Loja com margens confortáveis e moldura dourada
+	# painel principal da loja
 	panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.07, 0.12, 0.96)
@@ -64,7 +64,7 @@ func _ready() -> void:
 	style.shadow_color = Color(0, 0, 0, 0.85)
 	style.shadow_size = 20
 	
-	# Margens internas generosas para que nenhum texto encoste na borda
+	# margens internas
 	style.content_margin_left = 22
 	style.content_margin_right = 22
 	style.content_margin_top = 18
@@ -77,7 +77,7 @@ func _ready() -> void:
 	panel.pivot_offset = panel.custom_minimum_size * 0.5
 	add_child(panel)
 	
-	# Animação suave de abertura
+	# animacao de abrir a loja
 	panel.scale = Vector2(0.90, 0.90)
 	panel.modulate.a = 0.0
 	var tw_open = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -93,7 +93,7 @@ func _ready() -> void:
 	vbox.add_theme_constant_override("separation", 10)
 	panel.add_child(vbox)
 	
-	# ===== 1. HEADER (TÍTULO E BADGE DE MOEDAS) =====
+	# cabecalho e moedas
 	var header_box = HBoxContainer.new()
 	header_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	
@@ -108,7 +108,7 @@ func _ready() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_box.add_child(spacer)
 	
-	# Badge de moedas com ícone real
+	# contador de moedas
 	var coin_badge = PanelContainer.new()
 	var sb_coin = StyleBoxFlat.new()
 	sb_coin.bg_color = Color(0.16, 0.13, 0.08, 0.95)
@@ -141,7 +141,7 @@ func _ready() -> void:
 	header_box.add_child(coin_badge)
 	vbox.add_child(header_box)
 	
-	# ===== 2. FALA DO MERCADOR (BALÃO ESTILIZADO) =====
+	# balao de fala do npc
 	var balao_panel = PanelContainer.new()
 	var sb_balao = StyleBoxFlat.new()
 	sb_balao.bg_color = Color(0.04, 0.04, 0.07, 0.75)
@@ -164,7 +164,7 @@ func _ready() -> void:
 	
 	_iniciar_fala_mercador("Bem-vindo à minha humilde banca! Tenho poções frescas e pago moedas de ouro por sucatas e fragmentos.")
 	
-	# ===== 3. SEÇÃO: PRODUTOS À VENDA =====
+	# produtos da loja
 	var lbl_sec_comprar = Label.new()
 	lbl_sec_comprar.text = "PRODUTOS DA BANCA"
 	lbl_sec_comprar.add_theme_font_override("font", font_num)
@@ -189,7 +189,7 @@ func _ready() -> void:
 		hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 		hbox.add_theme_constant_override("separation", 12)
 		
-		# Ícone
+		# icone
 		var icone = TextureRect.new()
 		if item["tipo"] == "pocao" or item["tipo"] == "pocao_menor":
 			icone.texture = tex_pocao
@@ -200,7 +200,7 @@ func _ready() -> void:
 		icone.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		hbox.add_child(icone)
 		
-		# Informações
+		# descricao
 		var info_box = VBoxContainer.new()
 		info_box.add_theme_constant_override("separation", 1)
 		var l_nome = Label.new()
@@ -222,7 +222,7 @@ func _ready() -> void:
 		item_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hbox.add_child(item_spacer)
 		
-		# Botão de compra estilizado
+		# botao comprar
 		var btn_comprar = Button.new()
 		btn_comprar.text = "Comprar (" + str(item["preco"]) + " 🪙)"
 		btn_comprar.add_theme_font_override("font", font_num)
@@ -236,7 +236,7 @@ func _ready() -> void:
 		card_item.add_child(hbox)
 		vbox.add_child(card_item)
 		
-	# ===== 4. SEÇÃO: VENDER SUCATAS =====
+	# aba de vender itens
 	var lbl_sec_vender = Label.new()
 	lbl_sec_vender.text = "RECICLAR SUCATA (10 UNIDADES = 10 MOEDAS)"
 	lbl_sec_vender.add_theme_font_override("font", font_num)
@@ -244,7 +244,7 @@ func _ready() -> void:
 	lbl_sec_vender.add_theme_color_override("font_color", Color(0.35, 0.85, 0.55, 0.95))
 	vbox.add_child(lbl_sec_vender)
 	
-	# Card Gelatina
+	# venda de gelatina
 	var card_gel = _criar_card_venda(
 		tex_gelatina, 
 		"Fragmento de Gelatina", 
@@ -255,7 +255,7 @@ func _ready() -> void:
 	_btn_vender_gel = card_gel["btn"]
 	vbox.add_child(card_gel["card"])
 	
-	# Card Chip
+	# venda de chip
 	var card_chip = _criar_card_venda(
 		tex_chip, 
 		"Fragmento de Chip", 
@@ -266,7 +266,7 @@ func _ready() -> void:
 	_btn_vender_chip = card_chip["btn"]
 	vbox.add_child(card_chip["card"])
 	
-	# ===== 5. FOOTER (FECHAR LOJA) =====
+	# botao fechar
 	var btn_fechar = Button.new()
 	btn_fechar.text = "[ F ]  Fechar Loja"
 	btn_fechar.add_theme_font_override("font", font_num)
@@ -275,10 +275,10 @@ func _ready() -> void:
 	btn_fechar.pressed.connect(func(): queue_free())
 	vbox.add_child(btn_fechar)
 	
-	# Atualiza o estado dos botões e o texto das moedas
+	# atualiza botoes e moedas
 	_atualizar_todos_botoes()
 	
-	# Centraliza na tela
+	# centraliza
 	panel.reset_size()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 

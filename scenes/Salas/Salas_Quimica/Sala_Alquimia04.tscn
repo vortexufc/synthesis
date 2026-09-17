@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="19_n1eg3"]
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="22_1vd3n"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="23_f8ovt"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/poca_acido.tscn" id="26_762s3"]
 [ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
 [ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
@@ -1979,3 +1980,33 @@ script = ExtResource("ponto_item")
 position = Vector2(300, 780)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
+
+[node name="PocaAcido" parent="." unique_id=731236177 instance=ExtResource("26_762s3")]
+position = Vector2(1730, 961)
+
+[node name="PocaAcido" parent="PocaAcido" unique_id=337172655 instance=ExtResource("26_762s3")]
+position = Vector2(-12, -48)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido" unique_id=329216711 instance=ExtResource("26_762s3")]
+position = Vector2(-55, 27)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido" unique_id=1496401363 instance=ExtResource("26_762s3")]
+position = Vector2(-10, -51)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=1701382331 instance=ExtResource("26_762s3")]
+position = Vector2(65, -27)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=810060984 instance=ExtResource("26_762s3")]
+position = Vector2(-282, -27)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=1153588408 instance=ExtResource("26_762s3")]
+position = Vector2(-68, -42)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=1572444488 instance=ExtResource("26_762s3")]
+position = Vector2(-66, 1)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=1631611168 instance=ExtResource("26_762s3")]
+position = Vector2(-60, 29)
+
+[node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=313314394 instance=ExtResource("26_762s3")]
+position = Vector2(95, -81)

@@ -16,7 +16,7 @@ func _ready() -> void:
 	btn_criar_popup.pressed.connect(_on_btn_criar_popup_pressed)
 	ClanManager.clan_list_updated.connect(_on_clan_list_updated)
 	
-	# Carrega sugestões iniciais (embaralhadas, sem ordenação de ranking)
+	# sugestoes iniciais de clas
 	_carregar_lista(ClanManager.get_sugestoes_clas())
 
 func _aplicar_visual() -> void:
@@ -29,7 +29,7 @@ func _aplicar_visual() -> void:
 		lbl_top.add_theme_font_size_override("font_size", 20)
 		lbl_top.add_theme_color_override("font_color", Color("d9d9d9"))
 		
-	# Estilo do botão Criar (Verde premium)
+	# botao criar
 	var style_btn_criar: StyleBoxFlat = StyleBoxFlat.new()
 	style_btn_criar.bg_color = Color("28a745")
 	style_btn_criar.border_color = Color("4cd137")
@@ -43,7 +43,7 @@ func _aplicar_visual() -> void:
 	btn_criar_popup.add_theme_stylebox_override("hover", style_btn_criar)
 	btn_criar_popup.add_theme_color_override("font_color", Color.WHITE)
 	
-	# Estilo do botão buscar
+	# botao buscar
 	var style_btn_buscar: StyleBoxFlat = StyleBoxFlat.new()
 	style_btn_buscar.bg_color = Color("142240")
 	style_btn_buscar.border_color = Color("0088ff")
@@ -62,7 +62,7 @@ func _carregar_lista(lista: Array) -> void:
 		child.queue_free()
 	
 	if lista.is_empty():
-		# Nenhum clã encontrado — mostra mensagem amigável
+		# se nao achar nenhum mostra aviso
 		var lbl: Label = Label.new()
 		var font: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 		if font:
@@ -77,20 +77,20 @@ func _carregar_lista(lista: Array) -> void:
 		var card: PanelContainer = card_cla_scene.instantiate() as PanelContainer
 		container_lista.add_child(card)
 		if card.has_method("set_info"):
-			# Sem posição/rank — apenas nome, tag e membros
+			# exibe nome e membros
 			card.call("set_info", clan["name"], clan["tag"], clan["score"], clan["members"].size())
 
 func _on_btn_buscar_pressed() -> void:
 	var query: String = input_busca.text
 	btn_buscar.disabled = true
-	# Puxa atualizações do banco antes da pesquisa
+	# atualiza dados antes de buscar
 	await ClanManager.load_clans()
 	btn_buscar.disabled = false
 	
 	var filtrados: Array = ClanManager.search_clans(query)
 	_carregar_lista(filtrados)
 	
-	# Atualiza o label conforme o contexto
+	# muda o texto da busca
 	if query.strip_edges().is_empty():
 		lbl_top.text = "SUGESTÕES DE CLÃS"
 	else:
@@ -101,6 +101,6 @@ func _on_btn_criar_popup_pressed() -> void:
 	get_tree().current_scene.add_child(popup)
 
 func _on_clan_list_updated() -> void:
-	# Recarrega as sugestões após mudança no banco de clãs
+	# recarrega sugestoes
 	_carregar_lista(ClanManager.get_sugestoes_clas())
 	lbl_top.text = "SUGESTÕES DE CLÃS"
