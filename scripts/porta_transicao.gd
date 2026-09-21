@@ -70,14 +70,17 @@ func _ready() -> void:
 	_cooldown_ativo = false
 	
 	# Após o cooldown, verifica se o player já está dentro da área
-	for body in get_overlapping_bodies():
-		if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
-			_on_body_entered(body)
-			break
+	if is_inside_tree() and monitoring:
+		for body in get_overlapping_bodies():
+			if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
+				_on_body_entered(body)
+				break
 
 func _player_esta_na_porta() -> bool:
 	if _player_no_alcance:
 		return true
+	if not is_inside_tree() or not monitoring:
+		return false
 	for body in get_overlapping_bodies():
 		if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
 			_player_no_alcance = true
@@ -454,8 +457,17 @@ func _mostrar_prompt_hub() -> void:
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	
 	var label = Label.new()
+	var e_concluido = false
+	if get_node_or_null("/root/PlayerStats") and PlayerStats.get("vinhetas_desbloqueadas") != null:
+		var andar_porta = 1
+		if hub_dungeon_name == "Física": andar_porta = 2
+		elif hub_dungeon_name == "Biologia": andar_porta = 3
+		e_concluido = PlayerStats.vinhetas_desbloqueadas.has(andar_porta)
+		
 	if DatabaseManager.active_dungeon == hub_dungeon_name:
 		label.text = "Deseja continuar o andar de " + hub_dungeon_name + "?"
+	elif e_concluido:
+		label.text = "Andar Concluído!\nDeseja explorar novamente o andar de " + hub_dungeon_name + "?"
 	else:
 		label.text = "Deseja começar o andar de " + hub_dungeon_name + "?"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -630,13 +642,16 @@ func _on_body_entered(body: Node2D) -> void:
 				_mostrar_feedback_hub("TRANCADO", Color(0.85, 0.25, 0.25, 0.9))
 				return
 			
-		# Lógica de porta de Hub
+		# Lógica de porta de Hub (só pode trocar de andar ao finalizar a run atual)
 		if is_hub_door:
-			# TODO: Descomentar isso no futuro para travar o jogador na run atual!
-			# var active = DatabaseManager.active_dungeon
-			# if active != "" and active != hub_dungeon_name:
-			# 	_mostrar_feedback_hub("Você já está explorando " + active + "!", Color(0.85, 0.25, 0.25, 0.9))
-			# 	return
+			var dev_liberado = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.get("liberar_portas_hub") == true
+			if not dev_liberado:
+				var active = ""
+				if get_node_or_null("/root/DatabaseManager"):
+					active = DatabaseManager.active_dungeon
+				if active != "" and active != hub_dungeon_name:
+					_mostrar_feedback_hub("Você já iniciou a expedição em " + active + "!\nConclua o andar para poder trocar de expedição.", Color(0.95, 0.45, 0.25, 0.95))
+					return
 			
 			_mostrar_prompt_hub()
 		else:
@@ -673,6 +688,14 @@ func _obter_andar_atual() -> int:
 func _exibir_vinheta_boss(andar_id: int) -> void:
 	if not _porta_aberta:
 		await _abrir_porta_animacao()
+		
+	# Conclui a masmorra ativa, liberando o jogador para escolher o próximo andar no Hub
+	if get_node_or_null("/root/DatabaseManager"):
+		DatabaseManager.active_dungeon = ""
+		if DatabaseManager.has_method("salvar_progresso"):
+			DatabaseManager.salvar_progresso()
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.masmorra_retorno_hub = ""
 		
 	var vinheta_cena = load("res://scenes/ui/vinheta_historia.tscn")
 	if vinheta_cena:

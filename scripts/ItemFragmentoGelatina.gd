@@ -3,7 +3,6 @@ extends "res://scripts/ItemQuestBase.gd"
 @export_enum("azul", "verde", "vermelho") var cor_fragmento: String = "azul"
 
 func _ready() -> void:
-	nome_item = "Fragmento de Gelatina"
 	_aplicar_cor()
 	super._ready()
 
@@ -23,14 +22,17 @@ func _aplicar_cor() -> void:
 	if "verm" in cor_fragmento or "laranja" in cor_fragmento:
 		row = 0 # Linha 0 = Vermelho
 		cor_fragmento = "vermelho"
+		nome_item = "Fragmento Gelatinoso Vermelho"
 		descricao_item = "Um fragmento pegajoso e incandescente deixado por um slime vermelho."
 	elif "verd" in cor_fragmento:
 		row = 1 # Linha 1 = Verde
 		cor_fragmento = "verde"
+		nome_item = "Fragmento Gelatinoso Verde"
 		descricao_item = "Um fragmento pegajoso e ácido deixado por um slime verde."
 	else:
 		row = 2 # Linha 2 = Azul
 		cor_fragmento = "azul"
+		nome_item = "Fragmento Gelatinoso Azul"
 		descricao_item = "Um fragmento pegajoso e translúcido deixado por um slime azul."
 		
 	var col = randi_range(0, 2)
@@ -55,7 +57,8 @@ func _coletar(corpo: Node2D) -> void:
 			if hud and hud.has_method("mostrar_mensagem"):
 				var total = 0
 				for it in PlayerStats.itens:
-					if it.get("nome") == nome_item: total += 1
+					var it_nome = it.get("nome", "")
+					if "Gelatina" in it_nome or it.has("cor"): total += 1
 				hud.mostrar_mensagem(nome_item + " (" + str(total) + "/5)")
 				
 		# particulas de coleta
@@ -74,9 +77,15 @@ func _coletar(corpo: Node2D) -> void:
 		queue_free()
 
 func _emitir_particulas_coleta() -> void:
+	var pos_coleta = global_position
+	var sprite = get_node_or_null("Sprite2D")
+	if sprite:
+		pos_coleta = sprite.global_position
+
 	var part = CPUParticles2D.new()
-	part.global_position = global_position
-	part.z_index = 10
+	part.top_level = true
+	part.z_index = 15
+	part.local_coords = false
 	
 	var mat_p = CanvasItemMaterial.new()
 	mat_p.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
@@ -115,10 +124,14 @@ func _emitir_particulas_coleta() -> void:
 		grad.colors = PackedColorArray([Color(0.35, 0.85, 1.0, 1.0), Color(0.10, 0.40, 1.0, 0.0)])
 		
 	part.color_ramp = grad
-	var pai = get_parent()
+	var arvore = get_tree()
+	var pai = arvore.current_scene if (arvore and arvore.current_scene) else get_parent()
 	if pai:
 		pai.add_child(part)
 	else:
 		get_tree().root.add_child(part)
+	part.global_position = pos_coleta
 	part.emitting = true
-	get_tree().create_timer(0.65).timeout.connect(part.queue_free)
+	part.restart()
+	if arvore:
+		arvore.create_timer(0.65).timeout.connect(part.queue_free)

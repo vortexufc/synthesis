@@ -298,7 +298,13 @@ func _on_btn_descartar_pressionado() -> void:
 		else:
 			var removidos = 0
 			for k in range(PlayerStats.itens.size() - 1, -1, -1):
-				if PlayerStats.itens[k]["nome"] == item_selecionado["nome"]:
+				var it = PlayerStats.itens[k]
+				var mesmo_item = false
+				if it.get("nome") == item_selecionado.get("nome"):
+					mesmo_item = true
+				elif ("Gelatina" in item_selecionado.get("nome", "")) and it.get("cor") == item_selecionado.get("cor"):
+					mesmo_item = true
+				if mesmo_item:
 					PlayerStats.itens.remove_at(k)
 					removidos += 1
 					if removidos >= qtd_descarte:
@@ -340,19 +346,34 @@ func _atualizar_listas() -> void:
 		var card = _criar_slot_card(icone_chave, "Chave de Porta", PlayerStats.chaves, func(): _selecionar_item(dic_chave, "item", -1))
 		grid_itens.add_child(card)
 		
-	# junta itens iguais por nome
+	# junta itens iguais por nome (separando os fragmentos por cor)
 	var itens_agrupados: Dictionary = {}
 	for it in PlayerStats.itens:
 		var nome = it.get("nome", "Item Desconhecido")
+		var cor = it.get("cor", "")
+		
+		# Garante que fragmentos gelatinosos fiquem separados por cor no repartimento
+		if nome == "Fragmento de Gelatina" or "Gelatina" in nome or cor != "":
+			if cor == "" and nome == "Fragmento de Gelatina":
+				cor = "azul"
+			if cor == "verde" or "verde" in nome.to_lower():
+				nome = "Fragmento Gelatinoso Verde"
+				cor = "verde"
+			elif cor == "vermelho" or "vermelh" in nome.to_lower() or "laranja" in nome.to_lower():
+				nome = "Fragmento Gelatinoso Vermelho"
+				cor = "vermelho"
+			else:
+				nome = "Fragmento Gelatinoso Azul"
+				cor = "azul"
+			it["nome"] = nome
+			it["cor"] = cor
+			
 		if not itens_agrupados.has(nome):
 			itens_agrupados[nome] = {
 				"item_base": it,
-				"qtd": 0,
-				"cores": []
+				"qtd": 0
 			}
 		itens_agrupados[nome]["qtd"] += 1
-		if it.has("cor"):
-			itens_agrupados[nome]["cores"].append(it["cor"])
 			
 	for nome in itens_agrupados.keys():
 		tem_qualquer_item = true
@@ -363,18 +384,9 @@ func _atualizar_listas() -> void:
 		
 		if nome == "Livro de Fórmulas":
 			icone = load("res://assets/sprites/ui/item_livro_formulas.png")
-		elif nome == "Fragmento de Gelatina":
-			var cores = grupo["cores"]
-			var todas_mesma_cor = true
-			for c in cores:
-				if c != cores[0]:
-					todas_mesma_cor = false
-					break
-			if cores.size() > 1 and not todas_mesma_cor:
-				icone = load("res://assets/sprites/ui/item_fragmento_gelatina_mercado.png")
-			else:
-				var cor_destaque = cores[0] if cores.size() > 0 else "azul"
-				icone = _obter_icone_gelatina(cor_destaque)
+		elif "Gelatina" in nome or item_base.has("cor"):
+			var cor = item_base.get("cor", "azul")
+			icone = _obter_icone_gelatina(cor)
 		elif nome == "Bateria Elétrica":
 			icone = load("res://assets/sprites/ui/item_bateria.png")
 		elif nome == "Fragmento de Chip":
@@ -382,17 +394,6 @@ func _atualizar_listas() -> void:
 			
 		var item_display = item_base.duplicate()
 		item_display["qtd"] = qtd
-		if nome == "Fragmento de Gelatina":
-			var cores = grupo["cores"]
-			var todas_mesma_cor = true
-			for c in cores:
-				if c != cores[0]:
-					todas_mesma_cor = false
-					break
-			if cores.size() > 1 and not todas_mesma_cor:
-				item_display["cores_mistas"] = true
-			else:
-				item_display["cor"] = cores[0] if cores.size() > 0 else "azul"
 		var card = _criar_slot_card(icone, nome, qtd, func(): _selecionar_item(item_display, "item", -1))
 		grid_itens.add_child(card)
 		
@@ -448,6 +449,7 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tex_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	tex_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	vbox.add_child(tex_rect)
 	
 	# nome do item
@@ -526,14 +528,14 @@ func _add_mensagem_vazia(node: Node, icone_recurso: Variant, titulo: String, dic
 	vbox.add_theme_constant_override("separation", 10)
 	
 	if icone_recurso is Texture2D and icone_recurso != null:
-		var tr = TextureRect.new()
-		tr.texture = icone_recurso
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		tr.custom_minimum_size = Vector2(36, 36)
-		tr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		tr.modulate = Color(1.0, 1.0, 1.0, 0.45)
-		vbox.add_child(tr)
+		var tex_icone = TextureRect.new()
+		tex_icone.texture = icone_recurso
+		tex_icone.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tex_icone.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tex_icone.custom_minimum_size = Vector2(36, 36)
+		tex_icone.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		tex_icone.modulate = Color(1.0, 1.0, 1.0, 0.45)
+		vbox.add_child(tex_icone)
 	
 	var lbl_tit = Label.new()
 	lbl_tit.text = titulo
@@ -589,26 +591,17 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 			icone_item = load("res://assets/sprites/ui/icon_key_transparent.png")
 		elif item["nome"] == "Livro de Fórmulas":
 			icone_item = load("res://assets/sprites/ui/item_livro_formulas.png")
-		elif item["nome"] == "Fragmento de Gelatina":
-			if item.get("cores_mistas", false):
-				icone_item = load("res://assets/sprites/ui/item_fragmento_gelatina_mercado.png")
-			else:
-				icone_item = _obter_icone_gelatina(item.get("cor", "azul"))
+		elif "Gelatina" in item["nome"] or item.has("cor"):
+			icone_item = _obter_icone_gelatina(item.get("cor", "azul"))
 		elif item["nome"] == "Bateria Elétrica":
 			icone_item = load("res://assets/sprites/ui/item_bateria.png")
 		elif item["nome"] == "Fragmento de Chip":
 			icone_item = load("res://assets/sprites/ui/item_chip.png")
 			
-		if img_detalhe_icone: img_detalhe_icone.texture = icone_item
-		if item["nome"] == "Fragmento de Gelatina":
-			if item.get("cores_mistas", false):
-				lbl_detalhe_titulo.text = "Fragmentos de Gelatina"
-			elif item.has("cor"):
-				lbl_detalhe_titulo.text = "Fragmento de Gelatina (%s)" % str(item["cor"]).capitalize()
-			else:
-				lbl_detalhe_titulo.text = item["nome"]
-		else:
-			lbl_detalhe_titulo.text = item["nome"]
+		if img_detalhe_icone:
+			img_detalhe_icone.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			img_detalhe_icone.texture = icone_item
+		lbl_detalhe_titulo.text = item["nome"]
 			
 		var desc_base = item.get("descricao", "Um item raro e valioso necessário para abrir caminhos ou avançar na jornada.")
 		if item.has("qtd") and item["qtd"] > 1:

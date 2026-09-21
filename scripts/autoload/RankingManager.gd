@@ -44,7 +44,11 @@ func load_ranking() -> void:
 		for row in res["data"]:
 			ranking_geral.append({
 				"name": row.get("player_name", "?"),
-				"score": int(row.get("score", 0))
+				"score": int(row.get("score", 0)),
+				"score_diario": int(row.get("score_diario", 0)),
+				"score_semanal": int(row.get("score_semanal", 0)),
+				"score_mensal": int(row.get("score_mensal", 0)),
+				"insignias": row.get("insignias", [])
 			})
 		
 		# poe o visitante local na lista pra aparecer na tela
@@ -67,7 +71,7 @@ func load_ranking_periodo(periodo: String) -> void:
 		_: return
 	
 	var res = await DatabaseManager.request_async(
-		"/rest/v1/rankinggeral?select=player_name,%s&order=%s.desc&limit=20" % [coluna, coluna],
+		"/rest/v1/rankinggeral?select=*&order=%s.desc&limit=20" % coluna,
 		HTTPClient.METHOD_GET
 	)
 	if not (res["success"] and res["data"] is Array):
@@ -77,7 +81,14 @@ func load_ranking_periodo(periodo: String) -> void:
 	for row in res["data"]:
 		var pts = int(row.get(coluna, 0))
 		if pts > 0:
-			lista.append({"name": row.get("player_name", "?"), "score": pts})
+			lista.append({
+				"name": row.get("player_name", "?"),
+				"score": pts,
+				"score_diario": int(row.get("score_diario", 0)),
+				"score_semanal": int(row.get("score_semanal", 0)),
+				"score_mensal": int(row.get("score_mensal", 0)),
+				"insignias": row.get("insignias", [])
+			})
 	
 	match periodo:
 		"quimica":  ranking_diario  = lista

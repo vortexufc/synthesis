@@ -143,6 +143,9 @@ func _criar_card() -> PanelContainer:
 func _contar_item(nome_item: String) -> int:
 	var contagem = 0
 	for item in PlayerStats.itens:
-		if item["nome"] == nome_item:
+		var nome_it = item.get("nome", "")
+		if nome_it == nome_item:
+			contagem += 1
+		elif nome_item == "Fragmento de Gelatina" and ("Gelatina" in nome_it or item.has("cor")):
 			contagem += 1
 	return contagem

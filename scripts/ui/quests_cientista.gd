@@ -218,10 +218,19 @@ func _cancelar_quest(quest_id: String) -> void:
 		PlayerStats.quests_atualizadas.emit()
 		_atualizar_quests()
 
+func _item_corresponde(item: Dictionary, nome_procurado: String) -> bool:
+	var nome_it = item.get("nome", "")
+	if nome_it == nome_procurado:
+		return true
+	if nome_procurado == "Fragmento de Gelatina":
+		if "Gelatina" in nome_it or item.has("cor"):
+			return true
+	return false
+
 func _contar_item(nome_item: String) -> int:
 	var contagem = 0
 	for item in PlayerStats.itens:
-		if item["nome"] == nome_item:
+		if _item_corresponde(item, nome_item):
 			contagem += 1
 	return contagem
 
@@ -229,7 +238,7 @@ func _remover_itens(nome_item: String, qtd: int) -> void:
 	var removidos = 0
 	# Remove de trás pra frente para não quebrar os índices
 	for i in range(PlayerStats.itens.size() - 1, -1, -1):
-		if PlayerStats.itens[i]["nome"] == nome_item:
+		if _item_corresponde(PlayerStats.itens[i], nome_item):
 			PlayerStats.itens.remove_at(i)
 			removidos += 1
 			if removidos >= qtd:
