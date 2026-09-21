@@ -1,57 +1,57 @@
-[gd_scene format=4 uid="uid://dw2ckq6t145j4"]
+[gd_scene format=4 uid="uid://skc0l64y4ctj"]
 
-[ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_u1ntx"]
-[ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_54x5m"]
-[ext_resource type="TileSet" uid="uid://d2uxhwqjqqfc6" path="res://scenes/Salas/Estufa_Biologia/Decoration_Estufa.tres" id="3_r5s3g"]
-[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_enuxp"]
-[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_cpf7e"]
-[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="6_2my1m"]
-[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="7_q8dg3"]
-[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="8_vldj6"]
-[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="9_usf6k"]
-[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="10_t6pmr"]
-[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_qq048"]
-[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_hj7mw"]
-[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_b3bx2"]
-[ext_resource type="PackedScene" uid="uid://b8txw21gc8e2h" path="res://scenes/Entidades/Plantas/CogumelinhoDoMal.tscn" id="14_r5s3g"]
-[ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="15_enuxp"]
+[ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_m6r5x"]
+[ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_7ec6k"]
+[ext_resource type="TileSet" uid="uid://d2uxhwqjqqfc6" path="res://scenes/Salas/Estufa_Biologia/Decoration_Estufa.tres" id="3_5jsgw"]
+[ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_rha2n"]
+[ext_resource type="Script" uid="uid://uurclcowo4qv" path="res://scripts/autoload/test.gd" id="5_4sutm"]
+[ext_resource type="PackedScene" uid="uid://df7s0qg1k8awe" path="res://scenes/ui/hud.tscn" id="6_7q7c3"]
+[ext_resource type="PackedScene" uid="uid://cx402m722max2" path="res://scenes/ui/inventario_ui.tscn" id="7_vrde0"]
+[ext_resource type="Script" uid="uid://cgeivmkljrh4g" path="res://scripts/ui/parchment_ui.gd" id="8_ed2mk"]
+[ext_resource type="Texture2D" uid="uid://bs2ii4ut24qj4" path="res://assets/sprites/Backgrounds/Old Dungeon/scroll_32x32.png" id="9_03gty"]
+[ext_resource type="Texture2D" uid="uid://doniqjxth6v02" path="res://assets/sprites/Backgrounds/Old Dungeon/pagina_anterior.png" id="10_4uu87"]
+[ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_46ia3"]
+[ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_gs03e"]
+[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_gi63p"]
+[ext_resource type="PackedScene" uid="uid://b8txw21gc8e2h" path="res://scenes/Entidades/Plantas/CogumelinhoDoMal.tscn" id="14_ngfdw"]
+[ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="15_hafof"]
 
-[node name="Node2D" type="Node2D" unique_id=1098789254]
+[node name="Node2D" type="Node2D" unique_id=1886512827]
 
-[node name="Floor" type="TileMapLayer" parent="." unique_id=2049363340]
+[node name="Floor" type="TileMapLayer" parent="." unique_id=1047373156]
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAAEACsAAAAAACwAAAAIACcAAAAAACwAAAAMACMAAAAAACwAAAAMACcAAAAAACgAAAAIACsAAAAIACgAAAAMACsAAAAcACgAAAAQACMAAAAcACgAAAAPACYAAAAEACwAAAAPACgAAAAEAC4AAAARACYAAAAGACwAAAARACgAAAAGAC4AAAAPACoAAAAEACwAAAAPACwAAAAEAC4AAAARACoAAAAGACwAAAARACwAAAAGAC4AAAATACoAAAAEACwAAAATACwAAAAEAC4AAAAVACoAAAAGACwAAAAVACwAAAAGAC4AAAAXACYAAAAEACwAAAAXACgAAAAEAC4AAAAZACYAAAAGACwAAAAZACgAAAAGAC4AAAAbACIAAAAEACwAAAAbACQAAAAEAC4AAAAdACIAAAAGACwAAAAdACQAAAAGAC4AAAATACIAAAAEACwAAAATACQAAAAEAC4AAAAVACIAAAAGACwAAAAVACQAAAAGAC4AAAAcACYAAAAEACwAAFAcACgAAAAGACwAAFAaACYAAAAEAC4AAFAaACgAAAAGAC4AAFAYACMAAAAQACgAAAAUACcAAAAQACgAAAAYACsAAAAYACgAAAAgACcAAAAYACgAAAAgACMAAAAEACgAAAAgACsAAAAAACgAAAAkACsAAAAcACgAAAAIACMAAAAcACgAAAADACIAAAAEACwAAAADACQAAAAEAC4AAAAFACIAAAAGACwAAAAFACQAAAAGAC4AAAADACcAAAAEACwAAGADACUAAAAGACwAAGAFACcAAAAEAC4AAGAFACUAAAAGAC4AAGAjACcAAAAEACwAAGAjACUAAAAGACwAAGAlACcAAAAEAC4AAGAlACUAAAAGAC4AAGAjACMAAAAEACwAAGAjACEAAAAGACwAAGAlACMAAAAEAC4AAGAlACEAAAAGAC4AAGAaACsAAAAGACwAADAaACkAAAAGAC4AADAcACsAAAAEACwAADAcACkAAAAEAC4AADADABYAAAAEACwAAAADABgAAAAEAC4AAAADABkAAAAGACwAAGADABsAAAAEACwAAGAEAB8AAAAAACwAAAAFABYAAAAGACwAAAAFABgAAAAGAC4AAAAFABkAAAAGAC4AAGAFABsAAAAEAC4AAGAIABcAAAAcACgAAAAIABsAAAAAACwAAAAIAB8AAAAIACgAAAAMABcAAAAAACwAAAAMABsAAAAAACgAAAAMAB8AAAAcACgAAAAPABoAAAAEACwAAAAPABwAAAAEAC4AAAAPAB4AAAAEACwAAAAPACAAAAAEAC4AAAAQABcAAAAcACgAAAARABoAAAAGACwAAAARABwAAAAGAC4AAAARAB4AAAAGACwAAAARACAAAAAGAC4AAAATABYAAAAEACwAAAATABgAAAAEAC4AAAATAB4AAAAEACwAAAATACAAAAAEAC4AAAAUABsAAAAQACgAAAAVABYAAAAGACwAAAAVABgAAAAGAC4AAAAVAB4AAAAGACwAAAAVACAAAAAGAC4AAAAXABoAAAAEACwAAAAXABwAAAAEAC4AAAAYABcAAAAQACgAAAAYAB8AAAAYACgAAAAZABoAAAAGACwAAAAZABwAAAAGAC4AAAAaABoAAAAEAC4AAFAaABwAAAAGAC4AAFAaAB0AAAAGAC4AADAaAB8AAAAGACwAADAbABYAAAAEACwAAAAbABgAAAAEAC4AAAAcABoAAAAEACwAAFAcABwAAAAGACwAAFAcAB0AAAAEAC4AADAcAB8AAAAEACwAADAdABYAAAAGACwAAAAdABgAAAAGAC4AAAAgABcAAAAEACgAAAAgABsAAAAYACgAAAAgAB8AAAAAACgAAAAjABUAAAAGACwAAGAjABcAAAAEACwAAGAjABkAAAAGACwAAGAjABsAAAAEACwAAGAkAB8AAAAcACgAAAAlABUAAAAGAC4AAGAlABcAAAAEAC4AAGAlABkAAAAGAC4AAGAlABsAAAAEAC4AAGADAAoAAAAEACwAAAADAAwAAAAEAC4AAAADAA0AAAAGACwAAGADAA8AAAAEACwAAGAEABMAAAAAACwAAAAFAAoAAAAGACwAAAAFAAwAAAAGAC4AAAAFAA0AAAAGAC4AAGAFAA8AAAAEAC4AAGAIAAsAAAAcACgAAAAIAA8AAAAAACwAAAAIABMAAAAIACgAAAAMAAsAAAAAACwAAAAMAA8AAAAAACgAAAAMABMAAAAcACgAAAAPAA4AAAAEACwAAAAPABAAAAAEAC4AAAAPABIAAAAEACwAAAAPABQAAAAEAC4AAAAQAAsAAAAcACgAAAARAA4AAAAGACwAAAARABAAAAAGAC4AAAARABIAAAAGACwAAAARABQAAAAGAC4AAAATAAoAAAAEACwAAAATAAwAAAAEAC4AAAATABIAAAAEACwAAAATABQAAAAEAC4AAAAUAA8AAAAQACgAAAAVAAoAAAAGACwAAAAVAAwAAAAGAC4AAAAVABIAAAAGACwAAAAVABQAAAAGAC4AAAAXAA4AAAAEACwAAAAXABAAAAAEAC4AAAAYAAsAAAAQACgAAAAYABMAAAAYACgAAAAZAA4AAAAGACwAAAAZABAAAAAGAC4AAAAaAA4AAAAEAC4AAFAaABAAAAAGAC4AAFAaABEAAAAGAC4AADAaABMAAAAGACwAADAbAAoAAAAEACwAAAAbAAwAAAAEAC4AAAAcAA4AAAAEACwAAFAcABAAAAAGACwAAFAcABEAAAAEAC4AADAcABMAAAAEACwAADAdAAoAAAAGACwAAAAdAAwAAAAGAC4AAAAgAAsAAAAEACgAAAAgAA8AAAAYACgAAAAgABMAAAAAACgAAAAjAAkAAAAGACwAAGAjAAsAAAAEACwAAGAjAA0AAAAGACwAAGAjAA8AAAAEACwAAGAkABMAAAAcACgAAAAlAAkAAAAGAC4AAGAlAAsAAAAEAC4AAGAlAA0AAAAGAC4AAGAlAA8AAAAEAC4AAGA=")
-tile_set = ExtResource("1_u1ntx")
+tile_set = ExtResource("1_m6r5x")
 
-[node name="Wall" type="TileMapLayer" parent="." unique_id=972534308]
+[node name="Wall" type="TileMapLayer" parent="." unique_id=1675573270]
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAABABAAAAAAABAAAAABAAwAAAAAABAAAAAnABQAAAAGABAAAAAnABAAAAAGABAAAAAnAAwAAAAGABAAAAABACcAAAAAABAAAAAOADAAAgAAAAAAAAARACwAAAAGABgAAAARAC4AAAAOABgAAAARADAAAAAOABgAAAABACsAAAAAABAAAAABAC4AAAAIABoAAAACADAAAAAYABoAAAACADMAAAAMACAAAAAEAC4AAAAUABgAAAAGAC4AAAANABoAAAAGADAAAAAYABoAAAAGADMAAAAIACAAAAAHAC4AAAANABoAAAAJAC0AAAAGAAAAACAKADAAAAAYABoAAAAKADMAAAAMACAAAAALACwAAAAAABgAAAALAC4AAAAAABoAAAALADEAAAAAABAAAAALADQAAAAIABoAAAANACwAAAACABgAAAANADQAAAAKABoAAAAOAC4AAAAUABgAAAAOADMAAAAMACAAAAAOADQAAAAKABoAAAAPACwAAAAFABgAAAARADIAAAAOABgAAAARADQAAAAOABoAAAASAC0AAAAGAAAAADASADAAAAAYABoAAAASADMAAAAIACAAAAAUAC4AAAANABoAAAAVAC4AAAANABoAAAAWADAAAAAYABoAAAAWADMAAAAIACAAAAAYAC4AAAAUABgAAAAaADAAAAAYABoAAAAaADMAAAAIACAAAAAcAC4AAAAUABgAAAAeADAAAAAYABoAAAAeADMAAAAMACAAAAAgAC4AAAAUABgAAAAiADAAAAAYABoAAAAiADMAAAAMACAAAAAkAC4AAAAUABgAAAAmADAAAAAYABoAAAAmADMAAAAIACAAAAAnACsAAAAGABAAAAAnAC4AAAAOABoAAAAnABgAAAAGABAAAAAnABwAAAAGABAAAAAnACAAAAAGABAAAAAnACEAAAAGABAAAAAnACUAAAAGABAAAAAnACkAAAAGABAAAAABABQAAAAAABAAAAABABgAAAAAABAAAAABABwAAAAAABAAAAABACAAAAAAABAAAAABACQAAAAAABAAAAABACgAAAAAABAAAAABAPz/AAAAABgAAAABAP7/AAAAABoAAAABAAEAAAAAABAAAAABAAUAAAAAABAAAAABAAkAAAAAABAAAAADAP7/AAAKAAIAAAADAAEAAAAaABAAAAADAAUAAAAaABAAAAADAAgAAAACAAQAAAAEAPz/AAAQABgAAAAFAP7/AAAAAAIAAAAGAP7/AAAAAAIAABAGAAEAAAAAACAAAAAGAAUAAAAAACAAAAAGAAgAAAAYAAAAAAAIAPz/AAAQABgAAAAJAP7/AAAAAAIAAAAKAP7/AAAAAAIAABAKAAEAAAAEACAAAAAKAAUAAAAEACAAAAAKAAgAAAAYAAAAAAAMAPz/AAAQABgAAAANAP7/AAAAAAIAAAAOAP7/AAAAAAIAABAOAAEAAAAEACAAAAAOAAUAAAAEACAAAAAOAAgAAAAYAAAAAAAQAPz/AAAQABgAAAARAP7/AAAAAAIAAAASAP7/AAAAAAIAABASAAEAAAAEACAAAAASAAUAAAAAACAAAAASAAgAAAAYAAAAAAAUAPz/AAAQABgAAAAVAP7/AAAAAAIAAAAWAP7/AAAAAAIAABAWAAEAAAAEACAAAAAWAAUAAAAAACAAAAAWAAgAAAAYAAAAAAAYAPz/AAAQABgAAAAZAP7/AAAAAAIAAAAaAP7/AAAAAAIAABAaAAEAAAAAACAAAAAaAAUAAAAAACAAAAAaAAgAAAAYAAAAAAAcAPz/AAAQABgAAAAdAP7/AAAAAAIAAAAeAP7/AAAAAAIAABAeAAEAAAAAACAAAAAeAAUAAgAAAAAAAAAeAAgAAAAYAAAAAAAgAPz/AAAQABgAAAAhAP7/AAAAAAIAAAAiAP7/AAAAAAIAABAiAAEAAAAEACAAAAAiAAUAAAAEACAAAAAiAAgAAAAYAAAAAAAkAPz/AAAQABgAAAAlAP7/AAAMAAIAAAAlAAEAAAAcABAAAAAlAAUAAAAcABAAAAAlAAgAAAAEAAQAAAAnAPz/AAAGABgAAAAnAP7/AAAGABoAAAAnAAEAAAAGABAAAAAnAAUAAAAGABAAAAAnAAkAAAAGABAAAAA=")
-tile_set = ExtResource("2_54x5m")
+tile_set = ExtResource("2_7ec6k")
 
-[node name="Decoration" type="TileMapLayer" parent="." unique_id=913735526]
+[node name="Decoration" type="TileMapLayer" parent="." unique_id=920693527]
 scale = Vector2(2, 2)
 tile_map_data = PackedByteArray("AAAIAAQAAAAzAAAAAAAMAAQAAAAzAAAAAAAQAAQAAAAzAAAAAAAUAAQAAAAzAAAAAAAIAAAAAAAzAAAAAAAMAAAAAAAzAAAAAAAQAAAAAAAzAAAAAAAUAAAAAAAzAAAAAAAFAAkAAAABAAMAAAAMAAYAAAAgAAAAAAATAAYAAAAYAAAAAAAGAAgAAABgAAYAAAADAAkAAAA4AAYAAAAFAAUAAAARAAAAAAAFAAIAAABoAAQAAAALAAAAAABQAAQAAAAOAAIAAABgAAYAAAADAAMAAABYAAQAAAAjAAcAAABoAAQAAAADABcAAABwAAUAAAAFABgAAAABAAMAAAAlABkAAAANAAIAABAlABgAAABYAAQAAAA=")
-tile_set = ExtResource("3_r5s3g")
+tile_set = ExtResource("3_5jsgw")
 
-[node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_enuxp")]
+[node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_rha2n")]
 z_index = 4
 position = Vector2(635, 379)
 scale = Vector2(1.2, 1.2)
 
-[node name="Node" type="Node" parent="." unique_id=1992972301]
-script = ExtResource("5_cpf7e")
+[node name="Node" type="Node" parent="." unique_id=1617058273]
+script = ExtResource("5_4sutm")
 
-[node name="HUD" parent="." unique_id=1738994363 instance=ExtResource("6_2my1m")]
+[node name="HUD" parent="." unique_id=1283256464 instance=ExtResource("6_7q7c3")]
 visible = false
 
-[node name="InventarioUI" parent="." unique_id=1704940987 instance=ExtResource("7_q8dg3")]
+[node name="InventarioUI" parent="." unique_id=1694535173 instance=ExtResource("7_vrde0")]
 visible = false
 
-[node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=1132103787]
+[node name="ParchmentUI" type="CanvasLayer" parent="." unique_id=797682751]
 visible = false
-script = ExtResource("8_vldj6")
+script = ExtResource("8_ed2mk")
 
-[node name="Control" type="Control" parent="ParchmentUI" unique_id=2100594660]
+[node name="Control" type="Control" parent="ParchmentUI" unique_id=557566206]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -60,15 +60,15 @@ size_flags_horizontal = 6
 size_flags_vertical = 4
 metadata/_edit_use_anchors_ = true
 
-[node name="BackgroundPapel" type="TextureRect" parent="ParchmentUI/Control" unique_id=2122055532]
+[node name="BackgroundPapel" type="TextureRect" parent="ParchmentUI/Control" unique_id=1918587453]
 layout_mode = 0
 offset_left = 93.0
 offset_top = -97.0
 offset_right = 893.0
 offset_bottom = 703.0
-texture = ExtResource("9_usf6k")
+texture = ExtResource("9_03gty")
 
-[node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=980985614]
+[node name="TextoDica" type="RichTextLabel" parent="ParchmentUI/Control/BackgroundPapel" unique_id=2081918886]
 custom_minimum_size = Vector2(160, 80)
 layout_mode = 0
 offset_left = 174.0
@@ -76,7 +76,7 @@ offset_top = 273.0
 offset_right = 334.0
 offset_bottom = 353.0
 
-[node name="BotoesContainer" type="HBoxContainer" parent="ParchmentUI/Control/BackgroundPapel" unique_id=2033761258]
+[node name="BotoesContainer" type="HBoxContainer" parent="ParchmentUI/Control/BackgroundPapel" unique_id=968188536]
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 1
 anchors_preset = 1
@@ -89,30 +89,30 @@ offset_bottom = 177.0
 grow_horizontal = 0
 theme_override_constants/separation = 50
 
-[node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=193937163]
+[node name="BtnEsquerda" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=678648479]
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
-texture_normal = ExtResource("10_t6pmr")
+texture_normal = ExtResource("10_4uu87")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=40138856]
+[node name="BtnFechar" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=2041718753]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-texture_normal = ExtResource("11_qq048")
+texture_normal = ExtResource("11_46ia3")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=894039325]
+[node name="BtnDireita" type="TextureButton" parent="ParchmentUI/Control/BackgroundPapel/BotoesContainer" unique_id=2026062830]
 custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-texture_normal = ExtResource("12_hj7mw")
+texture_normal = ExtResource("12_gs03e")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1006861391]
+[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1415269207]
 
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=3696239]
+[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=346653287]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -121,21 +121,21 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=1186250315]
+[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=1633501401]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
-[node name="PortaTransicao" parent="." unique_id=1036395039 instance=ExtResource("13_b3bx2")]
+[node name="PortaTransicao" parent="." unique_id=337095416 instance=ExtResource("13_gi63p")]
 position = Vector2(964, 201)
 
-[node name="PortaRetorno" parent="." unique_id=208915308 instance=ExtResource("13_b3bx2")]
+[node name="PortaRetorno" parent="." unique_id=558252051 instance=ExtResource("13_gi63p")]
 position = Vector2(437, 1435)
 porta_de_retorno = true
 
-[node name="CharacterBody2D" parent="." unique_id=1698167466 instance=ExtResource("14_r5s3g")]
+[node name="CharacterBody2D" parent="." unique_id=1698167466 instance=ExtResource("14_ngfdw")]
 position = Vector2(537, 931)
 
-[node name="CharacterBody2D2" parent="." unique_id=1993884800 instance=ExtResource("15_enuxp")]
+[node name="CharacterBody2D2" parent="." unique_id=1993884800 instance=ExtResource("15_hafof")]
 position = Vector2(936, 555)

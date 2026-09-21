@@ -160,15 +160,16 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_aiw76"]
-radius = 27.0
-height = 54.0
+radius = 51.0
+height = 114.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fbnk4"]
-radius = 28.0
+radius = 54.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1698167466]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2003832849]
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_r6fmd")
 frame_progress = 0.19650756
 
@@ -178,12 +179,12 @@ id_inimigo = "robo_p_amarelo"
 andar_id = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1348016517]
-position = Vector2(-1, 15)
+position = Vector2(1, 28)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_aiw76")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1148734232]
-position = Vector2(-1, 14)
+position = Vector2(0, 37)
 shape = SubResource("CircleShape2D_fbnk4")
 
 [connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]
