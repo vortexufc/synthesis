@@ -92,6 +92,12 @@ func _ready():
 	music_player.volume_db = 0
 	battle_player.volume_db = 0
 
+func _input(event: InputEvent) -> void:
+	if OS.has_feature("web"):
+		if event is InputEventMouseButton or event is InputEventKey:
+			if music_state == MusicState.MENU and music_player and not music_player.playing:
+				play_menu_music()
+
 # toca efeito sonoro
 func play_sfx(audio: String) -> void:
 	if not sfx.has(audio):

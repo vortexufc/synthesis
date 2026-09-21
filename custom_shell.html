@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>$GODOT_PROJECT_NAME</title>
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	color: white;
+	background-color: #0b0e14;
+	overflow: hidden;
+	touch-action: none;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+
+#status {
+	background-color: #0d121d;
+	background: radial-gradient(circle at center, #182238 0%, #0b0e17 100%);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+	z-index: 100;
+}
+
+#status-splash {
+	max-height: 70%;
+	max-width: 85%;
+	margin: auto;
+	object-fit: contain;
+	filter: drop-shadow(0 0 25px rgba(0, 136, 255, 0.3));
+}
+
+#status-progress, #status-notice {
+	display: none;
+}
+
+#status-progress {
+	position: absolute;
+	bottom: 12%;
+	width: 40%;
+	min-width: 280px;
+	height: 14px;
+	margin: 0 auto;
+	border-radius: 7px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(0, 136, 255, 0.4);
+	box-shadow: 0 0 15px rgba(0, 136, 255, 0.2);
+}
+
+#status-progress::-webkit-progress-bar {
+	background: rgba(10, 15, 25, 0.8);
+}
+
+#status-progress::-webkit-progress-value {
+	background: linear-gradient(90deg, #0088ff, #00ffcc);
+	border-radius: 6px;
+	box-shadow: 0 0 10px #00ffff;
+}
+
+#status-progress::-moz-progress-bar {
+	background: linear-gradient(90deg, #0088ff, #00ffcc);
+	border-radius: 6px;
+	box-shadow: 0 0 10px #00ffff;
+}
+
+#loading-label {
+	position: absolute;
+	bottom: calc(12% + 22px);
+	font-size: 14px;
+	font-weight: bold;
+	letter-spacing: 2px;
+	color: #7abaff;
+	text-transform: uppercase;
+	text-shadow: 0 0 8px rgba(0, 136, 255, 0.6);
+}
+
+#start-prompt {
+	display: none;
+	position: absolute;
+	bottom: 10%;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.btn-start-game {
+	background: linear-gradient(135deg, #0055ff, #0099ff);
+	color: #ffffff;
+	border: 2px solid #66c2ff;
+	border-radius: 8px;
+	padding: 14px 36px;
+	font-size: 18px;
+	font-weight: bold;
+	letter-spacing: 2px;
+	cursor: pointer;
+	box-shadow: 0 0 20px rgba(0, 136, 255, 0.6);
+	transition: all 0.2s ease-in-out;
+	animation: pulse-glow 1.5s infinite alternate;
+}
+
+.btn-start-game:hover {
+	transform: scale(1.05);
+	background: linear-gradient(135deg, #0066ff, #00bfff);
+	box-shadow: 0 0 30px rgba(0, 200, 255, 0.9);
+}
+
+@keyframes pulse-glow {
+	0% {
+		box-shadow: 0 0 15px rgba(0, 136, 255, 0.4);
+		border-color: #66c2ff;
+	}
+	100% {
+		box-shadow: 0 0 30px rgba(0, 200, 255, 0.85);
+		border-color: #ffffff;
+	}
+}
+
+#status-notice {
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+		</style>
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+		<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">
+			Seu navegador não suporta a tag canvas.
+		</canvas>
+
+		<noscript>
+			Seu navegador não possui JavaScript ativado.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="$GODOT_SPLASH" alt="Synthesis">
+			<div id="loading-label">Carregando...</div>
+			<progress id="status-progress"></progress>
+			<div id="start-prompt">
+				<button class="btn-start-game" id="btn-start">&#9654; CLIQUE PARA INICIAR</button>
+				<span style="font-size: 12px; color: #8fa0c0; text-shadow: 0 0 4px #000;">(ou pressione qualquer tecla)</span>
+			</div>
+			<div id="status-notice"></div>
+		</div>
+
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const loadingLabel = document.getElementById('loading-label');
+	const startPrompt = document.getElementById('start-prompt');
+	const btnStart = document.getElementById('btn-start');
+	const statusNotice = document.getElementById('status-notice');
+	const canvas = document.getElementById('canvas');
+
+	let initializing = true;
+	let statusMode = '';
+	let userInteracted = false;
+	let gameLoaded = false;
+
+	function unlockAudio() {
+		userInteracted = true;
+		try {
+			const AudioCtx = window.AudioContext || window.webkitAudioContext;
+			if (AudioCtx) {
+				const ctx = new AudioCtx();
+				ctx.resume().then(() => {
+					setTimeout(() => { try { ctx.close(); } catch(e){} }, 500);
+				});
+			}
+		} catch (e) {
+			console.warn('AudioContext unlock:', e);
+		}
+	}
+
+	function onUserGesture() {
+		unlockAudio();
+		if (gameLoaded) {
+			startGameplay();
+		}
+	}
+
+	window.addEventListener('pointerdown', onUserGesture, { capture: true });
+	window.addEventListener('keydown', onUserGesture, { capture: true });
+	window.addEventListener('touchstart', onUserGesture, { capture: true });
+
+	function startGameplay() {
+		if (!initializing) return;
+		unlockAudio();
+		setStatusMode('hidden');
+		try {
+			canvas.focus();
+			const evt = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window });
+			canvas.dispatchEvent(evt);
+		} catch (e) {}
+	}
+
+	if (btnStart) {
+		btnStart.addEventListener('click', (e) => {
+			e.stopPropagation();
+			startGameplay();
+		});
+	}
+
+	if (statusOverlay) {
+		statusOverlay.addEventListener('click', () => {
+			if (gameLoaded) {
+				startGameplay();
+			}
+		});
+	}
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) {
+			return;
+		}
+		if (mode === 'hidden') {
+			statusOverlay.remove();
+			initializing = false;
+			return;
+		}
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		if (loadingLabel) loadingLabel.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) {
+			statusNotice.removeChild(statusNotice.lastChild);
+		}
+		const lines = text.split('\n');
+		lines.forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+
+	function displayFailureNotice(err) {
+		console.error(err);
+		if (err instanceof Error) {
+			setStatusNotice(err.message);
+		} else if (typeof err === 'string') {
+			setStatusNotice(err);
+		} else {
+			setStatusNotice('Ocorreu um erro ao carregar o jogo.');
+		}
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({
+		threads: GODOT_THREADS_ENABLED,
+	});
+
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let serviceWorkerRegistrationPromise;
+			try {
+				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+			} catch (err) {
+				serviceWorkerRegistrationPromise = Promise.reject(new Error('Falha no Service worker.'));
+			}
+			Promise.race([
+				serviceWorkerRegistrationPromise.then((registration) => {
+					if (registration != null) {
+						return Promise.reject(new Error('Service worker já existe.'));
+					}
+					return registration;
+				}).then(() => engine.installServiceWorker()),
+				new Promise((resolve) => {
+					setTimeout(() => resolve(), 2000);
+				}),
+			]).then(() => {
+				window.location.reload();
+			}).catch((err) => {
+				console.error('Erro ao registrar service worker:', err);
+			});
+		} else {
+			const missingMsg = 'Erro\nRecursos necessários para rodar no navegador estão ausentes:\n';
+			displayFailureNotice(missingMsg + missing.join('\n'));
+		}
+	} else {
+		setStatusMode('progress');
+		engine.startGame({
+			'onProgress': function (current, total) {
+				if (current > 0 && total > 0) {
+					statusProgress.value = current;
+					statusProgress.max = total;
+					var percent = Math.floor((current / total) * 100);
+					if (loadingLabel) loadingLabel.textContent = 'Carregando... ' + percent + '%';
+				} else {
+					statusProgress.removeAttribute('value');
+					statusProgress.removeAttribute('max');
+				}
+			},
+		}).then(() => {
+			gameLoaded = true;
+			const hasActive = (navigator.userActivation && navigator.userActivation.hasBeenActive) || userInteracted;
+			if (hasActive) {
+				startGameplay();
+			} else {
+				statusProgress.style.display = 'none';
+				if (loadingLabel) loadingLabel.style.display = 'none';
+				if (startPrompt) {
+					startPrompt.style.display = 'flex';
+				}
+			}
+		}, displayFailureNotice);
+	}
+}());
+		</script>
+	</body>
+</html>
