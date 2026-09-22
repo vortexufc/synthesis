@@ -156,6 +156,38 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 					"speed": randf_range(2.0, 4.0),
 					"offset": randf() * 10.0
 				})
+			# luz da luminaria da mesa de projetos (lampada + foco na mesa)
+			elif atlas in [Vector2i(70, 5), Vector2i(75, 5)]:
+				var luz_mesa = PointLight2D.new()
+				luz_mesa.name = "LuzMesaProjetos_" + cell_id
+				luz_mesa.texture = tex_luz
+				luz_mesa.color = Color(1.0, 0.97, 0.84, 1.0) # Luz quente/brilhante de abajur sobre o mapa
+				luz_mesa.energy = 0.95
+				luz_mesa.texture_scale = 1.6
+				luz_mesa.position = cell_world + Vector2(72, 45)
+				add_child(luz_mesa)
+				_luzes_telas.append({
+					"node": luz_mesa,
+					"base_energy": 0.95,
+					"speed": randf_range(1.5, 3.5),
+					"offset": randf() * 10.0
+				})
+				
+				# Foco de luz direto no bulbo da lampada
+				var luz_bulbo = PointLight2D.new()
+				luz_bulbo.name = "LuzBulboMesa_" + cell_id
+				luz_bulbo.texture = tex_luz
+				luz_bulbo.color = Color(1.0, 1.0, 0.95, 1.0)
+				luz_bulbo.energy = 0.7
+				luz_bulbo.texture_scale = 0.5
+				luz_bulbo.position = cell_world + Vector2(70, 32)
+				add_child(luz_bulbo)
+				_luzes_telas.append({
+					"node": luz_bulbo,
+					"base_energy": 0.7,
+					"speed": randf_range(2.0, 4.0),
+					"offset": randf() * 10.0
+				})
 				
 		# ventiladores
 		elif src_id == 1:
