@@ -57,6 +57,11 @@ func carregar_progresso() -> void:
 			active_dungeon = data.get("active_dungeon", "")
 	file.close()
 
+func resetar_expedicao_ativa() -> void:
+	active_dungeon = ""
+	salvar_progresso()
+	print("[DatabaseManager] Expedição ativa resetada com sucesso!")
+
 
 # monta o header e envia requisicao pro supabase
 # exemplo: /rest/v1/alunos

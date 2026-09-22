@@ -148,5 +148,5 @@ func _atualizar_lista():
 	for item in lista_dados:
 		var node = item_cena.instantiate()
 		container_lista.add_child(node)
-		node.set_info(pos, item["name"], item["score"], eh_cla)
+		node.set_info(pos, item["name"], item["score"], eh_cla, item)
 		pos += 1

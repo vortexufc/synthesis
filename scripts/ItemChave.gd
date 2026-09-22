@@ -209,9 +209,15 @@ func coletar() -> void:
 	if _tween_glow and _tween_glow.is_valid(): _tween_glow.kill()
 	if _tween_bob and _tween_bob.is_valid(): _tween_bob.kill()
 	
+	var pos_coleta = global_position
+	var sprite = get_node_or_null("Sprite2D")
+	if sprite:
+		pos_coleta = sprite.global_position
+		
 	var part = CPUParticles2D.new()
-	part.global_position = global_position
-	part.z_index = 10
+	part.top_level = true
+	part.z_index = 15
+	part.local_coords = false
 	
 	var mat_p = CanvasItemMaterial.new()
 	mat_p.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
@@ -243,9 +249,18 @@ func coletar() -> void:
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([Color(1.0, 0.95, 0.4, 1.0), Color(1.0, 0.5, 0.05, 0.0)])
 	part.color_ramp = grad
-	get_parent().add_child(part)
+	
+	var arvore = get_tree()
+	var pai = arvore.current_scene if (arvore and arvore.current_scene) else get_parent()
+	if pai:
+		pai.add_child(part)
+	else:
+		get_tree().root.add_child(part)
+	part.global_position = pos_coleta
 	part.emitting = true
-	get_tree().create_timer(0.7).timeout.connect(part.queue_free)
+	part.restart()
+	if arvore:
+		arvore.create_timer(0.7).timeout.connect(part.queue_free)
 	
 	var tween_coleta = create_tween()
 	tween_coleta.set_parallel(true)

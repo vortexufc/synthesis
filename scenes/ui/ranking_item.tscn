@@ -36,10 +36,19 @@ custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
 
 [node name="LblNome" type="Label" parent="HBox"]
+custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
-size_flags_horizontal = 3
 text = "Nome do Jogador"
 vertical_alignment = 1
+
+[node name="ContainerInsignias" type="HBoxContainer" parent="HBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Spacer" type="Control" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="LblScore" type="Label" parent="HBox"]
 custom_minimum_size = Vector2(150, 0)

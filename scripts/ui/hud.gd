@@ -50,6 +50,7 @@ func _ready() -> void:
 	_ultimas_concluidas = PlayerStats.quests_concluidas.duplicate()
 	PlayerStats.quests_atualizadas.connect(_verificar_mudancas_quest)
 
+
 func _criar_painel_toast() -> void:
 	_toast_panel = PanelContainer.new()
 	_toast_panel.name = "ToastNotificacaoQuest"
@@ -193,3 +194,4 @@ func atualizar_vida(atual: float, maxima: float) -> void:
 		tween.finished.connect(func(): fill.visible = false, CONNECT_ONE_SHOT)
 	
 	text_label.text = str(max(0, int(atual))) + " / " + str(int(maxima))
+

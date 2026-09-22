@@ -473,7 +473,10 @@ func _contar_item(nome_item: String) -> int:
 	if not get_node_or_null("/root/PlayerStats"): return 0
 	var contagem = 0
 	for item in PlayerStats.itens:
-		if item["nome"] == nome_item:
+		var nome_it = item.get("nome", "")
+		if nome_it == nome_item:
+			contagem += 1
+		elif nome_item == "Fragmento de Gelatina" and ("Gelatina" in nome_it or item.has("cor")):
 			contagem += 1
 	return contagem
 
@@ -485,7 +488,10 @@ func _vender_sucata(nome_item: String, qtd_necessaria: int, recompensa: int) -> 
 		var removidos = 0
 		var i = PlayerStats.itens.size() - 1
 		while i >= 0 and removidos < qtd_necessaria:
-			if PlayerStats.itens[i]["nome"] == nome_item:
+			var it = PlayerStats.itens[i]
+			var nome_it = it.get("nome", "")
+			var e_match = (nome_it == nome_item) or (nome_item == "Fragmento de Gelatina" and ("Gelatina" in nome_it or it.has("cor")))
+			if e_match:
 				PlayerStats.itens.remove_at(i)
 				removidos += 1
 			i -= 1

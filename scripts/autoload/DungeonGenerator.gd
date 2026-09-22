@@ -259,19 +259,20 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	inimigos_derrotados.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
 	
-	var active = "Química"
+	var active = ""
 	if forcar_dungeon != "":
 		active = forcar_dungeon
 		masmorra_retorno_hub = forcar_dungeon
 		if get_node_or_null("/root/DatabaseManager"):
 			DatabaseManager.active_dungeon = forcar_dungeon
+			if DatabaseManager.has_method("salvar_progresso"):
+				DatabaseManager.salvar_progresso()
 	elif get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
 		active = DatabaseManager.active_dungeon
 		masmorra_retorno_hub = active
 	else:
-		masmorra_retorno_hub = "Química"
-		if get_node_or_null("/root/DatabaseManager"):
-			DatabaseManager.active_dungeon = "Química"
+		masmorra_retorno_hub = ""
+		active = ""
 	
 	# coloca o hub no inicio
 	percurso_salas.append(hub_geral)
@@ -289,7 +290,7 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		# ultima sala: boss robo
 		percurso_salas.append(sala_boss_fisica)
 		print("[DungeonGenerator] Masmorra de Física gerada com %d salas (Sala 01 -> 6 sorteadas -> Boss 12)." % [percurso_salas.size() - 1])
-	else:
+	elif active == "Química":
 		# andar de quimica:
 		# comeca na sala 1
 		percurso_salas.append(sala_01)
@@ -303,3 +304,5 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		# ultima sala: boss slime
 		percurso_salas.append(sala_boss_alquimia)
 		print("[DungeonGenerator] Masmorra de Química gerada com %d salas (Sala 01 -> 6 sorteadas -> Boss Alquimia)." % [percurso_salas.size() - 1])
+	else:
+		print("[DungeonGenerator] Nenhuma expedição ativa (Aguardando escolha de porta no Hub).")

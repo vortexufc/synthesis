@@ -31,6 +31,7 @@ var quests_ativas: Dictionary = {}
 signal vida_alterada(atual, maxima)
 @warning_ignore("unused_signal")
 signal quests_atualizadas()
+signal insignias_atualizadas()
 
 const SAVE_PATH = "user://save.json"
 
@@ -54,6 +55,7 @@ func _inicializar_dados_padrao():
 	salvar()
 
 func salvar():
+	_normalizar_itens()
 	var save_dict = {
 		"vida_atual_jogador": vida_atual_jogador,
 		"pocoes": pocoes,
@@ -86,17 +88,58 @@ func carregar():
 			quests_concluidas = data.get("quests_concluidas", {})
 			quests_ativas = data.get("quests_ativas", {})
 			
+			_normalizar_itens()
 			vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 		else:
 			_inicializar_dados_padrao()
 	else:
 		_inicializar_dados_padrao()
 
+# garante que fragmentos gelatinosos sejam identificados individualmente pela cor
+func _normalizar_itens() -> void:
+	for it in itens:
+		if not it is Dictionary: continue
+		var nome = it.get("nome", "")
+		var cor = it.get("cor", "")
+		if nome == "Fragmento de Gelatina" or "Gelatina" in nome or cor != "":
+			if cor == "":
+				cor = "azul"
+			if cor == "verde" or "verde" in nome.to_lower():
+				it["nome"] = "Fragmento Gelatinoso Verde"
+				it["cor"] = "verde"
+				it["descricao"] = "Um fragmento pegajoso e ácido deixado por um slime verde."
+			elif cor == "vermelho" or "vermelh" in nome.to_lower() or "laranja" in nome.to_lower():
+				it["nome"] = "Fragmento Gelatinoso Vermelho"
+				it["cor"] = "vermelho"
+				it["descricao"] = "Um fragmento pegajoso e incandescente deixado por um slime vermelho."
+			else:
+				it["nome"] = "Fragmento Gelatinoso Azul"
+				it["cor"] = "azul"
+				it["descricao"] = "Um fragmento pegajoso e translúcido deixado por um slime azul."
+
 func desbloquear_vinheta(andar_id: int) -> void:
 	if not vinhetas_desbloqueadas.has(andar_id):
 		vinhetas_desbloqueadas.append(andar_id)
 		salvar()
-		print("[PlayerStats] Nova Vinheta Desbloqueada para o Andar %d!" % andar_id)
+		insignias_atualizadas.emit()
+		print("[PlayerStats] Nova Vinheta/Insígnia Desbloqueada para o Andar %d!" % andar_id)
+
+func tem_insignia(andar_id: int) -> bool:
+	return vinhetas_desbloqueadas.has(andar_id)
+
+func resetar_insignias() -> void:
+	vinhetas_desbloqueadas.clear()
+	salvar()
+	insignias_atualizadas.emit()
+	print("[PlayerStats] Insígnias resetadas!")
+
+func desbloquear_todas_insignias() -> void:
+	for i in [1, 2, 3]:
+		if not vinhetas_desbloqueadas.has(i):
+			vinhetas_desbloqueadas.append(i)
+	salvar()
+	insignias_atualizadas.emit()
+	print("[PlayerStats] Todas as insígnias foram desbloqueadas!")
 
 
 # limpa os pergaminhos lidos
