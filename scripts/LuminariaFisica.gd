@@ -11,19 +11,19 @@ enum Orientacao { NORTE = 0, OESTE = 1, LESTE = 2 }
 		if is_node_ready():
 			_aplicar_orientacao()
 
-@export var cor_luz: Color = Color(0.75, 0.90, 1.0, 1.0):
+@export var cor_luz: Color = Color(0.78, 0.92, 1.0, 1.0):
 	set(value):
 		cor_luz = value
 		if is_node_ready() and _luz:
 			_luz.color = cor_luz
 
-@export var energia_base: float = 0.75:
+@export var energia_base: float = 0.95:
 	set(value):
 		energia_base = value
 		if is_node_ready() and _luz:
 			_luz.energy = energia_base
 
-@export var escala_base: float = 1.8:
+@export var escala_base: float = 2.1:
 	set(value):
 		escala_base = value
 		if is_node_ready() and _luz:

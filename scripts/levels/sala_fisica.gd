@@ -9,9 +9,9 @@ var monstros_na_sala: int = 0
 @export var dropar_chave_no_ultimo_monstro: bool = false
 
 @export_group("Iluminação Ambiente")
-# cor da iluminacao da sala
-@export var cor_ambiente: Color = Color(0.74, 0.78, 0.84, 1.0)
-@export var energia_aura_player: float = 0.38
+# cor da iluminacao da sala (tom escuro de laboratorio para destacar as luminarias)
+@export var cor_ambiente: Color = Color(0.25, 0.28, 0.35, 1.0)
+@export var energia_aura_player: float = 0.42
 
 var _canvas_modulate: CanvasModulate = null
 var _luz_player: PointLight2D = null
