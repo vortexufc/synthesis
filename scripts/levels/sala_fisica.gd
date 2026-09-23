@@ -158,13 +158,27 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 				})
 			# luz da luminaria da mesa de projetos (lampada + foco na mesa)
 			elif atlas in [Vector2i(70, 5), Vector2i(75, 5)]:
+				var alt = decor.get_cell_alternative_tile(cell)
+				var is_flipped = bool(alt & TileSetAtlasSource.TRANSFORM_FLIP_H)
+				
+				# Se a mesa estiver invertida horizontalmente (alt: 4096), a lampada fica a esquerda e a planta a direita.
+				# Se for orientacao padrao (alt: 0), a lampada fica a direita e a planta a esquerda.
+				var pos_mesa: Vector2
+				var pos_bulbo: Vector2
+				if is_flipped:
+					pos_mesa = cell_world + Vector2(72, 45)
+					pos_bulbo = cell_world + Vector2(28, 14)
+				else:
+					pos_mesa = cell_world + Vector2(-25, 45)
+					pos_bulbo = cell_world + Vector2(20, 14)
+					
 				var luz_mesa = PointLight2D.new()
 				luz_mesa.name = "LuzMesaProjetos_" + cell_id
 				luz_mesa.texture = tex_luz
 				luz_mesa.color = Color(1.0, 0.97, 0.84, 1.0) # Luz quente/brilhante de abajur sobre o mapa
 				luz_mesa.energy = 0.95
 				luz_mesa.texture_scale = 1.6
-				luz_mesa.position = cell_world + Vector2(72, 45)
+				luz_mesa.position = pos_mesa
 				add_child(luz_mesa)
 				_luzes_telas.append({
 					"node": luz_mesa,
@@ -180,7 +194,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 				luz_bulbo.color = Color(1.0, 1.0, 0.95, 1.0)
 				luz_bulbo.energy = 0.7
 				luz_bulbo.texture_scale = 0.5
-				luz_bulbo.position = cell_world + Vector2(70, 32)
+				luz_bulbo.position = pos_bulbo
 				add_child(luz_bulbo)
 				_luzes_telas.append({
 					"node": luz_bulbo,
