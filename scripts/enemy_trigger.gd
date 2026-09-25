@@ -3,6 +3,8 @@ extends Area2D
 # area de deteccao do inimigo
 # quando o player entra aqui comeca a batalha
 
+signal inimigo_derrotado(pos: Vector2)
+
 @export var id_inimigo:        String = "slime_p"
 @export var num_questoes:      int   = 5
 @export var duracao_batalha:   float = 300.0
@@ -23,6 +25,16 @@ func _ready() -> void:
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
 	call_deferred("_garantir_alcance_trigger")
+
+	var pai = get_parent()
+	if pai:
+		if get_node_or_null("/root/DungeonGenerator"):
+			var room_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else ""
+			var key = room_path + "::" + pai.name
+			if DungeonGenerator.is_inimigo_derrotado(key):
+				pai.queue_free()
+				return
+		pai.add_to_group("inimigos")
 
 func _garantir_alcance_trigger() -> void:
 	var pai = get_parent()
@@ -112,6 +124,11 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 			if pai.has_method("derrotar"):
 				pai.derrotar()
 			else:
+				var pos = pai.global_position
+				_dropar_moeda_padrao(pos)
+				inimigo_derrotado.emit(pos)
+				if pai.has_signal("inimigo_derrotado"):
+					pai.emit_signal("inimigo_derrotado", pos)
 				pai.queue_free()
 		else:
 			if get_node_or_null("/root/DungeonGenerator"):
@@ -121,6 +138,9 @@ func _on_batalha_encerrada(vitoria: bool) -> void:
 			if has_method("derrotar"):
 				call("derrotar")
 			else:
+				var pos = global_position
+				_dropar_moeda_padrao(pos)
+				inimigo_derrotado.emit(pos)
 				queue_free()
 
 func _on_body_entered(body: Node2D) -> void:
@@ -191,3 +211,15 @@ func _on_body_entered(body: Node2D) -> void:
 	GlobalSignals.iniciar_batalha.emit(enemy_data)
 	hide()
 	set_deferred("monitoring", false)
+
+func _dropar_moeda_padrao(pos: Vector2) -> void:
+	var cena_moeda = load("res://scenes/Entidades/Items/ItemMoeda.tscn")
+	if not cena_moeda:
+		cena_moeda = load("res://scenes/Entidades/ItemMoeda.tscn")
+	if not cena_moeda:
+		return
+	var moeda = cena_moeda.instantiate()
+	var pai_sala = get_tree().current_scene
+	if pai_sala:
+		moeda.position = pai_sala.to_local(pos)
+		pai_sala.call_deferred("add_child", moeda)

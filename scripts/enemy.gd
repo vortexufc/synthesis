@@ -508,21 +508,21 @@ func _dropar_itens() -> void:
 
 	# boss roxo só dá moeda
 	if is_boss_slime:
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		if eh_runico:
-			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+			_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		return
 
 	# boss robo
 	if is_boss:
 		if is_fisica:
-			_instanciar_drop("res://scenes/Entidades/ItemChip.tscn")
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+			_instanciar_drop("res://scenes/Entidades/Items/ItemChip.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		if eh_runico:
-			_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+			_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		return
 
 	# acha a cor certa do slime
@@ -536,21 +536,23 @@ func _dropar_itens() -> void:
 
 	# dropa item e moeda
 	if is_quimica:
-		_instanciar_drop("res://scenes/Entidades/ItemFragmentoGelatina.tscn", {"cor": cor_slime})
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemFragmentoGelatina.tscn", {"cor": cor_slime})
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 	elif is_fisica:
-		_instanciar_drop("res://scenes/Entidades/ItemChip.tscn")
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemChip.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 	else:
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 
 	# bicho runico da mais moeda
 	if eh_runico:
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
-		_instanciar_drop("res://scenes/Entidades/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 
 func _instanciar_drop(caminho: String, dados_custom: Dictionary = {}) -> void:
 	var cena = load(caminho)
+	if not cena and not ("/Items/" in caminho):
+		cena = load(caminho.replace("res://scenes/Entidades/", "res://scenes/Entidades/Items/"))
 	if not cena: return
 	var item = cena.instantiate()
 	

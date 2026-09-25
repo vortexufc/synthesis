@@ -37,7 +37,9 @@ func _on_inimigo_derrotado(pos: Vector2) -> void:
 
 func _dropar_chave(pos: Vector2) -> void:
 	print("Último robô morto! Dropando a chave!")
-	var cena_chave = load("res://scenes/Entidades/ItemChave.tscn")
+	var cena_chave = load("res://scenes/Entidades/Items/ItemChave.tscn")
+	if not cena_chave:
+		cena_chave = load("res://scenes/Entidades/ItemChave.tscn")
 	if not cena_chave: return
 	var chave = cena_chave.instantiate()
 	chave.position = to_local(pos)

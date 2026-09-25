@@ -32,11 +32,11 @@ enum TipoItem {
 # caminhos das cenas dos itens
 const CENAS_PADRAO = {
 	TipoItem.PERGAMINHO: "res://scenes/Objetos/pergaminho.tscn",
-	TipoItem.LIVRO_QUIMICA: "res://scenes/Entidades/ItemLivroFormula.tscn",
-	TipoItem.BATERIA_FISICA: "res://scenes/Entidades/ItemBateria.tscn",
-	TipoItem.CHIP_FISICA: "res://scenes/Entidades/ItemChip.tscn",
-	TipoItem.MOEDA: "res://scenes/Entidades/ItemMoeda.tscn",
-	TipoItem.CHAVE: "res://scenes/Entidades/ItemChave.tscn"
+	TipoItem.LIVRO_QUIMICA: "res://scenes/Entidades/Items/ItemLivroFormula.tscn",
+	TipoItem.BATERIA_FISICA: "res://scenes/Entidades/Items/ItemBateria.tscn",
+	TipoItem.CHIP_FISICA: "res://scenes/Entidades/Items/ItemChip.tscn",
+	TipoItem.MOEDA: "res://scenes/Entidades/Items/ItemMoeda.tscn",
+	TipoItem.CHAVE: "res://scenes/Entidades/Items/ItemChave.tscn"
 }
 
 func _ready() -> void:

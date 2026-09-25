@@ -52,6 +52,11 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	
+	var porta_key = _obter_porta_id()
+	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.is_porta_destrancada(porta_key):
+		_chave_usada = true
+		_porta_aberta = true
+	
 	_sprite_porta = get_node_or_null("SpritePorta")
 	if _sprite_porta and _sprite_porta.region_enabled:
 		_base_region_rect = _sprite_porta.region_rect
@@ -141,6 +146,12 @@ func _process(delta: float) -> void:
 func _sala_requer_chave() -> bool:
 	if porta_de_retorno or is_hub_door:
 		return false
+	if _is_sala_boss():
+		return false
+	if _chave_usada:
+		return false
+	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.is_porta_destrancada(_obter_porta_id()):
+		return false
 	if precisa_de_chave:
 		return true
 		
@@ -157,6 +168,10 @@ func _sala_requer_chave() -> bool:
 		return true
 		
 	return false
+
+func _obter_porta_id() -> String:
+	var cena_path = get_tree().current_scene.scene_file_path if (get_tree() and get_tree().current_scene) else ""
+	return cena_path + "::" + name
 
 # mostra o prompt na tela igual a porta trancada
 func _exibir_prompt_tranca() -> void:
@@ -216,10 +231,10 @@ func _atualizar_texto_prompt_tranca() -> void:
 	var tem_chave = get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0
 	
 	if tem_chave or ignorar:
-		_label_prompt_chave.text = "Pressione [F] para Usar a Chave Secreta"
+		_label_prompt_chave.text = "Pressione [F] para Destrancar a Porta"
 		_label_prompt_chave.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
 	else:
-		_label_prompt_chave.text = "Use a chave secreta para acessar essa porta."
+		_label_prompt_chave.text = "A porta está trancada. Derrote os monstros para obter a chave."
 		_label_prompt_chave.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 
 func _remover_prompt_tranca() -> void:
@@ -246,6 +261,9 @@ func _tentar_abrir_com_chave_f() -> void:
 			PlayerStats.salvar()
 			
 	_chave_usada = true
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.registrar_porta_destrancada(_obter_porta_id())
+		
 	_remover_prompt_tranca()
 	
 	if get_node_or_null("/root/AudioManager"):
@@ -690,7 +708,7 @@ func _is_sala_boss() -> bool:
 	if get_node_or_null("/root/DungeonGenerator"):
 		if DungeonGenerator.has_method("is_sala_boss") and DungeonGenerator.is_sala_boss(cena_atual):
 			return true
-	return ("boss" in cena_atual) or ("fisica12" in cena_atual) or ("física12" in cena_atual)
+	return ("boss" in cena_atual) or ("fisica12" in cena_atual) or ("física12" in cena_atual) or ("biologia04" in cena_atual)
 
 func _obter_andar_atual() -> int:
 	var cena_atual = ""
