@@ -457,45 +457,54 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
 		print("[DungeonGenerator] Masmorra de Física gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	elif active == "Química":
-		# andar de quimica com progressão ordenada:
-		# Corredor -> 3 azuis (Sala 01 fixa + 2 intermediárias azuis) -> 2 verdes -> 2 vermelhas -> Boss
+		# andar de quimica com progressão ordenada e layout randômico:
+		# Index 0: Hub Geral (já adicionado)
+		# Index 1: Corredor_Alquimia (sala_inicial)
+		# Index 2: Sala_Alquimia01 (sala_01 fixa) -> 1ª sala de combate (Azul / Tier 1)
 		percurso_salas.append(sala_inicial)
 		percurso_salas.append(sala_01)
 		
-		var salas_candidatas_chave: Array = [sala_01]
+		# Sorteia 6 salas intermediárias dentre todo o pool disponível (Sala 02 a Sala 14) sem repetição
+		var pool_intermediarias = salas_alquimia_pool.duplicate()
+		pool_intermediarias.shuffle()
+		var salas_intermediarias_escolhidas: Array = []
+		for i in range(min(6, pool_intermediarias.size())):
+			var s = pool_intermediarias[i]
+			percurso_salas.append(s)
+			salas_intermediarias_escolhidas.append(s)
 		
-		# --- TIER 1: 2 salas azuis (sala_01 já é a 1ª azul, totalizando 3 azuis na run) ---
-		var pool_azul = salas_alquimia_tier1.duplicate()
-		pool_azul.shuffle()
-		var qtd_azul = min(2, pool_azul.size())
-		for i in range(qtd_azul):
-			percurso_salas.append(pool_azul[i])
-			salas_candidatas_chave.append(pool_azul[i])
-		
-		# --- TIER 2: 2 salas verdes nativas (Sala 04 e Sala 05) ---
-		var pool_verde = salas_alquimia_tier2.duplicate()
-		pool_verde.shuffle()
-		var qtd_verde = min(2, pool_verde.size())
-		for i in range(qtd_verde):
-			percurso_salas.append(pool_verde[i])
-			salas_candidatas_chave.append(pool_verde[i])
-		
-		# --- TIER 3: 2 salas vermelhas/laranjas nativas (Sala 06 e Sala 07) ---
-		var pool_vermelho = salas_alquimia_tier3.duplicate()
-		pool_vermelho.shuffle()
-		var qtd_vermelho = min(2, pool_vermelho.size())
-		for i in range(qtd_vermelho):
-			percurso_salas.append(pool_vermelho[i])
-			salas_candidatas_chave.append(pool_vermelho[i])
-		
-		# ultima sala: boss slime
+		# Index 9: Boss Slime Roxo (sala_boss_alquimia fixa)
 		percurso_salas.append(sala_boss_alquimia)
 		
-		# sorteia exatamente 2 salas para ter mecânica de chave
-		_sortear_salas_com_chave(salas_candidatas_chave, 2)
-		print("[DungeonGenerator] Masmorra de Química gerada com progressão: 3 azuis -> 2 verdes -> 2 vermelhas -> Boss")
-		print("[DungeonGenerator] Percurso: %s" % str(percurso_salas))
-		print("[DungeonGenerator] Salas com chave: %s" % str(salas_com_chave))
+		# Define os Tiers da progressão de combate:
+		# Sequência exata: 3 azuis -> 2 verdes -> 2 vermelhas -> Boss
+		# Index 2 (Sala 01): Tier 1 (Azul)
+		# Index 3 (Intermediária 1): Tier 1 (Azul)
+		# Index 4 (Intermediária 2): Tier 1 (Azul)
+		# Index 5 (Intermediária 3): Tier 2 (Verde)
+		# Index 6 (Intermediária 4): Tier 2 (Verde)
+		# Index 7 (Intermediária 5): Tier 3 (Vermelho)
+		# Index 8 (Intermediária 6): Tier 3 (Vermelho)
+		tier_override[sala_01] = 1
+		tier_override[salas_intermediarias_escolhidas[0]] = 1
+		tier_override[salas_intermediarias_escolhidas[1]] = 1
+		tier_override[salas_intermediarias_escolhidas[2]] = 2
+		tier_override[salas_intermediarias_escolhidas[3]] = 2
+		tier_override[salas_intermediarias_escolhidas[4]] = 3
+		tier_override[salas_intermediarias_escolhidas[5]] = 3
+		
+		# Sorteia 2 salas entre as 7 salas de combate para ter a mecânica de chave
+		var candidatas_chave: Array = [sala_01]
+		candidatas_chave.append_array(salas_intermediarias_escolhidas)
+		_sortear_salas_com_chave(candidatas_chave, 2)
+		
+		print("[DungeonGenerator] Masmorra de Química gerada com progressão dinâmica:")
+		print("  - Index 2..4 (3 salas): TIER 1 - Azuis")
+		print("  - Index 5..6 (2 salas): TIER 2 - Verdes")
+		print("  - Index 7..8 (2 salas): TIER 3 - Vermelhos")
+		print("  - Index 9 (1 sala): BOSS - Roxo")
+		print("  - Percurso: ", percurso_salas)
+		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
 	elif active == "Biologia":
 		# andar de biologia (Estufa)
 		percurso_salas.append(sala_inicial_biologia)
@@ -526,19 +535,43 @@ func _sortear_salas_com_chave(candidatas: Array, quantidade: int) -> void:
 		salas_com_chave.append(pool[i])
 	print("[DungeonGenerator] Salas sorteadas para mecânica de chave: ", salas_com_chave)
 
-# retorna o tier de override para a sala (0 = sem override, usa nativo)
-func get_tier_override(arquivo_cena: String = "") -> int:
+# retorna o tier desejado para a sala de química
+# 1 = azul, 2 = verde, 3 = vermelho/laranja, 0 = sem alteração (boss/corredor/outros)
+func get_tier_da_sala(arquivo_cena: String = "") -> int:
 	var cena = arquivo_cena
 	if cena == "" and get_tree() and get_tree().current_scene:
 		cena = get_tree().current_scene.scene_file_path
 	if cena == "":
 		return 0
-	# busca exata
-	if tier_override.has(cena):
-		return tier_override[cena]
-	# busca case-insensitive
+		
+	var cena_lower = cena.to_lower()
+	if is_sala_boss(cena) or "boss" in cena_lower:
+		return 0
+		
+	# 1. Verifica override registrado no dicionário tier_override
+	var cena_file = cena_lower.get_file()
 	for key in tier_override:
-		if key.to_lower() == cena.to_lower():
+		var k_lower = key.to_lower()
+		if k_lower == cena_lower or (cena_file != "" and k_lower.get_file() == cena_file):
 			return tier_override[key]
+			
+	# 2. Fallback baseado no índice no percurso atual de Química
+	var masmorra = get_masmorra_da_cena(cena)
+	if masmorra == "Química":
+		var idx = get_index_da_cena(cena)
+		if idx >= 2 and idx <= 4:
+			return 1
+		elif idx >= 5 and idx <= 6:
+			return 2
+		elif idx >= 7 and idx <= 8:
+			return 3
+		elif idx >= 9:
+			return 0
+			
 	return 0
+
+# compatibilidade com chamadas de get_tier_override
+func get_tier_override(arquivo_cena: String = "") -> int:
+	return get_tier_da_sala(arquivo_cena)
+
 
