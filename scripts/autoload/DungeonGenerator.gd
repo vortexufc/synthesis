@@ -8,11 +8,10 @@ var sala_01 = "res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia01.tscn"
 var sala_boss_alquimia = "res://scenes/Salas/Laboratório_Alquimia/Sala_BossAlquimia.tscn"
 
 # pools de salas de quimica separados por dificuldade
-# Tier 1 (Azul) - slimes pequenos azuis
+# Tier 1 (Azul) - slimes pequenos azuis (8 salas intermediárias nativamente azuis)
 var salas_alquimia_tier1: Array = [
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia02.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia03.tscn",
-	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia04.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia09.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia10.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia11.tscn",
@@ -20,11 +19,12 @@ var salas_alquimia_tier1: Array = [
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia13.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia14.tscn"
 ]
-# Tier 2 (Verde) - slimes verdes
+# Tier 2 (Verde) - slimes verdes (2 salas nativamente verdes)
 var salas_alquimia_tier2: Array = [
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia04.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia05.tscn"
 ]
-# Tier 3 (Vermelho/Laranja) - slimes laranjas
+# Tier 3 (Vermelho/Laranja) - slimes laranjas/vermelhos (2 salas nativamente vermelhas)
 var salas_alquimia_tier3: Array = [
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia06.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia07.tscn"
@@ -182,8 +182,10 @@ func get_index_da_cena(cena: String) -> int:
 		print("[DungeonGenerator] Cena fora do percurso (%s). Regenerando percurso para %s..." % [cena, masmorra_da_cena])
 		resetar_masmorra(masmorra_da_cena)
 		
+	var cena_file = cena_lower.get_file()
 	for i in range(percurso_salas.size()):
-		if percurso_salas[i].to_lower() == cena_lower:
+		var p_lower = percurso_salas[i].to_lower()
+		if p_lower == cena_lower or (cena_file != "" and p_lower.get_file() == cena_file):
 			return i
 			
 	# equivalencias de nomes de salas
@@ -218,6 +220,7 @@ func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 		cena_atual = get_tree().current_scene.scene_file_path
 		
 	var cena_lower = cena_atual.to_lower()
+	var cena_file = cena_lower.get_file()
 	var masmorra_da_cena = get_masmorra_da_cena(cena_atual)
 	
 	# garante percurso da mesma materia
@@ -239,7 +242,7 @@ func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 			return sala_01
 		
 	# sincroniza o indice da sala atual
-	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_lower:
+	if indice_atual < percurso_salas.size() and (percurso_salas[indice_atual].to_lower() == cena_lower or (cena_file != "" and percurso_salas[indice_atual].to_lower().get_file() == cena_file)):
 		print("[DungeonGenerator] Avanço sincronizado no índice: ", indice_atual)
 	else:
 		# se trocou de sala por fora sincroniza o indice
@@ -319,7 +322,8 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 		return sala_inicial_biologia
 
 	# volta um indice no percurso
-	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_lower:
+	var cena_file = cena_lower.get_file()
+	if indice_atual < percurso_salas.size() and (percurso_salas[indice_atual].to_lower() == cena_lower or (cena_file != "" and percurso_salas[indice_atual].to_lower().get_file() == cena_file)):
 		print("[DungeonGenerator] Retorno sincronizado no índice: ", indice_atual)
 	else:
 		indice_atual = get_index_da_cena(cena_atual)
@@ -341,7 +345,7 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 			lista_completa = salas_biologia_pool
 			
 		for k in range(lista_completa.size()):
-			if lista_completa[k].to_lower() == cena_lower:
+			if lista_completa[k].to_lower() == cena_lower or (cena_file != "" and lista_completa[k].to_lower().get_file() == cena_file):
 				if k > 0:
 					return lista_completa[k - 1]
 				elif masmorra_da_cena == "Química":
@@ -387,9 +391,12 @@ func sala_usa_chave(arquivo_cena: String = "") -> bool:
 		cena = get_tree().current_scene.scene_file_path
 	if cena == "":
 		return false
+	var cena_lower = cena.to_lower()
+	var cena_file = cena_lower.get_file()
 	# busca exata no array de salas com chave
 	for s in salas_com_chave:
-		if s.to_lower() == cena.to_lower():
+		var s_lower = s.to_lower()
+		if s_lower == cena_lower or (cena_file != "" and s_lower.get_file() == cena_file):
 			return true
 	return false
 
@@ -451,59 +458,44 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		print("[DungeonGenerator] Masmorra de Física gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	elif active == "Química":
 		# andar de quimica com progressão ordenada:
-		# Corredor -> Sala 01 (azul) -> 2 azuis -> 2 verdes -> 2 vermelhas -> Boss
+		# Corredor -> 3 azuis (Sala 01 fixa + 2 intermediárias azuis) -> 2 verdes -> 2 vermelhas -> Boss
 		percurso_salas.append(sala_inicial)
 		percurso_salas.append(sala_01)
 		
-		var salas_intermediarias_escolhidas: Array = []
+		var salas_candidatas_chave: Array = [sala_01]
 		
-		# --- TIER 1: 2 salas azuis (sala_01 já é a 1ª azul) ---
+		# --- TIER 1: 2 salas azuis (sala_01 já é a 1ª azul, totalizando 3 azuis na run) ---
 		var pool_azul = salas_alquimia_tier1.duplicate()
 		pool_azul.shuffle()
 		var qtd_azul = min(2, pool_azul.size())
 		for i in range(qtd_azul):
 			percurso_salas.append(pool_azul[i])
-			salas_intermediarias_escolhidas.append(pool_azul[i])
+			salas_candidatas_chave.append(pool_azul[i])
 		
-		# --- TIER 2: 2 salas verdes ---
+		# --- TIER 2: 2 salas verdes nativas (Sala 04 e Sala 05) ---
 		var pool_verde = salas_alquimia_tier2.duplicate()
 		pool_verde.shuffle()
-		# pega o que tiver de verde nativo
-		var qtd_verde_nativo = min(2, pool_verde.size())
-		for i in range(qtd_verde_nativo):
+		var qtd_verde = min(2, pool_verde.size())
+		for i in range(qtd_verde):
 			percurso_salas.append(pool_verde[i])
-			salas_intermediarias_escolhidas.append(pool_verde[i])
-		# se faltar verde, pega uma sala azul e marca pra trocar inimigos
-		var verdes_faltando = 2 - qtd_verde_nativo
-		if verdes_faltando > 0:
-			var pool_azul_extra = []
-			for s in pool_azul:
-				if s not in salas_intermediarias_escolhidas:
-					pool_azul_extra.append(s)
-			for i in range(min(verdes_faltando, pool_azul_extra.size())):
-				var sala_promovida = pool_azul_extra[i]
-				percurso_salas.append(sala_promovida)
-				salas_intermediarias_escolhidas.append(sala_promovida)
-				tier_override[sala_promovida] = 2 # marca pra virar verde
-				print("[DungeonGenerator] Sala %s promovida para Tier 2 (Verde)" % sala_promovida)
+			salas_candidatas_chave.append(pool_verde[i])
 		
-		# --- TIER 3: 2 salas vermelhas/laranjas ---
+		# --- TIER 3: 2 salas vermelhas/laranjas nativas (Sala 06 e Sala 07) ---
 		var pool_vermelho = salas_alquimia_tier3.duplicate()
 		pool_vermelho.shuffle()
 		var qtd_vermelho = min(2, pool_vermelho.size())
 		for i in range(qtd_vermelho):
 			percurso_salas.append(pool_vermelho[i])
-			salas_intermediarias_escolhidas.append(pool_vermelho[i])
+			salas_candidatas_chave.append(pool_vermelho[i])
 		
 		# ultima sala: boss slime
 		percurso_salas.append(sala_boss_alquimia)
 		
-		# sorteia 2 salas intermediárias para ter mecânica de chave
-		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
+		# sorteia exatamente 2 salas para ter mecânica de chave
+		_sortear_salas_com_chave(salas_candidatas_chave, 2)
 		print("[DungeonGenerator] Masmorra de Química gerada com progressão: 3 azuis -> 2 verdes -> 2 vermelhas -> Boss")
 		print("[DungeonGenerator] Percurso: %s" % str(percurso_salas))
 		print("[DungeonGenerator] Salas com chave: %s" % str(salas_com_chave))
-		print("[DungeonGenerator] Tier overrides: %s" % str(tier_override))
 	elif active == "Biologia":
 		# andar de biologia (Estufa)
 		percurso_salas.append(sala_inicial_biologia)
