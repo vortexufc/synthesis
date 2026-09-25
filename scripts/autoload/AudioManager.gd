@@ -39,6 +39,8 @@ var sfx = {
 	"acerto_3": preload("res://assets/audio/sfx/acerto_3.wav"),
 	"win": preload("res://assets/audio/sfx/win.wav"),
 	"fail": preload("res://assets/audio/sfx/fail.wav"),
+	"erro_1": preload("res://assets/audio/sfx/fail.wav"),
+	"erro": preload("res://assets/audio/sfx/fail.wav"),
 	"transicao-1": preload("res://assets/audio/sfx/transicao-1.wav"),
 	"moedas": preload("res://assets/audio/sfx/acerto_1.wav"),
 	"moeda": preload("res://assets/audio/sfx/acerto_1.wav")

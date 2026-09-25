@@ -4,12 +4,92 @@ var is_transitioning: bool = false
 
 @onready var color_rect = $ColorRect as ColorRect
 
+var _vinheta_vida_baixa: TextureRect = null
+var _tempo_pulso_vida: float = 0.0
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if color_rect and color_rect.material is ShaderMaterial:
 		(color_rect.material as ShaderMaterial).set_shader_parameter("progresso", 0.0)
 	if color_rect:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_configurar_vinheta_vida_baixa()
+
+func _configurar_vinheta_vida_baixa() -> void:
+	if _vinheta_vida_baixa and is_instance_valid(_vinheta_vida_baixa):
+		return
+	
+	_vinheta_vida_baixa = TextureRect.new()
+	_vinheta_vida_baixa.name = "VinhetaVidaBaixa"
+	_vinheta_vida_baixa.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_vinheta_vida_baixa.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_vinheta_vida_baixa.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_vinheta_vida_baixa.modulate.a = 0.0
+	
+	# Gradiente radial invertido: centro transparente, bordas em vermelho sangue escuro
+	var grad_tex = GradientTexture2D.new()
+	var grad = Gradient.new()
+	grad.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CUBIC
+	grad.offsets = PackedFloat32Array([0.0, 0.45, 0.72, 1.0])
+	grad.colors = PackedColorArray([
+		Color(0.85, 0.05, 0.05, 0.0),
+		Color(0.85, 0.05, 0.05, 0.0),
+		Color(0.75, 0.02, 0.02, 0.55),
+		Color(0.45, 0.0, 0.0, 0.95)
+	])
+	grad_tex.gradient = grad
+	grad_tex.fill = GradientTexture2D.FILL_RADIAL
+	grad_tex.fill_from = Vector2(0.5, 0.5)
+	grad_tex.fill_to = Vector2(1.0, 0.5)
+	grad_tex.width = 512
+	grad_tex.height = 512
+	_vinheta_vida_baixa.texture = grad_tex
+	
+	add_child(_vinheta_vida_baixa)
+	move_child(_vinheta_vida_baixa, 0)
+
+func _process(delta: float) -> void:
+	_process_vinheta_vida_baixa(delta)
+
+func _process_vinheta_vida_baixa(delta: float) -> void:
+	if not _vinheta_vida_baixa or not is_instance_valid(_vinheta_vida_baixa):
+		return
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps:
+		return
+		
+	var v_atual = ps.get("vida_atual_jogador")
+	var v_max = ps.get("vida_maxima_jogador")
+	if v_atual == null or v_max == null:
+		return
+		
+	var vida_max = float(v_max)
+	if vida_max <= 0.0:
+		vida_max = 100.0
+	var hp_ratio = clampf(float(v_atual) / vida_max, 0.0, 1.0)
+	
+	if hp_ratio <= 0.30 and float(v_atual) > 0.0:
+		# Ritmo cardíaco duplo (lub-dub) acelerando conforme a vida diminui
+		var urgencia = 1.0 - (hp_ratio / 0.30) # 0.0 a 1.0
+		var freq_batimento = 4.5 + (urgencia * 3.5)
+		_tempo_pulso_vida += delta * freq_batimento
+		
+		# Onda com duplo pulso (batimento cardíaco realista)
+		var p1 = pow(maxf(sin(_tempo_pulso_vida), 0.0), 3.0)
+		var p2 = pow(maxf(sin(_tempo_pulso_vida - 0.45), 0.0), 4.0) * 0.65
+		var batimento = clampf(p1 + p2, 0.0, 1.0)
+		
+		var alfa_base = lerpf(0.18, 0.45, urgencia)
+		var alfa_pico = lerpf(0.55, 0.92, urgencia)
+		var alfa_alvo = lerpf(alfa_base, alfa_pico, batimento)
+		
+		_vinheta_vida_baixa.modulate.a = lerpf(_vinheta_vida_baixa.modulate.a, alfa_alvo, delta * 12.0)
+	else:
+		# Vida confortável: desvanece suavemente
+		if _vinheta_vida_baixa.modulate.a > 0.001:
+			_vinheta_vida_baixa.modulate.a = lerpf(_vinheta_vida_baixa.modulate.a, 0.0, delta * 6.0)
+		else:
+			_vinheta_vida_baixa.modulate.a = 0.0
 
 func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	if is_transitioning:
@@ -45,8 +125,9 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	get_tree().get_root().set_disable_input(true)
 	
 	# toca som de transicao
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("transicao-1")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("transicao-1")
 		
 	# fecha o portal
 	if mat:
@@ -98,8 +179,10 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	# diminui 1 sala do buff de escudo
 	var t_lower = target_scene.to_lower()
 	var eh_sala_masmorra = not ("/ui/" in t_lower or "menu" in t_lower or "hub" in t_lower or "login" in t_lower or "cadastro" in t_lower or "config" in t_lower)
-	if eh_sala_masmorra and get_node_or_null("/root/PlayerStats"):
-		PlayerStats.decrementar_buff_escudo()
+	if eh_sala_masmorra:
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.has_method("decrementar_buff_escudo"):
+			ps.decrementar_buff_escudo()
 
 func _obter_textura_luz() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()
@@ -207,11 +290,14 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	passo_timer.wait_time = 0.28
 	passo_timer.autostart = true
 	passo_timer.timeout.connect(func():
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.tocar_som_caminhada()
+		var am_p = get_node_or_null("/root/AudioManager")
+		if am_p and am_p.has_method("tocar_som_caminhada"):
+			am_p.tocar_som_caminhada()
 	)
 	add_child(passo_timer)
-	if get_node_or_null("/root/AudioManager"): AudioManager.tocar_som_caminhada()
+	var am_init = get_node_or_null("/root/AudioManager")
+	if am_init and am_init.has_method("tocar_som_caminhada"):
+		am_init.tocar_som_caminhada()
 
 	# pisca a luz das tochas
 	var luzes_tochas: Array = corredor.find_children("", "PointLight2D", true, false)

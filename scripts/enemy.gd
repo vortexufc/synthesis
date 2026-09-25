@@ -222,7 +222,7 @@ func _criar_aura_runica() -> void:
 	add_child(aura_runica_sprite)
 	move_child(aura_runica_sprite, 0)
 
-	var tw = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	var tw = aura_runica_sprite.create_tween().set_loops()
 	tw.tween_property(aura_runica_sprite, "scale", Vector2(2.4, 1.35), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(aura_runica_sprite, "scale", Vector2(1.8, 0.95), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
@@ -283,10 +283,10 @@ func _criar_aura_runica() -> void:
 		tag_y = -38.0
 
 	tag_runico_label.position = Vector2(-40, tag_y)
-	tag_runico_label.size = Vector2(80, 16)
+	tag_runico_label.custom_minimum_size = Vector2(80, 16)
 	add_child(tag_runico_label)
 
-	var tw_tag = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	var tw_tag = tag_runico_label.create_tween().set_loops()
 	tw_tag.tween_property(tag_runico_label, "position:y", tag_y - 4.0, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	tw_tag.tween_property(tag_runico_label, "position:y", tag_y, 0.8).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 

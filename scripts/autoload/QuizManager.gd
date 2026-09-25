@@ -644,8 +644,9 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		_processando_resposta = false
 		return
 
-	var fim_das_rodadas = (_rodada_atual >= _num_questoes)
-	if PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0 or fim_das_rodadas:
+	# A batalha de RPG só termina quando o HP de um dos dois combatentes é zerado!
+	var combate_concluido = (PlayerStats.vida_atual_jogador <= 0 or vida_atual_inimigo <= 0)
+	if combate_concluido:
 		if is_instance_valid(ui_instancia):
 			ui_instancia.ocultar_interface()
 		
@@ -664,12 +665,17 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		
 		if vitoria:
 			print("[Combate] Você venceu o quiz!")
+		else:
+			print("[Combate] Mago derrotado por falta de HP (HP zerado)!")
 			
 		_processando_resposta = false
 		em_batalha = false
 		GlobalSignals.batalha_encerrada.emit(vitoria)
 		PlayerStats.salvar()
-		GlobalSignals.fim_de_jogo.emit(vitoria, stats)
+		
+		# Só abre a tela de fim_de_jogo se foi vitória OU se o jogador realmente morreu (HP <= 0)!
+		if vitoria or PlayerStats.vida_atual_jogador <= 0:
+			GlobalSignals.fim_de_jogo.emit(vitoria, stats)
 	else:
 		_processando_resposta = false
 		_nova_rodada()

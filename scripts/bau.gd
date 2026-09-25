@@ -62,59 +62,73 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	_remover_prompt_tela()
 
+var _indicador_flutuante: Node2D = null
+var _tempo_indicador: float = 0.0
+
+func _process(delta: float) -> void:
+	if _indicador_flutuante and is_instance_valid(_indicador_flutuante):
+		_tempo_indicador += delta
+		_indicador_flutuante.position.y = -36.0 + sin(_tempo_indicador * 3.8) * 4.5
+
 func _exibir_prompt_tela() -> void:
-	if canvas_prompt and is_instance_valid(canvas_prompt):
+	if _indicador_flutuante and is_instance_valid(_indicador_flutuante):
 		return
 		
-	canvas_prompt = CanvasLayer.new()
-	canvas_prompt.name = "PromptAbrirBau"
-	add_child(canvas_prompt)
+	_indicador_flutuante = Node2D.new()
+	_indicador_flutuante.name = "IndicadorFlutuante"
+	_indicador_flutuante.z_index = 25
+	_indicador_flutuante.position = Vector2(0, -36)
+	_indicador_flutuante.scale = Vector2.ZERO
+	add_child(_indicador_flutuante)
 	
-	panel_prompt = PanelContainer.new()
+	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.12, 0.90)
-	style.corner_radius_top_left = 6
-	style.corner_radius_top_right = 6
-	style.corner_radius_bottom_left = 6
-	style.corner_radius_bottom_right = 6
-	style.set_content_margin_all(10)
-	style.border_width_bottom = 2
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.border_width_top = 2
-	style.border_color = Color(0.95, 0.80, 0.25, 0.95)
+	style.bg_color = Color(0.06, 0.08, 0.12, 0.94)
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
+	style.set_border_width_all(1)
+	style.border_color = Color(1.0, 0.82, 0.28, 0.95)
+	style.shadow_color = Color(0.95, 0.70, 0.15, 0.35)
+	style.shadow_size = 8
+	panel.add_theme_stylebox_override("panel", style)
 	
-	panel_prompt.add_theme_stylebox_override("panel", style)
+	var hbox = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	panel.add_child(hbox)
 	
-	var label = Label.new()
-	if eh_desafio_memoria:
-		label.text = "Pressione [F] - Desafio da Memória Arcana"
-	else:
-		label.text = "Pressione [F] para Abrir o Baú"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	
+	var lbl_key = Label.new()
+	lbl_key.text = "[F]"
+	lbl_key.add_theme_color_override("font_color", Color(1.0, 0.95, 0.50))
 	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 	if font_pixel:
-		label.add_theme_font_override("font", font_pixel)
-	label.add_theme_font_size_override("font_size", 18)
-	label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.7))
+		lbl_key.add_theme_font_override("font", font_pixel)
+	lbl_key.add_theme_font_size_override("font_size", 13)
+	hbox.add_child(lbl_key)
 	
-	panel_prompt.add_child(label)
-	panel_prompt.custom_minimum_size = Vector2(420, 50)
-	canvas_prompt.add_child(panel_prompt)
+	var lbl_txt = Label.new()
+	lbl_txt.text = "Desafio Arcano" if eh_desafio_memoria else "Abrir Baú"
+	lbl_txt.add_theme_color_override("font_color", Color(0.90, 0.92, 0.98))
+	if font_pixel:
+		lbl_txt.add_theme_font_override("font", font_pixel)
+	lbl_txt.add_theme_font_size_override("font_size", 12)
+	hbox.add_child(lbl_txt)
 	
-	panel_prompt.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	panel_prompt.offset_top = -130
-	panel_prompt.offset_bottom = -80
-	panel_prompt.offset_left = 340
-	panel_prompt.offset_right = -340
+	panel.position = Vector2(-70, -14)
+	_indicador_flutuante.add_child(panel)
+	
+	var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_indicador_flutuante, "scale", Vector2.ONE, 0.22)
 
 func _remover_prompt_tela() -> void:
-	if canvas_prompt and is_instance_valid(canvas_prompt):
-		canvas_prompt.queue_free()
-		canvas_prompt = null
-		panel_prompt = null
+	if _indicador_flutuante and is_instance_valid(_indicador_flutuante):
+		var node = _indicador_flutuante
+		_indicador_flutuante = null
+		var tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.tween_property(node, "scale", Vector2.ZERO, 0.16)
+		tw.tween_callback(node.queue_free)
 
 func _on_body_entered(body: Node2D) -> void:
 	if ja_aberto:

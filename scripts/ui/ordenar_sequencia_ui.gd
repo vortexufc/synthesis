@@ -136,6 +136,8 @@ var _lbl_status: Label
 var _hbox_cards: HBoxContainer
 var _btn_verificar: Button
 var _card_nodes: Array = []
+var _tween_shake: Tween = null
+var _painel_pos_x_original: float = -1.0
 
 func _ready() -> void:
 	add_to_group("minigame_ativo")
@@ -179,20 +181,39 @@ func _esta_na_ordem(lista: Array) -> bool:
 	return lista[0]["id"] == 1 and lista[1]["id"] == 2 and lista[2]["id"] == 3
 
 func _construir_ui() -> void:
-	# fundo escuro
-	var backdrop = ColorRect.new()
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	backdrop.color = Color(0.04, 0.04, 0.07, 0.88)
-	add_child(backdrop)
+	# Container raiz de tela cheia que garante o layout no CanvasLayer
+	var root_container = Control.new()
+	root_container.name = "RootContainer"
+	root_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(root_container)
 	
-	# container central
+	# Fundo escuro cobrindo 100% da tela
+	var backdrop = ColorRect.new()
+	backdrop.color = Color(0.04, 0.04, 0.07, 0.88)
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+	root_container.add_child(backdrop)
+	
+	# Container centralizado na tela
 	var center = CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root_container.add_child(center)
+	
+	var atualizar_tamanho = func():
+		if is_instance_valid(root_container) and is_inside_tree():
+			var vp_size = get_viewport().get_visible_rect().size
+			root_container.size = vp_size
+			backdrop.size = vp_size
+			center.size = vp_size
+	
+	atualizar_tamanho.call()
+	get_viewport().size_changed.connect(atualizar_tamanho)
 	
 	# painel principal
 	_painel_central = PanelContainer.new()
-	_painel_central.custom_minimum_size = Vector2(900, 520)
+	_painel_central.custom_minimum_size = Vector2(860, 500)
 	
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = Color(0.07, 0.08, 0.12, 0.98) # Grafite arcano escuro
@@ -329,7 +350,7 @@ func _atualizar_textos_e_cards() -> void:
 
 func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	var card = PanelContainer.new()
-	card.custom_minimum_size = Vector2(260, 240)
+	card.custom_minimum_size = Vector2(245, 230)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
 	var eh_selecionado = (pos_idx == _card_selecionado_idx)
@@ -495,16 +516,23 @@ func _executar_erro() -> void:
 	_lbl_status.text = "❌ A ordem ainda está incorreta! Pense na causa, processo e resultado."
 	_lbl_status.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
 	
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("erro_1")
+	# Som de derrota removido para evitar repetição/loop incômodo
+	
+	# Treme o painel ao errar de forma segura
+	if _tween_shake and _tween_shake.is_valid():
+		_tween_shake.kill()
 		
-	# treme o painel ao errar
-	var pos_original = _painel_central.position
-	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tw.tween_property(_painel_central, "position", pos_original + Vector2(12, 0), 0.05)
-	tw.tween_property(_painel_central, "position", pos_original - Vector2(12, 0), 0.05)
-	tw.tween_property(_painel_central, "position", pos_original + Vector2(6, 0), 0.05)
-	tw.tween_property(_painel_central, "position", pos_original, 0.05)
+	if _painel_pos_x_original < 0.0:
+		_painel_pos_x_original = _painel_central.position.x
+	else:
+		_painel_central.position.x = _painel_pos_x_original
+		
+	var orig_x = _painel_central.position.x
+	_tween_shake = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x + 8.0, 0.04)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x - 8.0, 0.04)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x + 4.0, 0.04)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x, 0.04)
 
 func _on_fechar_clicado() -> void:
 	if _resolvido:

@@ -84,7 +84,11 @@ func carregar():
 			grimorio = data.get("grimorio", [])
 			chaves = int(data.get("chaves", 0))
 			moedas = int(data.get("moedas", 0))
-			vinhetas_desbloqueadas = data.get("vinhetas_desbloqueadas", [])
+			vinhetas_desbloqueadas = []
+			for v in data.get("vinhetas_desbloqueadas", []):
+				var v_int = int(v)
+				if not vinhetas_desbloqueadas.has(v_int):
+					vinhetas_desbloqueadas.append(v_int)
 			quests_concluidas = data.get("quests_concluidas", {})
 			quests_ativas = data.get("quests_ativas", {})
 			

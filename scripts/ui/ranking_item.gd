@@ -68,8 +68,27 @@ func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false, dado
 	if not is_node_ready():
 		await ready
 		
+	var nome_exibido = nome
+	if not eh_cla:
+		var nick_local = ""
+		if get_node_or_null("/root/DatabaseManager") and not DatabaseManager.user_nick.is_empty():
+			nick_local = DatabaseManager.user_nick
+		elif get_node_or_null("/root/RankingManager"):
+			nick_local = RankingManager.get_local_nick()
+			
+		var tem_conta = get_node_or_null("/root/DatabaseManager") and not DatabaseManager.user_token.is_empty()
+		if not tem_conta:
+			var guest_nick = ""
+			if get_node_or_null("/root/RankingManager"):
+				guest_nick = RankingManager.get_local_nick()
+			if nome == guest_nick or (nome.begins_with("Mago_") and nome == guest_nick):
+				nome_exibido = "Você"
+				label_nome.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
+		elif nome == nick_local:
+			label_nome.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
+		
 	# preenche os textos
-	label_nome.text = nome
+	label_nome.text = nome_exibido
 	label_score.text = str(score) + " PTS"
 	
 	# esconde o capuz e insígnias na aba de clas
@@ -81,7 +100,7 @@ func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false, dado
 		icone_mago.show()
 		if container_insignias:
 			container_insignias.show()
-			_atualizar_insignias(nome, dados_extras)
+			_atualizar_insignias(nome_exibido, dados_extras)
 	
 	# alinha o espaco da medalha
 	label_posicao.custom_minimum_size.x = 60
