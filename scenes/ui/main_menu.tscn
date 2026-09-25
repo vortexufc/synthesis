@@ -432,7 +432,7 @@ offset_bottom = -20.0
 grow_vertical = 0
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 12
-text = "V1.0.0 ALPHA"
+text = "v1.4.0 ALPHA"
 
 [node name="CopyrightLabel" type="Label" parent="." unique_id=1387420395]
 layout_mode = 1
