@@ -25,6 +25,7 @@ func _ready() -> void:
 	
 	if logo:
 		_logo_base_y = logo.position.y
+		_iniciar_animacao_logo()
 	if bg:
 		_bg_base_pos = bg.position
 	
@@ -216,11 +217,6 @@ func _atualizar_leaderboard() -> void:
 func _process(delta: float) -> void:
 	_tempo_menu += delta
 	
-	# animacao de flutuar do logo
-	if logo and is_instance_valid(logo):
-		logo.position.y = _logo_base_y + sin(_tempo_menu * 1.7) * 5.5
-		logo.rotation = sin(_tempo_menu * 0.85) * 0.012
-		
 	# parallax com o mouse
 	if bg and is_instance_valid(bg):
 		var vp_rect = get_viewport_rect()
@@ -233,6 +229,26 @@ func _process(delta: float) -> void:
 			)
 			_parallax_offset = _parallax_offset.lerp(norm * 14.0, delta * 3.5)
 			bg.position = _bg_base_pos - _parallax_offset
+
+func _iniciar_animacao_logo() -> void:
+	if not logo or not is_instance_valid(logo):
+		return
+	logo.pivot_offset = Vector2(250, 115)
+	
+	# Flutuacao vertical fluida e suave com curvas senoidais continuas
+	var tween_y = create_tween().set_loops()
+	tween_y.tween_property(logo, "position:y", _logo_base_y - 7.0, 2.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween_y.tween_property(logo, "position:y", _logo_base_y + 7.0, 2.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	
+	# Balanco organico suave (sem trancos ou aceleracoes bruscas)
+	var tween_rot = create_tween().set_loops()
+	tween_rot.tween_property(logo, "rotation", deg_to_rad(0.6), 2.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween_rot.tween_property(logo, "rotation", deg_to_rad(-0.6), 2.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	
+	# Respiracao sutil de escala para dar vitalidade e profundidade
+	var tween_scale = create_tween().set_loops()
+	tween_scale.tween_property(logo, "scale", Vector2(1.018, 1.018), 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween_scale.tween_property(logo, "scale", Vector2(0.992, 0.992), 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _configurar_animacoes_botoes() -> void:
 	if vbox_buttons:
