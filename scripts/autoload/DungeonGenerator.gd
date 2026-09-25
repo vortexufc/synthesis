@@ -113,6 +113,11 @@ var tocar_cutscene_inicial: bool = false
 
 # lista de monstros derrotados na run
 var inimigos_derrotados: Array = []
+# lista de portas destrancadas na run
+var portas_destrancadas: Array = []
+
+# salas que vão ter a mecânica da chave nesta run (2 por andar)
+var salas_com_chave: Array = []
 
 func _ready():
 	randomize()
@@ -338,6 +343,28 @@ func registrar_inimigo_derrotado(key: String) -> void:
 func is_inimigo_derrotado(key: String) -> bool:
 	return key in inimigos_derrotados
 
+func registrar_porta_destrancada(key: String) -> void:
+	if not (key in portas_destrancadas):
+		portas_destrancadas.append(key)
+		print("[DungeonGenerator] Porta registrada como destrancada: ", key)
+
+func is_porta_destrancada(key: String) -> bool:
+	return key in portas_destrancadas
+
+# retorna se a sala atual deve usar a mecânica de chave
+# chama essa funcao no _ready de cada sala para setar dropar_chave_no_ultimo_monstro
+func sala_usa_chave(arquivo_cena: String = "") -> bool:
+	var cena = arquivo_cena
+	if cena == "" and get_tree() and get_tree().current_scene:
+		cena = get_tree().current_scene.scene_file_path
+	if cena == "":
+		return false
+	# busca exata no array de salas com chave
+	for s in salas_com_chave:
+		if s.to_lower() == cena.to_lower():
+			return true
+	return false
+
 func is_sala_boss(arquivo_cena: String = "") -> bool:
 	var cena_lower = arquivo_cena.to_lower()
 	if cena_lower == "" and get_tree() and get_tree().current_scene:
@@ -351,6 +378,8 @@ func is_sala_boss(arquivo_cena: String = "") -> bool:
 func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	percurso_salas.clear()
 	inimigos_derrotados.clear()
+	portas_destrancadas.clear()
+	salas_com_chave.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
 	
 	var active = ""
@@ -380,12 +409,17 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		# sorteia 6 salas do meio sem repetir
 		var intermediarias = salas_fisica_pool.duplicate()
 		intermediarias.shuffle()
+		var salas_intermediarias_escolhidas: Array = []
 		for i in range(min(6, intermediarias.size())):
 			percurso_salas.append(intermediarias[i])
+			salas_intermediarias_escolhidas.append(intermediarias[i])
 		
 		# ultima sala: boss robo
 		percurso_salas.append(sala_boss_fisica)
-		print("[DungeonGenerator] Masmorra de Física gerada com %d salas (Corredor -> Sala 01 -> 6 sorteadas -> Boss 12)." % [percurso_salas.size() - 1])
+		
+		# sorteia 2 salas intermediárias para ter mecânica de chave
+		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
+		print("[DungeonGenerator] Masmorra de Física gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	elif active == "Química":
 		# andar de quimica:
 		# comeca no corredor de alquimia (indice 1)
@@ -396,20 +430,44 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		# sorteia 6 salas do meio sem repetir
 		var intermediarias = salas_alquimia_pool.duplicate()
 		intermediarias.shuffle()
+		var salas_intermediarias_escolhidas: Array = []
 		for i in range(min(6, intermediarias.size())):
 			percurso_salas.append(intermediarias[i])
+			salas_intermediarias_escolhidas.append(intermediarias[i])
 		
 		# ultima sala: boss slime
 		percurso_salas.append(sala_boss_alquimia)
-		print("[DungeonGenerator] Masmorra de Química gerada com %d salas (Corredor -> Sala 01 -> 6 sorteadas -> Boss Alquimia)." % [percurso_salas.size() - 1])
+		
+		# sorteia 2 salas intermediárias para ter mecânica de chave
+		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
+		print("[DungeonGenerator] Masmorra de Química gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	elif active == "Biologia":
 		# andar de biologia (Estufa)
 		percurso_salas.append(sala_inicial_biologia)
 		percurso_salas.append(sala_01_biologia)
-		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn")
-		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn")
+		var salas_bio_inter: Array = [
+			"res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn",
+			"res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn"
+		]
+		for s in salas_bio_inter:
+			percurso_salas.append(s)
 		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn")
-		print("[DungeonGenerator] Masmorra de Biologia gerada com %d salas (Corredor -> Salas 01 a 04)." % [percurso_salas.size() - 1])
+		
+		# sorteia 2 salas intermediárias para ter mecânica de chave
+		# inclui sala_01 nas candidatas (não é corredor nem boss)
+		var candidatas_bio: Array = [sala_01_biologia]
+		candidatas_bio.append_array(salas_bio_inter)
+		_sortear_salas_com_chave(candidatas_bio, 2)
+		print("[DungeonGenerator] Masmorra de Biologia gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	else:
 		print("[DungeonGenerator] Nenhuma expedição ativa (Aguardando escolha de porta no Hub).")
+
+# sorteia N salas de uma lista para terem a mecânica de chave
+func _sortear_salas_com_chave(candidatas: Array, quantidade: int) -> void:
+	var pool = candidatas.duplicate()
+	pool.shuffle()
+	var qtd = min(quantidade, pool.size())
+	for i in range(qtd):
+		salas_com_chave.append(pool[i])
+	print("[DungeonGenerator] Salas sorteadas para mecânica de chave: ", salas_com_chave)
 
