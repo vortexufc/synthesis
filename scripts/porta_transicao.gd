@@ -519,16 +519,6 @@ func _mostrar_prompt_hub() -> void:
 		_aguardando_confirmacao = false
 		canvas.queue_free()
 		
-		if hub_dungeon_name == "Biologia":
-			_aguardando_confirmacao = true # Mantém travado enquanto anima
-			await _abrir_porta_animacao()
-			_mostrar_feedback_hub("Em desenvolvimento!", Color(0.8, 0.2, 0.2, 0.9))
-			await get_tree().create_timer(1.2).timeout
-			await _fechar_porta_animacao()
-			_aguardando_confirmacao = false
-			_cooldown_ativo = false
-			return
-			
 		# Salvar a escolha do jogador localmente na conta
 		DatabaseManager.active_dungeon = hub_dungeon_name
 		if DatabaseManager.has_method("salvar_progresso"):
@@ -595,6 +585,8 @@ func _transacionar_porta() -> void:
 					cena_alvo = "res://scenes/Salas/Salas_Quimica/Corredor.tscn"
 				elif d_name == "Física":
 					cena_alvo = "res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn"
+				elif d_name == "Biologia":
+					cena_alvo = "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"
 			else:
 				cena_alvo = DungeonGenerator.get_proxima_sala(arquivo_sala)
 			

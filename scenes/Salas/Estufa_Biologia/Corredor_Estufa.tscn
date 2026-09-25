@@ -126,7 +126,9 @@ metadata/_edit_use_anchors_ = true
 
 [node name="PortaTransicao" parent="." unique_id=1120561421 instance=ExtResource("13_bm3yc")]
 position = Vector2(437, -31)
+proxima_cena = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn"
 
 [node name="PortaRetorno" parent="." unique_id=1877277594 instance=ExtResource("13_bm3yc")]
 position = Vector2(448, 827)
+proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
 porta_de_retorno = true

@@ -77,6 +77,22 @@ var salas_fisica: Array = [
 	"res://scenes/Salas/Sala_Fisica/Sala_Física12.tscn"
 ]
 
+# salas do andar de biologia
+var sala_inicial_biologia = "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"
+var sala_01_biologia = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn"
+var salas_biologia_pool: Array = [
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn"
+]
+var salas_biologia: Array = [
+	"res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn"
+]
+
 # ordem das salas da corrida atual
 var percurso_salas: Array = []
 
@@ -142,6 +158,13 @@ func get_index_da_cena(cena: String) -> int:
 			return 1
 		if "fisica12" in cena_lower or "física12" in cena_lower or "boss" in cena_lower:
 			return percurso_salas.size() - 1
+	elif masmorra_atual == "Biologia":
+		if "corredor" in cena_lower or "estufa" in cena_lower:
+			return 1
+		if "biologia01.tscn" in cena_lower:
+			return 2
+		if "biologia04.tscn" in cena_lower:
+			return percurso_salas.size() - 1
 				
 	return -1
 
@@ -159,8 +182,13 @@ func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 		resetar_masmorra(masmorra_da_cena)
 	
 	# do corredor sempre vai pra sala 1
-	if "corredor.tscn" in cena_lower:
-		if percurso_salas.size() > 1:
+	if "corredor" in cena_lower:
+		if "biologia" in masmorra_da_cena.to_lower() or "estufa" in cena_lower:
+			if percurso_salas.size() > 2:
+				indice_atual = 2
+				return percurso_salas[2]
+			return sala_01_biologia
+		elif percurso_salas.size() > 1:
 			indice_atual = 1
 			print("[DungeonGenerator] Corredor -> Avançando para a primeira sala: ", percurso_salas[1])
 			return percurso_salas[1]
@@ -231,6 +259,11 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 	if "sala_física01.tscn" in cena_lower or "sala_fisica01.tscn" in cena_lower:
 		indice_atual = 0
 		return hub_geral
+
+	# voltando da sala 1 de biologia vai pro corredor da estufa
+	if "biologia01.tscn" in cena_lower:
+		indice_atual = 1
+		return sala_inicial_biologia
 
 	# volta um indice no percurso
 	if indice_atual < percurso_salas.size() and percurso_salas[indice_atual].to_lower() == cena_lower:
@@ -341,5 +374,13 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		# ultima sala: boss slime
 		percurso_salas.append(sala_boss_alquimia)
 		print("[DungeonGenerator] Masmorra de Química gerada com %d salas (Sala 01 -> 6 sorteadas -> Boss Alquimia)." % [percurso_salas.size() - 1])
+	elif active == "Biologia":
+		# andar de biologia (Estufa)
+		percurso_salas.append(sala_inicial_biologia)
+		percurso_salas.append(sala_01_biologia)
+		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn")
+		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn")
+		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn")
+		print("[DungeonGenerator] Masmorra de Biologia gerada com %d salas (Corredor -> Salas 01 a 04)." % [percurso_salas.size() - 1])
 	else:
 		print("[DungeonGenerator] Nenhuma expedição ativa (Aguardando escolha de porta no Hub).")
