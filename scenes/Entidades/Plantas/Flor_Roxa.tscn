@@ -47,15 +47,16 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t15ie"]
-radius = 27.0
-height = 54.0
+radius = 60.0
+height = 120.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_m7mbj"]
-radius = 28.0
+radius = 55.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=837519223]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=566271539]
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_70alw")
 autoplay = "default"
 
@@ -70,7 +71,7 @@ rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_t15ie")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=55450065]
-position = Vector2(-1, 14)
+position = Vector2(-2, 19)
 shape = SubResource("CircleShape2D_m7mbj")
 
 [connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]
