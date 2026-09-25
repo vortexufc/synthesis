@@ -62,22 +62,27 @@ func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 		elif id_inimigo == "evil_wizzard":
 			$Control/SpriteMonstro.position.y = 195.0
 			$Control/HealthEnemy.position.y = 115.0
-		elif "boss" in id_inimigo or "roxo" in id_inimigo:
-			$Control/SpriteMonstro.position.y = 195.0 # Slime Boss assentado no chão
-			$Control/HealthEnemy.position.y = 100.0 # Barra elevada bem acima da animação de pulo
+		elif "boss" in id_inimigo or "roxo" in id_inimigo or "carnivora" in id_inimigo:
+			$Control/SpriteMonstro.position.y = 195.0 # Slime Boss ou Carnívora assentados no chão
+			$Control/HealthEnemy.position.y = 100.0 # Barra elevada bem acima da animação
 			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(2.3, 2.3)
 		elif "laranja" in id_inimigo or id_inimigo == "slime_g":
 			$Control/SpriteMonstro.position.y = 205.0
 			$Control/HealthEnemy.position.y = 115.0
 			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(1.8, 1.8)
+		elif "cogumelo" in id_inimigo or "flor" in id_inimigo or "planta" in id_inimigo:
+			$Control/SpriteMonstro.position.y = 205.0
+			$Control/HealthEnemy.position.y = 115.0
+			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(2.2, 2.2)
 		else:
 			$Control/SpriteMonstro.position.y = 233.0
 			$Control/HealthEnemy.position.y = 115.0
 			$Control/SpriteMonstro/AnimatedSprite2D.scale = Vector2(1.5, 1.5)
 			
-		# [UI] Apenas os robôs originalmente encaram a esquerda, logo não precisam do flip_h.
+		# [UI] Apenas os robôs e as criaturas de biologia encaram a esquerda/frente naturalmente, logo não precisam do flip_h.
 		# Slimes e o Mago encaram a direita na sprite original, então precisam.
-		if id_inimigo == "robo_g" or id_inimigo.begins_with("robo_p"):
+		var id_low = id_inimigo.to_lower()
+		if id_low == "robo_g" or id_low.begins_with("robo_p") or "cogumelo" in id_low or "flor" in id_low or "planta" in id_low or "carnivora" in id_low:
 			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = false
 		else:
 			$Control/SpriteMonstro/AnimatedSprite2D.flip_h = true

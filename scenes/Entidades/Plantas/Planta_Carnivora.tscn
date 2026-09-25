@@ -112,8 +112,9 @@ frame_progress = 0.016220681
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=2034819081]
 script = ExtResource("2_7q26c")
-id_inimigo = "robo_p_amarelo"
+id_inimigo = "planta_carnivora"
 andar_id = 3
+eh_boss = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=371991372]
 position = Vector2(-21, 17)

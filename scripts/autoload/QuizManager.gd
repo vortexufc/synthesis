@@ -389,23 +389,46 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	_duracao_batalha = enemy_data.get("duracao_batalha", 300.0)
 	_rodada_atual    = 0
 
-	# se mudou de andar busca as perguntas novas
-	var novo_andar: int = enemy_data.get("andar_id", 1)
-	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
-	if id_do_inimigo.to_lower().begins_with("slime"):
+	# Determina o andar correto para a batalha com base na masmorra ativa ou na cena atual:
+	# 1 = Química, 2 = Física, 3 = Biologia
+	var novo_andar: int = 1
+	var active_mat = ""
+	if get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
+		active_mat = DatabaseManager.active_dungeon
+	elif get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.masmorra_retorno_hub != "":
+		active_mat = DungeonGenerator.masmorra_retorno_hub
+		
+	var c_path = ""
+	if get_tree() and get_tree().current_scene:
+		c_path = get_tree().current_scene.scene_file_path.to_lower()
+		
+	if active_mat == "Biologia" or "biologia" in c_path or "estufa" in c_path:
+		novo_andar = 3
+	elif active_mat == "Física" or "fisica" in c_path or "física" in c_path or "oficina" in c_path:
+		novo_andar = 2
+	elif active_mat == "Química" or "alquimia" in c_path or "quimica" in c_path or "laborat" in c_path:
 		novo_andar = 1
+	else:
+		var id_low_check = enemy_data.get("id_inimigo", "").to_lower()
+		if "flor" in id_low_check or "cogumelo" in id_low_check or "planta" in id_low_check or "carnivora" in id_low_check:
+			novo_andar = 3
+		elif "robo" in id_low_check:
+			novo_andar = 2
+		elif "slime" in id_low_check:
+			novo_andar = 1
+		else:
+			novo_andar = int(enemy_data.get("andar_id", 1))
 
+	var id_do_inimigo: String = enemy_data.get("id_inimigo", "")
 	_inimigo_atual_id = id_do_inimigo
 	var id_lower = id_do_inimigo.to_lower()
 	var nivel_explicit: int = int(enemy_data.get("nivel_dificuldade", 0))
 	
 	# checa se e boss
 	_eh_chefe_atual = enemy_data.get("eh_boss", false)
-	var cena_atual_str = ""
-	if get_tree() and get_tree().current_scene:
-		cena_atual_str = get_tree().current_scene.scene_file_path.to_lower()
+	var cena_atual_str = c_path
 	if not _eh_chefe_atual:
-		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "wizard" in id_lower or "boss" in cena_atual_str or "fisica12" in cena_atual_str or "física12" in cena_atual_str:
+		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "carnivora" in id_lower or "wizard" in id_lower or "boss" in cena_atual_str or "fisica12" in cena_atual_str or "física12" in cena_atual_str or "biologia04" in cena_atual_str:
 			_eh_chefe_atual = true
 
 	_furia_chefe_executada = false
@@ -416,11 +439,11 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		_nivel_dificuldade_alvo = nivel_explicit
 	elif "boss" in id_lower or "roxo" in id_lower or "robo_g" in id_lower or "wizard" in id_lower or _eh_chefe_atual:
 		_nivel_dificuldade_alvo = 3
-	elif "laranja" in id_lower or "vermelho" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower:
+	elif "laranja" in id_lower or "vermelho" in id_lower or "vermelha" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower or "carnivora" in id_lower:
 		_nivel_dificuldade_alvo = 3
-	elif "verde" in id_lower or "ciano" in id_lower:
+	elif "verde" in id_lower or "ciano" in id_lower or "roxa" in id_lower:
 		_nivel_dificuldade_alvo = 2
-	elif "azul" in id_lower or "amarelo" in id_lower or "slime_p" in id_lower or "robo_p" in id_lower:
+	elif "azul" in id_lower or "amarelo" in id_lower or "amarela" in id_lower or "cogumelo" in id_lower or "slime_p" in id_lower or "robo_p" in id_lower:
 		_nivel_dificuldade_alvo = 1
 	else:
 		_nivel_dificuldade_alvo = 0
@@ -439,15 +462,23 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		_num_questoes = 5
 		print("[QuizManager] 🟣 BOSS SLIME ROXO DETECTADO! 130 HP, dano de 30 por erro e Fúria do Chefe armada com V ou F!")
 
+	# Checa se as perguntas na memória pertencem ao andar correto:
+	var precisa_recarregar: bool = (novo_andar != _andar_atual) or questions.is_empty()
+	if not precisa_recarregar and questions.size() > 0:
+		var q_andar = int(questions[0].get("andar_id", 0))
+		if q_andar > 0 and q_andar != novo_andar:
+			precisa_recarregar = true
+
 	if _questoes_locais_ativas.size() > 0:
 		# usa as questoes locais direto
 		print("[Local] Batalha com questões locais (%d questões)" % _questoes_locais_ativas.size())
 		reset_questions()
-	elif novo_andar != _andar_atual or questions.size() == 0:
+	elif precisa_recarregar:
 		_andar_atual = novo_andar
-		print("carregando perguntas do andar: ", _andar_atual)
+		print("[QuizManager] Carregando perguntas do andar: %d (Masmorra: %s)" % [_andar_atual, active_mat])
 		DatabaseManager.puxar_perguntas(_andar_atual)
 		await DatabaseManager.perguntas_recebidas
+		reset_questions()
 	else:
 		# se ja sorteou antes mantem as mesmas pra bater com as dicas
 		var sala_atual = ""
@@ -472,9 +503,12 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	# reseta a vida do monstro
 	vida_atual_inimigo = vida_maxima_inimigo
 	
-	# poe a animacao certa do monstro
+	# poe a animacao certa do monstro (prioriza sprite_frames fornecido pela cena da criatura)
 	var enemy_id = enemy_data.get("id_inimigo", "slime_g")
-	sprite_frame_inimigo_atual = sprite_frames_inimigos.get(enemy_id, sprite_frames_inimigos["slime_g"])
+	if enemy_data.has("sprite_frames") and enemy_data["sprite_frames"] != null:
+		sprite_frame_inimigo_atual = enemy_data["sprite_frames"]
+	else:
+		sprite_frame_inimigo_atual = sprite_frames_inimigos.get(enemy_id, sprite_frames_inimigos["slime_g"])
 	
 	if not is_instance_valid(ui_instancia):
 		ui_instancia = batalha_ui_cena.instantiate()
@@ -482,18 +516,14 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		ui_instancia.resposta_escolhida.connect(_on_resposta_recebida)
 	else:
 		ui_instancia.show() # Garante que está visível se foi reciclada
-		# atualiza o sprite se a tela ja tava criada
 		var anim_sprite = ui_instancia.get_node_or_null("Control/SpriteMonstro/AnimatedSprite2D")
-		if anim_sprite:
+		if anim_sprite and sprite_frame_inimigo_atual:
 			anim_sprite.sprite_frames = sprite_frame_inimigo_atual
 			anim_sprite.play("default")
 
-		
 	# passa o sprite pro painel de batalha
 	var current_id = enemy_data.get("id_inimigo", "")
-	if enemy_data.has("sprite_frames"):
-		ui_instancia.configurar_inimigo(enemy_data["sprite_frames"], current_id)
-	elif sprite_frame_inimigo_atual != null:
+	if sprite_frame_inimigo_atual != null:
 		ui_instancia.configurar_inimigo(sprite_frame_inimigo_atual, current_id)
 		
 	# cria o bonequinho do mago na tela de luta

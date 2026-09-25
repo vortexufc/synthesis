@@ -139,11 +139,11 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	
 	# se for pro hub, corredor ou menu pula a animacao
 	var pular_animacao = false
-	if "Corredor.tscn" in target_scene or "Hub_Geral" in target_scene or "/ui/" in target_scene or "Menu" in target_scene:
+	if "corredor" in target_scene.to_lower() or "Hub_Geral" in target_scene or "/ui/" in target_scene or "Menu" in target_scene:
 		pular_animacao = true
 		
 	# pula se estiver saindo do corredor
-	if get_tree().current_scene and "Corredor.tscn" in get_tree().current_scene.scene_file_path:
+	if get_tree().current_scene and "corredor" in get_tree().current_scene.scene_file_path.to_lower():
 		pular_animacao = true
 		
 	# por enquanto so toca cutscene em quimica

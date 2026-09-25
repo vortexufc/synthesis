@@ -1804,6 +1804,7 @@ offset_bottom = 40.0
 
 [node name="PortaTransicao" parent="." unique_id=1254393895 instance=ExtResource("15_ct47e")]
 position = Vector2(343, 259)
+proxima_cena = "res://scenes/Salas/Laboratório_Alquimia/Corredor_Alquimia.tscn"
 is_hub_door = true
 hub_dungeon_name = "Química"
 textura_porta = ExtResource("tex_quimica")
@@ -1853,6 +1854,7 @@ region_rect = Rect2(16, 0, 96, 192)
 
 [node name="PortaTransicao3" parent="." unique_id=2019376781 instance=ExtResource("15_ct47e")]
 position = Vector2(584, 259)
+proxima_cena = "res://scenes/Salas/Oficina_Física/Corredor_Física.tscn"
 is_hub_door = true
 hub_dungeon_name = "Física"
 textura_porta = ExtResource("tex_fisica")

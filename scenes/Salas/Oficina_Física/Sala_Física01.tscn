@@ -475,7 +475,7 @@ region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="PortaRetorno" parent="." unique_id=1952945906 instance=ExtResource("14_um6bs")]
 position = Vector2(475, 1377)
-proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
+proxima_cena = "res://scenes/Salas/Oficina_Física/Corredor_Física.tscn"
 porta_de_retorno = true
 
 [node name="Robo_P_Amarelo" parent="." unique_id=1200000011 instance=ExtResource("15_imiam")]

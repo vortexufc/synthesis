@@ -96,7 +96,7 @@ autoplay = "default"
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=1200000033]
 script = ExtResource("3_robog")
 id_inimigo = "robo_g"
-andar_id = 3
+andar_id = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1200000034]
 position = Vector2(0, 40)

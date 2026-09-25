@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_qoveu"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_r7uls"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="15_5gi3m"]
+[ext_resource type="Script" path="res://scripts/levels/corredor_fisica.gd" id="1_corredor_fisica_script"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rq110"]
 texture = ExtResource("1_g0k76")
@@ -331,6 +332,7 @@ sources/0 = SubResource("TileSetAtlasSource_n7nh7")
 sources/1 = SubResource("TileSetAtlasSource_jt2al")
 
 [node name="Node2D" type="Node2D" unique_id=1434948310]
+script = ExtResource("1_corredor_fisica_script")
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1219908800]
 scale = Vector2(2, 2)
@@ -442,6 +444,7 @@ metadata/_edit_use_anchors_ = true
 
 [node name="PortaTransicao" parent="." unique_id=784504684 instance=ExtResource("13_r7uls")]
 position = Vector2(559, 360)
+proxima_cena = "res://scenes/Salas/Oficina_Física/Sala_Física01.tscn"
 frames_animacao = 4
 stride_animacao = 192
 
@@ -455,6 +458,7 @@ region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="PortaRetorno" parent="." unique_id=933279871 instance=ExtResource("13_r7uls")]
 position = Vector2(563, 1888)
+proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
 porta_de_retorno = true
 
 [node name="Luminarias" type="Node2D" parent="." unique_id=1073367403]

@@ -15,8 +15,11 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_5n4mo"]
 [ext_resource type="PackedScene" uid="uid://b8txw21gc8e2h" path="res://scenes/Entidades/Plantas/CogumelinhoDoMal.tscn" id="14_twk0c"]
 [ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="15_2jlbj"]
+[ext_resource type="PackedScene" uid="uid://bmel7tnca765k" path="res://scenes/Entidades/Plantas/Planta_Carnivora.tscn" id="16_carnivora"]
+[ext_resource type="Script" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 
 [node name="Node2D" type="Node2D" unique_id=613230570]
+script = ExtResource("1_sala_bio")
 
 [node name="Floor" type="TileMapLayer" parent="." unique_id=1300675714]
 scale = Vector2(2, 2)
@@ -143,3 +146,6 @@ position = Vector2(837, 850)
 
 [node name="CharacterBody2D2" parent="." unique_id=1993884800 instance=ExtResource("15_2jlbj")]
 position = Vector2(2238, 923)
+
+[node name="CharacterBody2D3" parent="." unique_id=1883427817 instance=ExtResource("16_carnivora")]
+position = Vector2(964, 520)

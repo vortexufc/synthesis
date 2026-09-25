@@ -175,7 +175,7 @@ frame_progress = 0.19650756
 
 [node name="EnemyTrigger" type="Area2D" parent="." unique_id=584325763]
 script = ExtResource("2_e4kgq")
-id_inimigo = "robo_p_amarelo"
+id_inimigo = "cogumelo"
 andar_id = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1348016517]

@@ -561,18 +561,18 @@ func _transacionar_porta() -> void:
 		var s_path = ""
 		if get_tree() and get_tree().current_scene:
 			s_path = get_tree().current_scene.scene_file_path.to_lower()
-		if "fisica" in s_path or "física" in s_path:
-			DungeonGenerator.masmorra_retorno_hub = "Física"
-			if get_node_or_null("/root/DatabaseManager"):
-				DatabaseManager.active_dungeon = "Física"
-		elif "alquimia" in s_path or "quimica" in s_path or "corredor" in s_path:
-			DungeonGenerator.masmorra_retorno_hub = "Química"
-			if get_node_or_null("/root/DatabaseManager"):
-				DatabaseManager.active_dungeon = "Química"
-		elif "biologia" in s_path:
+		if "biologia" in s_path or "estufa" in s_path:
 			DungeonGenerator.masmorra_retorno_hub = "Biologia"
 			if get_node_or_null("/root/DatabaseManager"):
 				DatabaseManager.active_dungeon = "Biologia"
+		elif "fisica" in s_path or "física" in s_path or "oficina" in s_path:
+			DungeonGenerator.masmorra_retorno_hub = "Física"
+			if get_node_or_null("/root/DatabaseManager"):
+				DatabaseManager.active_dungeon = "Física"
+		elif "alquimia" in s_path or "quimica" in s_path or "química" in s_path or "laborat" in s_path or "corredor" in s_path:
+			DungeonGenerator.masmorra_retorno_hub = "Química"
+			if get_node_or_null("/root/DatabaseManager"):
+				DatabaseManager.active_dungeon = "Química"
 	
 	if cena_alvo == "" and get_node_or_null("/root/DungeonGenerator"):
 		var arquivo_sala = get_tree().current_scene.scene_file_path
@@ -582,9 +582,9 @@ func _transacionar_porta() -> void:
 			if is_hub_door:
 				var d_name = DatabaseManager.active_dungeon
 				if d_name == "Química":
-					cena_alvo = "res://scenes/Salas/Salas_Quimica/Corredor.tscn"
+					cena_alvo = "res://scenes/Salas/Laboratório_Alquimia/Corredor_Alquimia.tscn"
 				elif d_name == "Física":
-					cena_alvo = "res://scenes/Salas/Sala_Fisica/Sala_Física01.tscn"
+					cena_alvo = "res://scenes/Salas/Oficina_Física/Corredor_Física.tscn"
 				elif d_name == "Biologia":
 					cena_alvo = "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"
 			else:
