@@ -178,6 +178,25 @@ func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 		indice_atual += 1
 		return percurso_salas[indice_atual]
 		
+	# Fallback inteligente para quando rodar uma cena avulsa direto no F6:
+	if indice_atual == -1:
+		var lista_completa: Array = []
+		if masmorra_da_cena == "Química":
+			lista_completa = salas_alquimia
+		elif masmorra_da_cena == "Física":
+			lista_completa = salas_fisica_pool
+			
+		for k in range(lista_completa.size()):
+			if lista_completa[k].to_lower() == cena_lower:
+				if k + 1 < lista_completa.size():
+					print("[DungeonGenerator] Modo Teste F6: Avançando sequencialmente de %s para %s" % [cena_atual, lista_completa[k + 1]])
+					return lista_completa[k + 1]
+				elif masmorra_da_cena == "Química":
+					return sala_boss_alquimia
+				elif masmorra_da_cena == "Física":
+					return sala_boss_fisica
+				break
+		
 	return hub_geral
 
 func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
@@ -224,6 +243,24 @@ func get_sala_anterior(arquivo_cena_atual: String = "") -> String:
 	if indice_atual > 0:
 		indice_atual -= 1
 		return percurso_salas[indice_atual]
+		
+	# Fallback inteligente para retorno quando rodar via F6:
+	if indice_atual == -1:
+		var lista_completa: Array = []
+		if masmorra_da_cena == "Química":
+			lista_completa = salas_alquimia
+		elif masmorra_da_cena == "Física":
+			lista_completa = salas_fisica_pool
+			
+		for k in range(lista_completa.size()):
+			if lista_completa[k].to_lower() == cena_lower:
+				if k > 0:
+					return lista_completa[k - 1]
+				elif masmorra_da_cena == "Química":
+					return sala_inicial
+				elif masmorra_da_cena == "Física":
+					return sala_01_fisica
+				break
 		
 	return hub_geral
 

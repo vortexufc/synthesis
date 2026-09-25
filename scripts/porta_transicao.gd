@@ -38,12 +38,14 @@ var _selo_ativo: bool = false
 var _selo_resolvido: bool = false
 var _minigame_selo_aberto: bool = false
 var _indicador_selo_node: Node2D = null
+var _tw_indicador_selo: Tween = null
 
 # Cooldown para evitar teletransporte imediato ao carregar a cena (loop infinito)
 var _cooldown_ativo: bool = true
 
 func _exit_tree() -> void:
 	_remover_prompt_tranca()
+	_remover_indicador_selo()
 
 func _ready() -> void:
 	add_to_group("porta_transicao")
@@ -265,32 +267,64 @@ func _criar_indicador_selo() -> void:
 		
 	_indicador_selo_node = Node2D.new()
 	_indicador_selo_node.name = "IndicadorSeloRunico"
-	_indicador_selo_node.position = Vector2(0, -50)
+	_indicador_selo_node.position = Vector2(0, -48)
+	_indicador_selo_node.z_index = 25
+	_indicador_selo_node.scale = Vector2.ZERO
 	add_child(_indicador_selo_node)
 	
-	var label = Label.new()
-	label.text = "✦ SELO RÚNICO ✦\n[Toque para Decifrar]"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.position = Vector2(-75, -20)
-	label.custom_minimum_size = Vector2(150, 40)
-	label.add_theme_font_size_override("font_size", 10)
-	label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
-	label.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.15, 0.95))
-	label.add_theme_constant_override("outline_size", 4)
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.08, 0.14, 0.94)
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 12
+	style.content_margin_right = 12
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
+	style.set_border_width_all(1)
+	style.border_color = Color(1.0, 0.82, 0.28, 0.95)
+	style.shadow_color = Color(0.95, 0.70, 0.15, 0.40)
+	style.shadow_size = 10
+	panel.add_theme_stylebox_override("panel", style)
 	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 2)
+	panel.add_child(vbox)
+	
+	var lbl_top = Label.new()
+	lbl_top.text = "✦ SELO RÚNICO ✦"
+	lbl_top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_top.add_theme_font_size_override("font_size", 11)
+	lbl_top.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
 	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	if font:
-		label.add_theme_font_override("font", font)
-		
-	_indicador_selo_node.add_child(label)
+	if font: lbl_top.add_theme_font_override("font", font)
+	vbox.add_child(lbl_top)
 	
-	# Efeito de flutuação suave
-	var tw = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	tw.tween_property(_indicador_selo_node, "position:y", -55.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(_indicador_selo_node, "position:y", -48.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var lbl_bot = Label.new()
+	lbl_bot.text = "Decifrar Enigma"
+	lbl_bot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_bot.add_theme_font_size_override("font_size", 10)
+	lbl_bot.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98))
+	if font: lbl_bot.add_theme_font_override("font", font)
+	vbox.add_child(lbl_bot)
+	
+	panel.position = Vector2(-65, -20)
+	_indicador_selo_node.add_child(panel)
+	
+	if _tw_indicador_selo and _tw_indicador_selo.is_valid():
+		_tw_indicador_selo.kill()
+		
+	var tw_pop = _indicador_selo_node.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw_pop.tween_property(_indicador_selo_node, "scale", Vector2.ONE, 0.22)
+	
+	# Efeito de flutuação suave contínuo vinculado diretamente ao node do indicador
+	_tw_indicador_selo = _indicador_selo_node.create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tw_indicador_selo.tween_property(_indicador_selo_node, "position:y", -54.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_tw_indicador_selo.tween_property(_indicador_selo_node, "position:y", -46.0, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _remover_indicador_selo() -> void:
+	if _tw_indicador_selo and _tw_indicador_selo.is_valid():
+		_tw_indicador_selo.kill()
+		_tw_indicador_selo = null
 	if _indicador_selo_node and is_instance_valid(_indicador_selo_node):
 		_indicador_selo_node.queue_free()
 		_indicador_selo_node = null

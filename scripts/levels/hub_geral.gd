@@ -229,35 +229,39 @@ func _process(delta: float) -> void:
 	_tempo_luz_tick = 0.0
 	_tempo_iluminacao += dt
 	
-	# efeito de tremor na chama das tochas
+	# efeito orgânico de chama nas tochas (três frequências harmônicas)
 	for tocha in _luzes_tochas:
 		var node = tocha["node"] as PointLight2D
 		if not node or not is_instance_valid(node):
 			continue
 		var off = tocha["offset"]
 		var spd = tocha["speed"]
-		var f1 = sin((_tempo_iluminacao + off) * spd) * 0.03
-		var f2 = sin((_tempo_iluminacao + off * 1.7) * (spd * 1.5)) * 0.02
-		var flicker = f1 + f2
-		node.energy = tocha["base_energy"] + flicker
+		var f1 = sin((_tempo_iluminacao + off) * spd) * 0.045
+		var f2 = sin((_tempo_iluminacao + off * 1.63) * (spd * 1.85)) * 0.024
+		var f3 = sin((_tempo_iluminacao + off * 2.41) * (spd * 3.1)) * 0.015
+		var flicker = f1 + f2 + f3
+		node.energy = maxf(0.25, tocha["base_energy"] + flicker)
+		node.texture_scale = 1.35 * (1.0 + flicker * 0.30)
 	
 	# pulso da luz do cajado
 	if _luz_cajado and is_instance_valid(_luz_cajado):
-		var pulso = sin(_tempo_iluminacao * 2.5) * 0.02
+		var pulso = sin(_tempo_iluminacao * 2.5) * 0.025
 		_luz_cajado.energy = 0.18 + pulso
+		_luz_cajado.texture_scale = 0.40 + (pulso * 0.4)
 	
 	# pulso de luz do player
 	if _luz_player and is_instance_valid(_luz_player):
-		var pulso_p = sin(_tempo_iluminacao * 2.0) * 0.02
+		var pulso_p = sin(_tempo_iluminacao * 2.0) * 0.025
 		_luz_player.energy = 0.34 + pulso_p
 	
-	# pulso dos portais
+	# respiração cósmica e expansão de raio dos portais
 	for portal_info in _luzes_portais:
 		var luz_p = portal_info["node"] as PointLight2D
 		if luz_p and is_instance_valid(luz_p):
 			var off_p = portal_info["offset"]
-			var pulso_portal = sin((_tempo_iluminacao + off_p) * 2.2) * 0.04
-			luz_p.energy = portal_info["base_energy"] + pulso_portal
+			var pulso_portal = sin((_tempo_iluminacao + off_p) * 2.4) * 0.065 + sin((_tempo_iluminacao + off_p * 1.5) * 4.2) * 0.025
+			luz_p.energy = maxf(0.3, portal_info["base_energy"] + pulso_portal)
+			luz_p.texture_scale = 1.55 + (pulso_portal * 0.6)
 			
 	# bolhas no caldeirao
 	if _luz_caldeirao and is_instance_valid(_luz_caldeirao):

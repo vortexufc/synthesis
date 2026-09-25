@@ -56,6 +56,12 @@ func _ready() -> void:
 	add_child(particulas)
 
 func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
+	# Blindagem: se não foi vitória mas o jogador ainda tem vida (> 0), ele NÃO morreu!
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not vitoria and ps and ps.get("vida_atual_jogador") != null and ps.vida_atual_jogador > 0:
+		print("[GameOver] Ignorado: jogador ainda possui %.1f HP, não é Game Over!" % ps.vida_atual_jogador)
+		return
+		
 	show()
 	_era_boss = dict_stats.get("eh_boss", false)
 	_andar_concluido = dict_stats.get("andar_id", 1)

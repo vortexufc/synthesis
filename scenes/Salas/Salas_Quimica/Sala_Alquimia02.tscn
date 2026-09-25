@@ -1858,6 +1858,7 @@ position = Vector2(934, 608)
 position = Vector2(579, 272)
 frames_animacao = 4
 stride_animacao = 32
+tem_selo_runico = true
 
 [node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=1396982793]
 z_index = 2

@@ -57,9 +57,20 @@ func _process(delta: float) -> void:
 		_frame_offset = (_frame_offset + 1) % 7
 		_sprite.frame = (linha_frames * 7) + _frame_offset
 		
-	# efeito da chama tremendo
+	# Simulação orgânica de chama viva (três harmônicos + micro-ruído)
 	if _luz:
-		var f1 = sin((_tempo + _offset) * _velocidade) * 0.03
-		var f2 = sin((_tempo + _offset * 1.7) * (_velocidade * 1.5)) * 0.02
-		var flicker = f1 + f2
-		_luz.energy = energia_base + flicker
+		var f1 = sin((_tempo + _offset) * _velocidade) * 0.048
+		var f2 = sin((_tempo + _offset * 1.63) * (_velocidade * 1.85)) * 0.026
+		var f3 = sin((_tempo + _offset * 2.41) * (_velocidade * 3.2)) * 0.016
+		var micro_ruido = randf_range(-0.012, 0.012)
+		var flicker = f1 + f2 + f3 + micro_ruido
+		
+		# Respiração da energia da luz
+		_luz.energy = maxf(0.25, energia_base + flicker)
+		
+		# Expansão e contração do raio da luz (respiração da chama)
+		_luz.texture_scale = escala_base * (1.0 + flicker * 0.35)
+		
+		# Modulação de temperatura de cor (tons mais ambarinos e vivos)
+		var fator_calor = clampf((flicker + 0.06) / 0.12, 0.0, 1.0)
+		_luz.color = cor_luz.lerp(Color(1.0, 0.58, 0.20, 1.0), 0.22 * (1.0 - fator_calor))
