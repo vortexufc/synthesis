@@ -7,7 +7,30 @@ var sala_inicial = "res://scenes/Salas/Laboratório_Alquimia/Corredor_Alquimia.t
 var sala_01 = "res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia01.tscn"
 var sala_boss_alquimia = "res://scenes/Salas/Laboratório_Alquimia/Sala_BossAlquimia.tscn"
 
-# salas intermediarias sorteadas a cada partida
+# pools de salas de quimica separados por dificuldade
+# Tier 1 (Azul) - slimes pequenos azuis
+var salas_alquimia_tier1: Array = [
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia02.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia03.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia04.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia09.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia10.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia11.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia12.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia13.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia14.tscn"
+]
+# Tier 2 (Verde) - slimes verdes
+var salas_alquimia_tier2: Array = [
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia05.tscn"
+]
+# Tier 3 (Vermelho/Laranja) - slimes laranjas
+var salas_alquimia_tier3: Array = [
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia06.tscn",
+	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia07.tscn"
+]
+
+# pool legado (todas as intermediarias) para fallback
 var salas_alquimia_pool: Array = [
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia02.tscn",
 	"res://scenes/Salas/Laboratório_Alquimia/Sala_Alquimia03.tscn",
@@ -118,6 +141,11 @@ var portas_destrancadas: Array = []
 
 # salas que vão ter a mecânica da chave nesta run (2 por andar)
 var salas_com_chave: Array = []
+
+# dicionario que mapeia caminho da sala -> tier desejado dos inimigos
+# tier 1 = azul, 2 = verde, 3 = vermelho/laranja
+# usado quando uma sala precisa ter inimigos de tier diferente do nativo
+var tier_override: Dictionary = {}
 
 func _ready():
 	randomize()
@@ -380,6 +408,7 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	inimigos_derrotados.clear()
 	portas_destrancadas.clear()
 	salas_com_chave.clear()
+	tier_override.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
 	
 	var active = ""
@@ -421,26 +450,60 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
 		print("[DungeonGenerator] Masmorra de Física gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	elif active == "Química":
-		# andar de quimica:
-		# comeca no corredor de alquimia (indice 1)
+		# andar de quimica com progressão ordenada:
+		# Corredor -> Sala 01 (azul) -> 2 azuis -> 2 verdes -> 2 vermelhas -> Boss
 		percurso_salas.append(sala_inicial)
-		# sala 01 (indice 2)
 		percurso_salas.append(sala_01)
 		
-		# sorteia 6 salas do meio sem repetir
-		var intermediarias = salas_alquimia_pool.duplicate()
-		intermediarias.shuffle()
 		var salas_intermediarias_escolhidas: Array = []
-		for i in range(min(6, intermediarias.size())):
-			percurso_salas.append(intermediarias[i])
-			salas_intermediarias_escolhidas.append(intermediarias[i])
+		
+		# --- TIER 1: 2 salas azuis (sala_01 já é a 1ª azul) ---
+		var pool_azul = salas_alquimia_tier1.duplicate()
+		pool_azul.shuffle()
+		var qtd_azul = min(2, pool_azul.size())
+		for i in range(qtd_azul):
+			percurso_salas.append(pool_azul[i])
+			salas_intermediarias_escolhidas.append(pool_azul[i])
+		
+		# --- TIER 2: 2 salas verdes ---
+		var pool_verde = salas_alquimia_tier2.duplicate()
+		pool_verde.shuffle()
+		# pega o que tiver de verde nativo
+		var qtd_verde_nativo = min(2, pool_verde.size())
+		for i in range(qtd_verde_nativo):
+			percurso_salas.append(pool_verde[i])
+			salas_intermediarias_escolhidas.append(pool_verde[i])
+		# se faltar verde, pega uma sala azul e marca pra trocar inimigos
+		var verdes_faltando = 2 - qtd_verde_nativo
+		if verdes_faltando > 0:
+			var pool_azul_extra = []
+			for s in pool_azul:
+				if s not in salas_intermediarias_escolhidas:
+					pool_azul_extra.append(s)
+			for i in range(min(verdes_faltando, pool_azul_extra.size())):
+				var sala_promovida = pool_azul_extra[i]
+				percurso_salas.append(sala_promovida)
+				salas_intermediarias_escolhidas.append(sala_promovida)
+				tier_override[sala_promovida] = 2 # marca pra virar verde
+				print("[DungeonGenerator] Sala %s promovida para Tier 2 (Verde)" % sala_promovida)
+		
+		# --- TIER 3: 2 salas vermelhas/laranjas ---
+		var pool_vermelho = salas_alquimia_tier3.duplicate()
+		pool_vermelho.shuffle()
+		var qtd_vermelho = min(2, pool_vermelho.size())
+		for i in range(qtd_vermelho):
+			percurso_salas.append(pool_vermelho[i])
+			salas_intermediarias_escolhidas.append(pool_vermelho[i])
 		
 		# ultima sala: boss slime
 		percurso_salas.append(sala_boss_alquimia)
 		
 		# sorteia 2 salas intermediárias para ter mecânica de chave
 		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
-		print("[DungeonGenerator] Masmorra de Química gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
+		print("[DungeonGenerator] Masmorra de Química gerada com progressão: 3 azuis -> 2 verdes -> 2 vermelhas -> Boss")
+		print("[DungeonGenerator] Percurso: %s" % str(percurso_salas))
+		print("[DungeonGenerator] Salas com chave: %s" % str(salas_com_chave))
+		print("[DungeonGenerator] Tier overrides: %s" % str(tier_override))
 	elif active == "Biologia":
 		# andar de biologia (Estufa)
 		percurso_salas.append(sala_inicial_biologia)
@@ -470,4 +533,20 @@ func _sortear_salas_com_chave(candidatas: Array, quantidade: int) -> void:
 	for i in range(qtd):
 		salas_com_chave.append(pool[i])
 	print("[DungeonGenerator] Salas sorteadas para mecânica de chave: ", salas_com_chave)
+
+# retorna o tier de override para a sala (0 = sem override, usa nativo)
+func get_tier_override(arquivo_cena: String = "") -> int:
+	var cena = arquivo_cena
+	if cena == "" and get_tree() and get_tree().current_scene:
+		cena = get_tree().current_scene.scene_file_path
+	if cena == "":
+		return 0
+	# busca exata
+	if tier_override.has(cena):
+		return tier_override[cena]
+	# busca case-insensitive
+	for key in tier_override:
+		if key.to_lower() == cena.to_lower():
+			return tier_override[key]
+	return 0
 

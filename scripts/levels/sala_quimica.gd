@@ -31,6 +31,59 @@ func _ready() -> void:
 		
 	_configurar_sistema_iluminacao()
 	_iniciar_sistema_inimigos_e_portas()
+	
+	# aplica tier override se o DungeonGenerator marcou essa sala
+	if get_node_or_null("/root/DungeonGenerator"):
+		var tier = DungeonGenerator.get_tier_override(scene_file_path)
+		if tier > 0:
+			call_deferred("_aplicar_tier_override", tier)
+
+# troca os inimigos da sala para o tier desejado (2=verde, 3=vermelho)
+func _aplicar_tier_override(tier: int) -> void:
+	print("[Sala Química] Aplicando tier override %d para %s" % [tier, scene_file_path])
+	
+	# sprite frames por tier
+	var sprite_path = ""
+	var stats = {}
+	if tier == 2: # verde
+		sprite_path = "res://assets/sprites/Sprite Frames/slime_verde.tres"
+		stats = {"vida_maxima": 75.0, "dano": 18.0, "velocidade": 40.0, "velocidade_perseguicao": 62.0, "distancia_perseguicao": 180.0}
+	elif tier == 3: # vermelho/laranja
+		sprite_path = "res://assets/sprites/Sprite Frames/slime_g.tres"
+		stats = {"vida_maxima": 100.0, "dano": 24.0, "velocidade": 46.0, "velocidade_perseguicao": 70.0, "distancia_perseguicao": 190.0}
+	
+	if sprite_path == "":
+		return
+	
+	var sprite_frames = load(sprite_path) as SpriteFrames
+	if not sprite_frames:
+		push_warning("[Sala Química] Não foi possível carregar sprite frames: %s" % sprite_path)
+		return
+	
+	# troca todos os inimigos da sala
+	for inimigo in get_tree().get_nodes_in_group("inimigos"):
+		if is_ancestor_of(inimigo) and is_instance_valid(inimigo) and not inimigo.is_queued_for_deletion():
+			# troca sprite
+			var sprite_node = inimigo.get_node_or_null("AnimatedSprite2D")
+			if sprite_node and sprite_node is AnimatedSprite2D:
+				sprite_node.sprite_frames = sprite_frames
+				if tier == 2:
+					sprite_node.scale = Vector2(1.0, 1.0)
+				elif tier == 3:
+					sprite_node.scale = Vector2(1.1, 1.1)
+				if sprite_node.sprite_frames.has_animation("default"):
+					sprite_node.play("default")
+			# troca stats
+			for key in stats:
+				if key in inimigo:
+					inimigo.set(key, stats[key])
+			# atualiza vida atual
+			inimigo.vida_atual = stats.get("vida_maxima", inimigo.vida_maxima)
+			# atualiza id no trigger
+			var trigger = inimigo.get_node_or_null("EnemyTrigger")
+			if trigger and "nivel_dificuldade" in trigger:
+				trigger.nivel_dificuldade = tier
+			print("[Sala Química] Inimigo %s convertido para tier %d" % [inimigo.name, tier])
 
 func _obter_textura_luz() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()
