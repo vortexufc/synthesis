@@ -219,6 +219,8 @@ func _dropar_moeda_padrao(pos: Vector2) -> void:
 	if not cena_moeda:
 		return
 	var moeda = cena_moeda.instantiate()
+	if "is_drop_dinamico" in moeda:
+		moeda.is_drop_dinamico = true
 	var pai_sala = get_tree().current_scene
 	if pai_sala:
 		moeda.position = pai_sala.to_local(pos)

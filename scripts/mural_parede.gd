@@ -103,6 +103,12 @@ func _on_body_exited(body: Node2D) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not player_perto:
 		return
+	if mural_ui_instancia and is_instance_valid(mural_ui_instancia) and mural_ui_instancia.visible:
+		return
+	if player_ref and is_instance_valid(player_ref) and player_ref.has_method("esta_em_interacao") and player_ref.esta_em_interacao():
+		return
+	if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
+		return
 		
 	var pressionou_f = (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F)
 	if pressionou_f or event.is_action_pressed("interagir"):

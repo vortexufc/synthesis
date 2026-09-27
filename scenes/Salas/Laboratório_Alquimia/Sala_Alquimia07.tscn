@@ -1837,7 +1837,7 @@ gizmo_extents = 24.0
 script = ExtResource("23_76nqq")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=1217375829]
-position = Vector2(128, 604)
+position = Vector2(693, 842)
 gizmo_extents = 24.0
 script = ExtResource("23_76nqq")
 

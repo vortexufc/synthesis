@@ -2,7 +2,7 @@ extends CanvasLayer
 
 # minigame do jogo da memoria
 
-signal desafio_concluido(vitoria: bool)
+signal desafio_concluido(vitoria: bool, tempo_esgotado: bool)
 
 # referencia do player
 var player_ref: Node2D = null
@@ -125,6 +125,27 @@ func _ready() -> void:
 	_font_card.font_weight = 700
 	_construir_interface()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_inside_tree() or not visible:
+		return
+		
+	# Tecla ESC / Cancelar desiste do desafio
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_desistir()
+		return
+		
+	# Consome teclas de interação (como F ou interagir) para não reativar baús ou interações no mundo
+	if event is InputEventKey:
+		var key = event as InputEventKey
+		if key.pressed and (key.keycode == KEY_F or key.physical_keycode == KEY_F or key.key_label == KEY_F):
+			get_viewport().set_input_as_handled()
+			return
+			
+	if event.is_action_pressed("interagir"):
+		get_viewport().set_input_as_handled()
+		return
+
 func _process(delta: float) -> void:
 	if not jogo_ativo:
 		return
@@ -140,6 +161,14 @@ func _process(delta: float) -> void:
 
 # inicia o minigame e trava o player
 func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
+	# Protege contra instâncias duplicadas na árvore
+	var outros = get_tree().get_nodes_in_group("desafio_memoria")
+	for outro in outros:
+		if outro != self and is_instance_valid(outro):
+			print("[DesafioMemória] Outro desafio já ativo na árvore. Abortando instância duplicada.")
+			queue_free()
+			return
+
 	andar_id = p_andar_id
 	player_ref = p_player
 	if player_ref == null:
@@ -517,11 +546,12 @@ func _verificar_par() -> void:
 		_aplicar_estilo_frente(c1["node"], c1["texto"], Color(0.2, 0.95, 0.45))
 		_aplicar_estilo_frente(c2["node"], c2["texto"], Color(0.2, 0.95, 0.45))
 		
-		# pulso nas cartas certas
+		# pulso e partículas nas cartas certas
 		for c in [c1, c2]:
 			var tw = create_tween().set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-			tw.tween_property(c["node"], "scale", Vector2(1.08, 1.08), 0.12)
+			tw.tween_property(c["node"], "scale", Vector2(1.10, 1.10), 0.12)
 			tw.tween_property(c["node"], "scale", Vector2(1.0, 1.0), 0.12)
+			_criar_particulas_acerto_carta(c["node"])
 			
 		cartas_viradas.clear()
 		bloqueio_input = false
@@ -531,12 +561,22 @@ func _verificar_par() -> void:
 			_finalizar_vitoria()
 	else:
 		# errou o par
-		# pisca vermelho
+		# pisca vermelho e treme as cartas horizontalmente
 		_aplicar_estilo_frente(c1["node"], c1["texto"], Color(0.95, 0.25, 0.25))
 		_aplicar_estilo_frente(c2["node"], c2["texto"], Color(0.95, 0.25, 0.25))
 		
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-2")
+			
+		for c in [c1, c2]:
+			var btn_n: Control = c["node"]
+			var tw_s = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			var base_x = btn_n.position.x
+			tw_s.tween_property(btn_n, "position:x", base_x - 6.0, 0.05)
+			tw_s.tween_property(btn_n, "position:x", base_x + 6.0, 0.05)
+			tw_s.tween_property(btn_n, "position:x", base_x - 4.0, 0.05)
+			tw_s.tween_property(btn_n, "position:x", base_x + 4.0, 0.05)
+			tw_s.tween_property(btn_n, "position:x", base_x, 0.05)
 			
 		# espera um pouco e desvira
 		await get_tree().create_timer(0.60, true, false, true).timeout
@@ -552,6 +592,37 @@ func _verificar_par() -> void:
 			
 		cartas_viradas.clear()
 		bloqueio_input = false
+
+func _criar_particulas_acerto_carta(node_alvo: Control) -> void:
+	if node_alvo == null or not is_instance_valid(node_alvo): return
+	var part = CPUParticles2D.new()
+	part.z_index = 25
+	part.amount = 16
+	part.lifetime = 0.55
+	part.one_shot = true
+	part.explosiveness = 0.92
+	part.direction = Vector2(0, -1)
+	part.spread = 180.0
+	part.gravity = Vector2(0, 35)
+	part.initial_velocity_min = 35.0
+	part.initial_velocity_max = 75.0
+	part.scale_amount_min = 2.0
+	part.scale_amount_max = 4.0
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(0.35, 1.0, 0.5, 1.0),
+		Color(1.0, 0.95, 0.3, 0.9),
+		Color(0.2, 0.8, 0.3, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	part.color_ramp = grad
+	
+	node_alvo.add_child(part)
+	part.position = node_alvo.size * 0.5
+	part.emitting = true
+	part.restart()
+	get_tree().create_timer(0.65, true, false, true).timeout.connect(part.queue_free)
 
 func _atualizar_timer_ui() -> void:
 	if lbl_timer:
@@ -599,7 +670,7 @@ func _finalizar_vitoria() -> void:
 	tw.tween_property(banner_resultado, "scale", Vector2(1.0, 1.0), 0.25)
 	
 	await get_tree().create_timer(2.4, true, false, true).timeout
-	_fechar_e_emitir(true)
+	_fechar_e_emitir(true, false)
 
 func _finalizar_derrota() -> void:
 	jogo_ativo = false
@@ -626,15 +697,18 @@ func _finalizar_derrota() -> void:
 	tw.tween_property(banner_resultado, "scale", Vector2(1.0, 1.0), 0.25)
 	
 	await get_tree().create_timer(1.8, true, false, true).timeout
-	_fechar_e_emitir(false)
+	_fechar_e_emitir(false, true)
 
 func _desistir() -> void:
 	if not jogo_ativo:
 		return
 	jogo_ativo = false
-	_fechar_e_emitir(false)
+	_fechar_e_emitir(false, false)
 
-func _fechar_e_emitir(vitoria: bool) -> void:
+func _fechar_e_emitir(vitoria: bool, tempo_esgotado: bool = false) -> void:
+	remove_from_group("desafio_memoria")
+	remove_from_group("minigame_ativo")
+	
 	if player_ref and is_instance_valid(player_ref):
 		if player_ref.has_method("finalizar_interacao"):
 			player_ref.finalizar_interacao(0.8)
@@ -649,5 +723,5 @@ func _fechar_e_emitir(vitoria: bool) -> void:
 	tw.tween_property(backdrop, "modulate:a", 0.0, 0.2)
 	await tw.finished
 	
-	desafio_concluido.emit(vitoria)
+	desafio_concluido.emit(vitoria, tempo_esgotado)
 	queue_free()

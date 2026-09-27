@@ -39,11 +39,19 @@ var sfx = {
 	"acerto_3": preload("res://assets/audio/sfx/acerto_3.wav"),
 	"win": preload("res://assets/audio/sfx/win.wav"),
 	"fail": preload("res://assets/audio/sfx/fail.wav"),
-	"erro_1": preload("res://assets/audio/sfx/fail.wav"),
-	"erro": preload("res://assets/audio/sfx/fail.wav"),
+	"erro_1": preload("res://assets/audio/sfx/ui-2.wav"),
+	"erro": preload("res://assets/audio/sfx/ui-2.wav"),
 	"transicao-1": preload("res://assets/audio/sfx/transicao-1.wav"),
 	"moedas": preload("res://assets/audio/sfx/acerto_1.wav"),
-	"moeda": preload("res://assets/audio/sfx/acerto_1.wav")
+	"moeda": preload("res://assets/audio/sfx/acerto_1.wav"),
+	"pocao": preload("res://assets/audio/sfx/pocao_cura.wav"),
+	"pocao_cura": preload("res://assets/audio/sfx/pocao_cura.wav"),
+	"beber": preload("res://assets/audio/sfx/pocao_cura.wav"),
+	"lock": preload("res://assets/audio/sfx/lock.wav"),
+	"lock_pick": preload("res://assets/audio/sfx/lock_pick.wav"),
+	"dialogo_blip": preload("res://assets/audio/sfx/dialogo_blip.wav"),
+	"compra_venda": preload("res://assets/audio/sfx/compra_venda.wav"),
+	"cha_ching": preload("res://assets/audio/sfx/compra_venda.wav")
 }
 
 # sons de passos
@@ -117,6 +125,34 @@ func play_sfx(audio: String) -> void:
 	player.finished.connect(func():
 		player.queue_free()
 	)
+
+# toca efeito sonoro com controle de tom/pitch (ex: combo de moedas)
+func play_sfx_pitch(audio: String, pitch: float = 1.0) -> void:
+	if not sfx.has(audio):
+		push_error("SFX não encontrado: " + audio)
+		return
+
+	var player := AudioStreamPlayer.new()
+	player.stream = sfx[audio]
+	player.pitch_scale = clamp(pitch, 0.4, 2.5)
+	player.bus = "SFX"
+	add_child(player)
+
+	player.play()
+
+	player.finished.connect(func():
+		player.queue_free()
+	)
+
+func tocar_blip_dialogo(_tipo: String = "") -> void:
+	play_sfx("ui-1")
+
+func tocar_som_compra() -> void:
+	play_sfx_pitch("compra_venda", 1.0)
+
+func tocar_som_venda() -> void:
+	play_sfx_pitch("compra_venda", 1.25)
+	play_sfx_pitch("moedas", 1.3)
 
 # toca musica de fundo
 func play_music(music: AudioStream) -> void:

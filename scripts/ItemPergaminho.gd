@@ -21,7 +21,39 @@ var _tween_brilho: Tween
 var _tween_glow: Tween
 var _tween_bob: Tween
 
+var id_unico: String = ""
+var is_drop_dinamico: bool = false
+
+func _obter_id_unico() -> String:
+	if id_unico != "":
+		return id_unico
+	var cena_path = ""
+	if get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path
+	var pos_str = "%d_%d" % [int(global_position.x), int(global_position.y)]
+	var pai_nome = get_parent().name if get_parent() else ""
+	return "%s::%s/%s@%s" % [cena_path, pai_nome, name, pos_str]
+
 func _ready() -> void:
+	if name == "PergaminhoMesa":
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		var ps = get_node_or_null("/root/PlayerStats")
+		var precisa_cutscene = false
+		if dg and dg.tocar_cutscene_inicial:
+			if ps == null or not ps.cutscene_inicial_vista:
+				precisa_cutscene = true
+		if not precisa_cutscene:
+			visible = false
+			queue_free()
+			return
+
+	if not is_drop_dinamico:
+		if id_unico == "":
+			id_unico = _obter_id_unico()
+		if get_node_or_null("/root/PlayerStats") and PlayerStats.is_pergaminho_coletado(id_unico):
+			queue_free()
+			return
+			
 	z_index = 2
 	body_entered.connect(_quando_corpo_entra)
 	body_exited.connect(_quando_corpo_sai)
@@ -265,6 +297,10 @@ func _quando_corpo_sai(corpo: Node2D) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not player_perto:
 		return
+	if player_ref and is_instance_valid(player_ref) and player_ref.has_method("esta_em_interacao") and player_ref.esta_em_interacao():
+		return
+	if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
+		return
 		
 	var pressionou_f = (event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F)
 	if pressionou_f or event.is_action_pressed("interagir"):
@@ -284,6 +320,8 @@ func coletar() -> void:
 	# salva no grimorio
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.adicionar_pergaminho(titulo_pergaminho, paginas)
+		if not is_drop_dinamico and id_unico != "":
+			PlayerStats.registrar_pergaminho_coletado(id_unico)
 
 	# abre o pergaminho
 	var ui = get_tree().get_first_node_in_group("parchment_ui")

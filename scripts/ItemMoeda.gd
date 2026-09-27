@@ -2,12 +2,50 @@ extends Area2D
 
 var coletavel = false
 var _coletado = false
+var valor_custom: int = 0
+var id_unico: String = ""
+var is_drop_dinamico: bool = false
 
 var _tween_brilho: Tween
 var _tween_glow: Tween
 var _tween_bob: Tween
 
+# Controle de combo de som de moedas
+static var _ultimo_tempo_moeda: float = 0.0
+static var _combo_moedas: int = 0
+
+func _obter_id_unico() -> String:
+	if id_unico != "":
+		return id_unico
+	var cena_path = ""
+	if get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path
+	var pos_str = "%d_%d" % [int(global_position.x), int(global_position.y)]
+	var pai_nome = get_parent().name if get_parent() else ""
+	return "%s::%s/%s@%s" % [cena_path, pai_nome, name, pos_str]
+
+func _physics_process(delta: float) -> void:
+	if not coletavel or _coletado:
+		return
+		
+	var player = get_tree().get_first_node_in_group("player")
+	if player and is_instance_valid(player):
+		var dist = global_position.distance_to(player.global_position)
+		if dist < 80.0: # Raio de atração magnética
+			var dir = (player.global_position - global_position).normalized()
+			var speed = lerp(220.0, 520.0, 1.0 - (dist / 80.0))
+			global_position += dir * speed * delta
+			if dist < 16.0:
+				_coletar(player)
+
 func _ready() -> void:
+	if not is_drop_dinamico:
+		if id_unico == "":
+			id_unico = _obter_id_unico()
+		if get_node_or_null("/root/PlayerStats") and PlayerStats.is_item_coletado(id_unico):
+			queue_free()
+			return
+
 	z_index = 2
 	collision_layer = 0
 	collision_mask = 15 # Pega o player
@@ -21,6 +59,27 @@ func _ready() -> void:
 	tween.tween_interval(0.35)
 	tween.tween_callback(func(): coletavel = true)
 	tween.tween_callback(_verificar_coleta_imediata)
+
+func lancar_arco(pos_origem: Vector2, pos_destino: Vector2, altura_arco: float = 65.0) -> void:
+	is_drop_dinamico = true
+	coletavel = false
+	global_position = pos_origem
+	scale = Vector2(0.3, 0.3)
+	
+	var tw = create_tween().set_parallel(true)
+	tw.tween_property(self, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "global_position:x", pos_destino.x, 0.52).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	
+	var tw_y = create_tween()
+	var pico_y = min(pos_origem.y, pos_destino.y) - altura_arco
+	tw_y.tween_property(self, "global_position:y", pico_y, 0.24).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw_y.tween_property(self, "global_position:y", pos_destino.y, 0.28).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	
+	tw_y.tween_interval(0.18)
+	tw_y.tween_callback(func():
+		coletavel = true
+		_verificar_coleta_imediata()
+	)
 
 func _iniciar_efeito_brilho() -> void:
 	var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
@@ -117,13 +176,29 @@ func _coletar(corpo: Node2D) -> void:
 		_coletado = true
 		coletavel = false
 		
+		var ganho = valor_custom if valor_custom > 0 else randi_range(3, 5)
 		if get_node_or_null("/root/PlayerStats"):
-			PlayerStats.moedas += randi_range(3, 5)
+			PlayerStats.moedas += ganho
+			if not is_drop_dinamico and id_unico != "":
+				PlayerStats.registrar_item_coletado(id_unico)
 			PlayerStats.salvar()
-			print("Pegou moedas! Total: ", PlayerStats.moedas)
 			
+		# Combo escalonado de som
+		var agora = Time.get_ticks_msec() / 1000.0
+		if agora - _ultimo_tempo_moeda < 1.3:
+			_combo_moedas = min(_combo_moedas + 1, 8)
+		else:
+			_combo_moedas = 0
+		_ultimo_tempo_moeda = agora
+		
+		var pitch = 1.0 + (_combo_moedas * 0.08)
 		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("moedas")
+			if AudioManager.has_method("play_sfx_pitch"):
+				AudioManager.play_sfx_pitch("moedas", pitch)
+			else:
+				AudioManager.play_sfx("moedas")
+				
+		_exibir_texto_flutuante_moeda(ganho)
 			
 		if _tween_brilho and _tween_brilho.is_valid(): _tween_brilho.kill()
 		if _tween_glow and _tween_glow.is_valid(): _tween_glow.kill()
@@ -195,3 +270,42 @@ func _coletar(corpo: Node2D) -> void:
 		tween_coleta.tween_property(self, "modulate:a", 0.0, 0.22)
 		await tween_coleta.finished
 		queue_free()
+
+func _exibir_texto_flutuante_moeda(qtd: int) -> void:
+	var lbl = Label.new()
+	lbl.text = "+%d 🪙" % qtd
+	lbl.z_index = 25
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.92, 0.35))
+	lbl.add_theme_color_override("font_outline_color", Color(0.25, 0.14, 0.02, 0.95))
+	lbl.add_theme_constant_override("outline_size", 2)
+	
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font_pixel:
+		lbl.add_theme_font_override("font", font_pixel)
+		
+	var arvore = get_tree()
+	var cena_alvo = arvore.current_scene if (arvore and arvore.current_scene) else get_parent()
+	if cena_alvo:
+		cena_alvo.add_child(lbl)
+	else:
+		get_tree().root.add_child(lbl)
+		
+	lbl.global_position = global_position + Vector2(-15, -20)
+	lbl.scale = Vector2(0.8, 0.8)
+	
+	var tw = lbl.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(lbl, "global_position:y", lbl.global_position.y - 28.0, 0.65).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "scale", Vector2(1.15, 1.15), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_property(lbl, "scale", Vector2(1.0, 1.0), 0.15)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.22).set_delay(0.40)
+	tw.chain().tween_callback(lbl.queue_free)
+	
+	if arvore:
+		arvore.create_timer(0.75).timeout.connect(func():
+			if is_instance_valid(lbl):
+				lbl.queue_free()
+		)
+

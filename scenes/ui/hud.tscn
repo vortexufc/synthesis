@@ -3,7 +3,8 @@
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_abcd"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/health_heart.png" id="2_heart"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_bg.png" id="3_bg"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_green.png" id="4_fill"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_red.png" id="4_red"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_green.png" id="5_fill"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_abcd")
@@ -24,6 +25,7 @@ offset_left = 20.0
 offset_top = 18.0
 offset_right = 52.0
 offset_bottom = 50.0
+pivot_offset = Vector2(16, 16)
 texture = ExtResource("2_heart")
 expand_mode = 1
 stretch_mode = 5
@@ -52,6 +54,20 @@ patch_margin_right = 4
 patch_margin_bottom = 4
 mouse_filter = 2
 
+[node name="HealthBarGhost" type="NinePatchRect" parent="Control/HealthBarContainer"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 200.0
+grow_vertical = 2
+texture = ExtResource("4_red")
+patch_margin_left = 4
+patch_margin_top = 4
+patch_margin_right = 4
+patch_margin_bottom = 4
+mouse_filter = 2
+
 [node name="HealthBarFill" type="NinePatchRect" parent="Control/HealthBarContainer"]
 texture_filter = 1
 layout_mode = 1
@@ -59,7 +75,7 @@ anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 200.0
 grow_vertical = 2
-texture = ExtResource("4_fill")
+texture = ExtResource("5_fill")
 patch_margin_left = 4
 patch_margin_top = 4
 patch_margin_right = 4

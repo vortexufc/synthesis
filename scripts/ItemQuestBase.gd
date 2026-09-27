@@ -5,8 +5,27 @@ extends Area2D
 
 var coletavel = false
 var _coletado = false
+var id_unico: String = ""
+var is_drop_dinamico: bool = false
+
+func _obter_id_unico() -> String:
+	if id_unico != "":
+		return id_unico
+	var cena_path = ""
+	if get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path
+	var pos_str = "%d_%d" % [int(global_position.x), int(global_position.y)]
+	var pai_nome = get_parent().name if get_parent() else ""
+	return "%s::%s/%s@%s" % [cena_path, pai_nome, name, pos_str]
 
 func _ready() -> void:
+	if not is_drop_dinamico:
+		if id_unico == "":
+			id_unico = _obter_id_unico()
+		if get_node_or_null("/root/PlayerStats") and PlayerStats.is_item_coletado(id_unico):
+			queue_free()
+			return
+
 	z_index = 2
 	collision_layer = 0
 	collision_mask = 15 # Pega o player
@@ -70,6 +89,8 @@ func _coletar(corpo: Node2D) -> void:
 				"nome": nome_item,
 				"descricao": descricao_item
 			})
+			if not is_drop_dinamico and id_unico != "":
+				PlayerStats.registrar_item_coletado(id_unico)
 			PlayerStats.salvar()
 			PlayerStats.quests_atualizadas.emit()
 			

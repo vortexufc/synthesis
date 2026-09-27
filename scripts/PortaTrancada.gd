@@ -6,7 +6,26 @@ var panel_prompt: PanelContainer = null
 var label_prompt: Label = null
 var porta_original_ref: Node2D = null
 
+func _obter_porta_id() -> String:
+	var cena_path = get_tree().current_scene.scene_file_path if (get_tree() and get_tree().current_scene) else ""
+	var pai_nome = get_parent().name if get_parent() else ""
+	return "%s::%s/%s" % [cena_path, pai_nome, name]
+
 func _ready() -> void:
+	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.is_porta_destrancada(_obter_porta_id()):
+		var porta_original = porta_original_ref
+		if not porta_original:
+			var pai = get_parent()
+			if pai:
+				porta_original = pai.get_node_or_null("PortaTransicao")
+		if porta_original:
+			porta_original.process_mode = Node.PROCESS_MODE_INHERIT
+			porta_original.show()
+			if "porta_aberta" in porta_original:
+				porta_original._porta_aberta = true
+		queue_free()
+		return
+
 	# cria a area de interacao
 	var area = Area2D.new()
 	area.collision_layer = 0
@@ -126,9 +145,16 @@ func tentar_abrir() -> void:
 		if tem_chave and not ignorar:
 			player_stats.chaves -= 1
 			print("Porta aberta! Chaves restantes: ", player_stats.chaves)
+			if player_stats.has_method("salvar"):
+				player_stats.salvar()
+
+		if get_node_or_null("/root/DungeonGenerator"):
+			DungeonGenerator.registrar_porta_destrancada(_obter_porta_id())
 		
 		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-1")
+			AudioManager.play_sfx("lock")
+			
+		_gerar_particulas_destrancar()
 			
 		_remover_prompt_tela()
 		
@@ -158,3 +184,42 @@ func tentar_abrir() -> void:
 			var pos_x = label_prompt.position.x
 			tween.tween_property(label_prompt, "position:x", pos_x - 5, 0.05)
 			tween.tween_property(label_prompt, "position:x", pos_x, 0.05)
+
+func _gerar_particulas_destrancar() -> void:
+	var part = CPUParticles2D.new()
+	part.top_level = true
+	part.z_index = 20
+	part.amount = 24
+	part.lifetime = 0.65
+	part.one_shot = true
+	part.explosiveness = 0.92
+	part.direction = Vector2(0, -1)
+	part.spread = 180.0
+	part.gravity = Vector2(0, 40)
+	part.initial_velocity_min = 40.0
+	part.initial_velocity_max = 90.0
+	part.scale_amount_min = 2.0
+	part.scale_amount_max = 4.5
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1.0, 0.95, 0.40, 1.0),
+		Color(1.0, 0.60, 0.10, 0.90),
+		Color(0.80, 0.30, 0.05, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.60, 1.0])
+	part.color_ramp = grad
+	
+	var arvore = get_tree()
+	var cena_alvo = arvore.current_scene if (arvore and arvore.current_scene) else get_parent()
+	if cena_alvo:
+		cena_alvo.add_child(part)
+	else:
+		get_tree().root.add_child(part)
+		
+	part.global_position = global_position
+	part.emitting = true
+	part.restart()
+	if arvore:
+		arvore.create_timer(0.75).timeout.connect(part.queue_free)
+

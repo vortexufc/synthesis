@@ -10,12 +10,24 @@ var player_perto: bool = false
 var ui_instancia: CanvasLayer = null
 
 var _balao_interacao: Node2D = null
-var _indicador_quest: Label = null
+var _indicador_quest: Control = null
 var _sprite: Sprite2D = null
 var _tempo_anim: float = 0.0
 var _base_balao_y: float = -142.0
 var _base_quest_y: float = -145.0
 var _curr_quest_y: float = -145.0
+var _tw_txt: Tween = null
+var _lbl_msg_dialogo: RichTextLabel = null
+
+func _atualizar_progresso_fala_biologia(prog: float) -> void:
+	if _lbl_msg_dialogo and is_instance_valid(_lbl_msg_dialogo):
+		var total_chars = _lbl_msg_dialogo.get_total_character_count()
+		var antigo = int(_lbl_msg_dialogo.visible_ratio * total_chars)
+		var novo = int(prog * total_chars)
+		_lbl_msg_dialogo.visible_ratio = prog
+		if novo > antigo and novo % 3 == 0 and prog < 0.96:
+			if get_node_or_null("/root/AudioManager"):
+				AudioManager.play_sfx("ui-1")
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -55,6 +67,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_fechar_interface()
 
 func _exit_tree() -> void:
+	if _tw_txt and _tw_txt.is_running():
+		_tw_txt.kill()
 	_fechar_interface()
 
 func _process(delta: float) -> void:
@@ -117,19 +131,51 @@ func _criar_balao() -> void:
 	_balao_interacao.add_child(panel)
 	add_child(_balao_interacao)
 	
-	# icone de exclamacao
-	_indicador_quest = Label.new()
+	# 2. Indicador de Quest flutuante em balão de quadrinho/RPG (! ou ?)
+	_indicador_quest = Control.new()
 	_indicador_quest.name = "IndicadorQuestBio"
 	_indicador_quest.z_index = 26
-	_indicador_quest.custom_minimum_size = Vector2(40, 32)
-	if font: _indicador_quest.add_theme_font_override("font", font)
-	_indicador_quest.add_theme_font_size_override("font_size", 24)
-	_indicador_quest.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-	_indicador_quest.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_indicador_quest.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_indicador_quest.position = Vector2(-20, _base_quest_y)
-	_indicador_quest.pivot_offset = Vector2(20, 16)
-	_indicador_quest.text = "!"
+	_indicador_quest.custom_minimum_size = Vector2(34, 34)
+	_indicador_quest.size = Vector2(34, 34)
+	_indicador_quest.position = Vector2(-17, _base_quest_y)
+	_indicador_quest.pivot_offset = Vector2(17, 17)
+	
+	var painel_badge = PanelContainer.new()
+	painel_badge.name = "PainelBadge"
+	painel_badge.custom_minimum_size = Vector2(34, 34)
+	painel_badge.size = Vector2(34, 34)
+	
+	var sb_badge = StyleBoxFlat.new()
+	sb_badge.set_corner_radius_all(17)
+	sb_badge.set_border_width_all(2)
+	sb_badge.bg_color = Color(0.04, 0.16, 0.08, 0.95)
+	sb_badge.border_color = Color(0.3, 1.0, 0.55, 1.0)
+	sb_badge.shadow_color = Color(0.1, 0.6, 0.3, 0.5)
+	sb_badge.shadow_size = 6
+	painel_badge.add_theme_stylebox_override("panel", sb_badge)
+	_indicador_quest.add_child(painel_badge)
+	
+	var lbl_badge = Label.new()
+	lbl_badge.name = "LblBadge"
+	if font: lbl_badge.add_theme_font_override("font", font)
+	lbl_badge.add_theme_font_size_override("font_size", 22)
+	lbl_badge.add_theme_color_override("font_color", Color(0.4, 1.0, 0.65))
+	lbl_badge.add_theme_color_override("font_outline_color", Color(0.02, 0.25, 0.1, 0.9))
+	lbl_badge.add_theme_constant_override("outline_size", 3)
+	lbl_badge.text = "!"
+	lbl_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	painel_badge.add_child(lbl_badge)
+	
+	# Rabicho do balão
+	var rabicho = ColorRect.new()
+	rabicho.name = "Rabicho"
+	rabicho.size = Vector2(8, 8)
+	rabicho.position = Vector2(13, 27)
+	rabicho.rotation = deg_to_rad(45.0)
+	rabicho.color = Color(0.3, 1.0, 0.55)
+	_indicador_quest.add_child(rabicho)
+	
 	add_child(_indicador_quest)
 
 func _mostrar_prompt() -> void:
@@ -223,6 +269,13 @@ func _abrir_interface() -> void:
 	lbl_msg.add_theme_font_size_override("normal_font_size", 16)
 	lbl_msg.add_theme_font_size_override("bold_font_size", 16)
 	vbox.add_child(lbl_msg)
+	
+	_lbl_msg_dialogo = lbl_msg
+	lbl_msg.visible_ratio = 0.0
+	if _tw_txt and _tw_txt.is_running():
+		_tw_txt.kill()
+	_tw_txt = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tw_txt.tween_method(_atualizar_progresso_fala_biologia, 0.0, 1.0, 1.35)
 	
 	# Botão fechar
 	var hbox_btn = HBoxContainer.new()

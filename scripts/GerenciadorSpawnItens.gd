@@ -45,9 +45,13 @@ func _ready() -> void:
 		
 	call_deferred("_executar_spawn")
 
+func _obter_spawner_id() -> String:
+	var cena_path = ""
+	if get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path
+	return "%s::%s" % [cena_path, name]
+
 func _executar_spawn() -> void:
-	randomize()
-	
 	# pega a cena certa pro tipo selecionado
 	var cena_para_instanciar: PackedScene = null
 	if tipo_item == TipoItem.CUSTOMIZADO:
@@ -61,38 +65,55 @@ func _executar_spawn() -> void:
 		push_warning("[GerenciadorSpawnItens] Nenhuma cena válida configurada para %s!" % name)
 		return
 		
-	# lista os pontos filhos
-	var pontos: Array[Node2D] = []
+	# lista os pontos filhos indexados pelo nome
+	var pontos_map: Dictionary = {}
 	for child in get_children():
 		if child is Marker2D or child is Node2D:
-			pontos.append(child)
+			pontos_map[child.name] = child
 			
-	if pontos.size() == 0 and get_tree():
+	if pontos_map.size() == 0 and get_tree():
 		var grupo = get_tree().get_nodes_in_group("pontos_item")
 		for p in grupo:
 			if p is Node2D and p.get_parent() == self:
-				pontos.append(p)
+				pontos_map[p.name] = p
 				
-	if pontos.size() == 0:
+	if pontos_map.size() == 0:
 		return
-		
-	pontos.shuffle()
+
+	var spawner_id = _obter_spawner_id()
+	var pontos_selecionados: Array = []
+
+	if get_node_or_null("/root/PlayerStats") and PlayerStats.has_spawner_sorteio(spawner_id):
+		pontos_selecionados = PlayerStats.get_spawner_sorteio(spawner_id)
+	else:
+		randomize()
+		var chaves_pontos = pontos_map.keys()
+		chaves_pontos.shuffle()
+		for k in chaves_pontos:
+			if randf() <= chance_spawn:
+				pontos_selecionados.append(k)
+		if pontos_selecionados.size() == 0 and garantir_ao_menos_um and chaves_pontos.size() > 0:
+			pontos_selecionados.append(chaves_pontos.pick_random())
+		if get_node_or_null("/root/PlayerStats"):
+			PlayerStats.registrar_spawner_sorteio(spawner_id, pontos_selecionados)
+
 	var pai = get_parent()
 	if pai == null:
 		pai = self
+
+	for nome_ponto in pontos_selecionados:
+		if not pontos_map.has(nome_ponto):
+			continue
+		var p = pontos_map[nome_ponto]
+		var item_id = "%s::%s" % [spawner_id, nome_ponto]
 		
-	var total_spawnados = 0
-	for p in pontos:
-		if randf() <= chance_spawn:
-			var item_inst = cena_para_instanciar.instantiate()
-			pai.add_child(item_inst)
-			item_inst.global_position = p.global_position
-			total_spawnados += 1
+		# Se o jogador ja coletou esse item, nao spawna novamente!
+		if get_node_or_null("/root/PlayerStats") and PlayerStats.is_item_coletado(item_id):
+			continue
 			
-	# se nenhum ponto deu certo, mas precisa de pelo menos 1
-	if total_spawnados == 0 and garantir_ao_menos_um and pontos.size() > 0:
-		var p_sorteado = pontos.pick_random()
 		var item_inst = cena_para_instanciar.instantiate()
+		if "id_unico" in item_inst:
+			item_inst.id_unico = item_id
 		pai.add_child(item_inst)
-		item_inst.global_position = p_sorteado.global_position
-		total_spawnados = 1
+		item_inst.global_position = p.global_position
+

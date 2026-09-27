@@ -37,6 +37,10 @@ var _vida_anterior: float = 100.0
 var _shake_tempo: float = 0.0
 var _shake_intensidade: float = 0.0
 
+# Tempo de graça e piscar de invulnerabilidade (i-frames)
+var _tempo_invulneravel: float = 0.0
+var _tween_invulneravel: Tween = null
+
 
 func _ready() -> void:
 	add_to_group("player")
@@ -65,6 +69,12 @@ func _ready() -> void:
 
 
 func _reposicionar_na_porta_correta() -> void:
+	if PlayerStats and PlayerStats.restaurando_posicao_save and PlayerStats.tem_pos_salva:
+		global_position = Vector2(PlayerStats.pos_salva_x, PlayerStats.pos_salva_y)
+		PlayerStats.restaurando_posicao_save = false
+		print("[Player] Posição restaurada do save: ", global_position)
+		return
+
 	if not get_node_or_null("/root/DungeonGenerator"):
 		return
 	
@@ -102,6 +112,13 @@ func _reposicionar_na_porta_correta() -> void:
 func _physics_process(delta: float) -> void:
 	if _tempo_imunidade_pos_interacao > 0.0:
 		_tempo_imunidade_pos_interacao -= delta
+		
+	if _tempo_invulneravel > 0.0:
+		_tempo_invulneravel -= delta
+		if _tempo_invulneravel <= 0.0:
+			_tempo_invulneravel = 0.0
+			if has_node("sprite"):
+				$sprite.modulate.a = 1.0
 
 	# se tiver em dialogo ou minigame, nao move
 	if esta_em_interacao():
@@ -214,13 +231,28 @@ func receber_dano_mimico(quantidade: float = 70.0) -> void:
 
 # dano de armadilha / perigo do cenario
 func receber_dano(quantidade: float = 15.0, intensidade_shake: float = 8.0, motivo: String = "") -> void:
+	if PlayerStats.vida_atual_jogador <= 0.0 or _tempo_invulneravel > 0.0:
+		return
+		
+	_tempo_invulneravel = 0.85
 	PlayerStats.sofrer_dano(quantidade)
 	aplicar_shake(intensidade_shake, 0.28)
 	
 	if has_node("sprite"):
-		var tween = create_tween()
-		tween.tween_property($sprite, "modulate", Color(2.2, 0.15, 0.15, 1.0), 0.08)
-		tween.tween_property($sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.35)
+		if _tween_invulneravel and _tween_invulneravel.is_running():
+			_tween_invulneravel.kill()
+		_tween_invulneravel = create_tween()
+		# Flash avermelhado imediato do impacto
+		_tween_invulneravel.tween_property($sprite, "modulate", Color(2.4, 0.2, 0.2, 1.0), 0.08)
+		_tween_invulneravel.tween_property($sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.10)
+		# Piscar clássico retrô de invulnerabilidade (i-frames)
+		for i in range(4):
+			_tween_invulneravel.tween_property($sprite, "modulate:a", 0.25, 0.08)
+			_tween_invulneravel.tween_property($sprite, "modulate:a", 1.0, 0.08)
+		_tween_invulneravel.tween_callback(func():
+			if has_node("sprite"):
+				$sprite.modulate = Color.WHITE
+		)
 		
 	if not motivo.is_empty():
 		_exibir_texto_dano(motivo, quantidade)

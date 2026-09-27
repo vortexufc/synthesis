@@ -108,9 +108,26 @@ const PARES_POR_ANDAR = {
 }
 
 func _ready() -> void:
+	add_to_group("minigame_ativo")
 	layer = 105
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_construir_interface()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible or not is_inside_tree():
+		return
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_finalizar_derrota()
+		return
+	if event is InputEventKey:
+		var key = event as InputEventKey
+		if key.pressed and (key.keycode == KEY_F or key.physical_keycode == KEY_F or key.key_label == KEY_F):
+			get_viewport().set_input_as_handled()
+			return
+	if event.is_action_pressed("interagir"):
+		get_viewport().set_input_as_handled()
+		return
 
 func _process(delta: float) -> void:
 	if not jogo_ativo:
@@ -455,6 +472,9 @@ func _ao_clicar_bloco(btn: Button) -> void:
 		_aplicar_cor_bloco(b1, Color(0.2, 0.95, 0.45))
 		_aplicar_cor_bloco(b2, Color(0.2, 0.95, 0.45))
 		
+		_criar_particulas_acerto(b1)
+		_criar_particulas_acerto(b2)
+		
 		# animacao de sumir os blocos
 		var tw = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tw.tween_property(b1, "scale", Vector2(1.12, 1.12), 0.15)
@@ -496,6 +516,37 @@ func _ao_clicar_bloco(btn: Button) -> void:
 		_restaurar_cor_bloco(b2)
 		bloco_selecionado = null
 		bloqueio_input = false
+
+func _criar_particulas_acerto(node_alvo: Control) -> void:
+	if node_alvo == null or not is_instance_valid(node_alvo): return
+	var part = CPUParticles2D.new()
+	part.z_index = 25
+	part.amount = 16
+	part.lifetime = 0.55
+	part.one_shot = true
+	part.explosiveness = 0.92
+	part.direction = Vector2(0, -1)
+	part.spread = 180.0
+	part.gravity = Vector2(0, 35)
+	part.initial_velocity_min = 35.0
+	part.initial_velocity_max = 75.0
+	part.scale_amount_min = 2.0
+	part.scale_amount_max = 4.0
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(0.35, 1.0, 0.5, 1.0),
+		Color(1.0, 0.95, 0.3, 0.9),
+		Color(0.2, 0.8, 0.3, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	part.color_ramp = grad
+	
+	node_alvo.add_child(part)
+	part.position = node_alvo.size * 0.5
+	part.emitting = true
+	part.restart()
+	get_tree().create_timer(0.65, true, false, true).timeout.connect(part.queue_free)
 
 func _destacar_bloco(btn: Button, destacar: bool) -> void:
 	if not is_instance_valid(btn): return
@@ -594,6 +645,7 @@ func _finalizar_derrota() -> void:
 	_fechar_e_emitir(false)
 
 func _fechar_e_emitir(vitoria: bool) -> void:
+	remove_from_group("minigame_ativo")
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(painel_central, "modulate:a", 0.0, 0.2)
 	tw.tween_property(painel_central, "scale", Vector2(0.8, 0.8), 0.2)

@@ -267,13 +267,53 @@ func _tentar_abrir_com_chave_f() -> void:
 	_remover_prompt_tranca()
 	
 	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
+		AudioManager.play_sfx("lock")
+		
+	_gerar_particulas_destrancar()
 		
 	_porta_aberta = true
 	await _abrir_porta_animacao()
 	
 	if _player_esta_na_porta():
 		_transacionar_porta()
+
+func _gerar_particulas_destrancar() -> void:
+	var part = CPUParticles2D.new()
+	part.top_level = true
+	part.z_index = 20
+	part.amount = 24
+	part.lifetime = 0.65
+	part.one_shot = true
+	part.explosiveness = 0.92
+	part.direction = Vector2(0, -1)
+	part.spread = 180.0
+	part.gravity = Vector2(0, 40)
+	part.initial_velocity_min = 40.0
+	part.initial_velocity_max = 90.0
+	part.scale_amount_min = 2.0
+	part.scale_amount_max = 4.5
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1.0, 0.95, 0.40, 1.0),
+		Color(1.0, 0.60, 0.10, 0.90),
+		Color(0.80, 0.30, 0.05, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.60, 1.0])
+	part.color_ramp = grad
+	
+	var arvore = get_tree()
+	var cena_alvo = arvore.current_scene if (arvore and arvore.current_scene) else get_parent()
+	if cena_alvo:
+		cena_alvo.add_child(part)
+	else:
+		get_tree().root.add_child(part)
+		
+	part.global_position = global_position
+	part.emitting = true
+	part.restart()
+	if arvore:
+		arvore.create_timer(0.75).timeout.connect(part.queue_free)
 
 func _ativar_selo_runico() -> void:
 	_selo_ativo = true

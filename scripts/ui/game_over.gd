@@ -62,6 +62,10 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		print("[GameOver] Ignorado: jogador ainda possui %.1f HP, não é Game Over!" % ps.vida_atual_jogador)
 		return
 		
+	# Se a tela de game over já estiver visível, ignora chamadas duplicadas para não repetir o som de derrota
+	if visible:
+		return
+		
 	show()
 	_era_boss = dict_stats.get("eh_boss", false)
 	_andar_concluido = dict_stats.get("andar_id", 1)
@@ -98,6 +102,7 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		btn_container.show() # Mostra botões
 		particulas.emitting = false
 		_pode_pular_vitoria = false
+		get_tree().paused = true # Pausa o jogo para congelar armadilhas e inimigos
 	
 	if dict_stats.is_empty():
 		stats.text = "Tempo de Batalha: --s\nPrecisão: --%\nDano Causado: --"
@@ -155,8 +160,11 @@ func _finalizar_vitoria() -> void:
 
 func _on_tentar_novamente_pressed() -> void:
 	hide()
+	get_tree().paused = false
 	AudioManager.play_sfx("ui-2")
 	PlayerStats.resetar_vida()
+	PlayerStats.limpar_posicao_salva()
+	PlayerStats.resetar_progresso_mundo()
 	QuizManager.fechar_ui_batalha()
 	if get_node_or_null("/root/DungeonGenerator"):
 		DungeonGenerator.resetar_masmorra()
@@ -166,7 +174,12 @@ func _on_tentar_novamente_pressed() -> void:
 
 func _on_menu_principal_pressed() -> void:
 	hide()
+	get_tree().paused = false
 	AudioManager.play_sfx("ui-2")
 	PlayerStats.resetar_vida()
+	PlayerStats.limpar_posicao_salva()
+	PlayerStats.resetar_progresso_mundo()
 	QuizManager.fechar_ui_batalha()
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.resetar_masmorra()
 	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")

@@ -204,6 +204,11 @@ func _criar_interface_dev() -> void:
 	lbl_acoes.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
 	vbox.add_child(lbl_acoes)
 	
+	# resetar save completo para o padrao de fábrica
+	var btn_reset_save = _criar_botao_dev("💾 Resetar Save Completo (Padrão de Fábrica)", Color(0.62, 0.18, 0.18))
+	btn_reset_save.pressed.connect(_resetar_save_completo)
+	vbox.add_child(btn_reset_save)
+	
 	# resetar expedicao do hub
 	var btn_reset_andar = _criar_botao_dev("🚪 Resetar Expedição Atual (Limpar Andar)", Color(0.42, 0.24, 0.12))
 	btn_reset_andar.pressed.connect(func():
@@ -244,6 +249,20 @@ func _criar_interface_dev() -> void:
 	var btn_clear_inv = _criar_botao_dev("🗑️ Limpar Inventário e Moedas")
 	btn_clear_inv.pressed.connect(_limpar_inventario_e_moedas)
 	vbox.add_child(btn_clear_inv)
+	
+	var btn_reset_cutscene = _criar_botao_dev("📜 Resetar Cutscene Inicial (Ver de Novo)")
+	btn_reset_cutscene.pressed.connect(func():
+		if get_node_or_null("/root/PlayerStats"):
+			PlayerStats.cutscene_inicial_vista = false
+			PlayerStats.salvar()
+		if get_node_or_null("/root/DungeonGenerator"):
+			DungeonGenerator.tocar_cutscene_inicial = true
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("mostrar_mensagem"):
+			hud.mostrar_mensagem("📜 Cutscene inicial resetada! Será exibida no próximo Novo Jogo.")
+		print("[DevManager] Cutscene inicial resetada!")
+	)
+	vbox.add_child(btn_reset_cutscene)
 	
 	var hs_ins = HSeparator.new()
 	vbox.add_child(hs_ins)
@@ -400,3 +419,46 @@ func _limpar_inventario_e_moedas() -> void:
 			
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui_5")
+
+func _resetar_save_completo() -> void:
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.resetar_salvamento_completo()
+		
+	# atualiza a mochila se tiver aberta
+	var inv = get_tree().get_first_node_in_group("inventario_ui")
+	if not inv:
+		inv = get_tree().root.find_child("InventarioUI", true, false)
+	if inv:
+		if inv.has_method("_limpar_detalhes"):
+			inv._limpar_detalhes()
+		if inv.has_method("_atualizar_listas"):
+			inv._atualizar_listas()
+			
+	# atualiza a loja se tiver aberta
+	var loja = get_tree().root.find_child("LojaMercador", true, false)
+	if loja and loja.has_method("_atualizar_interface"):
+		loja._atualizar_interface()
+		
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("ui_5")
+		
+	# fecha o menu dev para o usuario ver o jogo resetado
+	_panel_container.visible = false
+	get_tree().paused = false
+	
+	# recarrega a cena atual para recriar todos os itens, pergaminhos e salas do zero
+	var cena_atual = get_tree().current_scene
+	if cena_atual and is_instance_valid(cena_atual):
+		get_tree().reload_current_scene()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		
+	var hud = get_tree().get_first_node_in_group("hud")
+	if not hud:
+		hud = get_tree().root.find_child("HUD", true, false)
+	if hud and hud.has_method("mostrar_mensagem"):
+		hud.mostrar_mensagem("💾 Save Resetado! Livros, pergaminhos e salas restaurados.")
+	elif hud and hud.has_method("mostrar_notificacao_quest"):
+		hud.mostrar_notificacao_quest("🛠️ DEV MODE", "Save Resetado para o Padrão!", Color(0.3, 1.0, 0.5), "ui-1")
+		
+	print("[DevManager] Save do jogo resetado para o padrão com sucesso!")

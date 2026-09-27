@@ -145,6 +145,22 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_construir_ui()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible or not is_inside_tree():
+		return
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_on_fechar_clicado()
+		return
+	if event is InputEventKey:
+		var key = event as InputEventKey
+		if key.pressed and (key.keycode == KEY_F or key.physical_keycode == KEY_F or key.key_label == KEY_F):
+			get_viewport().set_input_as_handled()
+			return
+	if event.is_action_pressed("interagir"):
+		get_viewport().set_input_as_handled()
+		return
+
 func iniciar_minigame(tema: String = "auto") -> void:
 	var p = get_tree().get_first_node_in_group("player")
 	if p:

@@ -656,6 +656,7 @@ func _on_btn_acao_pressionado() -> void:
 			
 		var po = PlayerStats.pocoes[idx]
 		if po["qtd"] > 0:
+			AudioManager.play_sfx("pocao_cura")
 			PlayerStats.curar_vida(po["cura"])
 			po["qtd"] -= 1
 			if po["qtd"] <= 0:

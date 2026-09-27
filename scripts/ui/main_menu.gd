@@ -35,6 +35,18 @@ func _ready() -> void:
 	btn_clas.pressed.connect(_on_btn_clas_pressed)
 	btn_config.pressed.connect(_on_btn_config_pressed)
 	
+	# Se tiver jogo salvo com localizacao, exibe CONTINUAR e NOVO JOGO
+	if PlayerStats and PlayerStats.tem_pos_salva and PlayerStats.cena_salva != "":
+		btn_jogar.text = "CONTINUAR"
+		
+		var btn_novo = btn_jogar.duplicate()
+		btn_novo.name = "BtnNovoJogo"
+		btn_novo.text = "NOVO JOGO"
+		btn_novo.pressed.connect(_on_btn_novo_jogo_pressed)
+		var vbox = $MarginContainer/VBoxButtons
+		vbox.add_child(btn_novo)
+		vbox.move_child(btn_novo, 1)
+
 	if DatabaseManager.is_admin:
 		var btn_admin = btn_jogar.duplicate()
 		btn_admin.text = "PAINEL ADMIN"
@@ -103,14 +115,39 @@ func _atualizar_perfil() -> void:
 		_btn_avatar.modulate = Color(1.0, 1.0, 1.0)
 
 func _on_btn_jogar_pressed() -> void:
-	print("Botão JOGAR pressionado")
-	
-	# clique em jogar
 	AudioManager.play_sfx("ui_5")
 	
+	# Se tiver jogo salvo com localizacao, continua de onde parou!
+	if PlayerStats and PlayerStats.tem_pos_salva and PlayerStats.cena_salva != "":
+		print("[MainMenu] Continuando jogo na cena: %s na posicao (%.0f, %.0f)" % [PlayerStats.cena_salva, PlayerStats.pos_salva_x, PlayerStats.pos_salva_y])
+		PlayerStats.restaurando_posicao_save = true
+		
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg and PlayerStats.percurso_salas_salvo.size() > 0:
+			dg.percurso_salas = PlayerStats.percurso_salas_salvo.duplicate()
+			dg.indice_atual = PlayerStats.indice_sala_salvo
+			
+		AudioManager.play_sfx("transicao-1")
+		TransitionScreen.change_scene(PlayerStats.cena_salva)
+		return
+		
+	_iniciar_novo_jogo()
+
+func _on_btn_novo_jogo_pressed() -> void:
+	AudioManager.play_sfx("ui_5")
+	_iniciar_novo_jogo()
+
+func _iniciar_novo_jogo() -> void:
+	if PlayerStats:
+		PlayerStats.resetar_vida()
+		PlayerStats.resetar_progresso_mundo()
+		PlayerStats.limpar_posicao_salva()
 	if get_node_or_null("/root/DungeonGenerator"):
 		DungeonGenerator.resetar_masmorra()
-		DungeonGenerator.tocar_cutscene_inicial = true
+		if PlayerStats and not PlayerStats.cutscene_inicial_vista:
+			DungeonGenerator.tocar_cutscene_inicial = true
+		else:
+			DungeonGenerator.tocar_cutscene_inicial = false
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.resetar_historico_perguntas()
 		

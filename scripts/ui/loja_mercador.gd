@@ -454,20 +454,30 @@ func _comprar(item: Dictionary) -> void:
 		PlayerStats.salvar()
 		_atualizar_todos_botoes()
 		
-		_iniciar_fala_mercador("Excelente escolha! Guarde bem esse " + item["nome"] + ".")
+		_animar_mudanca_moedas(false, item["preco"])
+		
+		var falas_compra = [
+			"Excelente escolha! Esse %s vai te manter vivo nos combates arcanos." % item["nome"],
+			"Negócio fechado! Poção de primeiríssima qualidade para sua jornada.",
+			"Mais um cliente satisfeito! Use com sabedoria nos momentos de aperto.",
+			"Bela aquisição! Volte sempre que sua reserva de vida estiver baixa."
+		]
+		_iniciar_fala_mercador(falas_compra.pick_random())
 		
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("mostrar_mensagem"):
 			hud.mostrar_mensagem("Comprado: " + item["nome"] + " (-" + str(item["preco"]) + " Moedas)")
 		
 		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui_5")
+			if AudioManager.has_method("tocar_som_compra"):
+				AudioManager.tocar_som_compra()
+			else:
+				AudioManager.play_sfx("ui_5")
 	else:
-		_iniciar_fala_mercador("Moedas insuficientes, amigo! Derrote monstros ou me traga sucatas para conseguir mais.")
-		if lbl_moedas:
-			lbl_moedas.modulate = Color(1, 0.3, 0.3)
-			var t = create_tween()
-			t.tween_property(lbl_moedas, "modulate", Color(1, 1, 1), 0.5)
+		_iniciar_fala_mercador("Moedas insuficientes, amigo! Derrote monstros nas salas para conseguir mais ouro.")
+		_tremer_lbl_moedas()
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.play_sfx("erro")
 
 func _contar_item(nome_item: String) -> int:
 	if not get_node_or_null("/root/PlayerStats"): return 0
@@ -500,20 +510,83 @@ func _vender_sucata(nome_item: String, qtd_necessaria: int, recompensa: int) -> 
 		PlayerStats.salvar()
 		_atualizar_todos_botoes()
 		
-		_iniciar_fala_mercador("Negócio fechado! +" + str(recompensa) + " Moedas de ouro na sua algibeira.")
+		_animar_mudanca_moedas(true, recompensa)
+		
+		var falas_venda = [
+			"Negócio fechado! +%d Moedas de ouro na sua algibeira." % recompensa,
+			"Opa! Essa sucata vai render ótimos experimentos. Aqui está seu ouro!",
+			"Excelente coleta! Se achar mais materiais de monstros, traga para cá.",
+			"Dinheiro justo! Comércio limpo entre sábios e mercadores."
+		]
+		_iniciar_fala_mercador(falas_venda.pick_random())
 		
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("mostrar_mensagem"):
 			hud.mostrar_mensagem("Vendido: " + nome_item + " (+" + str(recompensa) + " Moedas)")
 			
 		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui_5")
+			if AudioManager.has_method("tocar_som_venda"):
+				AudioManager.tocar_som_venda()
+			else:
+				AudioManager.play_sfx("ui_5")
 	else:
-		_iniciar_fala_mercador("Você não tem " + str(qtd_necessaria) + " " + nome_item + " para me vender!")
-		if lbl_moedas:
-			lbl_moedas.modulate = Color(1, 0.3, 0.3)
-			var t = create_tween()
-			t.tween_property(lbl_moedas, "modulate", Color(1, 1, 1), 0.5)
+		_iniciar_fala_mercador("Você não tem %d %s para me vender! Derrote monstros para recolher materiais." % [qtd_necessaria, nome_item])
+		_tremer_lbl_moedas()
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.play_sfx("erro")
+
+func _animar_mudanca_moedas(positivo: bool, valor: int) -> void:
+	if lbl_moedas == null: return
+	lbl_moedas.pivot_offset = lbl_moedas.size * 0.5
+	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl_moedas, "scale", Vector2(1.32, 1.32), 0.12)
+	tw.chain().tween_property(lbl_moedas, "scale", Vector2.ONE, 0.22)
+	
+	var cor = Color(1.0, 0.88, 0.2) if positivo else Color(1.0, 0.45, 0.45)
+	var tw_col = create_tween()
+	tw_col.tween_property(lbl_moedas, "modulate", cor, 0.12)
+	tw_col.tween_property(lbl_moedas, "modulate", Color.WHITE, 0.35)
+	
+	var flutuante = Label.new()
+	flutuante.text = ("+%d 🪙" if positivo else "-%d 🪙") % valor
+	flutuante.add_theme_font_size_override("font_size", 16)
+	flutuante.add_theme_color_override("font_color", cor)
+	flutuante.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	flutuante.add_theme_constant_override("outline_size", 4)
+	flutuante.position = lbl_moedas.global_position + Vector2(10, -22)
+	flutuante.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flutuante.z_index = 50
+	add_child(flutuante)
+	
+	var tw_f = create_tween().set_parallel(true)
+	tw_f.tween_property(flutuante, "position:y", flutuante.position.y - 35, 0.75).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw_f.tween_property(flutuante, "modulate:a", 0.0, 0.75).set_ease(Tween.EASE_IN)
+	tw_f.chain().tween_callback(flutuante.queue_free)
+
+func _tremer_lbl_moedas() -> void:
+	if lbl_moedas == null: return
+	var pos_base_x = lbl_moedas.position.x
+	var tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	lbl_moedas.modulate = Color(1.0, 0.3, 0.3)
+	tw.tween_property(lbl_moedas, "position:x", pos_base_x + 6, 0.04)
+	tw.tween_property(lbl_moedas, "position:x", pos_base_x - 6, 0.04)
+	tw.tween_property(lbl_moedas, "position:x", pos_base_x + 4, 0.04)
+	tw.tween_property(lbl_moedas, "position:x", pos_base_x, 0.04)
+	tw.parallel().tween_property(lbl_moedas, "modulate", Color.WHITE, 0.35)
+
+func _exit_tree() -> void:
+	if _tween_fala and _tween_fala.is_running():
+		_tween_fala.kill()
+
+func _atualizar_progresso_fala_mercador(prog: float) -> void:
+	if lbl_fala_mercador and is_instance_valid(lbl_fala_mercador):
+		var total_chars = lbl_fala_mercador.text.length()
+		var antigo = int(lbl_fala_mercador.visible_ratio * total_chars)
+		var novo = int(prog * total_chars)
+		lbl_fala_mercador.visible_ratio = prog
+		if novo > antigo and novo % 3 == 0 and prog < 0.96:
+			if get_node_or_null("/root/AudioManager"):
+				AudioManager.play_sfx("ui-1")
 
 func _iniciar_fala_mercador(texto: String) -> void:
 	if lbl_fala_mercador == null: return
@@ -525,16 +598,7 @@ func _iniciar_fala_mercador(texto: String) -> void:
 	
 	var duracao = clamp(texto.length() * 0.02, 0.45, 1.3)
 	_tween_fala = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	_tween_fala.tween_method(func(prog: float):
-		if lbl_fala_mercador:
-			var total_chars = lbl_fala_mercador.text.length()
-			var antigo = int(lbl_fala_mercador.visible_ratio * total_chars)
-			var novo = int(prog * total_chars)
-			lbl_fala_mercador.visible_ratio = prog
-			if novo > antigo and novo % 3 == 0 and prog < 0.96:
-				if get_node_or_null("/root/AudioManager"):
-					AudioManager.play_sfx("ui-1")
-	, 0.0, 1.0, duracao)
+	_tween_fala.tween_method(_atualizar_progresso_fala_mercador, 0.0, 1.0, duracao)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if (event is InputEventMouseButton and event.pressed) or event.is_action_pressed("interagir") or (event is InputEventKey and event.keycode == KEY_F and event.pressed):

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dxngte5fixvcd" path="res://assets/sprites/Characters/Maguinho/shadow.png" id="3_shadow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_livro"]
-radius = 30.0
+radius = 26.0
 
 [node name="ItemLivroFormula" type="Area2D" unique_id=91493795]
 z_index = 2
@@ -18,12 +18,13 @@ descricao_item = "Um livro antigo com fórmulas alquímicas complexas."
 [node name="Shadow" type="Sprite2D" parent="." unique_id=987162545]
 z_index = 1
 z_as_relative = false
-position = Vector2(0, 34)
-scale = Vector2(1.4, 0.8)
+position = Vector2(0, 26)
+scale = Vector2(1.1, 0.65)
 texture = ExtResource("3_shadow")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1170071266]
-scale = Vector2(0.1, 0.1)
+texture_filter = 1
+scale = Vector2(1.1, 1.1)
 texture = ExtResource("2_tex")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1238995126]

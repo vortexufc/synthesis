@@ -9,6 +9,8 @@ var _quadro_atual_indice: int = 0
 var _concluida: bool = false
 var _em_tela_vitoria: bool = false
 var _animando_transicao: bool = false
+var _tween_conteudo: Tween = null
+var _texto_quadro_atual: String = ""
 
 # Nós do pergaminho vertical e seu conteúdo
 var _scroll_rect: NinePatchRect = null
@@ -244,7 +246,7 @@ func _construir_layout() -> void:
 	_scroll_rect.axis_stretch_horizontal = NinePatchRect.AXIS_STRETCH_MODE_STRETCH
 	_scroll_rect.axis_stretch_vertical = NinePatchRect.AXIS_STRETCH_MODE_STRETCH
 	_scroll_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_scroll_rect.pivot_offset = Vector2(290, 325)
+	_scroll_rect.pivot_offset = Vector2(290, 0)
 	_center_pergaminho.add_child(_scroll_rect)
 	
 	# Margens seguras: todo o texto fica 100% contido sobre o papiro claro, sem nunca vazar para fora
@@ -451,10 +453,10 @@ func _animar_abertura_pergaminho() -> void:
 	if not _scroll_rect or not _container_conteudo: return
 	
 	_animando_transicao = true
-	# Começa enrolado no meio (apenas as hastes de madeira encostadas)
-	_scroll_rect.pivot_offset = Vector2(290, 325)
-	_scroll_rect.scale = Vector2(1.025, 0.16)
-	_scroll_rect.self_modulate = Color(0.90, 0.86, 0.80)
+	# Começa enrolado no topo (haste inferior encostada na haste superior fixa)
+	_scroll_rect.pivot_offset = Vector2(290, 0)
+	_scroll_rect.scale = Vector2(1.0, 0.15)
+	_scroll_rect.self_modulate = Color(1.0, 1.0, 1.0)
 	_container_conteudo.modulate.a = 0.0
 	
 	# Som de abrir o pergaminho
@@ -463,14 +465,12 @@ func _animar_abertura_pergaminho() -> void:
 		am.play_sfx("transicao-1")
 		
 	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	# O pergaminho se desenrola verticalmente de forma cinematográfica, majestosa e contemplativa
-	tw.tween_property(_scroll_rect, "scale:y", 1.0, 1.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(_scroll_rect, "scale:x", 1.0, 1.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(_scroll_rect, "self_modulate", Color(1.0, 1.0, 1.0), 1.25).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	# A tinta antiga e ilustrações do mago surgem suavemente sobre o papel
-	tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.85).set_delay(0.25).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	# O pergaminho se desenrola verticalmente de cima para baixo suavemente
+	tw.tween_property(_scroll_rect, "scale:y", 1.0, 1.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.60).set_delay(0.20).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(func():
 		_animando_transicao = false
+		_iniciar_revelacao_conteudo()
 		if _btn_avancar and _btn_avancar.is_inside_tree():
 			_btn_avancar.grab_focus()
 	)
@@ -490,8 +490,13 @@ func _exibir_quadro(indice: int) -> void:
 	var nick = _obter_nick_jogador()
 	var texto_fmt = q.get("texto", "").replace("{JOGADOR}", nick)
 	var marco_fmt = q.get("marco", "").replace("{JOGADOR}", nick)
+	
+	_texto_quadro_atual = texto_fmt
 	_lbl_quadro_texto.text = "[center][color=#0a0401]" + texto_fmt + "[/color][/center]"
+	_lbl_quadro_texto.visible_ratio = 0.0
 	_lbl_marco.text = marco_fmt
+	if _painel_marco:
+		_painel_marco.modulate.a = 0.0
 	
 	if indice == 2:
 		_lbl_contador.text = "✦  Folha %s de III  ✦  •  [ Espaço ] para Concluir" % num_romano
@@ -509,12 +514,69 @@ func _exibir_quadro(indice: int) -> void:
 			sb_b.border_color = Color(0.78, 0.60, 0.22)
 			
 	if _canvas_arte:
+		_canvas_arte.modulate.a = 0.0
 		_canvas_arte.set_meta("tipo", q.get("icone_tipo", "alquimia"))
 		_canvas_arte.set_meta("cor", cor_tema)
 		_canvas_arte.queue_redraw()
 
+func _completar_revelacao_imediata() -> void:
+	if _tween_conteudo and _tween_conteudo.is_running():
+		_tween_conteudo.kill()
+	if _lbl_quadro_texto:
+		_lbl_quadro_texto.visible_ratio = 1.0
+	if _canvas_arte:
+		_canvas_arte.modulate.a = 1.0
+	if _painel_marco:
+		_painel_marco.modulate.a = 1.0
+
+func _exit_tree() -> void:
+	if _tween_conteudo and _tween_conteudo.is_running():
+		_tween_conteudo.kill()
+
+func _atualizar_progresso_texto(prog: float) -> void:
+	if _lbl_quadro_texto and is_instance_valid(_lbl_quadro_texto):
+		var total_chars = _texto_quadro_atual.length()
+		var antigo = int(_lbl_quadro_texto.visible_ratio * total_chars)
+		var novo = int(prog * total_chars)
+		_lbl_quadro_texto.visible_ratio = prog
+		if novo > antigo and novo % 3 == 0 and prog < 0.96:
+			var am = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null
+			if am and am.has_method("play_sfx"):
+				am.play_sfx("ui-1")
+
+func _iniciar_revelacao_conteudo() -> void:
+	if _tween_conteudo and _tween_conteudo.is_running():
+		_tween_conteudo.kill()
+		
+	if not _lbl_quadro_texto or not _canvas_arte: return
+	
+	_lbl_quadro_texto.visible_ratio = 0.0
+	_canvas_arte.modulate.a = 0.0
+	if _painel_marco:
+		_painel_marco.modulate.a = 0.0
+		
+	var total_chars = _texto_quadro_atual.length()
+	var duracao_texto = clamp(total_chars * 0.016, 2.0, 3.6)
+	
+	_tween_conteudo = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	
+	# 1. A arte/desenho manuscrito surge gradualmente na folha (tinta mágica se revelando)
+	_tween_conteudo.tween_property(_canvas_arte, "modulate:a", 1.0, 1.10).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	
+	# 2. As letras surgem devagar caracter por caracter, exatamente como nos NPCs
+	_tween_conteudo.parallel().tween_method(_atualizar_progresso_texto, 0.0, 1.0, duracao_texto)
+	
+	# 3. A citação / marco surge suavemente à medida que a leitura avança
+	if _painel_marco:
+		_tween_conteudo.parallel().tween_property(_painel_marco, "modulate:a", 1.0, 0.85).set_delay(duracao_texto * 0.50).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
 func _avancar_quadro() -> void:
 	if _concluida or _em_tela_vitoria or _animando_transicao: return
+	
+	# Se as letras/imagem ainda estiverem surgindo, o clique completa a exibição instantaneamente
+	if _tween_conteudo and _tween_conteudo.is_running():
+		_completar_revelacao_imediata()
+		return
 	
 	if _quadro_atual_indice < 2:
 		_animando_transicao = true
@@ -524,30 +586,26 @@ func _avancar_quadro() -> void:
 		if am and am.has_method("play_sfx"):
 			am.play_sfx("transicao-1")
 				
-		# Animação cinematográfica do pergaminho se enrolando bem devagar com efeito físico e realismo
+		# Garante que o topo fique 100% fixo: pivô no topo (y=0) e sem alteração no eixo X
+		_scroll_rect.pivot_offset = Vector2(290, 0)
+		_scroll_rect.scale.x = 1.0
+		
 		var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		
-		# 1. Enrola o pergaminho devagar em direção ao centro com sensação física de peso, espessura e sombra
-		# O texto vai sumindo suavemente enquanto o pergaminho se contrai
-		tw.tween_property(_container_conteudo, "modulate:a", 0.0, 0.88).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw.parallel().tween_property(_scroll_rect, "scale:y", 0.16, 1.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-		tw.parallel().tween_property(_scroll_rect, "scale:x", 1.038, 1.15).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw.parallel().tween_property(_scroll_rect, "self_modulate", Color(0.90, 0.86, 0.80), 1.15).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		# 1. Apenas a parte inferior sobe suavemente até o topo fixo (mais cadenciado e elegante)
+		tw.tween_property(_container_conteudo, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_property(_scroll_rect, "scale:y", 0.15, 0.95).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		
-		# 2. Efeito tátil de encontro dos rolos de madeira: pequeno rebote físico e som suave de toque
+		# 2. Toque sutil quando a haste de baixo alcança o topo
 		tw.tween_callback(func():
 			var am_click = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null
 			if am_click and am_click.has_method("play_sfx"):
 				am_click.play_sfx("ui-1")
 		)
-		tw.tween_property(_scroll_rect, "scale:y", 0.185, 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		tw.tween_property(_scroll_rect, "scale:y", 0.16, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw.parallel().tween_property(_scroll_rect, "scale:x", 1.025, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
-		# 3. Intervalo contemplativo com o pergaminho fechado repousando na mesa do mago
-		tw.tween_interval(0.28)
+		tw.tween_interval(0.18)
 		
-		# 4. No ponto em que o pergaminho está fechado, inscreve a nova página
+		# 3. Com o pergaminho fechado no topo, prepara o novo conteúdo
 		tw.tween_callback(func():
 			_exibir_quadro(prox)
 			var am2 = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null
@@ -555,15 +613,14 @@ func _avancar_quadro() -> void:
 				am2.play_sfx("transicao-1")
 		)
 		
-		# 5. O pergaminho se desenrola majestosamente de forma suave, lenta e com física elástica realista
-		tw.tween_property(_scroll_rect, "scale:y", 1.0, 1.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.parallel().tween_property(_scroll_rect, "scale:x", 1.0, 1.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.parallel().tween_property(_scroll_rect, "self_modulate", Color(1.0, 1.0, 1.0), 1.20).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		# A nova folha se revela com a tinta e gravuras surgindo serenamente sobre o papiro
-		tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.80).set_delay(0.25).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		# 4. A haste inferior desce desenrolando suavemente o pergaminho
+		tw.tween_property(_scroll_rect, "scale:y", 1.0, 1.05).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.50).set_delay(0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		
+		# 5. Após abrir completamente, libera a interação e inicia as letras e desenho surgindo devagar
 		tw.tween_callback(func():
 			_animando_transicao = false
+			_iniciar_revelacao_conteudo()
 			if _btn_avancar and _btn_avancar.is_inside_tree():
 				_btn_avancar.grab_focus()
 		)
@@ -916,29 +973,27 @@ func _mostrar_tela_vitoria() -> void:
 	if am_vit and am_vit.has_method("play_sfx"):
 		am_vit.play_sfx("win")
 		
-	# Oculta o Pergaminho de Mago enrolando-o devagar no centro com som e efeito físico
+	# Oculta o Pergaminho de Mago enrolando apenas a parte de baixo até o topo fixo de forma suave
 	if _scroll_rect and is_instance_valid(_scroll_rect):
+		if _tween_conteudo and _tween_conteudo.is_running():
+			_tween_conteudo.kill()
+		_scroll_rect.pivot_offset = Vector2(290, 0)
+		_scroll_rect.scale.x = 1.0
 		var am_roll = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null
 		if am_roll and am_roll.has_method("play_sfx"):
 			am_roll.play_sfx("transicao-1")
 			
 		var tw_fade = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tw_fade.tween_property(_container_conteudo, "modulate:a", 0.0, 0.88).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw_fade.parallel().tween_property(_scroll_rect, "scale:y", 0.16, 1.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-		tw_fade.parallel().tween_property(_scroll_rect, "scale:x", 1.038, 1.15).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw_fade.parallel().tween_property(_scroll_rect, "self_modulate", Color(0.90, 0.86, 0.80), 1.15).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw_fade.tween_property(_container_conteudo, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw_fade.parallel().tween_property(_scroll_rect, "scale:y", 0.15, 0.90).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		
-		# Toque sutil dos rolos e acomodação física
 		tw_fade.tween_callback(func():
 			var am_click = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null
 			if am_click and am_click.has_method("play_sfx"):
 				am_click.play_sfx("ui-1")
 		)
-		tw_fade.tween_property(_scroll_rect, "scale:y", 0.185, 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		tw_fade.tween_property(_scroll_rect, "scale:y", 0.16, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw_fade.parallel().tween_property(_scroll_rect, "scale:x", 1.025, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tw_fade.tween_interval(0.20)
-		tw_fade.tween_property(_scroll_rect, "modulate:a", 0.0, 0.35)
+		tw_fade.tween_interval(0.12)
+		tw_fade.tween_property(_scroll_rect, "modulate:a", 0.0, 0.25)
 		tw_fade.tween_callback(func(): _scroll_rect.visible = false)
 		
 	# Verifica quais andares foram concluídos e quais ainda estão pendentes
@@ -1409,6 +1464,8 @@ func _encerrar_vinheta() -> void:
 	if _concluida: return
 	_concluida = true
 	_em_tela_vitoria = false
+	if _tween_conteudo and _tween_conteudo.is_running():
+		_tween_conteudo.kill()
 	
 	if get_tree():
 		get_tree().paused = false

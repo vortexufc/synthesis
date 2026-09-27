@@ -91,10 +91,13 @@ func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 	var target_w = max(0.0, 200.0 * pct)
 	if target_w > 0:
 		health_player_fill.visible = true
-	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	var t = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	t.tween_property(health_player_fill, "size:x", target_w, 0.5)
 	if target_w <= 0:
-		t.finished.connect(func(): health_player_fill.visible = false, CONNECT_ONE_SHOT)
+		t.tween_callback(func():
+			if is_instance_valid(health_player_fill):
+				health_player_fill.visible = false
+		)
 
 func _process(delta: float) -> void:
 	if self.visible and tempo_rodando:
@@ -166,16 +169,22 @@ func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 		health_enemy_fill.visible = true
 		
 	# tween de pausa senao a animacao nao toca
-	var t = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
+	var t = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
 	
 	# tamanho do retangulo (200px / 230px)
 	t.tween_property(health_player_fill, "size:x", target_p, 0.5)
 	t.tween_property(health_enemy_fill, "size:x", target_e, 0.5)
 	
 	if target_p <= 0:
-		t.finished.connect(func(): health_player_fill.visible = false, CONNECT_ONE_SHOT)
+		t.chain().tween_callback(func():
+			if is_instance_valid(health_player_fill):
+				health_player_fill.visible = false
+		)
 	if target_e <= 0:
-		t.finished.connect(func(): health_enemy_fill.visible = false, CONNECT_ONE_SHOT)
+		t.chain().tween_callback(func():
+			if is_instance_valid(health_enemy_fill):
+				health_enemy_fill.visible = false
+		)
 
 func _on_botao_pressionado(indice: int) -> void:
 	# [BugFix] Ignora cliques duplicados ou re-entrada do timer
@@ -211,23 +220,54 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 		
 	var lbl = Label.new()
 	if acertou:
+		# Salto de conjuração do mago para a frente
+		var pos_mago = $Control.get_node_or_null("PosicaoMago")
+		if pos_mago:
+			var tw_m = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			var base_m_x = pos_mago.position.x
+			tw_m.tween_property(pos_mago, "position:x", base_m_x + 18.0, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw_m.tween_property(pos_mago, "position:x", base_m_x, 0.16).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			
 		$AnimationPlayer.play("ataque_mago")
 		await $AnimationPlayer.animation_finished
-		# Flash e tremor de impacto no monstro
-		var tween = create_tween()
-		tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 0.1, 0.1, 1), 0.08)
-		tween.tween_property($Control/SpriteMonstro, "modulate", Color(1, 1, 1, 1), 0.35)
 		
-		var pos_base_x = $Control/SpriteMonstro.position.x
+		# Som original de ataque/impacto
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.tocar_som_ataque()
+		
+		# Flash e deformação física (Squash & Stretch) no monstro
+		var sprite_monstro = $Control/SpriteMonstro
+		var scale_base = sprite_monstro.scale
+		var tw_sq = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_sq.tween_property(sprite_monstro, "scale", Vector2(scale_base.x * 1.35, scale_base.y * 0.70), 0.06).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw_sq.tween_property(sprite_monstro, "scale", Vector2(scale_base.x * 0.82, scale_base.y * 1.22), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw_sq.tween_property(sprite_monstro, "scale", scale_base, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		
+		# Flash branco puro de impacto (hit-stop visual), seguido de avermelhado
+		var tween_flash = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tween_flash.tween_property(sprite_monstro, "modulate", Color(2.8, 2.8, 2.8, 1.0), 0.06)
+		tween_flash.tween_property(sprite_monstro, "modulate", Color(1.0, 0.2, 0.2, 1.0), 0.14)
+		tween_flash.tween_property(sprite_monstro, "modulate", Color.WHITE, 0.28)
+		
+		# Tremor de tela de impacto potente
+		var shake_impact = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		shake_impact.tween_property($Control, "position", Vector2(8, -5), 0.03)
+		shake_impact.tween_property($Control, "position", Vector2(-8, 5), 0.03)
+		shake_impact.tween_property($Control, "position", Vector2(4, 2), 0.03)
+		shake_impact.tween_property($Control, "position", Vector2.ZERO, 0.03)
+		
+		# Tremor físico posicional do próprio monstro
+		var pos_base_x = sprite_monstro.position.x
 		var impact_tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x + 8.0, 0.04)
-		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x - 8.0, 0.04)
-		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x + 4.0, 0.04)
-		impact_tw.tween_property($Control/SpriteMonstro, "position:x", pos_base_x, 0.04)
+		impact_tw.tween_property(sprite_monstro, "position:x", pos_base_x + 10.0, 0.04)
+		impact_tw.tween_property(sprite_monstro, "position:x", pos_base_x - 10.0, 0.04)
+		impact_tw.tween_property(sprite_monstro, "position:x", pos_base_x + 5.0, 0.04)
+		impact_tw.tween_property(sprite_monstro, "position:x", pos_base_x, 0.04)
 		
 		lbl.text = str(valor) + " DMG!"
-		lbl.modulate = Color(0.2, 0.8, 0.2)
+		lbl.modulate = Color(0.25, 0.95, 0.4)
 	else:
+
 		if _ultimo_botao_clicado == -1:
 			# [BugFix] Timeout: espera um tempo fixo para o label aparecer antes de continuar
 			lbl.text = "Tempo!"
@@ -258,19 +298,21 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 	lbl.add_theme_font_size_override("font_size", 40)
 	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
 	lbl.add_theme_constant_override("outline_size", 6)
+	lbl.pivot_offset = Vector2(60, 25)
+	lbl.scale = Vector2(1.5, 1.5)
 	
 	# Adiciona primeiro pra ter o tamanho e poder centralizar
 	$Control.add_child(lbl)
 	
 	if acertou:
 		# Texto saindo de cima do inimigo
-		AudioManager.tocar_som_ataque()
 		lbl.position = health_enemy.position + Vector2(50, -20)
 	else:
 		# Texto saindo de cima do player
 		lbl.position = health_player.position + Vector2(0, -20)
 		
 	var t_lbl = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
+	t_lbl.tween_property(lbl, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	t_lbl.tween_property(lbl, "position:y", lbl.position.y - 100, 1.2)
 	t_lbl.tween_property(lbl, "modulate:a", 0.0, 1.2)
 	t_lbl.chain().tween_callback(lbl.queue_free)

@@ -395,5 +395,7 @@ func _dropar_chave(pos: Vector2) -> void:
 		cena_chave = load("res://scenes/Entidades/ItemChave.tscn")
 	if not cena_chave: return
 	var chave = cena_chave.instantiate()
+	if "is_drop_dinamico" in chave:
+		chave.is_drop_dinamico = true
 	chave.position = to_local(pos)
 	call_deferred("add_child", chave)

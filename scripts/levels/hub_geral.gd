@@ -22,9 +22,38 @@ var _tempo_iluminacao: float = 0.0
 func _ready() -> void:
 	_configurar_sistema_iluminacao()
 	
+	var cutscene_ja_vista = false
+	if get_node_or_null("/root/PlayerStats") and PlayerStats.cutscene_inicial_vista:
+		cutscene_ja_vista = true
+		
+	var deve_tocar_cutscene = false
 	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.tocar_cutscene_inicial:
+		if not cutscene_ja_vista:
+			deve_tocar_cutscene = true
 		DungeonGenerator.tocar_cutscene_inicial = false
+		
+	if deve_tocar_cutscene:
 		call_deferred("_executar_cutscene_inicial")
+	else:
+		# Se a cutscene não for tocar, o pergaminho da historinha inicial NUNCA deve ficar na mesa!
+		var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
+		if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
+			pergaminho_mesa.visible = false
+			if pergaminho_mesa.has_method("_remover_prompt_tela"):
+				pergaminho_mesa._remover_prompt_tela()
+			pergaminho_mesa.queue_free()
+			
+		if get_node_or_null("/root/PlayerStats"):
+			PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
+			if not PlayerStats.cutscene_inicial_vista:
+				PlayerStats.marcar_cutscene_inicial_vista()
+		
+		# Garante que o jogador está destravado para jogar livremente
+		var player = get_node_or_null("Player")
+		if player == null:
+			player = get_tree().get_first_node_in_group("player")
+		if player and is_instance_valid(player):
+			player.travado = false
 
 func _obter_textura_luz() -> Texture2D:
 	# cria a textura da luz
@@ -283,6 +312,10 @@ func _executar_cutscene_inicial() -> void:
 	if player == null:
 		return
 
+	# Marca que a historinha inicial já foi iniciada/vista para nunca mais repetir em Novos Jogos
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.marcar_cutscene_inicial_vista()
+
 	# trava o player na cutscene
 	player.travado = true
 	player.global_position = Vector2(580, 946)
@@ -339,6 +372,8 @@ func _executar_cutscene_inicial() -> void:
 func _ao_fechar_pergaminho_cutscene(player: Node2D) -> void:
 	if player and is_instance_valid(player):
 		player.travado = false
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.marcar_cutscene_inicial_vista()
 
 func _tocar_passos_cutscene(duracao: float) -> void:
 	var tempo_decorrido: float = 0.0

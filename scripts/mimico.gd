@@ -2,6 +2,7 @@
 extends Area2D
 
 var ja_ativado: bool = false
+var id_unico: String = ""
 
 @export var duracao_tremor: float = 0.5
 @export var intensidade_tremor: float = 8.0
@@ -11,6 +12,10 @@ var ja_ativado: bool = false
 var tex_aberto: AtlasTexture = null
 
 func _ready() -> void:
+	if id_unico != "" and get_node_or_null("/root/PlayerStats") and PlayerStats.is_item_coletado(id_unico):
+		queue_free()
+		return
+		
 	body_entered.connect(_on_body_entered)
 	var base_tex = load("res://assets/sprites/tilesets/Alquimia/OBJETOS.png")
 	if base_tex:
@@ -26,6 +31,8 @@ func _on_body_entered(body: Node2D) -> void:
 
 	ja_ativado = true
 	set_deferred("monitoring", false)
+	if id_unico != "" and get_node_or_null("/root/PlayerStats"):
+		PlayerStats.registrar_item_coletado(id_unico)
 
 	GlobalSignals.mimico_ativado.emit(body)
 	_sequencia_mimico(body)

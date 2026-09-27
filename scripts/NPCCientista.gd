@@ -8,7 +8,7 @@ var player_perto: bool = false
 var ui_instancia: CanvasLayer = null
 
 var _balao_interacao: Node2D = null
-var _indicador_quest: Label = null
+var _indicador_quest: Control = null
 var _sprite: Sprite2D = null
 var _tempo_anim: float = 0.0
 var _base_balao_y: float = -145.0
@@ -127,18 +127,37 @@ func _criar_balao_e_indicadores() -> void:
 	_balao_interacao.add_child(panel)
 	add_child(_balao_interacao)
 	
-	# 2. Indicador de Quest flutuante acima da cabeça (! ou ?)
-	_indicador_quest = Label.new()
+	# 2. Indicador de Quest flutuante em balão de quadrinho/RPG (! ou ?)
+	_indicador_quest = Control.new()
 	_indicador_quest.name = "IndicadorQuest"
 	_indicador_quest.z_index = 26
-	_indicador_quest.custom_minimum_size = Vector2(40, 32)
-	if font: _indicador_quest.add_theme_font_override("font", font)
-	_indicador_quest.add_theme_font_size_override("font_size", 24)
-	_indicador_quest.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
-	_indicador_quest.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_indicador_quest.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_indicador_quest.position = Vector2(-20, _base_quest_y)
-	_indicador_quest.pivot_offset = Vector2(20, 16)
+	_indicador_quest.custom_minimum_size = Vector2(34, 34)
+	_indicador_quest.size = Vector2(34, 34)
+	_indicador_quest.position = Vector2(-17, _base_quest_y)
+	_indicador_quest.pivot_offset = Vector2(17, 17)
+	
+	var painel_badge = PanelContainer.new()
+	painel_badge.name = "PainelBadge"
+	painel_badge.custom_minimum_size = Vector2(34, 34)
+	painel_badge.size = Vector2(34, 34)
+	_indicador_quest.add_child(painel_badge)
+	
+	var lbl_badge = Label.new()
+	lbl_badge.name = "LblBadge"
+	if font: lbl_badge.add_theme_font_override("font", font)
+	lbl_badge.add_theme_font_size_override("font_size", 22)
+	lbl_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	painel_badge.add_child(lbl_badge)
+	
+	# Rabicho do balão (triângulo apontando para baixo)
+	var rabicho = ColorRect.new()
+	rabicho.name = "Rabicho"
+	rabicho.size = Vector2(8, 8)
+	rabicho.position = Vector2(13, 27)
+	rabicho.rotation = deg_to_rad(45.0)
+	_indicador_quest.add_child(rabicho)
+	
 	add_child(_indicador_quest)
 
 func _atualizar_indicador_quest() -> void:
@@ -152,15 +171,42 @@ func _atualizar_indicador_quest() -> void:
 	var tem_livros = _contar_item("Livro de Fórmulas") >= 5
 	var tem_gelatina = _contar_item("Fragmento de Gelatina") >= 5
 	
+	var painel = _indicador_quest.get_node_or_null("PainelBadge") as PanelContainer
+	var lbl = _indicador_quest.get_node_or_null("PainelBadge/LblBadge") as Label
+	var rabicho = _indicador_quest.get_node_or_null("Rabicho") as ColorRect
+	
+	var sb = StyleBoxFlat.new()
+	sb.set_corner_radius_all(17)
+	sb.set_border_width_all(2)
+	sb.shadow_size = 6
+	
 	# Se tiver itens suficientes para entregar uma quest ativa: "?"
 	if (q1_ativa and not q1_conc and tem_livros) or (q2_ativa and not q2_conc and tem_gelatina):
-		_indicador_quest.text = "?"
-		_indicador_quest.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5)) # Verde de entrega
+		sb.bg_color = Color(0.04, 0.16, 0.08, 0.95)
+		sb.border_color = Color(0.3, 1.0, 0.55, 1.0)
+		sb.shadow_color = Color(0.1, 0.6, 0.3, 0.5)
+		if lbl:
+			lbl.text = "?"
+			lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.65))
+			lbl.add_theme_color_override("font_outline_color", Color(0.02, 0.25, 0.1, 0.9))
+			lbl.add_theme_constant_override("outline_size", 3)
+		if rabicho:
+			rabicho.color = Color(0.3, 1.0, 0.55)
+		if painel: painel.add_theme_stylebox_override("panel", sb)
 		_indicador_quest.show()
 	# Se tiver missões disponíveis para aceitar: "!"
 	elif (not q1_conc and not q1_ativa) or (not q2_conc and not q2_ativa):
-		_indicador_quest.text = "!"
-		_indicador_quest.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2)) # Dourado de quest
+		sb.bg_color = Color(0.16, 0.12, 0.03, 0.95)
+		sb.border_color = Color(1.0, 0.85, 0.2, 1.0)
+		sb.shadow_color = Color(0.8, 0.6, 0.1, 0.5)
+		if lbl:
+			lbl.text = "!"
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
+			lbl.add_theme_color_override("font_outline_color", Color(0.3, 0.18, 0.02, 0.9))
+			lbl.add_theme_constant_override("outline_size", 3)
+		if rabicho:
+			rabicho.color = Color(1.0, 0.85, 0.2)
+		if painel: painel.add_theme_stylebox_override("panel", sb)
 		_indicador_quest.show()
 	else:
 		_indicador_quest.hide()
