@@ -45,8 +45,15 @@ var _tween_invulneravel: Tween = null
 func _ready() -> void:
 	add_to_group("player")
 	_vida_anterior = PlayerStats.vida_atual_jogador
-
 	
+	# Se veio de Continuar ou Voltar ao Início / Novo Jogo, prepara o fade-in do boneco
+	var deve_fazer_fade = false
+	if PlayerStats and PlayerStats.fade_spawn_player:
+		deve_fazer_fade = true
+		PlayerStats.fade_spawn_player = false
+		modulate.a = 0.0
+		travado = true
+
 	# Tremer a câmera se tomar dano
 	PlayerStats.vida_alterada.connect(func(atual, _maxima):
 		if atual < _vida_anterior:
@@ -57,6 +64,9 @@ func _ready() -> void:
 	# Reposiciona o player na porta correta quando estiver voltando de uma sala
 	call_deferred("_reposicionar_na_porta_correta")
 	
+	if deve_fazer_fade:
+		call_deferred("_executar_fade_spawn_boneco")
+	
 	# quando a batalha começar, vira o mago pra direita e para o movimento
 	GlobalSignals.iniciar_batalha.connect(func(_d):
 		velocity = Vector2.ZERO
@@ -66,12 +76,85 @@ func _ready() -> void:
 			$PoeiraPassos.emitting = false
 	)
 
+func _executar_fade_spawn_boneco() -> void:
+	modulate.a = 0.0
+	travado = true
+	_tempo_invulneravel = 1.6
+	
+	# Aguarda a tela terminar de carregar/abrir e a posição/câmera assentar
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts and ts.is_transitioning:
+		await get_tree().create_timer(0.50, true, false, true).timeout
+	else:
+		await get_tree().create_timer(0.35, true, false, true).timeout
+	
+	# Garante que a câmera esteja perfeitamente alinhada na posição final antes de aparecer
+	var cam = get_node_or_null("Camera2D") as Camera2D
+	if cam:
+		cam.reset_smoothing()
+	
+	_criar_particulas_surgimento()
+	
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_1")
+	
+	# Fade-in suave e agradável da opacidade do mago
+	var tw = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(self, "modulate:a", 1.0, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	
+	# Tonalidade mágica suave que se acomoda na cor natural
+	modulate.r = 0.68
+	modulate.g = 0.92
+	modulate.b = 1.35
+	tw.tween_property(self, "modulate:r", 1.0, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "modulate:g", 1.0, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "modulate:b", 1.0, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	
+	await tw.finished
+	modulate = Color.WHITE
+	travado = false
 
+func _criar_particulas_surgimento() -> void:
+	var part = CPUParticles2D.new()
+	part.name = "ParticulasSurgimento"
+	part.emitting = true
+	part.one_shot = true
+	part.explosiveness = 0.65
+	part.amount = 20
+	part.lifetime = 0.85
+	part.position = Vector2(0, 10)
+	part.direction = Vector2(0, -1)
+	part.spread = 160.0
+	part.gravity = Vector2(0, -22)
+	part.initial_velocity_min = 12.0
+	part.initial_velocity_max = 30.0
+	part.scale_amount_min = 1.2
+	part.scale_amount_max = 2.4
+	
+	var grad = Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.25, 0.75, 1.0])
+	grad.colors = PackedColorArray([
+		Color(0.2, 0.8, 1.0, 0.0),
+		Color(0.3, 0.9, 1.0, 0.85),
+		Color(0.85, 0.7, 1.0, 0.75),
+		Color(1.0, 1.0, 1.0, 0.0)
+	])
+	part.color_ramp = grad
+	
+	add_child(part)
+	get_tree().create_timer(1.2, true, false, true).timeout.connect(func():
+		if is_instance_valid(part):
+			part.queue_free()
+	)
 
 func _reposicionar_na_porta_correta() -> void:
 	if PlayerStats and PlayerStats.restaurando_posicao_save and PlayerStats.tem_pos_salva:
 		global_position = Vector2(PlayerStats.pos_salva_x, PlayerStats.pos_salva_y)
 		PlayerStats.restaurando_posicao_save = false
+		var cam = get_node_or_null("Camera2D") as Camera2D
+		if cam:
+			cam.reset_smoothing()
 		print("[Player] Posição restaurada do save: ", global_position)
 		return
 

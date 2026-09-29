@@ -175,7 +175,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
-text = "JOGAR"
+text = "NOVO JOGO"
 
 [node name="BtnRanking" type="Button" parent="MarginContainer/VBoxButtons" unique_id=2016836333]
 layout_mode = 2

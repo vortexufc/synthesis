@@ -374,7 +374,7 @@ func _criar_interface_dev() -> void:
 			_panel_container.visible = false
 			get_tree().paused = false
 			if get_node_or_null("/root/TransitionScreen"):
-				TransitionScreen.change_scene(cena_path)
+				TransitionScreen.change_scene(cena_path, false, true)
 			else:
 				get_tree().change_scene_to_file(cena_path)
 	)
@@ -446,19 +446,17 @@ func _resetar_save_completo() -> void:
 	_panel_container.visible = false
 	get_tree().paused = false
 	
-	# recarrega a cena atual para recriar todos os itens, pergaminhos e salas do zero
+	# Leva para a tela inicial (Menu Principal) para começar do zero limpo sem disparar cutscene no meio do Hub
+	var menu_path = "res://scenes/ui/main_menu.tscn"
 	var cena_atual = get_tree().current_scene
-	if cena_atual and is_instance_valid(cena_atual):
+	var eh_menu = (cena_atual and is_instance_valid(cena_atual) and cena_atual.scene_file_path == menu_path)
+	
+	if not eh_menu:
+		if get_node_or_null("/root/TransitionScreen"):
+			TransitionScreen.change_scene(menu_path)
+		else:
+			get_tree().change_scene_to_file(menu_path)
+	else:
 		get_tree().reload_current_scene()
-		await get_tree().process_frame
-		await get_tree().process_frame
 		
-	var hud = get_tree().get_first_node_in_group("hud")
-	if not hud:
-		hud = get_tree().root.find_child("HUD", true, false)
-	if hud and hud.has_method("mostrar_mensagem"):
-		hud.mostrar_mensagem("💾 Save Resetado! Livros, pergaminhos e salas restaurados.")
-	elif hud and hud.has_method("mostrar_notificacao_quest"):
-		hud.mostrar_notificacao_quest("🛠️ DEV MODE", "Save Resetado para o Padrão!", Color(0.3, 1.0, 0.5), "ui-1")
-		
-	print("[DevManager] Save do jogo resetado para o padrão com sucesso!")
+	print("[DevManager] Save do jogo resetado para o padrão com sucesso! Redirecionando para a tela inicial.")

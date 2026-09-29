@@ -91,7 +91,7 @@ func _process_vinheta_vida_baixa(delta: float) -> void:
 		else:
 			_vinheta_vida_baixa.modulate.a = 0.0
 
-func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
+func change_scene(target_scene: String, porta_de_retorno: bool = false, pular_corredor: bool = false) -> void:
 	if is_transitioning:
 		return
 	is_transitioning = true
@@ -107,15 +107,17 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	
 	var mat = color_rect.material as ShaderMaterial if color_rect else null
 	
-	# tipo de transicao: fade pra menu e portal iris pras salas
-	var eh_menu = "/ui/" in target_scene or "menu" in target_scene.to_lower() or "login" in target_scene.to_lower() or "cadastro" in target_scene.to_lower()
+	# tipo de transicao: fade pra menus e portal iris pras salas
+	var eh_destino_menu = "/ui/" in target_scene or "menu" in target_scene.to_lower() or "login" in target_scene.to_lower() or "cadastro" in target_scene.to_lower()
+	var eh_origem_menu = false
 	if get_tree().current_scene:
 		var cena_antiga = get_tree().current_scene.scene_file_path.to_lower()
-		if "/ui/" in cena_antiga or "menu" in cena_antiga or "login" in cena_antiga:
-			eh_menu = true
+		if "/ui/" in cena_antiga or "menu" in cena_antiga or "login" in cena_antiga or "cadastro" in cena_antiga:
+			eh_origem_menu = true
 			
 	if mat:
-		mat.set_shader_parameter("modo", 1 if eh_menu else 0)
+		# Se estamos saindo de um menu, fecha com fade; se de uma sala de jogo, fecha com portal iris
+		mat.set_shader_parameter("modo", 1 if eh_origem_menu else 0)
 		mat.set_shader_parameter("progresso", 0.0)
 		
 	if color_rect:
@@ -129,17 +131,20 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	if am and am.has_method("play_sfx"):
 		am.play_sfx("transicao-1")
 		
-	# fecha o portal
+	# fecha a tela (portal ou fade)
 	if mat:
 		var tween_in = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tween_in.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 0.0, 1.0, 0.36).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		tween_in.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 0.0, 1.0, 0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		await tween_in.finished
 	else:
 		await get_tree().create_timer(0.3, true, false, true).timeout
 	
-	# se for pro hub, corredor ou menu pula a animacao
-	var pular_animacao = false
-	if "corredor" in target_scene.to_lower() or "Hub_Geral" in target_scene or "/ui/" in target_scene or "Menu" in target_scene:
+	# se for pro hub, corredor, menu ou estiver restaurando save pula a animacao do corredor
+	var pular_animacao = pular_corredor or eh_destino_menu or eh_origem_menu
+	if PlayerStats and PlayerStats.restaurando_posicao_save:
+		pular_animacao = true
+		
+	if "corredor" in target_scene.to_lower() or "Hub_Geral" in target_scene or "/ui/" in target_scene or "menu" in target_scene.to_lower():
 		pular_animacao = true
 		
 	# pula se estiver saindo do corredor
@@ -152,21 +157,24 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false) -> void:
 	
 	if not pular_animacao:
 		await _tocar_animacao_corredor(vp_size, porta_de_retorno)
-	else:
-		# pausa rapida com a tela escura
-		await get_tree().create_timer(0.18, true, false, true).timeout
 
-	# troca a cena
+	# troca a cena imediatamente
 	get_tree().change_scene_to_file(target_scene)
 	
-	# espera carregar
-	await get_tree().create_timer(0.08, true, false, true).timeout
+	# aguarda a nova cena ser completamente instanciada e posicionada na árvore
+	await get_tree().process_frame
+	await get_tree().process_frame
 	
-	# abre a transicao revelando o mapa
+	# abre a transicao revelando a nova sala ou menu com animacao fluida
 	if mat:
+		# Se entrando no jogo, revela com o portal iris mágico; se for menu, revela com fade
+		mat.set_shader_parameter("modo", 1 if eh_destino_menu else 0)
+		mat.set_shader_parameter("progresso", 1.0)
+		
 		var tween_out = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tween_out.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 1.0, 0.0, 0.40).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween_out.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 1.0, 0.0, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		await tween_out.finished
+		mat.set_shader_parameter("progresso", 0.0)
 		
 	if color_rect:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -46,6 +46,7 @@ var percurso_salas_salvo: Array = []
 var indice_sala_salvo: int = 0
 var restaurando_posicao_save: bool = false
 var cutscene_inicial_vista: bool = false
+var fade_spawn_player: bool = false
 
 
 signal vida_alterada(atual, maxima)
@@ -94,6 +95,7 @@ func _inicializar_dados_padrao():
 	indice_sala_salvo = 0
 	restaurando_posicao_save = false
 	cutscene_inicial_vista = false
+	fade_spawn_player = false
 	
 	# itens iniciais pra testar (apenas pocoes, grimorio comeca totalmente vazio)
 	pocoes.append({"nome": "Poção Grande", "qtd": 2, "cura": 50, "desc": "Cura 50 HP"})

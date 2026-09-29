@@ -39,8 +39,8 @@ void fragment() {
 		COLOR = col;
 	} else {
 		// fade simples com vinheta escura nas bordas
-		float vinheta = smoothstep(0.2, 0.85, dist);
-		float alpha = clamp(progresso * 1.15 + vinheta * 0.35 * progresso, 0.0, 1.0);
+		float vinheta = smoothstep(0.15, 0.9, dist);
+		float alpha = clamp(progresso + vinheta * 0.25 * progresso, 0.0, 1.0);
 		vec4 col = cor_fundo;
 		col.a = alpha;
 		COLOR = col;
