@@ -30,6 +30,7 @@ var _tween_botoes: Tween
 var _eh_pergunta_vf: bool = false
 
 var battle_music = preload("res://assets/audio/ost/2.wav")
+var _font_pixel_combate = preload("res://assets/fonts/PressStart2P-Regular.ttf")
 
 func _ready() -> void:
 	AudioManager.play_battle_music(battle_music)
@@ -218,7 +219,6 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 		_botoes[_ultimo_botao_clicado].modulate = Color(0.9, 0.2, 0.2)
 		_tween_botoes.tween_property(_botoes[_ultimo_botao_clicado], "modulate", Color(0.9, 0.2, 0.2), 1.2)
 		
-	var lbl = Label.new()
 	if acertou:
 		# Salto de conjuração do mago para a frente
 		var pos_mago = $Control.get_node_or_null("PosicaoMago")
@@ -264,13 +264,14 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 		impact_tw.tween_property(sprite_monstro, "position:x", pos_base_x + 5.0, 0.04)
 		impact_tw.tween_property(sprite_monstro, "position:x", pos_base_x, 0.04)
 		
-		lbl.text = str(valor) + " DMG!"
-		lbl.modulate = Color(0.25, 0.95, 0.4)
+		# Floating Combat Text: Dano subindo e flutuando em cima do monstro
+		var eh_critico: bool = (valor >= 30)
+		_mostrar_texto_flutuante_dano_monstro(valor, eh_critico)
 	else:
 
 		if _ultimo_botao_clicado == -1:
-			# [BugFix] Timeout: espera um tempo fixo para o label aparecer antes de continuar
-			lbl.text = "Tempo!"
+			# [BugFix] Timeout: exibe feedback de tempo no mago
+			_mostrar_texto_flutuante_dano_jogador(valor, true)
 			await get_tree().create_timer(0.5, true).timeout
 		else:
 			# Toca animação customizada do monstro se existir (ex: Robão)
@@ -292,30 +293,8 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 		shake_tw.tween_property($Control, "position", Vector2(-4, -2), 0.035)
 		shake_tw.tween_property($Control, "position", Vector2.ZERO, 0.035)
 			
-		lbl.text = "-" + str(valor) + " HP"
-		lbl.modulate = Color(0.9, 0.2, 0.2)
-		
-	lbl.add_theme_font_size_override("font_size", 40)
-	lbl.add_theme_color_override("font_outline_color", Color.BLACK)
-	lbl.add_theme_constant_override("outline_size", 6)
-	lbl.pivot_offset = Vector2(60, 25)
-	lbl.scale = Vector2(1.5, 1.5)
-	
-	# Adiciona primeiro pra ter o tamanho e poder centralizar
-	$Control.add_child(lbl)
-	
-	if acertou:
-		# Texto saindo de cima do inimigo
-		lbl.position = health_enemy.position + Vector2(50, -20)
-	else:
-		# Texto saindo de cima do player
-		lbl.position = health_player.position + Vector2(0, -20)
-		
-	var t_lbl = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
-	t_lbl.tween_property(lbl, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	t_lbl.tween_property(lbl, "position:y", lbl.position.y - 100, 1.2)
-	t_lbl.tween_property(lbl, "modulate:a", 0.0, 1.2)
-	t_lbl.chain().tween_callback(lbl.queue_free)
+			# Floating Combat Text no jogador
+			_mostrar_texto_flutuante_dano_jogador(valor, false)
 	
 	# [Pedagogia] Se o aluno errou, exibe a caixinha de revisão com resposta correta e explicação
 	if not acertou and not dados_pergunta.is_empty():
@@ -325,6 +304,125 @@ func _fechar_painel_feedback_imediato() -> void:
 	if has_node("Control/FooterColor/MarginContainer/VBoxContainer/PainelFeedbackErro"):
 		var p = $Control/FooterColor/MarginContainer/VBoxContainer/PainelFeedbackErro
 		p.queue_free()
+
+func _obter_posicao_topo_monstro() -> Vector2:
+	var sm = $Control.get_node_or_null("SpriteMonstro")
+	if sm:
+		var anim = sm.get_node_or_null("AnimatedSprite2D")
+		if anim:
+			# Centro visual do monstro na arena
+			var centro_monstro = sm.position + anim.position
+			return Vector2(centro_monstro.x, centro_monstro.y - 95.0)
+		return sm.position + Vector2(sm.size.x * 0.5, -40.0)
+	return Vector2(875.0, 270.0)
+
+func _mostrar_texto_flutuante_dano_monstro(qtd: int, eh_critico: bool = false) -> void:
+	if not has_node("Control"):
+		return
+		
+	var lbl = Label.new()
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.z_index = 40
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	if eh_critico:
+		lbl.text = "-%d HP CRÍTICO!" % qtd
+		lbl.add_theme_font_size_override("font_size", 20)
+		lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.20)) # Dourado flamejante crítico
+		lbl.add_theme_color_override("font_outline_color", Color(0.28, 0.05, 0.0, 0.98))
+		lbl.add_theme_constant_override("outline_size", 4)
+	else:
+		lbl.text = "-%d HP!" % qtd
+		lbl.add_theme_font_size_override("font_size", 16)
+		lbl.add_theme_color_override("font_color", Color(1.0, 0.32, 0.32)) # Carmesim de dano
+		lbl.add_theme_color_override("font_outline_color", Color(0.18, 0.02, 0.02, 0.95))
+		lbl.add_theme_constant_override("outline_size", 3)
+		
+	if _font_pixel_combate:
+		lbl.add_theme_font_override("font", _font_pixel_combate)
+		
+	var largura_est = 260.0 if eh_critico else 160.0
+	lbl.custom_minimum_size = Vector2(largura_est, 30.0)
+	lbl.size = Vector2(largura_est, 30.0)
+	lbl.pivot_offset = Vector2(largura_est * 0.5, 15.0)
+	
+	$Control.add_child(lbl)
+	
+	var pos_topo = _obter_posicao_topo_monstro()
+	var spawn_pos = pos_topo - Vector2(largura_est * 0.5, 15.0) + Vector2(randf_range(-14.0, 14.0), randf_range(-5.0, 5.0))
+	lbl.position = spawn_pos
+	
+	var scale_inicial = Vector2(0.5, 0.5) if not eh_critico else Vector2(0.65, 0.65)
+	var scale_pop = Vector2(1.35, 1.35) if not eh_critico else Vector2(1.65, 1.65)
+	var scale_final = Vector2(1.0, 1.0) if not eh_critico else Vector2(1.15, 1.15)
+	var dist_subida = 65.0 if not eh_critico else 85.0
+	
+	lbl.scale = scale_inicial
+	lbl.modulate.a = 0.0
+	
+	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.parallel().tween_property(lbl, "position:y", spawn_pos.y - dist_subida, 0.85).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(lbl, "position:x", spawn_pos.x + randf_range(-10.0, 10.0), 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(lbl, "scale", scale_pop, 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(lbl, "modulate:a", 1.0, 0.08)
+	tw.tween_property(lbl, "scale", scale_final, 0.12)
+	tw.tween_interval(0.35)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.25)
+	tw.finished.connect(lbl.queue_free)
+
+func mostrar_texto_flutuante_dano_monstro(qtd: int, eh_critico: bool = false) -> void:
+	_mostrar_texto_flutuante_dano_monstro(qtd, eh_critico)
+
+func _mostrar_texto_flutuante_dano_jogador(qtd: int, por_tempo: bool = false) -> void:
+	if not has_node("Control"):
+		return
+		
+	var lbl = Label.new()
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.z_index = 40
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	if por_tempo:
+		lbl.text = "TEMPO!"
+		lbl.add_theme_font_size_override("font_size", 16)
+		lbl.add_theme_color_override("font_color", Color(1.0, 0.75, 0.20))
+		lbl.add_theme_color_override("font_outline_color", Color(0.20, 0.08, 0.0, 0.95))
+	else:
+		lbl.text = "-%d HP" % qtd
+		lbl.add_theme_font_size_override("font_size", 16)
+		lbl.add_theme_color_override("font_color", Color(1.0, 0.28, 0.28))
+		lbl.add_theme_color_override("font_outline_color", Color(0.18, 0.02, 0.02, 0.95))
+		
+	lbl.add_theme_constant_override("outline_size", 3)
+	
+	if _font_pixel_combate:
+		lbl.add_theme_font_override("font", _font_pixel_combate)
+		
+	var largura_est = 160.0
+	lbl.custom_minimum_size = Vector2(largura_est, 30.0)
+	lbl.size = Vector2(largura_est, 30.0)
+	lbl.pivot_offset = Vector2(largura_est * 0.5, 15.0)
+	
+	$Control.add_child(lbl)
+	
+	var pos_mago = $Control.get_node_or_null("PosicaoMago")
+	var topo_mago = (pos_mago.position + Vector2(0.0, -90.0)) if pos_mago else Vector2(260.0, 300.0)
+	var spawn_pos = topo_mago - Vector2(largura_est * 0.5, 15.0) + Vector2(randf_range(-10.0, 10.0), randf_range(-4.0, 4.0))
+	lbl.position = spawn_pos
+	
+	lbl.scale = Vector2(0.6, 0.6)
+	lbl.modulate.a = 0.0
+	
+	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.parallel().tween_property(lbl, "position:y", spawn_pos.y - 55.0, 0.85).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(lbl, "scale", Vector2(1.3, 1.3), 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(lbl, "modulate:a", 1.0, 0.08)
+	tw.tween_property(lbl, "scale", Vector2.ONE, 0.12)
+	tw.tween_interval(0.35)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.25)
+	tw.finished.connect(lbl.queue_free)
 
 func mostrar_feedback_critico_parry(texto: String, eh_sucesso: bool) -> void:
 	var lbl = Label.new()

@@ -23,6 +23,7 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [Fix-18] Correção de recursão infinita e stack underflow em `LuminariaFisica.gd`, e clareamento da iluminação global do Andar de Física via `@export var cor_ambiente`.
 - [x] [Move-3] Dash Arcana com I-Frames (Espaço) — Esquiva rápida com micro-teleporte de 135px, rastro de afterimages fantasmagóricas ciano/violeta, partículas elementais, indicador de recarga na HUD e imunidade total a armadilhas e acionamento de combate durante o trajeto.
 - [x] [Hub-1] Altar / Cristal de Regeneração no Hub — Cristal sagrado em pixel art com iluminação dinâmica, partículas místicas, pedestal de pedra ancestral com runas e restauração total de HP ao interagir com [F].
+- [x] [Combat-6] Números de Dano Flutuante no Monstro (Floating Combat Text) — Texto flutuante de dano retro pixel art no monstro (-X HP! em vermelho e -X HP CRÍTICO! em dourado) diretamente acima do sprite na arena de batalha com animação de pop e subida suave.
 
 ## Changelog
 Ver arquivo `CHANGELOG.md` na raiz do projeto.
