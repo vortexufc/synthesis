@@ -12,6 +12,24 @@ var travado: bool = false
 var em_interacao: bool = false
 var _tempo_imunidade_pos_interacao: float = 0.0
 
+# === MECÂNICA DE DASH ARCANA (ESPAÇO) ===
+signal dash_iniciado(cooldown: float)
+signal dash_concluido()
+
+const DISTANCIA_DASH: float = 135.0
+const DURACAO_DASH: float = 0.16
+const COOLDOWN_DASH: float = 0.85
+const IFRAMES_POS_DASH: float = 0.20
+
+var _em_dash: bool = false
+var _tempo_dash_restante: float = 0.0
+var _tempo_recarga_dash: float = 0.0
+var _tempo_dash_invulneravel: float = 0.0
+var _direcao_dash: Vector2 = Vector2.ZERO
+var _intervalo_afterimage: float = 0.0
+var _inimigos_ignorados_dash: Array[CollisionObject2D] = []
+var _espaco_segurado: bool = false
+
 func esta_em_interacao() -> bool:
 	if travado or em_interacao:
 		return true
@@ -25,7 +43,7 @@ func esta_em_interacao() -> bool:
 	return false
 
 func esta_imune_a_combate() -> bool:
-	return esta_em_interacao() or _tempo_imunidade_pos_interacao > 0.0
+	return esta_em_interacao() or _tempo_imunidade_pos_interacao > 0.0 or _em_dash or _tempo_dash_invulneravel > 0.0
 
 func finalizar_interacao(tempo_graca: float = 0.8) -> void:
 	travado = false
@@ -45,6 +63,19 @@ var _tween_invulneravel: Tween = null
 func _ready() -> void:
 	add_to_group("player")
 	_vida_anterior = PlayerStats.vida_atual_jogador
+	
+	# Garante a ação de dash no InputMap (Tecla Espaço)
+	if not InputMap.has_action("dash"):
+		InputMap.add_action("dash")
+		var ev_space = InputEventKey.new()
+		ev_space.physical_keycode = KEY_SPACE
+		InputMap.action_add_event("dash", ev_space)
+	else:
+		# Se já existia e tinha Shift associado, limpa e garante apenas Espaço
+		InputMap.action_erase_events("dash")
+		var ev_space = InputEventKey.new()
+		ev_space.physical_keycode = KEY_SPACE
+		InputMap.action_add_event("dash", ev_space)
 	
 	# Se veio de Continuar ou Voltar ao Início / Novo Jogo, prepara o fade-in do boneco
 	var deve_fazer_fade = false
@@ -200,8 +231,38 @@ func _physics_process(delta: float) -> void:
 		_tempo_invulneravel -= delta
 		if _tempo_invulneravel <= 0.0:
 			_tempo_invulneravel = 0.0
-			if has_node("sprite"):
+			if has_node("sprite") and not _em_dash:
 				$sprite.modulate.a = 1.0
+
+	# Atualiza timers de cooldown e i-frames do Dash Arcana
+	if _tempo_recarga_dash > 0.0:
+		_tempo_recarga_dash -= delta
+		if _tempo_recarga_dash < 0.0:
+			_tempo_recarga_dash = 0.0
+			
+	if _tempo_dash_invulneravel > 0.0:
+		_tempo_dash_invulneravel -= delta
+		if _tempo_dash_invulneravel < 0.0:
+			_tempo_dash_invulneravel = 0.0
+
+	# Se estiver executando o Dash Arcana
+	if _em_dash:
+		_tempo_dash_restante -= delta
+		_intervalo_afterimage -= delta
+		if _intervalo_afterimage <= 0.0:
+			_intervalo_afterimage = 0.038
+			_criar_afterimage_arcana()
+			
+		var vel_dash = DISTANCIA_DASH / DURACAO_DASH
+		velocity = _direcao_dash * vel_dash
+		move_and_slide()
+		
+		_animar_sombra(delta)
+		_process_shake(delta)
+		
+		if _tempo_dash_restante <= 0.0:
+			_finalizar_dash()
+		return
 
 	# se tiver em dialogo ou minigame, nao move
 	if esta_em_interacao():
@@ -211,6 +272,20 @@ func _physics_process(delta: float) -> void:
 
 	direcao_horizontal = Input.get_axis("esquerda", "direita")
 	direcao_vertical = Input.get_axis("cima", "baixo")
+
+	# Detecção do Dash (Apenas Tecla Espaço)
+	var espaco_pressionado = Input.is_physical_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_SPACE)
+	var quer_dash = Input.is_action_just_pressed("dash")
+	if espaco_pressionado and not _espaco_segurado:
+		quer_dash = true
+		_espaco_segurado = true
+	elif not espaco_pressionado:
+		_espaco_segurado = false
+		
+	if quer_dash and _tempo_recarga_dash <= 0.0:
+		_iniciar_dash()
+		if _em_dash:
+			return
 
 	velocity = Vector2.ZERO
 	
@@ -314,7 +389,7 @@ func receber_dano_mimico(quantidade: float = 70.0) -> void:
 
 # dano de armadilha / perigo do cenario
 func receber_dano(quantidade: float = 15.0, intensidade_shake: float = 8.0, motivo: String = "") -> void:
-	if PlayerStats.vida_atual_jogador <= 0.0 or _tempo_invulneravel > 0.0:
+	if PlayerStats.vida_atual_jogador <= 0.0 or _tempo_invulneravel > 0.0 or _em_dash or _tempo_dash_invulneravel > 0.0:
 		return
 		
 	_tempo_invulneravel = 0.85
@@ -357,3 +432,158 @@ func _exibir_texto_dano(motivo: String, quantidade: float) -> void:
 	tw.tween_property(lbl, "position:y", lbl.position.y - 32.0, 0.85).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(lbl, "modulate:a", 0.0, 0.85).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(lbl.queue_free)
+
+# ==========================================
+# IMPLEMENTAÇÃO DO DASH ARCANA (ESPAÇO)
+# ==========================================
+
+func _iniciar_dash() -> void:
+	if _em_dash or _tempo_recarga_dash > 0.0 or esta_em_interacao():
+		return
+	if PlayerStats and PlayerStats.vida_atual_jogador <= 0.0:
+		return
+		
+	# Determina a direção do dash
+	var dir = Vector2(direcao_horizontal, direcao_vertical)
+	if dir.length_squared() > 0.01:
+		_direcao_dash = dir.normalized()
+	else:
+		match ultima_direcao:
+			"cima": _direcao_dash = Vector2.UP
+			"baixo": _direcao_dash = Vector2.DOWN
+			"esquerda": _direcao_dash = Vector2.LEFT
+			"direita": _direcao_dash = Vector2.RIGHT
+			_: _direcao_dash = Vector2.DOWN
+
+	_em_dash = true
+	_tempo_dash_restante = DURACAO_DASH
+	_tempo_recarga_dash = COOLDOWN_DASH
+	_tempo_dash_invulneravel = DURACAO_DASH + IFRAMES_POS_DASH
+	_tempo_imunidade_pos_interacao = max(_tempo_imunidade_pos_interacao, DURACAO_DASH + 0.35)
+	
+	# Efeito de áudio
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("dash")
+	
+	# Desativa passos normais
+	if has_node("PoeiraPassos"):
+		$PoeiraPassos.emitting = false
+	
+	# Ignora colisão física com inimigos durante o dash para passar através deles
+	_inimigos_ignorados_dash.clear()
+	var inimigos = get_tree().get_nodes_in_group("inimigos")
+	for ini in inimigos:
+		if ini is CollisionObject2D:
+			add_collision_exception_with(ini)
+			_inimigos_ignorados_dash.append(ini)
+			
+	# Emite partículas mágicas no ponto de saída
+	_criar_particulas_dash(global_position, _direcao_dash)
+	_criar_afterimage_arcana()
+	_intervalo_afterimage = 0.038
+	
+	# Brilho arcano no sprite do mago
+	if has_node("sprite"):
+		$sprite.modulate = Color(0.6, 1.4, 2.5, 0.9)
+		
+	dash_iniciado.emit(COOLDOWN_DASH)
+	if get_node_or_null("/root/GlobalSignals") and GlobalSignals.has_signal("dash_executado"):
+		GlobalSignals.dash_executado.emit(COOLDOWN_DASH)
+
+func _finalizar_dash() -> void:
+	_em_dash = false
+	velocity = Vector2.ZERO
+	
+	# Restaura colisões com inimigos
+	for ini in _inimigos_ignorados_dash:
+		if is_instance_valid(ini) and ini is CollisionObject2D:
+			remove_collision_exception_with(ini)
+	_inimigos_ignorados_dash.clear()
+	
+	# Partículas de chegada
+	_criar_particulas_dash(global_position, -_direcao_dash, true)
+	_criar_afterimage_arcana()
+	
+	# Retorna o sprite à cor normal suavemente
+	if has_node("sprite"):
+		var tw = create_tween()
+		tw.tween_property($sprite, "modulate", Color.WHITE, 0.12)
+		
+	dash_concluido.emit()
+
+func _criar_afterimage_arcana() -> void:
+	if not has_node("sprite"):
+		return
+	var spr = $sprite as AnimatedSprite2D
+	if not spr or not spr.sprite_frames:
+		return
+		
+	var anim = spr.animation
+	var frame_idx = spr.frame
+	var tex = spr.sprite_frames.get_frame_texture(anim, frame_idx)
+	if not tex:
+		return
+		
+	var ghost = Sprite2D.new()
+	ghost.texture = tex
+	ghost.global_position = spr.global_position
+	ghost.scale = spr.scale
+	ghost.flip_h = spr.flip_h
+	ghost.flip_v = spr.flip_v
+	ghost.z_index = max(1, z_index - 1)
+	
+	# Alterna entre ciano elétrico e violeta arcana
+	var cor_fantasma = Color(0.25, 0.85, 1.4, 0.70)
+	if randf() > 0.5:
+		cor_fantasma = Color(0.85, 0.40, 1.4, 0.70)
+	ghost.modulate = cor_fantasma
+	
+	var parent_map = get_parent()
+	if parent_map:
+		parent_map.add_child(ghost)
+	else:
+		get_tree().current_scene.add_child(ghost)
+	
+	var tw = ghost.create_tween().set_parallel(true)
+	tw.tween_property(ghost, "modulate:a", 0.0, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(ghost, "scale", spr.scale * 1.15, 0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_callback(ghost.queue_free)
+
+func _criar_particulas_dash(pos: Vector2, direcao: Vector2, eh_chegada: bool = false) -> void:
+	var part = CPUParticles2D.new()
+	part.global_position = pos + Vector2(0, 10)
+	part.emitting = true
+	part.one_shot = true
+	part.explosiveness = 0.85
+	part.amount = 16 if not eh_chegada else 12
+	part.lifetime = 0.38
+	part.direction = -direcao
+	part.spread = 65.0 if not eh_chegada else 180.0
+	part.gravity = Vector2.ZERO
+	part.initial_velocity_min = 40.0
+	part.initial_velocity_max = 95.0
+	part.scale_amount_min = 1.4
+	part.scale_amount_max = 2.8
+	
+	var grad = Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.25, 0.70, 1.0])
+	grad.colors = PackedColorArray([
+		Color(0.2, 0.9, 1.0, 0.0),
+		Color(0.3, 0.95, 1.0, 0.95),
+		Color(0.85, 0.4, 1.0, 0.85),
+		Color(1.0, 1.0, 1.0, 0.0)
+	])
+	part.color_ramp = grad
+	
+	var parent_map = get_parent()
+	if parent_map:
+		parent_map.add_child(part)
+	else:
+		get_tree().current_scene.add_child(part)
+		
+	get_tree().create_timer(0.55, true, false, true).timeout.connect(func():
+		if is_instance_valid(part):
+			part.queue_free()
+	)
+

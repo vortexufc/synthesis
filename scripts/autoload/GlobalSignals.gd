@@ -9,6 +9,8 @@ signal batalha_encerrada(vitoria: bool)
 signal mimico_ativado(player: Node) # quando abre bau falso
 @warning_ignore("unused_signal")
 signal fim_de_jogo(vitoria: bool, stats: Dictionary)
+@warning_ignore("unused_signal")
+signal dash_executado(cooldown: float)
 
 func _enter_tree() -> void:
 	_configurar_fontes_emoji()

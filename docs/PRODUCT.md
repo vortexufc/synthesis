@@ -21,6 +21,8 @@ Esta documentação centraliza as regras de negócio, funcionalidades e o backlo
 - [x] [Level-4] Ambientação e Iluminação do Andar de Física — Sistema de iluminação de laboratório industrial/eletromagnético (CanvasModulate claro de laboratório, LuminariaFisica em paredes, luz em terminais, vapor em válvulas e sensores ópticos nos robôs).
 - [x] [Fix-17] Fixação, Visual e Instanciação em Cena das Luminárias de Física — Luminárias blindadas agora ficam instanciadas diretamente dentro de cada cena (`Sala_Física01.tscn` a `12.tscn` e `template.tscn`) com suporte a `@tool`, permitindo edição visual direta no viewport da Godot.
 - [x] [Fix-18] Correção de recursão infinita e stack underflow em `LuminariaFisica.gd`, e clareamento da iluminação global do Andar de Física via `@export var cor_ambiente`.
+- [x] [Move-3] Dash Arcana com I-Frames (Espaço) — Esquiva rápida com micro-teleporte de 135px, rastro de afterimages fantasmagóricas ciano/violeta, partículas elementais, indicador de recarga na HUD e imunidade total a armadilhas e acionamento de combate durante o trajeto.
+- [x] [Hub-1] Altar / Cristal de Regeneração no Hub — Cristal sagrado em pixel art com iluminação dinâmica, partículas místicas, pedestal de pedra ancestral com runas e restauração total de HP ao interagir com [F].
 
 ## Changelog
 Ver arquivo `CHANGELOG.md` na raiz do projeto.

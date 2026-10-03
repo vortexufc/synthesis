@@ -42,6 +42,8 @@ var sfx = {
 	"erro_1": preload("res://assets/audio/sfx/ui-2.wav"),
 	"erro": preload("res://assets/audio/sfx/ui-2.wav"),
 	"transicao-1": preload("res://assets/audio/sfx/transicao-1.wav"),
+	"transicao-2": preload("res://assets/audio/sfx/transicao-2.wav"),
+	"dash": preload("res://assets/audio/sfx/transicao-2.wav"),
 	"moedas": preload("res://assets/audio/sfx/acerto_1.wav"),
 	"moeda": preload("res://assets/audio/sfx/acerto_1.wav"),
 	"pocao": preload("res://assets/audio/sfx/pocao_cura.wav"),

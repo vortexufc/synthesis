@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://d0lft226afsts" path="res://assets/sprites/tilesets/Biologia/porta.png" id="tex_biologia"]
 [ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="tex_fisica"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="tex_quimica"]
+[ext_resource type="PackedScene" uid="uid://c7v9x2m4p8q1w" path="res://scenes/Entidades/AltarRegeneracao.tscn" id="ext_altar_hub"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e6d1q"]
 texture = ExtResource("4_eqav8")
@@ -1885,3 +1886,6 @@ position = Vector2(851, 847)
 
 [node name="NPCBiologia" parent="." unique_id=1037908605 instance=ExtResource("24_ddqsf")]
 position = Vector2(734, 399)
+
+[node name="AltarRegeneracao" parent="." unique_id=771122341 instance=ExtResource("ext_altar_hub")]
+position = Vector2(584, 620)

@@ -41,6 +41,11 @@ var _tween_vinheta: Tween = null
 var _tween_heart_critico: Tween = null
 var _em_alerta_critico: bool = false
 
+# Indicador do Dash Arcana
+var _dash_bar: ProgressBar = null
+var _dash_label: Label = null
+var _dash_tween: Tween = null
+
 func _ready() -> void:
 	add_to_group("hud")
 	visible = true
@@ -58,6 +63,8 @@ func _exit_tree() -> void:
 		_tween_vinheta.kill()
 	if _tween_heart_critico and _tween_heart_critico.is_running():
 		_tween_heart_critico.kill()
+	if _dash_tween and _dash_tween.is_running():
+		_dash_tween.kill()
 
 var _vida_maxima_cache: float = 100.0
 var _target_w_cache: float = 0.0
@@ -113,6 +120,7 @@ func _on_roll_dano_finished() -> void:
 			add_child(q_hud)
 			
 	_criar_painel_toast()
+	_criar_indicador_dash()
 	
 	# Monitoramento de quests
 	_ultimas_ativas = PlayerStats.quests_ativas.duplicate()
@@ -512,3 +520,90 @@ func _mostrar_texto_flutuante_dano(qtd: float) -> void:
 	tw.tween_interval(0.30)
 	tw.tween_property(lbl, "modulate:a", 0.0, 0.25)
 	tw.finished.connect(lbl.queue_free)
+
+
+func _criar_indicador_dash() -> void:
+	var parent_ctrl = $Control if has_node("Control") else self
+	if parent_ctrl == null or _dash_bar != null:
+		return
+		
+	var container = PanelContainer.new()
+	container.name = "DashContainer"
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.position = Vector2(58, 49)
+	container.custom_minimum_size = Vector2(130, 15)
+	
+	var sb_bg = StyleBoxFlat.new()
+	sb_bg.bg_color = Color(0.06, 0.08, 0.14, 0.85)
+	sb_bg.border_color = Color(0.20, 0.40, 0.65, 0.70)
+	sb_bg.set_border_width_all(1)
+	sb_bg.set_corner_radius_all(3)
+	container.add_theme_stylebox_override("panel", sb_bg)
+	
+	_dash_bar = ProgressBar.new()
+	_dash_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dash_bar.show_percentage = false
+	_dash_bar.min_value = 0.0
+	_dash_bar.max_value = 1.0
+	_dash_bar.value = 1.0
+	_dash_bar.custom_minimum_size = Vector2(130, 15)
+	
+	var sb_fill = StyleBoxFlat.new()
+	sb_fill.bg_color = Color(0.18, 0.82, 0.98, 0.90)
+	sb_fill.set_corner_radius_all(2)
+	_dash_bar.add_theme_stylebox_override("fill", sb_fill)
+	
+	var sb_empty = StyleBoxEmpty.new()
+	_dash_bar.add_theme_stylebox_override("background", sb_empty)
+	
+	container.add_child(_dash_bar)
+	
+	_dash_label = Label.new()
+	_dash_label.text = "⚡ DASH [ESPAÇO]"
+	_dash_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_dash_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_dash_label.custom_minimum_size = Vector2(130, 15)
+	_dash_label.add_theme_font_size_override("font_size", 10)
+	_dash_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.95))
+	_dash_label.add_theme_color_override("font_outline_color", Color(0.02, 0.04, 0.08, 0.95))
+	_dash_label.add_theme_constant_override("outline_size", 2)
+	if _font_pixel:
+		_dash_label.add_theme_font_override("font", _font_pixel)
+		
+	container.add_child(_dash_label)
+	parent_ctrl.add_child(container)
+	
+	if get_node_or_null("/root/GlobalSignals"):
+		GlobalSignals.dash_executado.connect(_on_dash_executado)
+
+func _on_dash_executado(cooldown: float) -> void:
+	if not _dash_bar or not is_instance_valid(_dash_bar):
+		return
+	if _dash_tween and _dash_tween.is_running():
+		_dash_tween.kill()
+		
+	_dash_bar.value = 0.0
+	if _dash_label:
+		_dash_label.text = "RECARREGANDO..."
+		_dash_label.add_theme_color_override("font_color", Color(0.7, 0.85, 0.95, 0.75))
+		
+	var sb_fill = _dash_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	if sb_fill:
+		sb_fill.bg_color = Color(0.15, 0.50, 0.75, 0.80)
+		
+	_dash_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_dash_tween.tween_property(_dash_bar, "value", 1.0, cooldown).set_trans(Tween.TRANS_LINEAR)
+	_dash_tween.tween_callback(func():
+		if _dash_label and is_instance_valid(_dash_label):
+			_dash_label.text = "⚡ DASH [ESPAÇO]"
+			_dash_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.95))
+		var sb = _dash_bar.get_theme_stylebox("fill") as StyleBoxFlat
+		if sb:
+			sb.bg_color = Color(0.20, 0.95, 1.0, 0.95)
+			
+		var tw_brilho = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_brilho.tween_property(_dash_bar, "modulate", Color(1.4, 1.5, 1.8), 0.12)
+		tw_brilho.tween_property(_dash_bar, "modulate", Color.WHITE, 0.20)
+	)
+

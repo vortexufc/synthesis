@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://c7v9x2m4p8q1w"]
+
+[ext_resource type="Script" uid="uid://altarregeneracao_script" path="res://scripts/AltarRegeneracao.gd" id="1_altar"]
+[ext_resource type="Texture2D" uid="uid://altarbase_tex" path="res://assets/sprites/altar_base.png" id="2_base"]
+[ext_resource type="Texture2D" uid="uid://altarcristal_tex" path="res://assets/sprites/altar_cristal.png" id="3_cristal"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_trigger"]
+radius = 85.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_solido"]
+radius = 36.0
+
+[sub_resource type="Gradient" id="Gradient_sparks"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.2, 0.95, 0.85, 0, 0.3, 1, 0.85, 0.9, 0.7, 0.95, 0.5, 0.8, 1, 1, 1, 0)
+
+[node name="AltarRegeneracao" type="Area2D" unique_id=771122334]
+y_sort_origin = 30
+collision_layer = 0
+script = ExtResource("1_altar")
+
+[node name="SpriteBase" type="Sprite2D" parent="." unique_id=771122335]
+texture_filter = 1
+position = Vector2(0, -20)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("2_base")
+
+[node name="SpriteCristal" type="Sprite2D" parent="." unique_id=771122342]
+z_index = 1
+z_as_relative = true
+texture_filter = 1
+position = Vector2(0, -56)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("3_cristal")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=771122336]
+position = Vector2(0, -10)
+shape = SubResource("CircleShape2D_trigger")
+
+[node name="CorpoFisico" type="StaticBody2D" parent="." unique_id=771122337]
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CorpoFisico" unique_id=771122338]
+position = Vector2(0, -6)
+shape = SubResource("CircleShape2D_solido")
+
+[node name="LuzAltar" type="PointLight2D" parent="." unique_id=771122339]
+position = Vector2(0, -56)
+color = Color(0.2, 0.95, 0.85, 1)
+energy = 0.95
+texture_scale = 1.6
+
+[node name="ParticulasAmbiente" type="CPUParticles2D" parent="." unique_id=771122340]
+position = Vector2(0, -45)
+amount = 14
+lifetime = 1.8
+emission_shape = 1
+emission_sphere_radius = 28.0
+direction = Vector2(0, -1)
+spread = 35.0
+gravity = Vector2(0, -22)
+initial_velocity_min = 10.0
+initial_velocity_max = 24.0
+scale_amount_min = 1.2
+scale_amount_max = 2.4
+color_ramp = SubResource("Gradient_sparks")
