@@ -2,7 +2,18 @@
 <html lang="pt-BR">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-title" content="Synthesis">
+		<meta name="theme-color" content="#080104">
+		<meta name="screen-orientation" content="landscape">
+		<meta name="x5-orientation" content="landscape">
+		<meta name="x5-fullscreen" content="true">
+		<meta name="x5-page-mode" content="app">
+		<meta name="browsermode" content="application">
+		<meta name="msapplication-tap-highlight" content="no">
 		<title>$GODOT_PROJECT_NAME</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,15 +23,30 @@
 	box-sizing: border-box;
 }
 
-html, body, #canvas {
+html {
 	margin: 0;
 	padding: 0;
 	border: 0;
 	width: 100%;
 	height: 100%;
+	height: 100dvh;
+	height: -webkit-fill-available;
+	overflow: hidden;
 }
 
 body {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 100%;
+	height: 100dvh;
+	height: -webkit-fill-available;
+	margin: 0;
+	padding: 0;
+	border: 0;
 	color: #ffffff;
 	background-color: #080104;
 	overflow: hidden;
@@ -28,10 +54,15 @@ body {
 	font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	user-select: none;
 	-webkit-user-select: none;
+	-webkit-touch-callout: none;
 }
 
 #canvas {
 	display: block;
+	width: 100% !important;
+	height: 100% !important;
+	height: 100dvh !important;
+	touch-action: none;
 }
 
 #canvas:focus {
@@ -314,6 +345,57 @@ body {
 		display: flex;
 	}
 }
+
+#floating-fullscreen-btn {
+	position: fixed;
+	top: 14px;
+	right: 80px;
+	z-index: 99998;
+	display: none;
+	align-items: center;
+	gap: 6px;
+	background: rgba(18, 3, 8, 0.88);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	color: #ffffff;
+	border: 1.5px solid rgba(255, 51, 102, 0.75);
+	border-radius: 20px;
+	padding: 7px 13px;
+	font-family: 'Outfit', 'Segoe UI', sans-serif;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 1.5px;
+	text-transform: uppercase;
+	cursor: pointer;
+	box-shadow: 0 0 16px rgba(230, 0, 57, 0.5), inset 0 0 8px rgba(255, 51, 102, 0.2);
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-tap-highlight-color: transparent;
+	animation: pulse-fs-btn 2.2s infinite alternate;
+}
+
+@keyframes pulse-fs-btn {
+	0% {
+		border-color: rgba(255, 51, 102, 0.5);
+		box-shadow: 0 0 10px rgba(230, 0, 57, 0.4);
+	}
+	100% {
+		border-color: rgba(255, 120, 150, 0.95);
+		box-shadow: 0 0 22px rgba(255, 51, 102, 0.85);
+	}
+}
+
+#floating-fullscreen-btn:active {
+	transform: scale(0.95);
+	background: #b80030;
+}
+
+#floating-fullscreen-btn .fs-icon {
+	width: 15px;
+	height: 15px;
+	stroke: #ff4d73;
+}
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 		<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
@@ -332,6 +414,13 @@ body {
 		<canvas id="canvas">
 			Seu navegador não suporta a tag canvas.
 		</canvas>
+
+		<button id="floating-fullscreen-btn" type="button" aria-label="Tela Cheia" title="Ativar Tela Cheia">
+			<svg class="fs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+			</svg>
+			<span>TELA CHEIA</span>
+		</button>
 
 		<noscript>
 			Seu navegador não possui JavaScript ativado.
@@ -375,11 +464,123 @@ const engine = new Engine(GODOT_CONFIG);
 	const btnStart = document.getElementById('btn-start');
 	const statusNotice = document.getElementById('status-notice');
 	const canvas = document.getElementById('canvas');
+	const floatingFsBtn = document.getElementById('floating-fullscreen-btn');
+	const rotateOverlay = document.getElementById('rotate-device-overlay');
 
 	let initializing = true;
 	let statusMode = '';
 	let userInteracted = false;
 	let gameLoaded = false;
+
+	function isMobileOrTouch() {
+		return (
+			('ontouchstart' in window) ||
+			(navigator.maxTouchPoints > 0) ||
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+		);
+	}
+
+	function isFullscreenActive() {
+		return !!(
+			document.fullscreenElement ||
+			document.webkitFullscreenElement ||
+			document.mozFullScreenElement ||
+			document.msFullscreenElement
+		);
+	}
+
+	function requestFullscreenRobust(target) {
+		const elem = target || document.documentElement;
+		const options = { navigationUI: 'hide' };
+
+		try {
+			if (elem.requestFullscreen) {
+				elem.requestFullscreen(options).catch(function() {
+					try { elem.requestFullscreen().catch(function(){}); } catch(e){}
+				});
+			} else if (elem.webkitRequestFullscreen) {
+				elem.webkitRequestFullscreen(options);
+			} else if (elem.webkitRequestFullScreen) {
+				elem.webkitRequestFullScreen();
+			} else if (elem.mozRequestFullScreen) {
+				elem.mozRequestFullScreen();
+			} else if (elem.msRequestFullscreen) {
+				elem.msRequestFullscreen();
+			}
+		} catch (err) {
+			console.warn('requestFullscreen error:', err);
+		}
+
+		try {
+			if (screen.orientation && screen.orientation.lock) {
+				screen.orientation.lock('landscape').catch(function(){});
+			}
+		} catch (e) {}
+
+		// Minimizar barra de endereços em iOS Safari e navegadores baseados em scroll
+		try {
+			window.scrollTo(0, 1);
+			setTimeout(function() { window.scrollTo(0, 0); }, 60);
+		} catch (e) {}
+
+		updateFullscreenUI();
+	}
+
+	// Expõe funções globais para permitir chamada direta pelo GDScript via JavaScriptBridge
+	window.synthesisRequestFullscreen = function() {
+		requestFullscreenRobust(document.documentElement);
+	};
+	window.synthesisIsFullscreen = isFullscreenActive;
+
+	function updateFullscreenUI() {
+		const isFs = isFullscreenActive();
+		if (floatingFsBtn) {
+			// Esconde o botão flutuante se já estiver em tela cheia OU se o jogo ainda não carregou
+			if (isFs || !gameLoaded) {
+				floatingFsBtn.style.display = 'none';
+			} else {
+				// Exibe o botão de tela cheia caso o navegador tenha saído de tela cheia ou exibido a barra
+				floatingFsBtn.style.display = 'flex';
+			}
+		}
+	}
+
+	document.addEventListener('fullscreenchange', updateFullscreenUI);
+	document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+	document.addEventListener('mozfullscreenchange', updateFullscreenUI);
+	document.addEventListener('MSFullscreenChange', updateFullscreenUI);
+
+	window.addEventListener('resize', function() {
+		setTimeout(updateFullscreenUI, 200);
+	});
+	window.addEventListener('orientationchange', function() {
+		setTimeout(function() {
+			updateFullscreenUI();
+			if (!isFullscreenActive() && isMobileOrTouch()) {
+				requestFullscreenRobust(document.documentElement);
+			}
+		}, 300);
+	});
+
+	if (floatingFsBtn) {
+		floatingFsBtn.addEventListener('click', function(e) {
+			e.stopPropagation();
+			requestFullscreenRobust(document.documentElement);
+		});
+		floatingFsBtn.addEventListener('touchend', function(e) {
+			e.stopPropagation();
+			requestFullscreenRobust(document.documentElement);
+		});
+	}
+
+	if (rotateOverlay) {
+		rotateOverlay.addEventListener('click', function() {
+			requestFullscreenRobust(document.documentElement);
+		});
+		rotateOverlay.addEventListener('touchend', function() {
+			requestFullscreenRobust(document.documentElement);
+		});
+	}
 
 	function unlockAudio() {
 		userInteracted = true;
@@ -396,6 +597,15 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 	}
 
+	function onCanvasInteraction() {
+		if (!isFullscreenActive() && isMobileOrTouch()) {
+			requestFullscreenRobust(document.documentElement);
+		}
+	}
+
+	canvas.addEventListener('touchstart', onCanvasInteraction, { passive: true });
+	canvas.addEventListener('pointerdown', onCanvasInteraction, { passive: true });
+
 	function onUserGesture() {
 		unlockAudio();
 		if (gameLoaded) {
@@ -406,26 +616,13 @@ const engine = new Engine(GODOT_CONFIG);
 	window.addEventListener('pointerdown', onUserGesture, { capture: true });
 	window.addEventListener('keydown', onUserGesture, { capture: true });
 	window.addEventListener('touchstart', onUserGesture, { capture: true });
-	function lockLandscape() {
-		try {
-			const elem = document.documentElement;
-			if (elem.requestFullscreen) {
-				elem.requestFullscreen().then(() => {
-					if (screen.orientation && screen.orientation.lock) {
-						screen.orientation.lock('landscape').catch(() => {});
-					}
-				}).catch(() => {});
-			} else if (elem.webkitRequestFullscreen) {
-				elem.webkitRequestFullscreen();
-			}
-		} catch (e) {}
-	}
 
 	function startGameplay() {
-		if (!initializing) return;
 		unlockAudio();
-		lockLandscape();
+		requestFullscreenRobust(document.documentElement);
+		if (!initializing) return;
 		setStatusMode('hidden');
+		updateFullscreenUI();
 		try {
 			canvas.focus();
 			const evt = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window });
@@ -436,6 +633,12 @@ const engine = new Engine(GODOT_CONFIG);
 	if (btnStart) {
 		btnStart.addEventListener('click', (e) => {
 			e.stopPropagation();
+			requestFullscreenRobust(document.documentElement);
+			startGameplay();
+		});
+		btnStart.addEventListener('touchend', (e) => {
+			e.stopPropagation();
+			requestFullscreenRobust(document.documentElement);
 			startGameplay();
 		});
 	}
@@ -443,6 +646,13 @@ const engine = new Engine(GODOT_CONFIG);
 	if (statusOverlay) {
 		statusOverlay.addEventListener('click', () => {
 			if (gameLoaded) {
+				requestFullscreenRobust(document.documentElement);
+				startGameplay();
+			}
+		});
+		statusOverlay.addEventListener('touchend', () => {
+			if (gameLoaded) {
+				requestFullscreenRobust(document.documentElement);
 				startGameplay();
 			}
 		});
@@ -455,6 +665,7 @@ const engine = new Engine(GODOT_CONFIG);
 		if (mode === 'hidden') {
 			statusOverlay.remove();
 			initializing = false;
+			updateFullscreenUI();
 			return;
 		}
 		statusOverlay.style.visibility = 'visible';
@@ -534,13 +745,18 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			gameLoaded = true;
-			const hasActive = (navigator.userActivation && navigator.userActivation.hasBeenActive) || userInteracted;
-			if (hasActive) {
+			const isMobile = isMobileOrTouch();
+			// No mobile, sempre exibe o prompt com botão para garantir um gesto síncrono válido
+			// para ativar requestFullscreen({ navigationUI: 'hide' }) e destravar áudio.
+			if (!isMobile && ((navigator.userActivation && navigator.userActivation.hasBeenActive) || userInteracted)) {
 				startGameplay();
 			} else {
 				if (loadingContainer) loadingContainer.style.display = 'none';
 				if (startPrompt) {
 					startPrompt.style.display = 'flex';
+					if (isMobile && btnStart) {
+						btnStart.innerHTML = '&#9654; JOGAR EM TELA CHEIA';
+					}
 				}
 			}
 		}, displayFailureNotice);

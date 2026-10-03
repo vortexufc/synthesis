@@ -71,3 +71,7 @@ func set_joystick_habilitado(ativo: bool) -> void:
 	_salvar_preferencia()
 	print("[MobileControlsManager] Joystick virtual alterado para: ", "ATIVADO" if ativo else "DESATIVADO")
 	joystick_toggled.emit(ativo)
+
+func solicitar_tela_cheia_web() -> void:
+	if OS.has_feature("web") and JavaScriptBridge:
+		JavaScriptBridge.eval("window.synthesisRequestFullscreen && window.synthesisRequestFullscreen()")

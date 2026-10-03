@@ -456,3 +456,7 @@ func _on_pausa_pressed() -> void:
 		
 	if get_node_or_null("/root/MenuPausaManager"):
 		MenuPausaManager._processar_tecla_esc()
+		
+	var mcm = get_node_or_null("/root/MobileControlsManager")
+	if mcm and mcm.has_method("solicitar_tela_cheia_web"):
+		mcm.solicitar_tela_cheia_web()
