@@ -17,7 +17,7 @@ extends Area2D
 var ja_aberto: bool = false
 var id_unico: String = ""
 
-@onready var sprite: Sprite2D = $BauSprite if has_node("BauSprite") else null
+@onready var sprite: Sprite2D = get_node_or_null("BauSprite")
 
 const CENA_MOEDA = preload("res://scenes/Entidades/Items/ItemMoeda.tscn")
 
@@ -43,6 +43,7 @@ func _obter_id_unico() -> String:
 	return "%s::%s/%s@%s" % [cena_path, pai_nome, name, pos_str]
 
 func _ready() -> void:
+	add_to_group("baus")
 	if id_unico == "":
 		id_unico = _obter_id_unico()
 
@@ -257,6 +258,10 @@ func _iniciar_desafio_memoria() -> void:
 	_minigame_ativo = true
 	_remover_prompt_tela()
 	
+	var ui_inv = get_tree().get_first_node_in_group("inventario_ui")
+	if ui_inv and ui_inv.visible and ui_inv.has_method("fechar_inventario"):
+		ui_inv.fechar_inventario()
+	
 	# pega o andar certo
 	var andar_id = 1
 	if forcar_andar > 0:
@@ -376,8 +381,8 @@ func _executar_loot_pop(total_moedas: int) -> void:
 	var pai = get_parent()
 	if not pai: return
 	
-	var num_moedas = clamp(int(total_moedas / 6), 4, 7)
-	var valor_por_moeda = max(1, int(total_moedas / num_moedas))
+	var num_moedas = clamp(int(float(total_moedas) / 6.0), 4, 7)
+	var valor_por_moeda = max(1, int(float(total_moedas) / float(num_moedas)))
 	var resto = total_moedas - (valor_por_moeda * num_moedas)
 	
 	for i in range(num_moedas):

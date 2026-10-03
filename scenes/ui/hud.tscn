@@ -5,8 +5,10 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_bg.png" id="3_bg"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_red.png" id="4_red"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/health_bar_fill_green.png" id="5_fill"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TouchControls.tscn" id="6_touch"]
 
 [node name="HUD" type="CanvasLayer"]
+layer = 5
 script = ExtResource("1_abcd")
 
 [node name="Control" type="Control" parent="."]
@@ -17,6 +19,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="TouchControls" parent="Control" instance=ExtResource("6_touch")]
+layout_mode = 1
 
 [node name="HeartIcon" type="TextureRect" parent="Control"]
 texture_filter = 1

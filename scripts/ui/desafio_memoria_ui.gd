@@ -118,6 +118,7 @@ var _font_card: SystemFont
 func _ready() -> void:
 	add_to_group("minigame_ativo")
 	add_to_group("desafio_memoria")
+	add_to_group("interacao_ativa")
 	layer = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_font_card = SystemFont.new()
@@ -708,6 +709,7 @@ func _desistir() -> void:
 func _fechar_e_emitir(vitoria: bool, tempo_esgotado: bool = false) -> void:
 	remove_from_group("desafio_memoria")
 	remove_from_group("minigame_ativo")
+	remove_from_group("interacao_ativa")
 	
 	if player_ref and is_instance_valid(player_ref):
 		if player_ref.has_method("finalizar_interacao"):

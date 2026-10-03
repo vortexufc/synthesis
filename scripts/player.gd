@@ -36,10 +36,14 @@ func esta_em_interacao() -> bool:
 	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
 		return true
 	if get_tree():
-		if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
-			return true
-		if get_tree().get_nodes_in_group("dialogo_ativo").size() > 0:
-			return true
+		for n in get_tree().get_nodes_in_group("minigame_ativo"):
+			if is_instance_valid(n) and not n.is_queued_for_deletion():
+				if (n is CanvasLayer and n.visible) or (n is CanvasItem and n.is_visible_in_tree()):
+					return true
+		for n in get_tree().get_nodes_in_group("dialogo_ativo"):
+			if is_instance_valid(n) and not n.is_queued_for_deletion():
+				if (n is CanvasLayer and n.visible) or (n is CanvasItem and n.is_visible_in_tree()):
+					return true
 	return false
 
 func esta_imune_a_combate() -> bool:

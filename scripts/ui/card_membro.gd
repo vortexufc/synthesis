@@ -13,17 +13,22 @@ func _ready() -> void:
 	btn_expulsar.pressed.connect(_on_btn_expulsar_pressed)
 
 func _aplicar_visual() -> void:
-	var font: Font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var font_normal = SystemFont.new()
+	font_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_normal.font_weight = 600
 	
 	# Transparent panel background
 	var style_vazio: StyleBoxEmpty = StyleBoxEmpty.new()
 	add_theme_stylebox_override("panel", style_vazio)
 	
-	if font:
-		lbl_nome.add_theme_font_override("font", font)
-		lbl_cargo.add_theme_font_override("font", font)
-		lbl_score.add_theme_font_override("font", font)
-		btn_expulsar.add_theme_font_override("font", font)
+	lbl_nome.add_theme_font_override("font", font_normal)
+	lbl_nome.add_theme_font_size_override("font_size", 18)
+	lbl_cargo.add_theme_font_override("font", font_normal)
+	lbl_cargo.add_theme_font_size_override("font_size", 14)
+	lbl_score.add_theme_font_override("font", font_normal)
+	lbl_score.add_theme_font_size_override("font_size", 18)
+	btn_expulsar.add_theme_font_override("font", font_normal)
+	btn_expulsar.add_theme_font_size_override("font_size", 14)
 		
 	# Avatar loading
 	var tex: Texture2D = load("res://assets/branding/avatar.png.png") as Texture2D
@@ -48,6 +53,9 @@ func _aplicar_visual() -> void:
 	btn_expulsar.add_theme_color_override("font_color", Color.WHITE)
 
 func set_info(p_member_name: String, role: String, score: int, is_active_player_leader: bool) -> void:
+	if not is_node_ready():
+		await ready
+		
 	member_name = p_member_name
 	
 	lbl_nome.text = member_name

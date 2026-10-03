@@ -115,23 +115,6 @@ texture_normal = ExtResource("12_3fbu0")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1523540118]
-
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=1526915828]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=923046637]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-metadata/_edit_use_anchors_ = true
-
 [node name="PortaTransicao" parent="." unique_id=504229553 instance=ExtResource("13_5n4mo")]
 position = Vector2(964, 201)
 proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"

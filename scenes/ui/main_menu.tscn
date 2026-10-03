@@ -5,108 +5,157 @@
 [ext_resource type="Texture2D" uid="uid://q50elk0j8rd1" path="res://assets/branding/logosynthesis.png" id="3_uhagc"]
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="4_font"]
 [ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="4_x2yvf"]
+[ext_resource type="Texture2D" path="res://assets/branding/instagram_icon.png" id="5_insta"]
+[ext_resource type="Texture2D" path="res://assets/branding/qrcode_instagram.png" id="6_qr"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
 content_margin_left = 16.0
-content_margin_top = 16.0
+content_margin_top = 8.0
 content_margin_right = 16.0
-content_margin_bottom = 16.0
-bg_color = Color(0.109804, 0.168627, 0.309804, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0, 0.533333, 1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-corner_detail = 1
-anti_aliasing = false
+content_margin_bottom = 8.0
+bg_color = Color(0.05, 0.09, 0.18, 0.72)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.52, 0.88, 0.65)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
 content_margin_left = 16.0
-content_margin_top = 16.0
+content_margin_top = 8.0
 content_margin_right = 16.0
-content_margin_bottom = 16.0
-bg_color = Color(0.054902, 0.0862745, 0.168627, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0, 0.4, 0.8, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-corner_detail = 1
-anti_aliasing = false
+content_margin_bottom = 8.0
+bg_color = Color(0.04, 0.07, 0.14, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.15, 0.45, 0.8, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
 content_margin_left = 16.0
-content_margin_top = 16.0
+content_margin_top = 8.0
 content_margin_right = 16.0
-content_margin_bottom = 16.0
-bg_color = Color(0.160784, 0.247059, 0.45098, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.2, 0.666667, 1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-corner_detail = 1
-anti_aliasing = false
+content_margin_bottom = 8.0
+bg_color = Color(0.12, 0.22, 0.42, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.85, 1, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.2, 0.65, 1, 0.25)
+shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PanelLeaderboard"]
-bg_color = Color(0.63, 0.63, 0.2, 0.8)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(1, 1, 0, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-corner_detail = 1
-anti_aliasing = false
+bg_color = Color(0.04, 0.07, 0.14, 0.68)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.76, 0.22, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 12
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_arrow"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_arrow_hover"]
-bg_color = Color(1, 1, 1, 0.15)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-anti_aliasing = false
+bg_color = Color(1, 1, 1, 0.18)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gold"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.65, 0, 1)
+bg_color = Color(0.2, 0.15, 0.05, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.8, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_silver"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.75, 0.75, 0.75, 1)
+bg_color = Color(0.15, 0.18, 0.22, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.8, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bronze"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.6, 0.4, 0.1, 1)
+bg_color = Color(0.2, 0.12, 0.05, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.5, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnInstaPill"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.06, 0.04, 0.12, 0.75)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.88, 0.35, 0.65, 0.8)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnInstaPill_Hover"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.16, 0.08, 0.22, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.55, 0.85, 1)
+corner_radius_top_left = 17
+corner_radius_top_right = 17
+corner_radius_bottom_right = 17
+corner_radius_bottom_left = 17
+shadow_color = Color(0.88, 0.35, 0.65, 0.35)
+shadow_size = 10
+
 
 [node name="MainMenu" type="Control" unique_id=1947850292]
 layout_mode = 3
@@ -153,24 +202,25 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -356.0
-offset_right = 350.0
-offset_bottom = 0.00048828125
+offset_top = -345.0
+offset_right = 295.0
+offset_bottom = 0.0
 grow_vertical = 0
-theme_override_constants/margin_left = 60
-theme_override_constants/margin_bottom = 60
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_bottom = 35
 
 [node name="VBoxButtons" type="VBoxContainer" parent="MarginContainer" unique_id=600201428]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 8
 
 [node name="BtnJogar" type="Button" parent="MarginContainer/VBoxButtons" unique_id=636761118]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -178,12 +228,13 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "NOVO JOGO"
 
 [node name="BtnRanking" type="Button" parent="MarginContainer/VBoxButtons" unique_id=2016836333]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -191,12 +242,13 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "RANKING"
 
 [node name="BtnClas" type="Button" parent="MarginContainer/VBoxButtons" unique_id=811134012]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -204,17 +256,32 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "CLÃS"
 
 [node name="BtnConfig" type="Button" parent="MarginContainer/VBoxButtons" unique_id=1039033382]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 17
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "CONFIGURAÇÕES"
+
+[node name="BtnCreditos" type="Button" parent="MarginContainer/VBoxButtons" unique_id=1039033383]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("4_x2yvf")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
+text = "CRÉDITOS"
 
 [node name="LeaderboardPanel" type="PanelContainer" parent="." unique_id=1310522272]
 layout_mode = 1
@@ -223,24 +290,24 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -428.07
-offset_top = -293.0
-offset_right = -35.069336
-offset_bottom = -60.0
+offset_left = -315.0
+offset_top = -255.0
+offset_right = -25.0
+offset_bottom = -55.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_PanelLeaderboard")
 
 [node name="MarginContainer" type="MarginContainer" parent="LeaderboardPanel" unique_id=1158135983]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LeaderboardPanel/MarginContainer" unique_id=181044948]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 8
 
 [node name="HeaderHBox" type="HBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer" unique_id=923186387]
 layout_mode = 2
@@ -248,9 +315,10 @@ layout_mode = 2
 [node name="LabelTitle" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox" unique_id=467015824]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
-text = "LIDERANÇA DA SEMANA"
+theme_override_font_sizes/font_size = 11
+text = "LIDERANÇA QUÍMICA"
 
 [node name="Spacer" type="Control" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox" unique_id=157866586]
 layout_mode = 2
@@ -262,14 +330,14 @@ size_flags_vertical = 4
 theme_override_constants/separation = 2
 
 [node name="BtnPrev" type="Button" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=17819633]
-custom_minimum_size = Vector2(50, 36)
+custom_minimum_size = Vector2(28, 22)
 layout_mode = 2
 size_flags_vertical = 4
 tooltip_text = "Período anterior"
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.6)
 theme_override_colors/font_hover_color = Color(1, 1, 0.5, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxEmpty_arrow")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_arrow")
 theme_override_styles/hover = SubResource("StyleBoxFlat_arrow_hover")
@@ -277,14 +345,14 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_arrow")
 text = "◄"
 
 [node name="BtnNext" type="Button" parent="LeaderboardPanel/MarginContainer/VBoxContainer/HeaderHBox/HBoxDots" unique_id=1276364033]
-custom_minimum_size = Vector2(50, 36)
+custom_minimum_size = Vector2(28, 22)
 layout_mode = 2
 size_flags_vertical = 4
 tooltip_text = "Próximo período"
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 0.6)
 theme_override_colors/font_hover_color = Color(1, 1, 0.5, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxEmpty_arrow")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_arrow")
 theme_override_styles/hover = SubResource("StyleBoxFlat_arrow_hover")
@@ -293,17 +361,18 @@ text = "►"
 
 [node name="Clan1" type="HBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer" unique_id=1452115181]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Pos" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan1" unique_id=667772829]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "1º"
 
 [node name="LogoPanel" type="Panel" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan1" unique_id=1528291396]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_gold")
 
 [node name="LogoTexture" type="TextureRect" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan1/LogoPanel" unique_id=619846138]
@@ -314,12 +383,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
-stretch_mode = 6
+stretch_mode = 5
 
 [node name="VBoxInfo" type="VBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan1" unique_id=1153992076]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 2
 alignment = 1
 
 [node name="Name" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan1/VBoxInfo" unique_id=629019248]
@@ -331,22 +400,23 @@ text = "CLÃ 1"
 [node name="Pts" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan1/VBoxInfo" unique_id=269817742]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "PONTOS: 0"
 
 [node name="Clan2" type="HBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer" unique_id=1585271832]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Pos" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan2" unique_id=1811893411]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "2º"
 
 [node name="LogoPanel" type="Panel" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan2" unique_id=1475952193]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_silver")
 
 [node name="LogoTexture" type="TextureRect" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan2/LogoPanel" unique_id=1346567796]
@@ -357,12 +427,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
-stretch_mode = 6
+stretch_mode = 5
 
 [node name="VBoxInfo" type="VBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan2" unique_id=1893220445]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 2
 alignment = 1
 
 [node name="Name" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan2/VBoxInfo" unique_id=1685493258]
@@ -374,22 +444,23 @@ text = "CLÃ 2"
 [node name="Pts" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan2/VBoxInfo" unique_id=919433218]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "PONTOS: 0"
 
 [node name="Clan3" type="HBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer" unique_id=266361203]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Pos" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan3" unique_id=213944658]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "3º"
 
 [node name="LogoPanel" type="Panel" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan3" unique_id=1928534416]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_bronze")
 
 [node name="LogoTexture" type="TextureRect" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan3/LogoPanel" unique_id=39118638]
@@ -400,12 +471,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
-stretch_mode = 6
+stretch_mode = 5
 
 [node name="VBoxInfo" type="VBoxContainer" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan3" unique_id=2047627263]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 2
 alignment = 1
 
 [node name="Name" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan3/VBoxInfo" unique_id=963122669]
@@ -417,22 +488,66 @@ text = "CLÃ 3"
 [node name="Pts" type="Label" parent="LeaderboardPanel/MarginContainer/VBoxContainer/Clan3/VBoxInfo" unique_id=2110536533]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "PONTOS: 0"
+
+[node name="BtnInstagram" type="Button" parent="." unique_id=314159265]
+custom_minimum_size = Vector2(145, 34)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -170.0
+offset_top = 20.0
+offset_right = -25.0
+offset_bottom = 54.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnInstaPill")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnInstaPill")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnInstaPill_Hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnInstaPill_Hover")
+
+[node name="HBox" type="HBoxContainer" parent="BtnInstagram"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="BtnInstagram/HBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("5_insta")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="BtnInstagram/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.95, 1)
+theme_override_fonts/font = ExtResource("4_x2yvf")
+theme_override_font_sizes/font_size = 15
+text = "@vortexufc"
+vertical_alignment = 1
 
 [node name="VersionLabel" type="Label" parent="." unique_id=1556552453]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -40.0
+offset_left = 24.0
+offset_top = -30.0
 offset_right = 200.0
-offset_bottom = -20.0
+offset_bottom = -14.0
 grow_vertical = 0
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "v1.4.0 ALPHA"
+vertical_alignment = 1
 
 [node name="CopyrightLabel" type="Label" parent="." unique_id=1387420395]
 layout_mode = 1
@@ -442,12 +557,13 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -250.0
-offset_top = -40.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_top = -30.0
+offset_right = -24.0
+offset_bottom = -14.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "© VORTEX UFC"
 horizontal_alignment = 2
+vertical_alignment = 1

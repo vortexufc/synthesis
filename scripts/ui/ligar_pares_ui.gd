@@ -109,6 +109,7 @@ const PARES_POR_ANDAR = {
 
 func _ready() -> void:
 	add_to_group("minigame_ativo")
+	add_to_group("interacao_ativa")
 	layer = 105
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_construir_interface()
@@ -646,6 +647,7 @@ func _finalizar_derrota() -> void:
 
 func _fechar_e_emitir(vitoria: bool) -> void:
 	remove_from_group("minigame_ativo")
+	remove_from_group("interacao_ativa")
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(painel_central, "modulate:a", 0.0, 0.2)
 	tw.tween_property(painel_central, "scale", Vector2(0.8, 0.8), 0.2)

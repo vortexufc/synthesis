@@ -49,43 +49,6 @@ var _dash_tween: Tween = null
 func _ready() -> void:
 	add_to_group("hud")
 	visible = true
-
-func _exit_tree() -> void:
-	if _tween_roll and _tween_roll.is_running():
-		_tween_roll.kill()
-	if _tween_fill and _tween_fill.is_running():
-		_tween_fill.kill()
-	if _tween_ghost and _tween_ghost.is_running():
-		_tween_ghost.kill()
-	if _tween_heart and _tween_heart.is_running():
-		_tween_heart.kill()
-	if _tween_vinheta and _tween_vinheta.is_running():
-		_tween_vinheta.kill()
-	if _tween_heart_critico and _tween_heart_critico.is_running():
-		_tween_heart_critico.kill()
-	if _dash_tween and _dash_tween.is_running():
-		_dash_tween.kill()
-
-var _vida_maxima_cache: float = 100.0
-var _target_w_cache: float = 0.0
-
-func _atualizar_texto_vida_roll(val: float) -> void:
-	_displayed_vida = val
-	if text_label and is_instance_valid(text_label):
-		text_label.text = str(max(0, int(round(val)))) + " / " + str(int(round(_vida_maxima_cache)))
-
-func _on_roll_cura_finished() -> void:
-	if text_label and is_instance_valid(text_label):
-		text_label.remove_theme_color_override("font_color")
-
-func _on_roll_dano_finished() -> void:
-	if text_label and is_instance_valid(text_label):
-		text_label.remove_theme_color_override("font_color")
-	if fill and is_instance_valid(fill) and _target_w_cache <= 0.0:
-		fill.visible = false
-		if ghost and is_instance_valid(ghost):
-			ghost.visible = false
-	
 	_font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 	
 	if heart_icon:
@@ -127,10 +90,48 @@ func _on_roll_dano_finished() -> void:
 	_ultimas_concluidas = PlayerStats.quests_concluidas.duplicate()
 	PlayerStats.quests_atualizadas.connect(_verificar_mudancas_quest)
 
+func _exit_tree() -> void:
+	if _tween_roll and _tween_roll.is_running():
+		_tween_roll.kill()
+	if _tween_fill and _tween_fill.is_running():
+		_tween_fill.kill()
+	if _tween_ghost and _tween_ghost.is_running():
+		_tween_ghost.kill()
+	if _tween_heart and _tween_heart.is_running():
+		_tween_heart.kill()
+	if _tween_vinheta and _tween_vinheta.is_running():
+		_tween_vinheta.kill()
+	if _tween_heart_critico and _tween_heart_critico.is_running():
+		_tween_heart_critico.kill()
+	if _dash_tween and _dash_tween.is_running():
+		_dash_tween.kill()
+
+var _vida_maxima_cache: float = 100.0
+var _target_w_cache: float = 0.0
+
+func _atualizar_texto_vida_roll(val: float) -> void:
+	_displayed_vida = val
+	if text_label and is_instance_valid(text_label):
+		text_label.text = str(max(0, int(round(val)))) + " / " + str(int(round(_vida_maxima_cache)))
+
+func _on_roll_cura_finished() -> void:
+	if text_label and is_instance_valid(text_label):
+		text_label.remove_theme_color_override("font_color")
+
+func _on_roll_dano_finished() -> void:
+	if text_label and is_instance_valid(text_label):
+		text_label.remove_theme_color_override("font_color")
+	if fill and is_instance_valid(fill) and _target_w_cache <= 0.0:
+		fill.visible = false
+		if ghost and is_instance_valid(ghost):
+			ghost.visible = false
+
 
 func _criar_vinheta_critica() -> void:
-	var parent_ctrl = $Control if has_node("Control") else self
-	if parent_ctrl == null or _vinheta_critica != null:
+	var parent_ctrl: Node = get_node_or_null("Control")
+	if parent_ctrl == null:
+		parent_ctrl = self
+	if _vinheta_critica != null:
 		return
 		
 	_vinheta_critica = TextureRect.new()
@@ -267,7 +268,9 @@ func _criar_painel_toast() -> void:
 	
 	_toast_panel.add_child(vbox)
 	
-	var parent_node = $Control if has_node("Control") else self
+	var parent_node: Node = get_node_or_null("Control")
+	if parent_node == null:
+		parent_node = self
 	parent_node.add_child(_toast_panel)
 	
 	_toast_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -353,8 +356,8 @@ func atualizar_vida(atual: float, maxima: float) -> void:
 	if _vida_anterior < 0.0:
 		_vida_anterior = atual
 		_displayed_vida = atual
-		fill.size.x = target_w
-		if ghost: ghost.size.x = target_w
+		fill.set_deferred("size:x", target_w)
+		if ghost: ghost.set_deferred("size:x", target_w)
 		fill.visible = (target_w > 0.0)
 		if text_label:
 			text_label.text = str(max(0, int(round(atual)))) + " / " + str(int(round(maxima)))
@@ -523,8 +526,10 @@ func _mostrar_texto_flutuante_dano(qtd: float) -> void:
 
 
 func _criar_indicador_dash() -> void:
-	var parent_ctrl = $Control if has_node("Control") else self
-	if parent_ctrl == null or _dash_bar != null:
+	var parent_ctrl: Node = get_node_or_null("Control")
+	if parent_ctrl == null:
+		parent_ctrl = self
+	if _dash_bar != null:
 		return
 		
 	var container = PanelContainer.new()

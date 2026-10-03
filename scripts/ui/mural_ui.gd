@@ -72,6 +72,8 @@ func abrir_mural(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 
 	_montar_conteudo_andar(andar_id)
 	
+	add_to_group("mural_ui")
+	add_to_group("interacao_ativa")
 	show()
 	if painel_central:
 		painel_central.modulate.a = 0.0
@@ -92,10 +94,15 @@ func fechar_mural() -> void:
 	await tw.finished
 
 	hide()
+	remove_from_group("interacao_ativa")
+	remove_from_group("mural_ui")
 	backdrop.modulate.a = 1.0
 	
 	if player_ref and is_instance_valid(player_ref):
-		player_ref.travado = false
+		if player_ref.has_method("finalizar_interacao"):
+			player_ref.finalizar_interacao(0.2)
+		else:
+			player_ref.travado = false
 		
 	mural_fechado.emit()
 

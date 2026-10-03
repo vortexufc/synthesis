@@ -27,6 +27,13 @@ func _ready() -> void:
 	if btn_deslogar:
 		btn_deslogar.pressed.connect(_on_deslogar_pressed)
 	if toggle_joystick:
+		var mcm = get_node_or_null("/root/MobileControlsManager")
+		if mcm:
+			toggle_joystick.set_pressed_no_signal(mcm.joystick_habilitado)
+			mcm.joystick_toggled.connect(func(ativo: bool):
+				if toggle_joystick and is_instance_valid(toggle_joystick):
+					toggle_joystick.set_pressed_no_signal(ativo)
+			)
 		toggle_joystick.toggled.connect(_on_joystick_toggled)
 		
 	if btn_voltar:
@@ -42,6 +49,36 @@ func _ready() -> void:
 	_fechar_confirmacao()
 	_atualizar_status_conta()
 	_atualizar_sliders()
+	_atualizar_switch_joystick()
+	_configurar_estilo_controles()
+	
+	visibility_changed.connect(func():
+		if visible:
+			_atualizar_status_conta()
+			_atualizar_sliders()
+			_atualizar_switch_joystick()
+	)
+
+func _configurar_estilo_controles() -> void:
+	var font_desc = SystemFont.new()
+	font_desc.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_desc.font_weight = 500
+	
+	for node_name in ["LblDescMov", "LblDescInteragir", "LblDescGrimorio", "LblDescPause"]:
+		var lbl = find_child(node_name, true, false) as Label
+		if lbl:
+			lbl.add_theme_font_override("font", font_desc)
+			lbl.add_theme_font_size_override("font_size", 14)
+			
+	var font_keys = SystemFont.new()
+	font_keys.font_names = PackedStringArray(["Consolas", "Courier New", "Segoe UI", "sans-serif"])
+	font_keys.font_weight = 700
+	
+	for node_name in ["LblKeyMov", "LblKeyInteragir", "LblKeyGrimorio", "LblKeyPause"]:
+		var lbl = find_child(node_name, true, false) as Label
+		if lbl:
+			lbl.add_theme_font_override("font", font_keys)
+			lbl.add_theme_font_size_override("font_size", 13)
 
 func configurar_modo_in_game(ativo: bool) -> void:
 	modo_in_game = ativo
@@ -58,6 +95,13 @@ func configurar_modo_in_game(ativo: bool) -> void:
 		
 	_atualizar_status_conta()
 	_atualizar_sliders()
+	_atualizar_switch_joystick()
+
+func _atualizar_switch_joystick() -> void:
+	if toggle_joystick:
+		var mcm = get_node_or_null("/root/MobileControlsManager")
+		if mcm:
+			toggle_joystick.set_pressed_no_signal(mcm.joystick_habilitado)
 
 func _atualizar_status_conta() -> void:
 	if btn_deslogar == null:
@@ -98,7 +142,9 @@ func _on_sfx_value_changed(value: float) -> void:
 		AudioServer.set_bus_volume_db(bus_idx, _slider_to_db(value))
 
 func _on_joystick_toggled(button_pressed: bool) -> void:
-	print("Joystick Virtual alterado para: ", "LIGADO" if button_pressed else "DESLIGADO")
+	var mcm = get_node_or_null("/root/MobileControlsManager")
+	if mcm:
+		mcm.set_joystick_habilitado(button_pressed)
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 

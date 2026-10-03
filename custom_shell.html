@@ -261,12 +261,74 @@ body {
 	text-align: center;
 	z-index: 1;
 }
+
+#rotate-device-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: radial-gradient(circle at 50% 45%, #2a0812 0%, #150308 55%, #070103 100%);
+	z-index: 999999;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	padding: 24px;
+	color: #ffffff;
+}
+
+.rotate-phone-icon {
+	width: 76px;
+	height: 76px;
+	margin-bottom: 24px;
+	animation: rotate-phone-anim 2.2s ease-in-out infinite;
+}
+
+@keyframes rotate-phone-anim {
+	0% { transform: rotate(0deg); }
+	35% { transform: rotate(-90deg); }
+	70% { transform: rotate(-90deg); }
+	100% { transform: rotate(0deg); }
+}
+
+.rotate-title {
+	font-size: 22px;
+	font-weight: 800;
+	letter-spacing: 2px;
+	color: #ff3366;
+	margin-bottom: 12px;
+	text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+}
+
+.rotate-desc {
+	font-size: 15px;
+	color: #e0d0d8;
+	max-width: 320px;
+	line-height: 1.5;
+}
+
+@media screen and (orientation: portrait) and (max-width: 900px) {
+	#rotate-device-overlay {
+		display: flex;
+	}
+}
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 		<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 		$GODOT_HEAD_INCLUDE
 	</head>
 	<body>
+		<div id="rotate-device-overlay">
+			<svg class="rotate-phone-icon" viewBox="0 0 24 24" fill="none" stroke="#ff3366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+				<line x1="12" y1="18" x2="12.01" y2="18"></line>
+			</svg>
+			<div class="rotate-title">GIRE SEU CELULAR</div>
+			<div class="rotate-desc">Por favor, vire o aparelho na <strong>horizontal (paisagem)</strong> para jogar em tela cheia!</div>
+		</div>
+
 		<canvas id="canvas">
 			Seu navegador não suporta a tag canvas.
 		</canvas>
@@ -344,10 +406,25 @@ const engine = new Engine(GODOT_CONFIG);
 	window.addEventListener('pointerdown', onUserGesture, { capture: true });
 	window.addEventListener('keydown', onUserGesture, { capture: true });
 	window.addEventListener('touchstart', onUserGesture, { capture: true });
+	function lockLandscape() {
+		try {
+			const elem = document.documentElement;
+			if (elem.requestFullscreen) {
+				elem.requestFullscreen().then(() => {
+					if (screen.orientation && screen.orientation.lock) {
+						screen.orientation.lock('landscape').catch(() => {});
+					}
+				}).catch(() => {});
+			} else if (elem.webkitRequestFullscreen) {
+				elem.webkitRequestFullscreen();
+			}
+		} catch (e) {}
+	}
 
 	function startGameplay() {
 		if (!initializing) return;
 		unlockAudio();
+		lockLandscape();
 		setStatusMode('hidden');
 		try {
 			canvas.focus();

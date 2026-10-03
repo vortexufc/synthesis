@@ -13,6 +13,8 @@ var btn_fechar: Button
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("dialogo_ativo")
+	add_to_group("interacao_ativa")
 	get_tree().paused = true # Pausa o jogo
 	
 	bg_rect = ColorRect.new()

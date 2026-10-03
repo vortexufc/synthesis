@@ -47,8 +47,6 @@ func _ready():
 	_aplicar_visual()
 
 func _aplicar_visual():
-	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
-	
 	# tira o fundo pra nao cobrir o painel
 	var style_vazio = StyleBoxEmpty.new()
 	add_theme_stylebox_override("panel", style_vazio)
@@ -57,12 +55,16 @@ func _aplicar_visual():
 	if tex_mago:
 		icone_mago.texture = tex_mago
 	
-	var font_num = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var font_normal = SystemFont.new()
+	font_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_normal.font_weight = 600
 	
-	label_posicao.add_theme_font_override("font", font_num)
-	label_score.add_theme_font_override("font", font_num)
-	if font:
-		label_nome.add_theme_font_override("font", font)
+	label_posicao.add_theme_font_override("font", font_normal)
+	label_posicao.add_theme_font_size_override("font_size", 18)
+	label_score.add_theme_font_override("font", font_normal)
+	label_score.add_theme_font_size_override("font_size", 18)
+	label_nome.add_theme_font_override("font", font_normal)
+	label_nome.add_theme_font_size_override("font_size", 18)
 
 func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false, dados_extras: Dictionary = {}) -> void:
 	if not is_node_ready():

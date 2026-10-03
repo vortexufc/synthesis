@@ -203,6 +203,7 @@ func _abrir_interface() -> void:
 	ui_instancia = CanvasLayer.new()
 	ui_instancia.name = "DialogoBiologia"
 	ui_instancia.add_to_group("dialogo_ativo")
+	ui_instancia.add_to_group("interacao_ativa")
 	add_child(ui_instancia)
 	
 	# escurece o fundo

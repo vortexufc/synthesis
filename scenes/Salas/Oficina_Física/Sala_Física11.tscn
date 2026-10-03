@@ -436,23 +436,6 @@ texture_normal = ExtResource("12_3dmp4")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1040501024]
-
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=586765591]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=589624820]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-metadata/_edit_use_anchors_ = true
-
 [node name="PortaTransicao" parent="." unique_id=477254236 instance=ExtResource("13_1lcoj")]
 position = Vector2(1249, 233)
 frames_animacao = 4

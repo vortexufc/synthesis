@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Projeto Synthesis"
 run/main_scene="res://scenes/ui/main_menu.tscn"
-config/features=PackedStringArray("4.6", "Mobile")
+config/features=PackedStringArray("4.7", "Mobile")
 run/max_fps=60
 config/icon="res://assets/branding/icon.svg"
 config/supabase_key="sb_publishable_mpz-s86wXECtwvBd0TnYoQ_qWQauy2S"
@@ -34,6 +34,7 @@ RankingManager="*res://scripts/autoload/RankingManager.gd"
 ClanManager="*res://scripts/autoload/ClanManager.gd"
 DevManager="*res://scripts/autoload/DevManager.gd"
 PergaminhoManager="*res://scripts/autoload/PergaminhoManager.gd"
+MobileControlsManager="*res://scripts/autoload/MobileControlsManager.gd"
 MenuPausaManager="*res://scripts/autoload/MenuPausaManager.gd"
 
 [display]
@@ -41,6 +42,7 @@ MenuPausaManager="*res://scripts/autoload/MenuPausaManager.gd"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+window/handheld/orientation="sensor_landscape"
 
 [global]
 
@@ -87,6 +89,10 @@ dash={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":32,"physical_keycode":32,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
 ]
 }
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
 
 [physics]
 

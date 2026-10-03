@@ -293,8 +293,8 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 		shake_tw.tween_property($Control, "position", Vector2(-4, -2), 0.035)
 		shake_tw.tween_property($Control, "position", Vector2.ZERO, 0.035)
 			
-			# Floating Combat Text no jogador
-			_mostrar_texto_flutuante_dano_jogador(valor, false)
+		# Floating Combat Text no jogador
+		_mostrar_texto_flutuante_dano_jogador(valor, false)
 	
 	# [Pedagogia] Se o aluno errou, exibe a caixinha de revisão com resposta correta e explicação
 	if not acertou and not dados_pergunta.is_empty():

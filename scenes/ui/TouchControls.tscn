@@ -1,0 +1,329 @@
+[gd_scene format=3 uid="uid://bwm8k2vy1r5gq"]
+
+[ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_title"]
+[ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="3_font_body"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Base"]
+bg_color = Color(0.0588235, 0.0980392, 0.196078, 0.45)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.25, 0.65, 0.95, 0.65)
+corner_radius_top_left = 70
+corner_radius_top_right = 70
+corner_radius_bottom_right = 70
+corner_radius_bottom_left = 70
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Knob"]
+bg_color = Color(0.2, 0.6, 1, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.92, 1, 0.95)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+shadow_color = Color(0.1, 0.5, 0.9, 0.5)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnF"]
+bg_color = Color(0.88, 0.55, 0.12, 0.85)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.35, 1)
+corner_radius_top_left = 39
+corner_radius_top_right = 39
+corner_radius_bottom_right = 39
+corner_radius_bottom_left = 39
+shadow_color = Color(0.8, 0.45, 0.1, 0.45)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnF_Hover"]
+bg_color = Color(0.98, 0.65, 0.22, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.95, 0.6, 1)
+corner_radius_top_left = 39
+corner_radius_top_right = 39
+corner_radius_bottom_right = 39
+corner_radius_bottom_left = 39
+shadow_color = Color(1, 0.6, 0.2, 0.6)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnInv"]
+bg_color = Color(0.15, 0.45, 0.85, 0.85)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.45, 0.8, 1, 1)
+corner_radius_top_left = 33
+corner_radius_top_right = 33
+corner_radius_bottom_right = 33
+corner_radius_bottom_left = 33
+shadow_color = Color(0.15, 0.4, 0.8, 0.45)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnInv_Hover"]
+bg_color = Color(0.25, 0.55, 0.95, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.7, 0.92, 1, 1)
+corner_radius_top_left = 33
+corner_radius_top_right = 33
+corner_radius_bottom_right = 33
+corner_radius_bottom_left = 33
+shadow_color = Color(0.25, 0.6, 1, 0.6)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnGrimorio"]
+bg_color = Color(0.55, 0.25, 0.75, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.6, 1, 1)
+corner_radius_top_left = 29
+corner_radius_top_right = 29
+corner_radius_bottom_right = 29
+corner_radius_bottom_left = 29
+shadow_color = Color(0.45, 0.15, 0.65, 0.45)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnGrimorio_Hover"]
+bg_color = Color(0.68, 0.32, 0.88, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.8, 1, 1)
+corner_radius_top_left = 29
+corner_radius_top_right = 29
+corner_radius_bottom_right = 29
+corner_radius_bottom_left = 29
+shadow_color = Color(0.6, 0.2, 0.85, 0.6)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnPause"]
+bg_color = Color(0.08, 0.12, 0.24, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.65, 0.95, 0.85)
+corner_radius_top_left = 23
+corner_radius_top_right = 23
+corner_radius_bottom_right = 23
+corner_radius_bottom_left = 23
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnPause_Hover"]
+bg_color = Color(0.14, 0.2, 0.38, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.8, 1, 1)
+corner_radius_top_left = 23
+corner_radius_top_right = 23
+corner_radius_bottom_right = 23
+corner_radius_bottom_left = 23
+shadow_color = Color(0.2, 0.5, 0.9, 0.5)
+shadow_size = 8
+
+[node name="TouchControls" type="Control"]
+visible = false
+z_index = 25
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="JoystickZone" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -240.0
+offset_right = 240.0
+offset_bottom = -40.0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="BaseCircle" type="Panel" parent="JoystickZone"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.0
+offset_top = -70.0
+offset_right = 70.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Base")
+
+[node name="Knob" type="Panel" parent="JoystickZone/BaseCircle"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -30.0
+offset_top = -30.0
+offset_right = 30.0
+offset_bottom = 30.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Knob")
+
+[node name="ActionsContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -260.0
+offset_top = -240.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="BtnInteragir" type="Button" parent="ActionsContainer"]
+custom_minimum_size = Vector2(78, 78)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -78.0
+offset_top = -78.0
+grow_horizontal = 0
+grow_vertical = 0
+pivot_offset = Vector2(39, 39)
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnF")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnF_Hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnF_Hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnF_Hover")
+text = "F
+INTERAGIR"
+
+[node name="BtnInventario" type="Button" parent="ActionsContainer"]
+custom_minimum_size = Vector2(66, 66)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -162.0
+offset_top = -78.0
+offset_right = -96.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+pivot_offset = Vector2(33, 33)
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnInv")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnInv_Hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnInv_Hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnInv_Hover")
+text = "E
+MOCHILA"
+
+[node name="BtnGrimorio" type="Button" parent="ActionsContainer"]
+custom_minimum_size = Vector2(58, 58)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -158.0
+offset_top = -154.0
+offset_right = -100.0
+offset_bottom = -96.0
+grow_horizontal = 0
+grow_vertical = 0
+pivot_offset = Vector2(29, 29)
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnGrimorio")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnGrimorio_Hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnGrimorio_Hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnGrimorio_Hover")
+text = "📜
+LIVRO"
+
+[node name="PauseContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -70.0
+offset_top = 18.0
+offset_right = -20.0
+offset_bottom = 68.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="BtnPausa" type="Button" parent="PauseContainer"]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -23.0
+offset_top = -23.0
+offset_right = 23.0
+offset_bottom = 23.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(23, 23)
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
+theme_override_fonts/font = ExtResource("2_font_title")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnPause")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnPause_Hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnPause_Hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnPause_Hover")
+text = "⏸"

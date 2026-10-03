@@ -1,0 +1,170 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/modal_membros_cla.gd" id="1_script"]
+[ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_title"]
+[ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="3_font_body"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Card"]
+bg_color = Color(0.0588235, 0.0901961, 0.176471, 0.960784)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.18, 0.65, 1, 0.95)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.705882)
+shadow_size = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnFechar"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 10.0
+bg_color = Color(0.12, 0.2, 0.38, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.76, 0.24, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnFechar_Hover"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 10.0
+bg_color = Color(0.18, 0.32, 0.58, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.88, 0.45, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_X"]
+
+[node name="ModalMembrosCla" type="Control"]
+z_index = 50
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0156863, 0.027451, 0.0588235, 0.8)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelCard" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(620, 460)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Card")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxMain" type="VBoxContainer" parent="CenterContainer/PanelCard/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain"]
+layout_mode = 2
+
+[node name="VBoxTitles" type="VBoxContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="LabelClanNome" type="Label" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/Header/VBoxTitles"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("2_font_title")
+theme_override_font_sizes/font_size = 18
+text = "CLÃ [TAG]"
+
+[node name="LabelSub" type="Label" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/Header/VBoxTitles"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.82, 1, 0.95)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 16
+text = "Líder: --- • Pontuação Total: 0 PTS"
+
+[node name="BtnFechar" type="Button" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/Header"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_colors/font_hover_color = Color(1, 0.4, 0.4, 1)
+theme_override_fonts/font = ExtResource("2_font_title")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxEmpty_X")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_X")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_X")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_X")
+text = "✕"
+
+[node name="HSeparator1" type="HSeparator" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain"]
+layout_mode = 2
+
+[node name="LabelMembrosTitulo" type="Label" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.88, 1, 0.9)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 16
+text = "MEMBROS INTEGRANTES (0/50)"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="VBoxMembros" type="VBoxContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain"]
+layout_mode = 2
+
+[node name="BtnFecharRodape" type="Button" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain"]
+custom_minimum_size = Vector2(170, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.92, 0.65, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnFechar")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnFechar_Hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnFechar")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnFechar_Hover")
+text = "FECHAR"

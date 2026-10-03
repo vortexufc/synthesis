@@ -38,3 +38,60 @@ func _configurar_fontes_emoji() -> void:
 		
 	if ThemeDB.fallback_font:
 		ThemeDB.fallback_font.fallbacks = fallbacks_list
+
+func tem_interacao_ou_minigame_ativo() -> bool:
+	if not is_inside_tree() or get_tree() == null:
+		return false
+	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+		return true
+	if _tem_no_visivel_no_grupo("minigame_ativo"):
+		return true
+	if _tem_no_visivel_no_grupo("dialogo_ativo"):
+		return true
+	if _tem_no_visivel_no_grupo("interacao_ativa"):
+		return true
+	if _tem_no_visivel_no_grupo("loja_mercador"):
+		return true
+	if _tem_no_visivel_no_grupo("desafio_memoria"):
+		return true
+	if _tem_no_visivel_no_grupo("mural_ui"):
+		return true
+	if _tem_no_visivel_no_grupo("parchment_ui"):
+		return true
+		
+	var root = get_tree().root
+	if root:
+		var mural = root.find_child("MuralUI", true, false)
+		if mural and is_instance_valid(mural) and not mural.is_queued_for_deletion() and mural.visible:
+			return true
+		var loja = root.find_child("LojaUI", true, false)
+		if loja and is_instance_valid(loja) and not loja.is_queued_for_deletion() and loja.visible:
+			return true
+	var cena = get_tree().current_scene
+	if cena:
+		var loja_c = cena.find_child("LojaUI", true, false)
+		if loja_c and is_instance_valid(loja_c) and not loja_c.is_queued_for_deletion() and loja_c.visible:
+			return true
+		var prompt_hub = cena.find_child("PromptHub", true, false)
+		if prompt_hub and is_instance_valid(prompt_hub) and not prompt_hub.is_queued_for_deletion() and prompt_hub.visible:
+			return true
+	var player = get_tree().get_first_node_in_group("player") as Node2D
+	if player and is_instance_valid(player) and player.has_method("esta_em_interacao") and player.esta_em_interacao():
+		return true
+	return false
+
+func _tem_no_visivel_no_grupo(grupo: String) -> bool:
+	if not is_inside_tree() or get_tree() == null:
+		return false
+	for node in get_tree().get_nodes_in_group(grupo):
+		if is_instance_valid(node) and not node.is_queued_for_deletion():
+			if node is CanvasLayer:
+				if node.visible:
+					return true
+			elif node is CanvasItem:
+				if node.is_visible_in_tree():
+					return true
+			else:
+				return true
+	return false
+

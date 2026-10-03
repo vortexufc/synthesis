@@ -78,6 +78,11 @@ func _processar_tecla_esc() -> void:
 			ui_pergaminho.visible = false
 		return
 		
+	# Se estiver jogando um minigame, no mercador, mural, bau ou diálogo,
+	# NÃO abre o menu de pause! As próprias interfaces gerenciam o fechamento/saída via ESC.
+	if GlobalSignals.tem_interacao_ou_minigame_ativo():
+		return
+		
 	# se nao tem nada na tela abre as configuracoes
 	get_viewport().set_input_as_handled()
 	abrir_menu()

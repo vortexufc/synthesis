@@ -141,6 +141,7 @@ var _painel_pos_x_original: float = -1.0
 
 func _ready() -> void:
 	add_to_group("minigame_ativo")
+	add_to_group("interacao_ativa")
 	layer = 105
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_construir_ui()

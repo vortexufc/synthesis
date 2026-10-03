@@ -8,7 +8,7 @@ var id_unico: String = ""
 @export var intensidade_tremor: float = 8.0
 @export var dano: float = 70.0
 
-@onready var sprite: Sprite2D = $BauSprite if has_node("BauSprite") else null
+@onready var sprite: Sprite2D = get_node_or_null("BauSprite")
 var tex_aberto: AtlasTexture = null
 
 func _ready() -> void:

@@ -99,6 +99,7 @@ func _atualizar_hud() -> void:
 func _criar_card() -> PanelContainer:
 	var card = PanelContainer.new()
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.custom_minimum_size = Vector2(238, 0)
 	
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = Color(0.06, 0.06, 0.1, 0.88)

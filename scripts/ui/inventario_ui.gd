@@ -31,6 +31,7 @@ var atlas_pergaminho_fechado: AtlasTexture
 var atlas_pergaminho_aberto: AtlasTexture
 
 var lbl_moedas_inv: Button
+var btn_fechar_inv: Button
 var box_descarte: HBoxContainer
 var spin_descarte: SpinBox
 var btn_descartar: Button
@@ -172,11 +173,70 @@ func _ready() -> void:
 	lbl_moedas_inv.pressed.connect(func(): _selecionar_item({"nome": "Moedas de Ouro", "qtd": PlayerStats.moedas}, "moeda", -1))
 	
 	var painel_principal = $Control/MarginContainer/Panel
-	painel_principal.add_child(lbl_moedas_inv)
-	lbl_moedas_inv.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	lbl_moedas_inv.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	lbl_moedas_inv.offset_top = 16
-	lbl_moedas_inv.offset_right = -24
+	var hbox_topo_direita = HBoxContainer.new()
+	hbox_topo_direita.name = "HBoxTopoDireita"
+	hbox_topo_direita.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox_topo_direita.add_theme_constant_override("separation", 10)
+	hbox_topo_direita.alignment = BoxContainer.ALIGNMENT_END
+	painel_principal.add_child(hbox_topo_direita)
+	hbox_topo_direita.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	hbox_topo_direita.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	hbox_topo_direita.offset_top = 14
+	hbox_topo_direita.offset_right = -18
+	
+	hbox_topo_direita.add_child(lbl_moedas_inv)
+	
+	# Botão de Fechar Inventário (Mobile + PC)
+	btn_fechar_inv = Button.new()
+	btn_fechar_inv.name = "BtnFecharInventario"
+	btn_fechar_inv.text = "✕"
+	btn_fechar_inv.custom_minimum_size = Vector2(36, 36)
+	btn_fechar_inv.pivot_offset = Vector2(18, 18)
+	btn_fechar_inv.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	btn_fechar_inv.tooltip_text = "Fechar (Esc / E)"
+	
+	var sb_close = StyleBoxFlat.new()
+	sb_close.bg_color = Color(0.20, 0.08, 0.12, 0.95)
+	sb_close.border_width_left = 2
+	sb_close.border_width_top = 2
+	sb_close.border_width_right = 2
+	sb_close.border_width_bottom = 2
+	sb_close.border_color = Color(0.85, 0.35, 0.35, 0.90)
+	sb_close.corner_radius_top_left = 8
+	sb_close.corner_radius_top_right = 8
+	sb_close.corner_radius_bottom_right = 8
+	sb_close.corner_radius_bottom_left = 8
+	
+	var sb_close_hover = sb_close.duplicate() as StyleBoxFlat
+	sb_close_hover.bg_color = Color(0.38, 0.12, 0.18, 1.0)
+	sb_close_hover.border_color = Color(1.0, 0.55, 0.55, 1.0)
+	sb_close_hover.shadow_size = 6
+	sb_close_hover.shadow_color = Color(0.8, 0.2, 0.2, 0.45)
+	
+	var sb_close_pressed = sb_close.duplicate() as StyleBoxFlat
+	sb_close_pressed.bg_color = Color(0.12, 0.04, 0.07, 1.0)
+	sb_close_pressed.border_color = Color(0.70, 0.25, 0.25, 1.0)
+	
+	btn_fechar_inv.add_theme_stylebox_override("normal", sb_close)
+	btn_fechar_inv.add_theme_stylebox_override("hover", sb_close_hover)
+	btn_fechar_inv.add_theme_stylebox_override("pressed", sb_close_pressed)
+	btn_fechar_inv.add_theme_color_override("font_color", Color(1.0, 0.85, 0.85))
+	btn_fechar_inv.add_theme_font_size_override("font_size", 16)
+	
+	var font_btn = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font_btn:
+		btn_fechar_inv.add_theme_font_override("font", font_btn)
+		
+	btn_fechar_inv.mouse_entered.connect(func():
+		var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn_fechar_inv, "scale", Vector2(1.1, 1.1), 0.1)
+	)
+	btn_fechar_inv.mouse_exited.connect(func():
+		var tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(btn_fechar_inv, "scale", Vector2.ONE, 0.1)
+	)
+	btn_fechar_inv.pressed.connect(_on_btn_fechar_inventario_pressionado)
+	hbox_topo_direita.add_child(btn_fechar_inv)
 
 func _criar_estilos_slots() -> void:
 	# estilo normal do slot
@@ -225,10 +285,39 @@ func _criar_estilos_slots() -> void:
 var _tween_anim_inv: Tween = null
 
 func _process(_delta: float) -> void:
+	if visible and GlobalSignals.tem_interacao_ou_minigame_ativo():
+		_toggle_inventario()
+		return
 	if Input.is_action_just_pressed("inventory"):
+		if not visible and GlobalSignals.tem_interacao_ou_minigame_ativo():
+			return
+		_toggle_inventario()
+
+func _on_btn_fechar_inventario_pressionado() -> void:
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("ui-2")
+	if painel_leitura and painel_leitura.visible:
+		_fechar_leitura()
+	else:
+		_toggle_inventario()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event.is_action_pressed("ui_cancel") and not event.is_echo():
+		get_viewport().set_input_as_handled()
+		if painel_leitura and painel_leitura.visible:
+			_fechar_leitura()
+		else:
+			_toggle_inventario()
+
+func fechar_inventario() -> void:
+	if visible:
 		_toggle_inventario()
 
 func _toggle_inventario() -> void:
+	if not visible and GlobalSignals.tem_interacao_ou_minigame_ativo():
+		return
 	var ui_pergaminho = get_tree().get_first_node_in_group("parchment_ui")
 	if ui_pergaminho and ui_pergaminho.visible:
 		if ui_pergaminho.has_method("_fechar_pergaminho"):
@@ -618,7 +707,10 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		if img_detalhe_icone:
 			if e_codice:
 				var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
-				img_detalhe_icone.texture = tex_livro if tex_livro else atlas_pergaminho_fechado
+				if tex_livro:
+					img_detalhe_icone.texture = tex_livro
+				else:
+					img_detalhe_icone.texture = atlas_pergaminho_fechado
 			else:
 				img_detalhe_icone.texture = atlas_pergaminho_fechado
 		lbl_detalhe_titulo.text = item["titulo"]

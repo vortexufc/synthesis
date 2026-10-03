@@ -40,7 +40,13 @@ var itens_loja = [
 
 func _ready() -> void:
 	name = "LojaUI"
+	add_to_group("loja_mercador")
+	add_to_group("interacao_ativa")
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	var player = get_tree().get_first_node_in_group("player") as Node2D
+	if player and is_instance_valid(player):
+		player.travado = true
 	
 	# fundo escuro
 	var bg_rect = ColorRect.new()
@@ -577,6 +583,12 @@ func _tremer_lbl_moedas() -> void:
 func _exit_tree() -> void:
 	if _tween_fala and _tween_fala.is_running():
 		_tween_fala.kill()
+	var player = get_tree().get_first_node_in_group("player") as Node2D
+	if player and is_instance_valid(player):
+		if player.has_method("finalizar_interacao"):
+			player.finalizar_interacao(0.2)
+		else:
+			player.travado = false
 
 func _atualizar_progresso_fala_mercador(prog: float) -> void:
 	if lbl_fala_mercador and is_instance_valid(lbl_fala_mercador):

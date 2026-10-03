@@ -48,14 +48,21 @@ func _aplicar_visual():
 		style_centro.texture = tex_painel_central
 	$PainelCentro.add_theme_stylebox_override("panel", style_centro)
 	
+	var font_normal = SystemFont.new()
+	font_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_normal.font_weight = 600
+
 	# estilo do titulo
 	if font:
 		$PainelCentro/LblTitulo.add_theme_font_override("font", font)
 		$PainelCentro/LblTitulo.add_theme_font_size_override("font_size", 32)
 		$PainelCentro/LblTitulo.add_theme_color_override("font_color", Color.WHITE)
-		btn_geral.add_theme_font_override("font", font)
-		btn_clas.add_theme_font_override("font", font)
 		btn_voltar.add_theme_font_override("font", font)
+		
+	btn_geral.add_theme_font_override("font", font_normal)
+	btn_geral.add_theme_font_size_override("font_size", 18)
+	btn_clas.add_theme_font_override("font", font_normal)
+	btn_clas.add_theme_font_size_override("font_size", 18)
 		
 	# estilo do botao voltar
 	var style_voltar = StyleBoxFlat.new()

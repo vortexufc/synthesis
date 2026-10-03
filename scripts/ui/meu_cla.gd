@@ -24,7 +24,11 @@ func _aplicar_visual() -> void:
 		lbl_nome_tag.add_theme_font_size_override("font_size", 24)
 		lbl_nome_tag.add_theme_color_override("font_color", Color("0088ff")) # Azul vibrante
 		
-		lbl_pontuacao.add_theme_font_override("font", font)
+		var font_normal = SystemFont.new()
+		font_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+		font_normal.font_weight = 600
+		
+		lbl_pontuacao.add_theme_font_override("font", font_normal)
 		lbl_pontuacao.add_theme_font_size_override("font_size", 18)
 		
 		lbl_descricao.add_theme_font_override("font", font)

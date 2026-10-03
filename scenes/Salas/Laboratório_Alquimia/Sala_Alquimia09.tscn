@@ -1850,21 +1850,6 @@ texture_normal = ExtResource("15_d0uf7")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=724992477]
-
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=1181781188]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=2106577830]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="CharacterBody2D" parent="." unique_id=1797331560 instance=ExtResource("16_nk5gw")]
 position = Vector2(657, 498)
 

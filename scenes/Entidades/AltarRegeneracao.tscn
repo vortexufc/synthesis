@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://c7v9x2m4p8q1w"]
+[gd_scene format=3 uid="uid://c7wax2m4p8q1w"]
 
 [ext_resource type="Script" uid="uid://altarregeneracao_script" path="res://scripts/AltarRegeneracao.gd" id="1_altar"]
 [ext_resource type="Texture2D" uid="uid://altarbase_tex" path="res://assets/sprites/altar_base.png" id="2_base"]

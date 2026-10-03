@@ -1793,21 +1793,6 @@ texture_normal = ExtResource("14_od83f")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1543071292]
-
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=326623872]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=825615698]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="Slime_P" parent="." unique_id=2088489146 instance=ExtResource("16_eg616")]
 z_index = 4
 position = Vector2(650, 431)

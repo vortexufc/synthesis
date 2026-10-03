@@ -1765,22 +1765,6 @@ texture_normal = ExtResource("15_qshgh")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="InterfaceLeitura" type="CanvasLayer" parent="." unique_id=1633944159]
-
-[node name="Fundo" type="Control" parent="InterfaceLeitura" unique_id=1104664704]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="PapelTextura" type="NinePatchRect" parent="InterfaceLeitura/Fundo" unique_id=836163970]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-metadata/_edit_use_anchors_ = true
-
 [node name="Slime_Laranja" parent="." unique_id=1797331560 instance=ExtResource("18_ny18o")]
 z_index = 3
 position = Vector2(657, 498)

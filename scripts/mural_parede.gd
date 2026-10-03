@@ -12,7 +12,7 @@ var canvas_prompt: CanvasLayer = null
 var panel_prompt: PanelContainer = null
 var mural_ui_instancia: CanvasLayer = null
 
-@onready var sprite: Sprite2D = $Sprite2D if has_node("Sprite2D") else null
+@onready var sprite: Sprite2D = get_node_or_null("Sprite2D")
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)

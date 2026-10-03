@@ -62,16 +62,39 @@ func load_ranking() -> void:
 		_carregar_local()
 
 # busca rankings por periodo
+func _calcular_pts_andar(row: Dictionary, periodo: String, coluna: String) -> int:
+	var pts_especifico = int(row.get(coluna, 0))
+	if pts_especifico > 0:
+		return pts_especifico
+		
+	# Fallback para contas que acumularam pontos antes da separação individual dos 3 andares
+	var total = int(row.get("score", 0))
+	if total <= 0:
+		return 0
+		
+	match periodo:
+		"quimica":
+			return total # 1º Andar (Química)
+		"fisica":
+			# 2º Andar (Física)
+			return int(total * 0.82)
+		"biologia":
+			# 3º Andar (Biologia)
+			return int(total * 0.68)
+		_:
+			return total
+
+# busca rankings por periodo
 func load_ranking_periodo(periodo: String) -> void:
 	var coluna: String
 	match periodo:
 		"quimica":  coluna = "score_diario"
-		"fisica": coluna = "score_semanal"
-		"biologia":  coluna = "score_mensal"
+		"fisica":   coluna = "score_semanal"
+		"biologia": coluna = "score_mensal"
 		_: return
 	
 	var res = await DatabaseManager.request_async(
-		"/rest/v1/rankinggeral?select=*&order=%s.desc&limit=20" % coluna,
+		"/rest/v1/rankinggeral?select=*&order=%s.desc,score.desc&limit=20" % coluna,
 		HTTPClient.METHOD_GET
 	)
 	if not (res["success"] and res["data"] is Array):
@@ -79,7 +102,8 @@ func load_ranking_periodo(periodo: String) -> void:
 	
 	var lista: Array = []
 	for row in res["data"]:
-		var pts = int(row.get(coluna, 0))
+		var pts = _calcular_pts_andar(row, periodo, coluna)
+			
 		if pts > 0:
 			lista.append({
 				"name": row.get("player_name", "?"),
@@ -90,20 +114,54 @@ func load_ranking_periodo(periodo: String) -> void:
 				"insignias": row.get("insignias", [])
 			})
 	
+	# Injeta o visitante local caso não esteja logado e tenha pontuação registrada
+	var nick_guest = get_local_nick()
+	if not nick_guest.is_empty() and DatabaseManager.user_token.is_empty():
+		var score_guest = _ler_score_guest_local(nick_guest)
+		if score_guest > 0:
+			var pts_guest = _calcular_pts_andar({"score": score_guest}, periodo, coluna)
+			if pts_guest > 0:
+				var ja_tem = false
+				for item in lista:
+					if item["name"] == nick_guest:
+						ja_tem = true
+						break
+				if not ja_tem:
+					lista.append({
+						"name": nick_guest,
+						"score": pts_guest,
+						"score_diario": int(score_guest if periodo == "quimica" else 0),
+						"score_semanal": int(score_guest if periodo == "fisica" else 0),
+						"score_mensal": int(score_guest if periodo == "biologia" else 0),
+						"insignias": []
+					})
+
+	lista.sort_custom(func(a, b): return int(a.get("score", 0)) > int(b.get("score", 0)))
+	
 	match periodo:
 		"quimica":  ranking_diario  = lista
-		"fisica": ranking_semanal = lista
-		"biologia":  ranking_mensal  = lista
+		"fisica":   ranking_semanal = lista
+		"biologia": ranking_mensal  = lista
 	
 	ranking_atualizado.emit()
 	
 # pega o ranking pelo periodo
 func get_ranking_por_periodo(periodo: String) -> Array:
 	match periodo:
-		"quimica":  return ranking_diario
-		"fisica": return ranking_semanal
-		"biologia":  return ranking_mensal
-		_: return ranking_geral
+		"quimica":
+			if ranking_diario.is_empty():
+				return ranking_geral
+			return ranking_diario
+		"fisica":
+			if ranking_semanal.is_empty():
+				return ranking_geral
+			return ranking_semanal
+		"biologia":
+			if ranking_mensal.is_empty():
+				return ranking_geral
+			return ranking_mensal
+		_:
+			return ranking_geral
 
 # salva ou atualiza a pontuacao
 func add_score(player_name: String, cla: String, pontos: int) -> void:
