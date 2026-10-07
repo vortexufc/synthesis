@@ -119,8 +119,12 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 
 	var dg = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
 	if dg and not ignorar_posicao_em_jogo:
-		portas_destrancadas = dg.portas_destrancadas.duplicate()
-		inimigos_derrotados = dg.inimigos_derrotados.duplicate()
+		for p in dg.portas_destrancadas:
+			if not (p in portas_destrancadas):
+				portas_destrancadas.append(p)
+		for i in dg.inimigos_derrotados:
+			if not (i in inimigos_derrotados):
+				inimigos_derrotados.append(i)
 		if dg.percurso_salas.size() > 0:
 			percurso_salas_salvo = dg.percurso_salas.duplicate()
 			indice_sala_salvo = dg.indice_atual
@@ -211,6 +215,11 @@ func carregar():
 			_inicializar_dados_padrao()
 	else:
 		_inicializar_dados_padrao()
+
+func tem_progresso_salvo() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+	return cutscene_inicial_vista or tem_pos_salva or (cena_salva != "" and not _eh_cena_de_menu(cena_salva)) or moedas > 0 or itens.size() > 0 or grimorio.size() > 0 or quests_ativas.size() > 0 or quests_concluidas.size() > 0 or baus_abertos.size() > 0 or inimigos_derrotados.size() > 0
 
 # --- Metodos de Persistencia de Mundo e Salas ---
 func is_bau_aberto(id: String) -> bool:

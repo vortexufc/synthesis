@@ -102,17 +102,18 @@ func _executar_spawn_aleatorio() -> void:
 			continue
 		var ponto = pontos_map[nome_ponto]
 		if cena_bau != null:
-			var bau_inst = cena_bau.instantiate()
 			var bau_id = "%s::%s" % [spawner_id, nome_ponto]
-			bau_inst.id_unico = bau_id
 			
 			var ja_aberto_anteriormente = false
 			if get_node_or_null("/root/PlayerStats"):
-				ja_aberto_anteriormente = PlayerStats.is_bau_aberto(bau_id) or PlayerStats.is_bau_aberto(spawner_id)
+				ja_aberto_anteriormente = PlayerStats.is_bau_aberto(bau_id) or PlayerStats.is_item_coletado(bau_id) or PlayerStats.is_bau_aberto(spawner_id)
 				
 			if ja_aberto_anteriormente:
-				bau_inst.ja_aberto = true
-				
+				# Se já foi pego/aberto, NÃO aparece na sala!
+				continue
+
+			var bau_inst = cena_bau.instantiate()
+			bau_inst.id_unico = bau_id
 			bau_inst.global_position = ponto.global_position
 			
 			if "modo_conteudo" in bau_inst:
@@ -130,7 +131,7 @@ func _executar_spawn_aleatorio() -> void:
 	var todos_abertos = true
 	for nome_ponto in nomes_pontos_baus:
 		var b_id = "%s::%s" % [spawner_id, nome_ponto]
-		if get_node_or_null("/root/PlayerStats") and not PlayerStats.is_bau_aberto(b_id) and not PlayerStats.is_bau_aberto(spawner_id):
+		if get_node_or_null("/root/PlayerStats") and not PlayerStats.is_bau_aberto(b_id) and not PlayerStats.is_item_coletado(b_id) and not PlayerStats.is_bau_aberto(spawner_id):
 			todos_abertos = false
 			break
 
@@ -139,7 +140,7 @@ func _executar_spawn_aleatorio() -> void:
 		var mimico_id = "%s::mimico_%s" % [spawner_id, nome_ponto_mimico]
 		var ja_ativado = false
 		if get_node_or_null("/root/PlayerStats"):
-			ja_ativado = PlayerStats.is_item_coletado(mimico_id)
+			ja_ativado = PlayerStats.is_item_coletado(mimico_id) or PlayerStats.is_bau_aberto(mimico_id)
 			
 		if not ja_ativado:
 			var ponto_mimico = pontos_map[nome_ponto_mimico]

@@ -126,10 +126,11 @@ func _ready() -> void:
 	_atualizar_quests()
 
 func _estilizar_botao(btn: Button, e_cancelar: bool = false) -> void:
-	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
-	if font_pixel:
-		btn.add_theme_font_override("font", font_pixel)
-	btn.add_theme_font_size_override("font_size", 14)
+	var sf = SystemFont.new()
+	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	sf.font_weight = 600
+	btn.add_theme_font_override("font", sf)
+	btn.add_theme_font_size_override("font_size", 13)
 	
 	var sb_normal = StyleBoxFlat.new()
 	if e_cancelar:

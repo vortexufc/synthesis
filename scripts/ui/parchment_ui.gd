@@ -23,6 +23,7 @@ var player_ref: Node2D = null
 func _ready() -> void:
 	layer = 100 # Mantém o pergaminho no topo de qualquer HUD/Batalha
 	add_to_group("parchment_ui")
+	add_to_group("interacao_ativa")
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	_construir_interface_pixel()
@@ -220,6 +221,7 @@ func abrir_pergaminho(paginas: Array[String], player: Node2D = null) -> void:
 		
 	if player_ref and is_instance_valid(player_ref):
 		player_ref.travado = true
+		player_ref.em_interacao = true
 		
 	pagina_atual = 0
 	
@@ -266,6 +268,7 @@ func _fechar_pergaminho() -> void:
 	hide()
 	if player_ref and is_instance_valid(player_ref):
 		player_ref.travado = false
+		player_ref.em_interacao = false
 		player_ref = null
 	if get_tree().paused:
 		get_tree().paused = false

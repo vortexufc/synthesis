@@ -54,6 +54,7 @@ func _ready() -> void:
 			player = get_tree().get_first_node_in_group("player")
 		if player and is_instance_valid(player):
 			player.travado = false
+			player.em_interacao = false
 
 func _obter_textura_luz() -> Texture2D:
 	# cria a textura da luz
@@ -316,48 +317,62 @@ func _executar_cutscene_inicial() -> void:
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.marcar_cutscene_inicial_vista()
 
-	# trava o player na cutscene
+	# Trava o jogador na cutscene e define direção inicial olhando para o corredor (cima)
 	player.travado = true
+	player.em_interacao = true
 	player.global_position = Vector2(580, 946)
+	player.ultima_direcao = "cima"
 	
 	var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
+	var poeira = player.get_node_or_null("PoeiraPassos") as CPUParticles2D
+	
+	# PASSO 1: Anda para cima pelo corredor
 	if sprite:
 		sprite.play("correr_cima")
+	if poeira:
+		poeira.emitting = true
+		poeira.direction = Vector2(0, 1)
 		
-	# anda pra cima
 	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
 	tween.tween_property(player, "global_position:y", 710.0, 3.0)
 	_tocar_passos_cutscene(3.0)
 	await tween.finished
 	
-	# vira pra esquerda ate a mesa
+	# PASSO 2: Vira para a esquerda e anda até a mesa
+	player.ultima_direcao = "esquerda"
 	if sprite:
 		sprite.play("correr_esquerda")
+	if poeira:
+		poeira.emitting = true
+		poeira.direction = Vector2(1, 0)
 		
 	var tween2 = create_tween().set_trans(Tween.TRANS_LINEAR)
 	tween2.tween_property(player, "global_position:x", 263.0, 4.0)
 	_tocar_passos_cutscene(4.0)
 	await tween2.finished
 	
-	# para na mesa olhando pra cima
+	# PASSO 3: Para em frente à mesa olhando para cima (em direção ao pergaminho na mesa)
+	player.ultima_direcao = "cima"
+	if poeira:
+		poeira.emitting = false
 	if sprite:
 		sprite.play("idle_cima")
 		
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
 		
-	# some o pergaminho da mesa
+	# Some o pergaminho da mesa
 	var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
 	if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
 		if pergaminho_mesa.has_method("_remover_prompt_tela"):
 			pergaminho_mesa._remover_prompt_tela()
 		pergaminho_mesa.queue_free()
 		
-	# salva o pergaminho no grimorio
+	# Salva o pergaminho no grimório
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
 
-	# abre o pergaminho na tela
+	# Abre o pergaminho na tela
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
@@ -367,17 +382,27 @@ func _executar_cutscene_inicial() -> void:
 			ui.pergaminho_fechado.connect(_ao_fechar_pergaminho_cutscene.bind(player), CONNECT_ONE_SHOT)
 		ui.abrir_pergaminho(paginas_intro, player)
 	else:
-		player.travado = false
+		_ao_fechar_pergaminho_cutscene(player)
 
 func _ao_fechar_pergaminho_cutscene(player: Node2D) -> void:
 	if player and is_instance_valid(player):
 		player.travado = false
+		player.em_interacao = false
+		player.ultima_direcao = "baixo"
+		var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
+		if sprite:
+			sprite.play("idle_baixo")
+		var poeira = player.get_node_or_null("PoeiraPassos") as CPUParticles2D
+		if poeira:
+			poeira.emitting = false
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.marcar_cutscene_inicial_vista()
 
 func _tocar_passos_cutscene(duracao: float) -> void:
 	var tempo_decorrido: float = 0.0
 	while tempo_decorrido < duracao:
+		if not is_inside_tree():
+			return
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.tocar_som_caminhada()
 		await get_tree().create_timer(0.35).timeout

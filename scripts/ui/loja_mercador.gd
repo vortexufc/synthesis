@@ -11,6 +11,9 @@ var _btn_vender_gel: Button = null
 var _lbl_qtd_chip: Label = null
 var _btn_vender_chip: Button = null
 
+var _font_pixel: Font = null
+var _font_num: Font = null
+
 var tex_pocao = preload("res://assets/sprites/vida.png")
 var tex_pergaminho = preload("res://assets/sprites/pergaminho.png")
 var tex_moeda = preload("res://assets/sprites/ui/coin.png")
@@ -92,8 +95,14 @@ func _ready() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui_5")
 	
-	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	var font_num = font_pixel
+	_font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var sf = SystemFont.new()
+	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	sf.font_weight = 600
+	_font_num = sf
+	
+	var font_pixel = _font_pixel
+	var font_num = _font_num
 	
 	var vbox = VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
@@ -162,7 +171,7 @@ func _ready() -> void:
 	
 	lbl_fala_mercador = Label.new()
 	lbl_fala_mercador.autowrap_mode = TextServer.AUTOWRAP_WORD
-	if font_pixel: lbl_fala_mercador.add_theme_font_override("font", font_pixel)
+	if font_num: lbl_fala_mercador.add_theme_font_override("font", font_num)
 	lbl_fala_mercador.add_theme_font_size_override("font_size", 14)
 	lbl_fala_mercador.add_theme_color_override("font_color", Color(0.92, 0.94, 0.96))
 	balao_panel.add_child(lbl_fala_mercador)
@@ -555,6 +564,8 @@ func _animar_mudanca_moedas(positivo: bool, valor: int) -> void:
 	
 	var flutuante = Label.new()
 	flutuante.text = ("+%d 🪙" if positivo else "-%d 🪙") % valor
+	if _font_num:
+		flutuante.add_theme_font_override("font", _font_num)
 	flutuante.add_theme_font_size_override("font_size", 16)
 	flutuante.add_theme_color_override("font_color", cor)
 	flutuante.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))

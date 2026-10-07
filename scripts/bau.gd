@@ -47,8 +47,9 @@ func _ready() -> void:
 	if id_unico == "":
 		id_unico = _obter_id_unico()
 
-	if get_node_or_null("/root/PlayerStats") and PlayerStats.is_bau_aberto(id_unico):
-		ja_aberto = true
+	if get_node_or_null("/root/PlayerStats") and (PlayerStats.is_bau_aberto(id_unico) or PlayerStats.is_item_coletado(id_unico)):
+		queue_free()
+		return
 
 	if modo_conteudo == 0:
 		eh_desafio_memoria = true
@@ -206,14 +207,22 @@ func abrir_bau() -> void:
 	ja_aberto = true
 	_remover_prompt_tela()
 	
+	if id_unico == "":
+		id_unico = _obter_id_unico()
 	if get_node_or_null("/root/PlayerStats") and id_unico != "":
 		PlayerStats.registrar_bau_aberto(id_unico)
+		PlayerStats.registrar_item_coletado(id_unico)
 	
 	# muda pro sprite aberto
 	if sprite and tex_aberto:
 		sprite.texture = tex_aberto
 
 	_executar_animacao_abrir_bau(false)
+	
+	var tw_fechar = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw_fechar.tween_interval(2.0)
+	tw_fechar.tween_property(self, "modulate:a", 0.0, 0.4)
+	tw_fechar.tween_callback(queue_free)
 
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
@@ -302,8 +311,11 @@ func _on_desafio_memoria_concluido(vitoria: bool, tempo_esgotado: bool = false) 
 		if sprite and tex_aberto:
 			sprite.texture = tex_aberto
 			
+		if id_unico == "":
+			id_unico = _obter_id_unico()
 		if get_node_or_null("/root/PlayerStats") and id_unico != "":
 			PlayerStats.registrar_bau_aberto(id_unico)
+			PlayerStats.registrar_item_coletado(id_unico)
 			
 		if get_node_or_null("/root/PlayerStats"):
 			# recompensas: pocao e escudo temporario
@@ -413,5 +425,11 @@ func _executar_loot_pop(total_moedas: int) -> void:
 			if is_instance_valid(moeda) and moeda.has_method("lancar_arco"):
 				moeda.lancar_arco(global_position + Vector2(0, -8), pos_pouso, randf_range(65.0, 95.0))
 		)
+
+	# Após ejetar as moedas, o baú desvanece suavemente e se remove da cena
+	var tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_interval(1.8)
+	tw.tween_property(self, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(queue_free)
 
 

@@ -64,21 +64,23 @@ func _configurar_estilo_controles() -> void:
 	font_desc.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_desc.font_weight = 500
 	
-	for node_name in ["LblDescMov", "LblDescInteragir", "LblDescGrimorio", "LblDescPause"]:
+	for node_name in ["LblDescMov", "LblDescDash", "LblDescInteragir", "LblDescGrimorio", "LblDescPause"]:
 		var lbl = find_child(node_name, true, false) as Label
 		if lbl:
 			lbl.add_theme_font_override("font", font_desc)
 			lbl.add_theme_font_size_override("font_size", 14)
+			lbl.add_theme_color_override("font_color", Color(0.9, 0.93, 0.98, 0.95))
 			
 	var font_keys = SystemFont.new()
 	font_keys.font_names = PackedStringArray(["Consolas", "Courier New", "Segoe UI", "sans-serif"])
 	font_keys.font_weight = 700
 	
-	for node_name in ["LblKeyMov", "LblKeyInteragir", "LblKeyGrimorio", "LblKeyPause"]:
+	for node_name in ["LblKeyMov", "LblKeyDash", "LblKeyInteragir", "LblKeyGrimorio", "LblKeyPause"]:
 		var lbl = find_child(node_name, true, false) as Label
 		if lbl:
 			lbl.add_theme_font_override("font", font_keys)
 			lbl.add_theme_font_size_override("font_size", 13)
+			lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.35, 1)) # Amarelo/Dourado arcano
 
 func configurar_modo_in_game(ativo: bool) -> void:
 	modo_in_game = ativo

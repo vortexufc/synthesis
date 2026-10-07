@@ -170,6 +170,10 @@ func _ready() -> void:
 	lbl_moedas_inv.add_theme_stylebox_override("pressed", sb_moeda)
 	lbl_moedas_inv.add_theme_color_override("font_color", Color(1, 0.85, 0.3))
 	lbl_moedas_inv.add_theme_font_size_override("font_size", 11)
+	var font_num_inv = SystemFont.new()
+	font_num_inv.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_num_inv.font_weight = 600
+	lbl_moedas_inv.add_theme_font_override("font", font_num_inv)
 	lbl_moedas_inv.pressed.connect(func(): _selecionar_item({"nome": "Moedas de Ouro", "qtd": PlayerStats.moedas}, "moeda", -1))
 	
 	var painel_principal = $Control/MarginContainer/Panel

@@ -10,7 +10,10 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 	_font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	_font_normal = _font_pixel
+	var sf = SystemFont.new()
+	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	sf.font_weight = 600
+	_font_normal = sf
 	
 	vbox_quests = VBoxContainer.new()
 	vbox_quests.mouse_filter = Control.MOUSE_FILTER_IGNORE

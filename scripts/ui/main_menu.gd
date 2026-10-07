@@ -43,19 +43,20 @@ func _ready() -> void:
 		btn_creditos.pressed.connect(_on_btn_creditos_pressed)
 	_configurar_card_instagram()
 	
-	# Se tiver jogo salvo com localizacao, exibe CONTINUAR e VOLTAR AO INÍCIO
-	if PlayerStats and PlayerStats.tem_pos_salva and PlayerStats.cena_salva != "":
+	# Se já jogou antes, exibe CONTINUAR e VOLTAR AO INÍCIO. Se for primeira vez, exibe NOVO JOGO.
+	var ja_jogou = PlayerStats and PlayerStats.tem_progresso_salvo()
+	if ja_jogou:
 		btn_jogar.text = "CONTINUAR"
 		
-		var btn_novo = btn_jogar.duplicate()
-		btn_novo.name = "BtnNovoJogo"
-		btn_novo.text = "VOLTAR AO INÍCIO"
-		btn_novo.custom_minimum_size = Vector2(0, 36)
-		btn_novo.add_theme_font_size_override("font_size", 16)
-		btn_novo.pressed.connect(_on_btn_novo_jogo_pressed)
+		var btn_inicio = btn_jogar.duplicate()
+		btn_inicio.name = "BtnVoltarInicio"
+		btn_inicio.text = "VOLTAR AO INÍCIO"
+		btn_inicio.custom_minimum_size = Vector2(0, 36)
+		btn_inicio.add_theme_font_size_override("font_size", 16)
+		btn_inicio.pressed.connect(_on_btn_voltar_inicio_pressed)
 		var vbox = $MarginContainer/VBoxButtons
-		vbox.add_child(btn_novo)
-		vbox.move_child(btn_novo, 1)
+		vbox.add_child(btn_inicio)
+		vbox.move_child(btn_inicio, 1)
 	else:
 		btn_jogar.text = "NOVO JOGO"
 
@@ -119,7 +120,7 @@ func _ready() -> void:
 	
 	var _ao_clicar_perfil = func():
 		if DatabaseManager.user_token == "":
-			_abrir_modal_aviso_visitante(false, false)
+			_abrir_modal_aviso_visitante(_ir_login)
 		else:
 			_ir_login.call()
 	
@@ -184,47 +185,64 @@ func _atualizar_perfil() -> void:
 
 func _on_btn_jogar_pressed() -> void:
 	AudioManager.play_sfx("ui_5")
+	var ja_jogou = PlayerStats and PlayerStats.tem_progresso_salvo()
+	var acao = _executar_continuar if ja_jogou else _iniciar_novo_jogo
 	if DatabaseManager.user_token.is_empty() and not _aviso_visitante_visto:
-		_abrir_modal_aviso_visitante(true, true)
+		_abrir_modal_aviso_visitante(acao)
 		return
-	_executar_continuar_ou_novo_jogo()
+	acao.call()
 
-func _on_btn_novo_jogo_pressed() -> void:
+func _on_btn_voltar_inicio_pressed() -> void:
 	AudioManager.play_sfx("ui_5")
 	if DatabaseManager.user_token.is_empty() and not _aviso_visitante_visto:
-		_abrir_modal_aviso_visitante(true, false)
+		_abrir_modal_aviso_visitante(_executar_voltar_ao_inicio)
 		return
-	_iniciar_novo_jogo()
+	_executar_voltar_ao_inicio()
 
-func _executar_continuar_ou_novo_jogo() -> void:
-	# Se tiver jogo salvo com localizacao, continua de onde parou!
+func _executar_continuar() -> void:
+	# Se tiver jogo salvo com localizacao, continua de onde parou na sala!
 	if PlayerStats and PlayerStats.tem_pos_salva and PlayerStats.cena_salva != "":
 		print("[MainMenu] Continuando jogo na cena: %s na posicao (%.0f, %.0f)" % [PlayerStats.cena_salva, PlayerStats.pos_salva_x, PlayerStats.pos_salva_y])
 		PlayerStats.restaurando_posicao_save = true
 		PlayerStats.fade_spawn_player = true
 		
 		var dg = get_node_or_null("/root/DungeonGenerator")
-		if dg and PlayerStats.percurso_salas_salvo.size() > 0:
-			dg.percurso_salas = PlayerStats.percurso_salas_salvo.duplicate()
-			dg.indice_atual = PlayerStats.indice_sala_salvo
+		if dg:
+			if PlayerStats.percurso_salas_salvo.size() > 0:
+				dg.percurso_salas = PlayerStats.percurso_salas_salvo.duplicate()
+				dg.indice_atual = PlayerStats.indice_sala_salvo
+			for i in PlayerStats.inimigos_derrotados:
+				if not (i in dg.inimigos_derrotados):
+					dg.inimigos_derrotados.append(i)
+			for p in PlayerStats.portas_destrancadas:
+				if not (p in dg.portas_destrancadas):
+					dg.portas_destrancadas.append(p)
 			
 		TransitionScreen.change_scene(PlayerStats.cena_salva, false, true)
 		return
 		
-	_iniciar_novo_jogo()
+	# Caso não tenha posição de sala específica (ex: estava no Hub ou sem sala ativa), vai pro Hub!
+	_executar_voltar_ao_inicio()
 
-func _abrir_modal_aviso_visitante(iniciar_jogo: bool = false, continuar: bool = false) -> void:
+func _executar_voltar_ao_inicio() -> void:
+	print("[MainMenu] Retornando ao Início (Hub Geral) com progresso salvo mantido!")
+	if PlayerStats:
+		PlayerStats.resetar_vida()
+		PlayerStats.limpar_posicao_salva()
+		PlayerStats.fade_spawn_player = true
+	if get_node_or_null("/root/DungeonGenerator"):
+		DungeonGenerator.resetar_masmorra()
+	TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+
+func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
 	var modal_cena = preload("res://scenes/ui/ModalAvisoVisitante.tscn")
 	if modal_cena:
 		var modal = modal_cena.instantiate()
 		add_child(modal)
 		modal.continuar_como_visitante.connect(func():
 			_aviso_visitante_visto = true
-			if iniciar_jogo:
-				if continuar:
-					_executar_continuar_ou_novo_jogo()
-				else:
-					_iniciar_novo_jogo()
+			if acao_apos.is_valid():
+				acao_apos.call()
 		)
 
 func _iniciar_novo_jogo() -> void:

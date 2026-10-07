@@ -281,9 +281,10 @@ func _exibir_texto_flutuante_moeda(qtd: int) -> void:
 	lbl.add_theme_color_override("font_outline_color", Color(0.25, 0.14, 0.02, 0.95))
 	lbl.add_theme_constant_override("outline_size", 2)
 	
-	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	if font_pixel:
-		lbl.add_theme_font_override("font", font_pixel)
+	var font_num = SystemFont.new()
+	font_num.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_num.font_weight = 700
+	lbl.add_theme_font_override("font", font_num)
 		
 	var arvore = get_tree()
 	var cena_alvo = arvore.current_scene if (arvore and arvore.current_scene) else get_parent()

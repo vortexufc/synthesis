@@ -8,6 +8,7 @@ extends Control
 @onready var btn_interagir = $ActionsContainer/BtnInteragir
 @onready var btn_inventario = $ActionsContainer/BtnInventario
 @onready var btn_grimorio = $ActionsContainer/BtnGrimorio
+@onready var btn_dash = get_node_or_null("ActionsContainer/BtnDash")
 @onready var btn_pausa = $PauseContainer/BtnPausa
 
 const RAIO_MAXIMO: float = 55.0
@@ -54,8 +55,14 @@ func _ready() -> void:
 	if btn_grimorio:
 		btn_grimorio.pressed.connect(_on_grimorio_pressed)
 		
+	if btn_dash:
+		btn_dash.pressed.connect(_on_dash_pressed)
+		
 	if btn_pausa:
 		btn_pausa.pressed.connect(_on_pausa_pressed)
+		
+	if get_node_or_null("/root/GlobalSignals") and GlobalSignals.has_signal("dash_executado"):
+		GlobalSignals.dash_executado.connect(_on_dash_cooldown)
 		
 	# Escuta mudanças no MobileControlsManager
 	var mcm = get_node_or_null("/root/MobileControlsManager")
@@ -147,6 +154,10 @@ func _input(event: InputEvent) -> void:
 					_on_grimorio_pressed()
 					get_viewport().set_input_as_handled()
 					return
+				elif btn_dash and btn_dash.is_visible_in_tree() and btn_dash.get_global_rect().has_point(mouse_pos):
+					_on_dash_pressed()
+					get_viewport().set_input_as_handled()
+					return
 				elif btn_pausa and btn_pausa.is_visible_in_tree() and btn_pausa.get_global_rect().has_point(mouse_pos):
 					_on_pausa_pressed()
 					get_viewport().set_input_as_handled()
@@ -182,6 +193,10 @@ func _input(event: InputEvent) -> void:
 				return
 			elif btn_grimorio and btn_grimorio.is_visible_in_tree() and btn_grimorio.get_global_rect().has_point(touch_pos):
 				_on_grimorio_pressed()
+				get_viewport().set_input_as_handled()
+				return
+			elif btn_dash and btn_dash.is_visible_in_tree() and btn_dash.get_global_rect().has_point(touch_pos):
+				_on_dash_pressed()
 				get_viewport().set_input_as_handled()
 				return
 			elif btn_pausa and btn_pausa.is_visible_in_tree() and btn_pausa.get_global_rect().has_point(touch_pos):
@@ -460,3 +475,26 @@ func _on_pausa_pressed() -> void:
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm and mcm.has_method("solicitar_tela_cheia_web"):
 		mcm.solicitar_tela_cheia_web()
+
+func _on_dash_pressed() -> void:
+	if GlobalSignals.tem_interacao_ou_minigame_ativo() or _inventario_aberto() or _pausa_aberta():
+		return
+		
+	if btn_dash:
+		var tw = create_tween()
+		tw.tween_property(btn_dash, "scale", Vector2(0.88, 0.88), 0.06)
+		tw.tween_property(btn_dash, "scale", Vector2.ONE, 0.10)
+		
+	var player = get_tree().get_first_node_in_group("player")
+	if player and is_instance_valid(player) and player.has_method("_iniciar_dash"):
+		player._iniciar_dash()
+	else:
+		Input.action_press("dash")
+		Input.action_release("dash")
+
+func _on_dash_cooldown(cooldown: float) -> void:
+	if not btn_dash or not is_instance_valid(btn_dash):
+		return
+	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	btn_dash.modulate = Color(0.55, 0.65, 0.75, 0.65)
+	tw.tween_property(btn_dash, "modulate", Color.WHITE, cooldown)

@@ -164,7 +164,8 @@ func _executar_fade_spawn_boneco() -> void:
 	
 	await tw.finished
 	modulate = Color.WHITE
-	travado = false
+	if not em_interacao:
+		travado = false
 
 func _criar_particulas_surgimento() -> void:
 	var part = CPUParticles2D.new()

@@ -150,6 +150,16 @@ var tier_override: Dictionary = {}
 func _ready():
 	randomize()
 	resetar_masmorra()
+	if get_node_or_null("/root/PlayerStats"):
+		for i in PlayerStats.inimigos_derrotados:
+			if not (i in inimigos_derrotados):
+				inimigos_derrotados.append(i)
+		for p in PlayerStats.portas_destrancadas:
+			if not (p in portas_destrancadas):
+				portas_destrancadas.append(p)
+		if PlayerStats.percurso_salas_salvo.size() > 0:
+			percurso_salas = PlayerStats.percurso_salas_salvo.duplicate()
+			indice_atual = PlayerStats.indice_sala_salvo
 
 func get_masmorra_da_cena(cena: String) -> String:
 	var cena_lower = cena.to_lower()
@@ -371,17 +381,35 @@ func registrar_inimigo_derrotado(key: String) -> void:
 	if not (key in inimigos_derrotados):
 		inimigos_derrotados.append(key)
 		print("[DungeonGenerator] Inimigo registrado como derrotado: ", key)
+	if get_node_or_null("/root/PlayerStats"):
+		if not (key in PlayerStats.inimigos_derrotados):
+			PlayerStats.inimigos_derrotados.append(key)
 
 func is_inimigo_derrotado(key: String) -> bool:
-	return key in inimigos_derrotados
+	if key in inimigos_derrotados:
+		return true
+	if get_node_or_null("/root/PlayerStats") and (key in PlayerStats.inimigos_derrotados):
+		if not (key in inimigos_derrotados):
+			inimigos_derrotados.append(key)
+		return true
+	return false
 
 func registrar_porta_destrancada(key: String) -> void:
 	if not (key in portas_destrancadas):
 		portas_destrancadas.append(key)
 		print("[DungeonGenerator] Porta registrada como destrancada: ", key)
+	if get_node_or_null("/root/PlayerStats"):
+		if not (key in PlayerStats.portas_destrancadas):
+			PlayerStats.portas_destrancadas.append(key)
 
 func is_porta_destrancada(key: String) -> bool:
-	return key in portas_destrancadas
+	if key in portas_destrancadas:
+		return true
+	if get_node_or_null("/root/PlayerStats") and (key in PlayerStats.portas_destrancadas):
+		if not (key in portas_destrancadas):
+			portas_destrancadas.append(key)
+		return true
+	return false
 
 # retorna se a sala atual deve usar a mecânica de chave
 # chama essa funcao no _ready de cada sala para setar dropar_chave_no_ultimo_monstro

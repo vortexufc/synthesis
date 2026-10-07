@@ -11,7 +11,20 @@ var id_unico: String = ""
 @onready var sprite: Sprite2D = get_node_or_null("BauSprite")
 var tex_aberto: AtlasTexture = null
 
+func _obter_id_unico() -> String:
+	if id_unico != "":
+		return id_unico
+	var cena_path = ""
+	if get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path
+	var pos_str = "%d_%d" % [int(global_position.x), int(global_position.y)]
+	var pai_nome = get_parent().name if get_parent() else ""
+	return "%s::%s/%s@%s" % [cena_path, pai_nome, name, pos_str]
+
 func _ready() -> void:
+	if id_unico == "":
+		id_unico = _obter_id_unico()
+
 	if id_unico != "" and get_node_or_null("/root/PlayerStats") and PlayerStats.is_item_coletado(id_unico):
 		queue_free()
 		return
@@ -31,8 +44,11 @@ func _on_body_entered(body: Node2D) -> void:
 
 	ja_ativado = true
 	set_deferred("monitoring", false)
+	if id_unico == "":
+		id_unico = _obter_id_unico()
 	if id_unico != "" and get_node_or_null("/root/PlayerStats"):
 		PlayerStats.registrar_item_coletado(id_unico)
+		PlayerStats.salvar()
 
 	GlobalSignals.mimico_ativado.emit(body)
 	_sequencia_mimico(body)

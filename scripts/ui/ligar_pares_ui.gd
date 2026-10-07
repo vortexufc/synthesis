@@ -9,6 +9,7 @@ var duracao_total: float = 20.0
 var tempo_restante: float = 20.0
 var jogo_ativo: bool = false
 var bloqueio_input: bool = false
+var _finalizado: bool = false
 
 var pares_conectados: int = 0
 var bloco_selecionado: Button = null
@@ -123,14 +124,12 @@ func _ready() -> void:
 		_construir_interface()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or not is_inside_tree():
+	if not visible or not is_inside_tree() or not jogo_ativo or bloqueio_input or _finalizado:
 		return
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		if bloco_selecionado != null:
 			_desselecionar_bloco()
-		else:
-			_finalizar_derrota()
 		return
 	if event is InputEventMouseButton:
 		if not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -195,8 +194,11 @@ func iniciar_conexao(p_andar_id: int = 1) -> void:
 	bloco_hover_alvo = null
 	esta_arrastando = false
 	bloqueio_input = false
+	_finalizado = false
 	linhas_animadas.clear()
 	tempo_anim_global = 0.0
+	if banner_resultado:
+		banner_resultado.visible = false
 	
 	_gerar_blocos()
 	_atualizar_timer_ui()
@@ -236,8 +238,8 @@ func _construir_interface() -> void:
 	backdrop.add_child(center_painel)
 
 	painel_central = PanelContainer.new()
-	painel_central.custom_minimum_size = Vector2(780, 540)
-	painel_central.pivot_offset = Vector2(390, 270)
+	painel_central.custom_minimum_size = Vector2(880, 540)
+	painel_central.pivot_offset = Vector2(440, 270)
 	
 	var style_panel = StyleBoxFlat.new()
 	style_panel.bg_color = Color(0.07, 0.06, 0.13, 0.98)
@@ -332,10 +334,10 @@ func _construir_interface() -> void:
 	lbl_pares.add_theme_color_override("font_color", Color(0.95, 0.82, 0.35))
 	hbox_status.add_child(lbl_pares)
 	
-	# duas colunas de blocos com cabeçalhos e canal central de ligação
+	# duas colunas de blocos com cabeçalhos e canal central de ligação amplo
 	var hbox_colunas = HBoxContainer.new()
 	hbox_colunas.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox_colunas.add_theme_constant_override("separation", 48)
+	hbox_colunas.add_theme_constant_override("separation", 170)
 	hbox_colunas.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox_main.add_child(hbox_colunas)
 	
@@ -355,7 +357,7 @@ func _construir_interface() -> void:
 	
 	col_a_container = VBoxContainer.new()
 	col_a_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col_a_container.add_theme_constant_override("separation", 14)
+	col_a_container.add_theme_constant_override("separation", 16)
 	col_a_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox_col_a.add_child(col_a_container)
 	
@@ -375,7 +377,7 @@ func _construir_interface() -> void:
 	
 	col_b_container = VBoxContainer.new()
 	col_b_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col_b_container.add_theme_constant_override("separation", 14)
+	col_b_container.add_theme_constant_override("separation", 16)
 	col_b_container.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox_col_b.add_child(col_b_container)
 	
@@ -434,8 +436,10 @@ func _construir_interface() -> void:
 	center_banner.add_child(banner_resultado)
 
 func _ao_gui_input_backdrop(event: InputEvent) -> void:
+	if not jogo_ativo or bloqueio_input or _finalizado:
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if bloco_selecionado != null and not bloqueio_input:
+		if bloco_selecionado != null:
 			_desselecionar_bloco()
 
 func _gerar_blocos() -> void:
@@ -545,7 +549,7 @@ func _obter_bloco_sob_posicao(pos_global: Vector2) -> Button:
 		return null
 	for child in container_alvo.get_children():
 		if child is Button and child.visible and not child.get_meta("resolvido", false):
-			if child.get_global_rect().has_point(pos_global):
+			if child.get_global_rect().grow(12.0).has_point(pos_global):
 				return child
 	return null
 
@@ -765,6 +769,9 @@ func _desenhar_camada_conexoes(canvas: Control) -> void:
 	if not is_instance_valid(canvas):
 		return
 		
+	# 0. Canal central de energia rúnica (guia visual elegante)
+	_desenhar_canal_central(canvas)
+		
 	# 1. Desenha linhas de conexões concluídas (em animação de acerto ou erro)
 	for l in linhas_animadas:
 		_desenhar_linha_animada(canvas, l)
@@ -781,6 +788,47 @@ func _desenhar_camada_conexoes(canvas: Control) -> void:
 	for btn in col_b_container.get_children():
 		if btn is Button and btn.visible and not btn.get_meta("resolvido", false):
 			_desenhar_no_bloco(canvas, btn)
+
+func _desenhar_canal_central(canvas: Control) -> void:
+	if not is_instance_valid(col_a_container) or not is_instance_valid(col_b_container):
+		return
+	var filhos_a = col_a_container.get_children()
+	var filhos_b = col_b_container.get_children()
+	if filhos_a.is_empty() or filhos_b.is_empty():
+		return
+		
+	var btn_a = filhos_a[0] as Control
+	var btn_b = filhos_b[0] as Control
+	if not is_instance_valid(btn_a) or not is_instance_valid(btn_b):
+		return
+		
+	var p_a = _obter_posicao_no(btn_a)
+	var p_b = _obter_posicao_no(btn_b)
+	var x_centro = (p_a.x + p_b.x) * 0.5
+	var largura_gap = p_b.x - p_a.x
+	
+	if largura_gap < 50.0:
+		return
+		
+	var y_inicio = p_a.y - 45.0
+	var y_fim = p_a.y + 195.0
+	if filhos_a.size() > 1:
+		var btn_ult = filhos_a[filhos_a.size() - 1] as Control
+		if is_instance_valid(btn_ult):
+			y_fim = _obter_posicao_no(btn_ult).y + 45.0
+			
+	# Fundo translúcido suave do corredor central de energia
+	var canal_rect = Rect2(x_centro - (largura_gap * 0.44), y_inicio, largura_gap * 0.88, y_fim - y_inicio)
+	var sb_canal = Color(0.10, 0.08, 0.18, 0.30)
+	canvas.draw_rect(canal_rect, sb_canal, true)
+	
+	# Bordas laterais sutis do canal
+	canvas.draw_line(Vector2(canal_rect.position.x, y_inicio), Vector2(canal_rect.position.x, y_fim), Color(0.5, 0.4, 0.7, 0.22), 1.0)
+	canvas.draw_line(Vector2(canal_rect.end.x, y_inicio), Vector2(canal_rect.end.x, y_fim), Color(0.5, 0.4, 0.7, 0.22), 1.0)
+	
+	# Linha central tracejada mística
+	var cor_guia = Color(0.65, 0.55, 0.9, 0.16)
+	canvas.draw_dashed_line(Vector2(x_centro, y_inicio + 8.0), Vector2(x_centro, y_fim - 8.0), cor_guia, 1.5, 7.0)
 
 func _desenhar_no_bloco(canvas: Control, btn: Button) -> void:
 	var pos = _obter_posicao_no(btn)
@@ -814,9 +862,9 @@ func _desenhar_no_bloco(canvas: Control, btn: Button) -> void:
 		
 	# Pino de contato em direção ao canal central
 	if col == "A":
-		canvas.draw_line(pos + Vector2(6.0, 0.0), pos + Vector2(13.0, 0.0), cor_base, 2.5)
+		canvas.draw_line(pos + Vector2(6.0, 0.0), pos + Vector2(15.0, 0.0), cor_base, 2.5)
 	else:
-		canvas.draw_line(pos - Vector2(6.0, 0.0), pos - Vector2(13.0, 0.0), cor_base, 2.5)
+		canvas.draw_line(pos - Vector2(6.0, 0.0), pos - Vector2(15.0, 0.0), cor_base, 2.5)
 		
 	# Borda externa do nó (anel metálico rúnico)
 	canvas.draw_circle(pos, r_ext, Color(0.05, 0.04, 0.1, 0.95))
@@ -967,6 +1015,9 @@ func _atualizar_timer_ui() -> void:
 				sb.bg_color = Color(0.2, 0.75, 1.0)
 
 func _finalizar_vitoria() -> void:
+	if _finalizado:
+		return
+	_finalizado = true
 	jogo_ativo = false
 	bloqueio_input = true
 	
@@ -989,6 +1040,9 @@ func _finalizar_vitoria() -> void:
 	_fechar_e_emitir(true)
 
 func _finalizar_derrota() -> void:
+	if _finalizado:
+		return
+	_finalizado = true
 	jogo_ativo = false
 	bloqueio_input = true
 	

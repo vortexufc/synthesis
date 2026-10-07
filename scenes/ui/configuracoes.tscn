@@ -22,9 +22,9 @@ shader_parameter/escurecer = Color(0.05, 0.06, 0.1, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 32.0
-content_margin_top = 32.0
+content_margin_top = 20.0
 content_margin_right = 32.0
-content_margin_bottom = 32.0
+content_margin_bottom = 20.0
 bg_color = Color(0.109804, 0.168627, 0.309804, 0.8)
 border_width_left = 4
 border_width_top = 4
@@ -36,6 +36,22 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_controles_bg"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(0.0627451, 0.0980392, 0.188235, 0.75)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.188235, 0.380392, 0.701961, 0.6)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
 content_margin_left = 16.0
@@ -109,9 +125,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -200.0
-offset_top = 60.0
+offset_top = 40.0
 offset_right = 200.0
-offset_bottom = 100.0
+offset_bottom = 80.0
 grow_horizontal = 2
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 32
@@ -123,28 +139,28 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 100.0
-offset_bottom = -100.0
+offset_top = 70.0
+offset_bottom = -75.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="CenterContainer" unique_id=766278706]
-custom_minimum_size = Vector2(600, 0)
+custom_minimum_size = Vector2(620, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel" unique_id=1071762123]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 14
 
 [node name="VBoxMusic" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=1347706746]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic" unique_id=1696853754]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "MÚSICA"
 
 [node name="HSliderMusic" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic" unique_id=1394328694]
@@ -155,12 +171,12 @@ value = 0.5
 
 [node name="VBoxSfx" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=462765115]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx" unique_id=181310200]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "EFEITOS SONOROS"
 
 [node name="HSliderSfx" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx" unique_id=470504719]
@@ -171,13 +187,13 @@ value = 0.5
 
 [node name="HBoxConta" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=1170035619]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxConta" unique_id=362227960]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "CONTA"
 vertical_alignment = 1
 
@@ -185,7 +201,7 @@ vertical_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
@@ -193,14 +209,14 @@ text = "DESCONECTAR"
 
 [node name="HBoxJoystick" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=776804254]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick" unique_id=132690023]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "JOYSTICK VIRTUAL"
 vertical_alignment = 1
 
@@ -208,6 +224,110 @@ vertical_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 8
 button_pressed = true
+
+[node name="HSeparatorControles" type="HSeparator" parent="CenterContainer/Panel/VBoxContainer" unique_id=1948201101]
+layout_mode = 2
+
+[node name="VBoxControles" type="VBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=1948201102]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LabelControles" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles" unique_id=1948201103]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.75, 1, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 13
+text = "CONTROLES (TECLADO)"
+
+[node name="PanelGrid" type="PanelContainer" parent="CenterContainer/Panel/VBoxContainer/VBoxControles" unique_id=1948201104]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_controles_bg")
+
+[node name="GridControles" type="GridContainer" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid" unique_id=1948201105]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="LblKeyMov" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201106]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "[W, A, S, D] / [Setas]"
+
+[node name="LblDescMov" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201107]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.98, 0.95)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "Movimentar o Mago"
+
+[node name="LblKeyDash" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201114]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "[ESPAÇO]"
+
+[node name="LblDescDash" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201115]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.98, 0.95)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "Dash (Esquiva / Avanço)"
+
+[node name="LblKeyInteragir" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201108]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "[F]"
+
+[node name="LblDescInteragir" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201109]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.98, 0.95)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "Interagir / Coletar Itens"
+
+[node name="LblKeyGrimorio" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201110]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "[E]"
+
+[node name="LblDescGrimorio" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201111]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.98, 0.95)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "Grimório de Fórmulas / Inventário"
+
+[node name="LblKeyPause" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201112]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "[ESC]"
+
+[node name="LblDescPause" type="Label" parent="CenterContainer/Panel/VBoxContainer/VBoxControles/PanelGrid/GridControles" unique_id=1948201113]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.98, 0.95)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+text = "Pausar Jogo / Fechar Menus"
 
 [node name="BotoesInferiores" type="HBoxContainer" parent="." unique_id=1617425860]
 layout_mode = 1
@@ -217,9 +337,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -300.0
-offset_top = -80.0
+offset_top = -68.0
 offset_right = 300.0
-offset_bottom = -20.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_constants/separation = 25
