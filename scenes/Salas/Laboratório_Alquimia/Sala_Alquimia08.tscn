@@ -23,6 +23,8 @@
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="22_h8nsg"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="23_ik6c5"]
 [ext_resource type="PackedScene" path="res://scenes/Armadilhas/poca_acido.tscn" id="26_j3unr"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="frasco_trap"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Items/ItemPocao.tscn" id="item_pocao"]
 [ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
 [ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
@@ -1890,3 +1892,12 @@ position = Vector2(-10, -54)
 
 [node name="PocaAcido" parent="PocaAcido/PocaAcido/PocaAcido/PocaAcido" unique_id=297585875 instance=ExtResource("26_j3unr")]
 position = Vector2(-56, -34)
+
+[node name="ItemPocao" parent="." unique_id=1059393491 instance=ExtResource("item_pocao")]
+position = Vector2(850, 480)
+
+[node name="FrascoInstavel1" parent="." unique_id=1687663713 instance=ExtResource("frasco_trap")]
+position = Vector2(459, 458)
+
+[node name="FrascoInstavel2" parent="." unique_id=919913391 instance=ExtResource("frasco_trap")]
+position = Vector2(1400, 850)

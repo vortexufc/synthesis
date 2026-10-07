@@ -29,6 +29,8 @@ var _direcao_dash: Vector2 = Vector2.ZERO
 var _intervalo_afterimage: float = 0.0
 var _inimigos_ignorados_dash: Array[CollisionObject2D] = []
 var _espaco_segurado: bool = false
+var _bloqueio_dash_pos_interacao: bool = false
+var _tempo_bloqueio_dash: float = 0.0
 
 func esta_em_interacao() -> bool:
 	if travado or em_interacao:
@@ -44,15 +46,25 @@ func esta_em_interacao() -> bool:
 			if is_instance_valid(n) and not n.is_queued_for_deletion():
 				if (n is CanvasLayer and n.visible) or (n is CanvasItem and n.is_visible_in_tree()):
 					return true
+		for n in get_tree().get_nodes_in_group("interacao_ativa"):
+			if is_instance_valid(n) and not n.is_queued_for_deletion():
+				if (n is CanvasLayer and n.visible) or (n is CanvasItem and n.is_visible_in_tree()):
+					return true
 	return false
 
 func esta_imune_a_combate() -> bool:
 	return esta_em_interacao() or _tempo_imunidade_pos_interacao > 0.0 or _em_dash or _tempo_dash_invulneravel > 0.0
 
+func bloquear_dash(tempo: float = 0.4) -> void:
+	_tempo_bloqueio_dash = max(_tempo_bloqueio_dash, tempo)
+	_bloqueio_dash_pos_interacao = true
+	_espaco_segurado = true
+
 func finalizar_interacao(tempo_graca: float = 0.8) -> void:
 	travado = false
 	em_interacao = false
 	_tempo_imunidade_pos_interacao = tempo_graca
+	bloquear_dash(0.4)
 
 # hp gerenciado pelo PlayerStats
 var _vida_anterior: float = 100.0
@@ -109,6 +121,10 @@ func _ready() -> void:
 		$sprite.play("idle_direita")
 		if has_node("PoeiraPassos"):
 			$PoeiraPassos.emitting = false
+	)
+	
+	GlobalSignals.batalha_encerrada.connect(func(_vitoria: bool):
+		bloquear_dash(0.5)
 	)
 
 func _executar_fade_spawn_boneco() -> void:
@@ -268,8 +284,15 @@ func _physics_process(delta: float) -> void:
 			_finalizar_dash()
 		return
 
+	if _tempo_bloqueio_dash > 0.0:
+		_tempo_bloqueio_dash -= delta
+		if _tempo_bloqueio_dash < 0.0:
+			_tempo_bloqueio_dash = 0.0
+
 	# se tiver em dialogo ou minigame, nao move
 	if esta_em_interacao():
+		_bloqueio_dash_pos_interacao = true
+		_espaco_segurado = true
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
@@ -279,12 +302,23 @@ func _physics_process(delta: float) -> void:
 
 	# Detecção do Dash (Apenas Tecla Espaço)
 	var espaco_pressionado = Input.is_physical_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_SPACE)
-	var quer_dash = Input.is_action_just_pressed("dash")
-	if espaco_pressionado and not _espaco_segurado:
-		quer_dash = true
-		_espaco_segurado = true
-	elif not espaco_pressionado:
-		_espaco_segurado = false
+	
+	# Se a tecla espaço ainda está fisicamente pressionada vindo de uma interação/menu anterior,
+	# bloqueia qualquer dash até o jogador soltar a tecla completamente!
+	if _bloqueio_dash_pos_interacao:
+		if not espaco_pressionado:
+			_bloqueio_dash_pos_interacao = false
+			_espaco_segurado = false
+		else:
+			_espaco_segurado = true
+
+	var quer_dash = false
+	if not _bloqueio_dash_pos_interacao and _tempo_bloqueio_dash <= 0.0:
+		if espaco_pressionado and not _espaco_segurado:
+			quer_dash = true
+			_espaco_segurado = true
+		elif not espaco_pressionado:
+			_espaco_segurado = false
 		
 	if quer_dash and _tempo_recarga_dash <= 0.0:
 		_iniciar_dash()
@@ -442,7 +476,7 @@ func _exibir_texto_dano(motivo: String, quantidade: float) -> void:
 # ==========================================
 
 func _iniciar_dash() -> void:
-	if _em_dash or _tempo_recarga_dash > 0.0 or esta_em_interacao():
+	if _em_dash or _tempo_recarga_dash > 0.0 or esta_em_interacao() or _bloqueio_dash_pos_interacao or _tempo_bloqueio_dash > 0.0:
 		return
 	if PlayerStats and PlayerStats.vida_atual_jogador <= 0.0:
 		return

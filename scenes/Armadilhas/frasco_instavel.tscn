@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://frasco_instavel_01"]
 
 [ext_resource type="Script" path="res://scripts/armadilhas/frasco_instavel.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://buh6511v5kggd" path="res://assets/sprites/vida.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://calqqgfj6isbx" path="res://assets/sprites/vida.png" id="2_tex"]
 
 [sub_resource type="Gradient" id="Gradient_aura"]
 offsets = PackedFloat32Array(0, 0.55, 1)

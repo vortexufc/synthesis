@@ -25,6 +25,8 @@
 [ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
 [ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="frasco_trap"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Items/ItemPocao.tscn" id="item_pocao"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k0jjw"]
 texture = ExtResource("2_dx6ka")
@@ -1877,3 +1879,12 @@ script = ExtResource("ponto_item")
 position = Vector2(143, 422)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
+
+[node name="ItemPocao" parent="." instance=ExtResource("item_pocao")]
+position = Vector2(750, 520)
+
+[node name="FrascoInstavel1" parent="." instance=ExtResource("frasco_trap")]
+position = Vector2(1150, 450)
+
+[node name="FrascoInstavel2" parent="." instance=ExtResource("frasco_trap")]
+position = Vector2(260, 560)

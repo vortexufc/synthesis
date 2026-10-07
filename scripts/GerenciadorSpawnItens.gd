@@ -11,7 +11,9 @@ enum TipoItem {
 	CHIP_FISICA = 3,
 	MOEDA = 4,
 	CHAVE = 5,
-	CUSTOMIZADO = 6
+	POCAO = 6,
+	ARMADILHA_POCAO = 7,
+	CUSTOMIZADO = 8
 }
 
 @export_group("Tipo do Item")
@@ -36,7 +38,9 @@ const CENAS_PADRAO = {
 	TipoItem.BATERIA_FISICA: "res://scenes/Entidades/Items/ItemBateria.tscn",
 	TipoItem.CHIP_FISICA: "res://scenes/Entidades/Items/ItemChip.tscn",
 	TipoItem.MOEDA: "res://scenes/Entidades/Items/ItemMoeda.tscn",
-	TipoItem.CHAVE: "res://scenes/Entidades/Items/ItemChave.tscn"
+	TipoItem.CHAVE: "res://scenes/Entidades/Items/ItemChave.tscn",
+	TipoItem.POCAO: "res://scenes/Entidades/Items/ItemPocao.tscn",
+	TipoItem.ARMADILHA_POCAO: "res://scenes/Armadilhas/frasco_instavel.tscn"
 }
 
 func _ready() -> void:

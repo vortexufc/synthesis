@@ -131,6 +131,7 @@ var capitulos = {
 }
 
 func _ready() -> void:
+	add_to_group("interacao_ativa")
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 120 # Acima de todas as telas
 	if _container_conteudo == null:

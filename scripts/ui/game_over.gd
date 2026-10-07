@@ -13,6 +13,7 @@ var _era_boss: bool = false
 var _andar_concluido: int = 1
 
 func _ready() -> void:
+	add_to_group("interacao_ativa")
 	hide()
 	GlobalSignals.fim_de_jogo.connect(_on_fim_de_jogo)
 	btn_tentar_novamente.pressed.connect(_on_tentar_novamente_pressed)
@@ -154,6 +155,11 @@ func _finalizar_vitoria() -> void:
 	QuizManager.fechar_ui_batalha()
 	if $ColorRect/VBoxContainer.has_node("LblSkip"):
 		$ColorRect/VBoxContainer.get_node("LblSkip").queue_free()
+
+	# Garante que o player não processe o dash do mesmo toque de Espaço
+	var player = get_tree().get_first_node_in_group("player")
+	if player and player.has_method("bloquear_dash"):
+		player.bloquear_dash(0.4)
 
 	_era_boss = false
 	get_tree().paused = false
