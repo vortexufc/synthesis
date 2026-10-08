@@ -1,5 +1,6 @@
 [gd_scene format=4 uid="uid://ckhrg4v1iknpd"]
 
+[ext_resource type="Script" uid="uid://f2ie181tmyy4" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 [ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_ybiir"]
 [ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_pueom"]
 [ext_resource type="TileSet" uid="uid://d2uxhwqjqqfc6" path="res://scenes/Salas/Estufa_Biologia/Decoration_Estufa.tres" id="3_pc55o"]
@@ -15,7 +16,6 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_fipmx"]
 [ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="14_t8630"]
 [ext_resource type="PackedScene" uid="uid://dtqmmxhnklhw8" path="res://scenes/Entidades/Plantas/Flor_Roxa.tscn" id="15_81wgt"]
-[ext_resource type="Script" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 
 [node name="Node2D" type="Node2D" unique_id=2101740093]
 script = ExtResource("1_sala_bio")
@@ -39,7 +39,7 @@ tile_set = ExtResource("3_pc55o")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_qg5xp")]
 z_index = 4
-position = Vector2(938, 1139)
+position = Vector2(904, 975)
 scale = Vector2(1.2, 1.2)
 
 [node name="Node" type="Node" parent="." unique_id=1166343632]
@@ -115,10 +115,10 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="PortaTransicao" parent="." unique_id=1026792415 instance=ExtResource("13_fipmx")]
-position = Vector2(2975, 734)
+position = Vector2(2974, 711)
 
 [node name="PortaRetorno" parent="." unique_id=359480589 instance=ExtResource("13_fipmx")]
-position = Vector2(915, 1179)
+position = Vector2(893, 1132)
 porta_de_retorno = true
 
 [node name="CharacterBody2D2" parent="." unique_id=1993884800 instance=ExtResource("14_t8630")]

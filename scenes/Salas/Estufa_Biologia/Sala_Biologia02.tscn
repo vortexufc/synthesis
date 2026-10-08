@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://skc0l64y4ctj"]
 
 [ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_m6r5x"]
+[ext_resource type="Script" uid="uid://f2ie181tmyy4" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 [ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_7ec6k"]
 [ext_resource type="TileSet" uid="uid://d2uxhwqjqqfc6" path="res://scenes/Salas/Estufa_Biologia/Decoration_Estufa.tres" id="3_5jsgw"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_rha2n"]
@@ -16,7 +17,6 @@
 [ext_resource type="PackedScene" uid="uid://b8txw21gc8e2h" path="res://scenes/Entidades/Plantas/CogumelinhoDoMal.tscn" id="14_ngfdw"]
 [ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="15_hafof"]
 [ext_resource type="PackedScene" uid="uid://dtqmmxhnklhw8" path="res://scenes/Entidades/Plantas/Flor_Roxa.tscn" id="16_7ec6k"]
-[ext_resource type="Script" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 
 [node name="Node2D" type="Node2D" unique_id=1886512827]
 script = ExtResource("1_sala_bio")
@@ -40,7 +40,7 @@ tile_set = ExtResource("3_5jsgw")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_rha2n")]
 z_index = 4
-position = Vector2(938, 1139)
+position = Vector2(918, 963.00006)
 scale = Vector2(1.2, 1.2)
 
 [node name="Node" type="Node" parent="." unique_id=1617058273]
@@ -119,7 +119,7 @@ stretch_mode = 5
 position = Vector2(2639, 423)
 
 [node name="PortaRetorno" parent="." unique_id=558252051 instance=ExtResource("13_gi63p")]
-position = Vector2(915, 1179)
+position = Vector2(901, 1131)
 porta_de_retorno = true
 
 [node name="CharacterBody2D" parent="." unique_id=1698167466 instance=ExtResource("14_ngfdw")]

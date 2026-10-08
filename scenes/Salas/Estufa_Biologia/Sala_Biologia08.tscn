@@ -1,6 +1,7 @@
 [gd_scene format=4 uid="uid://s1bt55nlcxvm"]
 
 [ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_57jpo"]
+[ext_resource type="Script" uid="uid://f2ie181tmyy4" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 [ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_tdld8"]
 [ext_resource type="TileSet" uid="uid://d2uxhwqjqqfc6" path="res://scenes/Salas/Estufa_Biologia/Decoration_Estufa.tres" id="3_y8ubs"]
 [ext_resource type="PackedScene" uid="uid://cpnkk3h1t02uy" path="res://scenes/Entidades/player.tscn" id="4_ktvgx"]
@@ -14,8 +15,6 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_fog35"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_o428c"]
 [ext_resource type="PackedScene" uid="uid://dtqmmxhnklhw8" path="res://scenes/Entidades/Plantas/Flor_Roxa.tscn" id="14_1mbs7"]
-
-[ext_resource type="Script" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 
 [node name="Node2D" type="Node2D" unique_id=490288522]
 script = ExtResource("1_sala_bio")
@@ -39,7 +38,7 @@ tile_set = ExtResource("3_y8ubs")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_ktvgx")]
 z_index = 4
-position = Vector2(1606, 2450)
+position = Vector2(1604, 2318)
 scale = Vector2(1.2, 1.2)
 
 [node name="Node" type="Node" parent="." unique_id=721238485]
@@ -132,10 +131,10 @@ offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
 [node name="PortaTransicao" parent="." unique_id=33224138 instance=ExtResource("13_o428c")]
-position = Vector2(3525, 2263)
+position = Vector2(3545, 2215)
 
 [node name="PortaRetorno" parent="." unique_id=1681027486 instance=ExtResource("13_o428c")]
-position = Vector2(1610, 2502)
+position = Vector2(1591, 2476)
 porta_de_retorno = true
 
 [node name="CharacterBody2D3" parent="." unique_id=837519223 instance=ExtResource("14_1mbs7")]
