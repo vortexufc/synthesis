@@ -47,19 +47,19 @@ func _on_backdrop_gui_input(event: InputEvent) -> void:
 		_on_btn_continuar_visitante_pressed()
 
 func _on_btn_criar_conta_pressed() -> void:
-	AudioManager.play_sfx("ui_5")
+	(get_node_or_null("/root/AudioManager").play_sfx("ui_5") if get_node_or_null("/root/AudioManager") else null)
 	emit_signal("criar_conta_solicitada")
 	_fechar_e_liberar(func():
-		TransitionScreen.change_scene("res://scenes/ui/login.tscn")
+		(get_node_or_null("/root/TransitionScreen").change_scene("res://scenes/ui/login.tscn") if get_node_or_null("/root/TransitionScreen") else get_tree().change_scene_to_file("res://scenes/ui/login.tscn"))
 	)
 
 func _on_btn_continuar_visitante_pressed() -> void:
-	AudioManager.play_sfx("ui-1")
+	(get_node_or_null("/root/AudioManager").play_sfx("ui-1") if get_node_or_null("/root/AudioManager") else null)
 	emit_signal("continuar_como_visitante")
 	_fechar_e_liberar(Callable())
 
 func _animar_entrada() -> void:
-	AudioManager.play_sfx("ui_5")
+	(get_node_or_null("/root/AudioManager").play_sfx("ui_5") if get_node_or_null("/root/AudioManager") else null)
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "modulate:a", 1.0, 0.22)
 	tw.tween_property(panel_card, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK)

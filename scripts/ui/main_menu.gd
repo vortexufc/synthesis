@@ -24,9 +24,23 @@ var _bg_base_pos: Vector2 = Vector2.ZERO
 var _parallax_offset: Vector2 = Vector2.ZERO
 static var _aviso_visitante_visto: bool = false
 
+func _mudar_cena(caminho: String, limpar_hist: bool = false, forcar_fade: bool = false) -> void:
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts and ts.has_method("change_scene"):
+		ts.change_scene(caminho, limpar_hist, forcar_fade)
+	else:
+		get_tree().change_scene_to_file(caminho)
+
+func _tocar_sfx(nome_som: String) -> void:
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx(nome_som)
+
 func _ready() -> void:
 	# toca musica do menu
-	AudioManager.play_menu_music()
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_menu_music"):
+		am.play_menu_music()
 	
 	if logo:
 		_logo_base_y = logo.position.y
@@ -35,7 +49,6 @@ func _ready() -> void:
 		_bg_base_pos = bg.position
 	
 	# conecta os cliques dos botoes
-	btn_jogar.pressed.connect(_on_btn_jogar_pressed)
 	btn_ranking.pressed.connect(_on_btn_ranking_pressed)
 	btn_clas.pressed.connect(_on_btn_clas_pressed)
 	btn_config.pressed.connect(_on_btn_config_pressed)
@@ -43,29 +56,33 @@ func _ready() -> void:
 		btn_creditos.pressed.connect(_on_btn_creditos_pressed)
 	_configurar_card_instagram()
 	
-	# Se já jogou antes, exibe CONTINUAR e VOLTAR AO INÍCIO. Se for primeira vez, exibe NOVO JOGO.
-	var ja_jogou = PlayerStats and PlayerStats.tem_progresso_salvo()
+	# Se já jogou antes, exibe CONTINUAR e NOVO JOGO. Se for primeira vez, exibe NOVO JOGO.
+	var ps = get_node_or_null("/root/PlayerStats")
+	var ja_jogou = ps and ps.tem_progresso_salvo()
 	if ja_jogou:
 		btn_jogar.text = "CONTINUAR"
+		btn_jogar.pressed.connect(_on_btn_continuar_pressed)
 		
-		var btn_inicio = btn_jogar.duplicate()
-		btn_inicio.name = "BtnVoltarInicio"
-		btn_inicio.text = "VOLTAR AO INÍCIO"
-		btn_inicio.custom_minimum_size = Vector2(0, 36)
-		btn_inicio.add_theme_font_size_override("font_size", 16)
-		btn_inicio.pressed.connect(_on_btn_voltar_inicio_pressed)
+		var btn_novo = btn_jogar.duplicate()
+		btn_novo.name = "BtnNovoJogo"
+		btn_novo.text = "NOVO JOGO"
+		btn_novo.custom_minimum_size = Vector2(0, 36)
+		btn_novo.add_theme_font_size_override("font_size", 16)
+		btn_novo.pressed.connect(_on_btn_novo_jogo_pressed)
 		var vbox = $MarginContainer/VBoxButtons
-		vbox.add_child(btn_inicio)
-		vbox.move_child(btn_inicio, 1)
+		vbox.add_child(btn_novo)
+		vbox.move_child(btn_novo, 1)
 	else:
 		btn_jogar.text = "NOVO JOGO"
+		btn_jogar.pressed.connect(_on_btn_novo_jogo_pressed)
 
-	if DatabaseManager.is_admin:
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.is_admin:
 		var btn_admin = btn_jogar.duplicate()
 		btn_admin.text = "PAINEL ADMIN"
 		btn_admin.custom_minimum_size = Vector2(0, 36)
 		btn_admin.add_theme_font_size_override("font_size", 16)
-		btn_admin.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/painel_admin.tscn"))
+		btn_admin.pressed.connect(func(): _mudar_cena("res://scenes/ui/painel_admin.tscn"))
 		var vbox = $MarginContainer/VBoxButtons
 		vbox.add_child(btn_admin)
 		vbox.move_child(btn_admin, 0) # Coloca no topo
@@ -115,16 +132,17 @@ func _ready() -> void:
 	_lbl_nome.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
 	var _ir_login = func():
-		AudioManager.play_sfx("ui_5")
-		TransitionScreen.change_scene("res://scenes/ui/login.tscn")
+		_tocar_sfx("ui_5")
+		_mudar_cena("res://scenes/ui/login.tscn")
 	
 	var _ao_clicar_perfil = func():
-		if DatabaseManager.user_token == "":
+		var db_click = get_node_or_null("/root/DatabaseManager")
+		if db_click == null or db_click.user_token == "":
 			_abrir_modal_aviso_visitante(_ir_login)
 		else:
 			_ir_login.call()
 	
-	if DatabaseManager.user_token == "":
+	if db == null or db.user_token == "":
 		_lbl_nome.text = "VISITANTE  •  ENTRAR"
 		_lbl_nome.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 	else:
@@ -154,27 +172,32 @@ func _ready() -> void:
 	
 	# leaderboard online
 	_inicializar_leaderboard()
-	# atualiza quando carregar os clas e ranking
-	ClanManager.clan_list_updated.connect(_atualizar_leaderboard)
-	RankingManager.ranking_atualizado.connect(_atualizar_leaderboard)
-	# atualiza o perfil se mudar de cla
-	ClanManager.clan_updated.connect(_atualizar_perfil)
+	var cm = get_node_or_null("/root/ClanManager")
+	var rm = get_node_or_null("/root/RankingManager")
+	if cm:
+		cm.clan_list_updated.connect(_atualizar_leaderboard)
+		cm.clan_updated.connect(_atualizar_perfil)
+	if rm:
+		rm.ranking_atualizado.connect(_atualizar_leaderboard)
 
 func _exit_tree() -> void:
-	if ClanManager and ClanManager.clan_list_updated.is_connected(_atualizar_leaderboard):
-		ClanManager.clan_list_updated.disconnect(_atualizar_leaderboard)
-	if RankingManager and RankingManager.ranking_atualizado.is_connected(_atualizar_leaderboard):
-		RankingManager.ranking_atualizado.disconnect(_atualizar_leaderboard)
-	if ClanManager and ClanManager.clan_updated.is_connected(_atualizar_perfil):
-		ClanManager.clan_updated.disconnect(_atualizar_perfil)
+	var cm = get_node_or_null("/root/ClanManager")
+	var rm = get_node_or_null("/root/RankingManager")
+	if cm and cm.clan_list_updated.is_connected(_atualizar_leaderboard):
+		cm.clan_list_updated.disconnect(_atualizar_leaderboard)
+	if rm and rm.ranking_atualizado.is_connected(_atualizar_leaderboard):
+		rm.ranking_atualizado.disconnect(_atualizar_leaderboard)
+	if cm and cm.clan_updated.is_connected(_atualizar_perfil):
+		cm.clan_updated.disconnect(_atualizar_perfil)
 
 func _atualizar_perfil() -> void:
-	if not is_inside_tree() or _lbl_nome == null or DatabaseManager.user_token == "":
+	var db = get_node_or_null("/root/DatabaseManager")
+	if not is_inside_tree() or _lbl_nome == null or db == null or db.user_token == "":
 		return
 	var cla_texto = ""
-	if not DatabaseManager.user_cla.is_empty() and DatabaseManager.user_cla != "Nenhum":
-		cla_texto = " [" + DatabaseManager.user_cla.to_upper() + "]"
-	_lbl_nome.text = DatabaseManager.user_nick.to_upper() + cla_texto
+	if not db.user_cla.is_empty() and db.user_cla != "Nenhum":
+		cla_texto = " [" + db.user_cla.to_upper() + "]"
+	_lbl_nome.text = db.user_nick.to_upper() + cla_texto
 	_lbl_nome.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
 	
 	if _btn_avatar != null:
@@ -183,42 +206,178 @@ func _atualizar_perfil() -> void:
 			_btn_avatar.texture_normal = tex_mago
 		_btn_avatar.modulate = Color(1.0, 1.0, 1.0)
 
-func _on_btn_jogar_pressed() -> void:
-	AudioManager.play_sfx("ui_5")
-	var ja_jogou = PlayerStats and PlayerStats.tem_progresso_salvo()
-	var acao = _executar_continuar if ja_jogou else _iniciar_novo_jogo
-	if DatabaseManager.user_token.is_empty() and not _aviso_visitante_visto:
-		_abrir_modal_aviso_visitante(acao)
+func _on_btn_continuar_pressed() -> void:
+	_tocar_sfx("ui_5")
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.user_token.is_empty() and not _aviso_visitante_visto:
+		_abrir_modal_aviso_visitante(_executar_continuar)
 		return
-	acao.call()
+	_executar_continuar()
 
-func _on_btn_voltar_inicio_pressed() -> void:
-	AudioManager.play_sfx("ui_5")
-	if DatabaseManager.user_token.is_empty() and not _aviso_visitante_visto:
-		_abrir_modal_aviso_visitante(_executar_voltar_ao_inicio)
-		return
-	_executar_voltar_ao_inicio()
+func _on_btn_novo_jogo_pressed() -> void:
+	_tocar_sfx("ui_5")
+	var ps = get_node_or_null("/root/PlayerStats")
+	var ja_jogou = ps and ps.tem_progresso_salvo()
+	if ja_jogou:
+		_abrir_modal_confirmar_novo_jogo()
+	else:
+		var db = get_node_or_null("/root/DatabaseManager")
+		if db and db.user_token.is_empty() and not _aviso_visitante_visto:
+			_abrir_modal_aviso_visitante(_iniciar_novo_jogo)
+			return
+		_iniciar_novo_jogo()
+
+func _abrir_modal_confirmar_novo_jogo() -> void:
+	var canvas = CanvasLayer.new()
+	canvas.layer = 100
+	add_child(canvas)
+	
+	var bg_overlay = ColorRect.new()
+	bg_overlay.color = Color(0, 0, 0, 0.78)
+	bg_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	canvas.add_child(bg_overlay)
+	
+	var panel = PanelContainer.new()
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.08, 0.15, 0.96)
+	sb.border_color = Color(0.95, 0.65, 0.22, 0.95)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(10)
+	sb.shadow_color = Color(0, 0, 0, 0.85)
+	sb.shadow_size = 20
+	sb.content_margin_left = 26
+	sb.content_margin_right = 26
+	sb.content_margin_top = 22
+	sb.content_margin_bottom = 22
+	panel.add_theme_stylebox_override("panel", sb)
+	
+	panel.custom_minimum_size = Vector2(460, 230)
+	var vp_size = get_viewport_rect().size
+	panel.position = (vp_size - panel.custom_minimum_size) * 0.5
+	panel.pivot_offset = panel.custom_minimum_size * 0.5
+	canvas.add_child(panel)
+	
+	# Animação suave de entrada
+	panel.scale = Vector2(0.88, 0.88)
+	panel.modulate.a = 0.0
+	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.22)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.18)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 14)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	panel.add_child(vbox)
+	
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var sf = SystemFont.new()
+	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	sf.font_weight = 600
+	
+	var lbl_tit = Label.new()
+	lbl_tit.text = "✦ INICIAR NOVO JOGO ✦"
+	if font_pixel: lbl_tit.add_theme_font_override("font", font_pixel)
+	lbl_tit.add_theme_font_size_override("font_size", 20)
+	lbl_tit.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
+	lbl_tit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(lbl_tit)
+	
+	var lbl_msg = Label.new()
+	lbl_msg.text = "Você já possui uma jornada em andamento!\n\nAo iniciar um novo jogo, sua expedição anterior será abandonada e todo o progresso (salas, itens e chaves) será reiniciado do zero.\n\nDeseja continuar?"
+	lbl_msg.add_theme_font_override("font", sf)
+	lbl_msg.add_theme_font_size_override("font_size", 13)
+	lbl_msg.add_theme_color_override("font_color", Color(0.88, 0.90, 0.96))
+	lbl_msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(lbl_msg)
+	
+	var hbox_btns = HBoxContainer.new()
+	hbox_btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox_btns.add_theme_constant_override("separation", 16)
+	
+	var btn_cancelar = Button.new()
+	btn_cancelar.text = "CANCELAR"
+	btn_cancelar.custom_minimum_size = Vector2(140, 38)
+	btn_cancelar.add_theme_font_override("font", sf)
+	btn_cancelar.add_theme_font_size_override("font_size", 13)
+	
+	var sb_canc = StyleBoxFlat.new()
+	sb_canc.bg_color = Color(0.12, 0.14, 0.20, 0.85)
+	sb_canc.border_color = Color(0.4, 0.45, 0.6, 0.6)
+	sb_canc.set_border_width_all(1)
+	sb_canc.set_corner_radius_all(6)
+	btn_cancelar.add_theme_stylebox_override("normal", sb_canc)
+	
+	var sb_canc_hov = sb_canc.duplicate() as StyleBoxFlat
+	sb_canc_hov.bg_color = Color(0.18, 0.22, 0.30, 1.0)
+	sb_canc_hov.border_color = Color(0.6, 0.7, 0.9, 0.9)
+	btn_cancelar.add_theme_stylebox_override("hover", sb_canc_hov)
+	btn_cancelar.add_theme_stylebox_override("pressed", sb_canc_hov)
+	
+	btn_cancelar.pressed.connect(func():
+		_tocar_sfx("ui-1")
+		canvas.queue_free()
+	)
+	hbox_btns.add_child(btn_cancelar)
+	
+	var btn_confirmar = Button.new()
+	btn_confirmar.text = "SIM, NOVO JOGO"
+	btn_confirmar.custom_minimum_size = Vector2(170, 38)
+	btn_confirmar.add_theme_font_override("font", sf)
+	btn_confirmar.add_theme_font_size_override("font_size", 13)
+	
+	var sb_conf = StyleBoxFlat.new()
+	sb_conf.bg_color = Color(0.25, 0.12, 0.10, 0.95)
+	sb_conf.border_color = Color(0.95, 0.45, 0.35, 0.9)
+	sb_conf.set_border_width_all(1)
+	sb_conf.set_corner_radius_all(6)
+	btn_confirmar.add_theme_stylebox_override("normal", sb_conf)
+	
+	var sb_conf_hov = sb_conf.duplicate() as StyleBoxFlat
+	sb_conf_hov.bg_color = Color(0.38, 0.16, 0.12, 1.0)
+	sb_conf_hov.border_color = Color(1.0, 0.65, 0.45, 1.0)
+	btn_confirmar.add_theme_stylebox_override("hover", sb_conf_hov)
+	btn_confirmar.add_theme_stylebox_override("pressed", sb_conf_hov)
+	btn_confirmar.add_theme_color_override("font_color", Color(1.0, 0.9, 0.8))
+	btn_confirmar.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0))
+	
+	btn_confirmar.pressed.connect(func():
+		_tocar_sfx("ui_5")
+		canvas.queue_free()
+		var db_conf = get_node_or_null("/root/DatabaseManager")
+		if db_conf and db_conf.user_token.is_empty() and not _aviso_visitante_visto:
+			_abrir_modal_aviso_visitante(_iniciar_novo_jogo)
+		else:
+			_iniciar_novo_jogo()
+	)
+	hbox_btns.add_child(btn_confirmar)
+	
+	vbox.add_child(hbox_btns)
+	
+	panel.reset_size()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
 func _executar_continuar() -> void:
 	# Se tiver jogo salvo com localizacao, continua de onde parou na sala!
-	if PlayerStats and PlayerStats.tem_pos_salva and PlayerStats.cena_salva != "":
-		print("[MainMenu] Continuando jogo na cena: %s na posicao (%.0f, %.0f)" % [PlayerStats.cena_salva, PlayerStats.pos_salva_x, PlayerStats.pos_salva_y])
-		PlayerStats.restaurando_posicao_save = true
-		PlayerStats.fade_spawn_player = true
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.tem_pos_salva and ps.cena_salva != "":
+		print("[MainMenu] Continuando jogo na cena: %s na posicao (%.0f, %.0f)" % [ps.cena_salva, ps.pos_salva_x, ps.pos_salva_y])
+		ps.restaurando_posicao_save = true
+		ps.fade_spawn_player = true
 		
 		var dg = get_node_or_null("/root/DungeonGenerator")
 		if dg:
-			if PlayerStats.percurso_salas_salvo.size() > 0:
-				dg.percurso_salas = PlayerStats.percurso_salas_salvo.duplicate()
-				dg.indice_atual = PlayerStats.indice_sala_salvo
-			for i in PlayerStats.inimigos_derrotados:
+			if ps.percurso_salas_salvo.size() > 0:
+				dg.percurso_salas = ps.percurso_salas_salvo.duplicate()
+				dg.indice_atual = ps.indice_sala_salvo
+			for i in ps.inimigos_derrotados:
 				if not (i in dg.inimigos_derrotados):
 					dg.inimigos_derrotados.append(i)
-			for p in PlayerStats.portas_destrancadas:
+			for p in ps.portas_destrancadas:
 				if not (p in dg.portas_destrancadas):
 					dg.portas_destrancadas.append(p)
 			
-		TransitionScreen.change_scene(PlayerStats.cena_salva, false, true)
+		_mudar_cena(ps.cena_salva, false, true)
 		return
 		
 	# Caso não tenha posição de sala específica (ex: estava no Hub ou sem sala ativa), vai pro Hub!
@@ -226,13 +385,15 @@ func _executar_continuar() -> void:
 
 func _executar_voltar_ao_inicio() -> void:
 	print("[MainMenu] Retornando ao Início (Hub Geral) com progresso salvo mantido!")
-	if PlayerStats:
-		PlayerStats.resetar_vida()
-		PlayerStats.limpar_posicao_salva()
-		PlayerStats.fade_spawn_player = true
-	if get_node_or_null("/root/DungeonGenerator"):
-		DungeonGenerator.resetar_masmorra()
-	TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		ps.resetar_vida()
+		ps.limpar_posicao_salva()
+		ps.fade_spawn_player = true
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		dg.resetar_masmorra()
+	_mudar_cena("res://scenes/Salas/Comum/Hub_Geral.tscn")
 
 func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
 	var modal_cena = preload("res://scenes/ui/ModalAvisoVisitante.tscn")
@@ -246,49 +407,39 @@ func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
 		)
 
 func _iniciar_novo_jogo() -> void:
-	if PlayerStats:
-		PlayerStats.resetar_vida()
-		PlayerStats.resetar_progresso_mundo()
-		PlayerStats.limpar_posicao_salva()
-		PlayerStats.fade_spawn_player = true
-	if get_node_or_null("/root/DungeonGenerator"):
-		DungeonGenerator.resetar_masmorra()
-		if PlayerStats and not PlayerStats.cutscene_inicial_vista:
-			DungeonGenerator.tocar_cutscene_inicial = true
-		else:
-			DungeonGenerator.tocar_cutscene_inicial = false
-	if get_node_or_null("/root/QuizManager"):
-		QuizManager.resetar_historico_perguntas()
+	print("[MainMenu] Iniciando Novo Jogo - resetando salvamento antigo!")
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		ps.resetar_salvamento_completo()
+		ps.fade_spawn_player = true
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		dg.resetar_masmorra()
+		dg.tocar_cutscene_inicial = true
+	var qm = get_node_or_null("/root/QuizManager")
+	if qm and qm.has_method("resetar_historico_perguntas"):
+		qm.resetar_historico_perguntas()
 		
 	# troca de cena pro hub
-	TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+	_mudar_cena("res://scenes/Salas/Comum/Hub_Geral.tscn")
 
 func _on_btn_ranking_pressed() -> void:
 	print("Botão RANKING pressionado - abrindo RankingLocal")
-	
-	# abre ranking
-	AudioManager.play_sfx("ui_5")
-	
-	TransitionScreen.change_scene("res://scenes/ui/ranking_ui.tscn")
+	_tocar_sfx("ui_5")
+	_mudar_cena("res://scenes/ui/ranking_ui.tscn")
 
 func _on_btn_clas_pressed() -> void:
 	print("Botão CLÃS pressionado - abrindo TelaClas")
-	
-	# abre clas
-	AudioManager.play_sfx("ui_5")
-	
-	TransitionScreen.change_scene("res://scenes/ui/TelaClas.tscn")
+	_tocar_sfx("ui_5")
+	_mudar_cena("res://scenes/ui/TelaClas.tscn")
 
 func _on_btn_config_pressed() -> void:
 	print("Botão CONFIGURAÇÕES pressionado")
-	
-	# abre configuracoes
-	AudioManager.play_sfx("ui_5")
-	
-	TransitionScreen.change_scene("res://scenes/ui/configuracoes.tscn")
+	_tocar_sfx("ui_5")
+	_mudar_cena("res://scenes/ui/configuracoes.tscn")
 
 func _on_btn_creditos_pressed() -> void:
-	AudioManager.play_sfx("ui_5")
+	_tocar_sfx("ui_5")
 	var modal_cena = preload("res://scenes/ui/creditos_modal.tscn")
 	if modal_cena:
 		var modal = modal_cena.instantiate()
@@ -303,8 +454,7 @@ func _configurar_card_instagram() -> void:
 	# Animação de hover suave no botão do Instagram
 	btn_instagram_node.pivot_offset = Vector2(72, 17)
 	btn_instagram_node.mouse_entered.connect(func():
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-1")
+		_tocar_sfx("ui-1")
 		var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_property(btn_instagram_node, "scale", Vector2(1.05, 1.05), 0.15)
 	)
@@ -315,15 +465,13 @@ func _configurar_card_instagram() -> void:
 	)
 
 func _abrir_modal_instagram() -> void:
-	AudioManager.play_sfx("ui_5")
+	_tocar_sfx("ui_5")
 	var modal_cena = preload("res://scenes/ui/ModalInstagram.tscn")
 	if modal_cena:
 		var modal = modal_cena.instantiate()
 		add_child(modal)
 
 # leaderboard com filtro de periodo
-
-# periodo atual do filtro
 var _periodo_atual: String = "quimica"
 var _periodos: Array = ["quimica", "fisica", "biologia"]
 
@@ -359,8 +507,7 @@ func _inicializar_leaderboard() -> void:
 var _lb_tween: Tween = null
 
 func _trocar_periodo(novo_periodo: String) -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
+	_tocar_sfx("ui-1")
 	_periodo_atual = novo_periodo
 	
 	if _leaderboard_panel:
@@ -397,13 +544,15 @@ func _atualizar_leaderboard() -> void:
 			"biologia": _lbl_title.text = "LIDERANÇA BIOLOGIA"
 	
 	# busca o ranking do periodo
-	var lista: Array = RankingManager.get_ranking_por_periodo(_periodo_atual)
+	var rm = get_node_or_null("/root/RankingManager")
+	var lista: Array = rm.get_ranking_por_periodo(_periodo_atual) if rm else []
 	
 	var nick_local = ""
-	if DatabaseManager and not DatabaseManager.user_nick.is_empty():
-		nick_local = DatabaseManager.user_nick
-	elif RankingManager:
-		nick_local = RankingManager.get_local_nick()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and not db.user_nick.is_empty():
+		nick_local = db.user_nick
+	elif rm:
+		nick_local = rm.get_local_nick()
 
 	var tex_mago = preload("res://assets/sprites/ui/ranking/icone_mago.png")
 
@@ -494,8 +643,7 @@ func _animar_botao(btn: Button) -> void:
 	btn.pivot_offset = btn.size * 0.5
 	
 	btn.mouse_entered.connect(func():
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-1")
+		_tocar_sfx("ui-1")
 		var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_property(btn, "scale", Vector2(1.04, 1.04), 0.16)
 		tw.tween_property(btn, "position:x", 8.0, 0.16)
