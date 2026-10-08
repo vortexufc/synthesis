@@ -93,8 +93,9 @@ func _ready() -> void:
 	var tw_open = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw_open.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.24)
 	tw_open.tween_property(panel, "modulate:a", 1.0, 0.20)
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_5")
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("ui_5")
 	
 	_font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 	var sf = SystemFont.new()
@@ -429,13 +430,15 @@ func _estilizar_botao_fechar(btn: Button) -> void:
 	btn.add_theme_color_override("font_hover_color", Color(1.0, 0.92, 0.6))
 
 func _atualizar_moedas() -> void:
-	if get_node_or_null("/root/PlayerStats") and lbl_moedas:
-		lbl_moedas.text = str(PlayerStats.moedas) + " Moedas"
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and lbl_moedas:
+		lbl_moedas.text = str(ps.moedas) + " Moedas"
 
 func _atualizar_todos_botoes() -> void:
 	_atualizar_moedas()
 	
-	var moedas_atuais = PlayerStats.moedas if get_node_or_null("/root/PlayerStats") else 0
+	var ps = get_node_or_null("/root/PlayerStats")
+	var moedas_atuais = ps.moedas if ps else 0
 	for item_info in _botoes_compra:
 		var btn = item_info["btn"] as Button
 		var preco = item_info["preco"] as int
@@ -464,12 +467,14 @@ func _atualizar_todos_botoes() -> void:
 			_btn_vender_chip.text = "Precisa de 10"
 
 func _comprar(item: Dictionary) -> void:
-	if not get_node_or_null("/root/PlayerStats"): return
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return
 	
-	if PlayerStats.moedas >= item["preco"]:
-		PlayerStats.moedas -= item["preco"]
+	if ps.moedas >= item["preco"]:
+		ps.moedas -= item["preco"]
 		_entregar_item(item)
-		PlayerStats.salvar()
+		if ps.has_method("salvar"):
+			ps.salvar()
 		_atualizar_todos_botoes()
 		
 		_animar_mudanca_moedas(false, item["preco"])
@@ -486,21 +491,24 @@ func _comprar(item: Dictionary) -> void:
 		if hud and hud.has_method("mostrar_mensagem"):
 			hud.mostrar_mensagem("Comprado: " + item["nome"] + " (-" + str(item["preco"]) + " Moedas)")
 		
-		if get_node_or_null("/root/AudioManager"):
-			if AudioManager.has_method("tocar_som_compra"):
-				AudioManager.tocar_som_compra()
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			if am.has_method("tocar_som_compra"):
+				am.tocar_som_compra()
 			else:
-				AudioManager.play_sfx("ui_5")
+				am.play_sfx("ui_5")
 	else:
 		_iniciar_fala_mercador("Moedas insuficientes, amigo! Derrote monstros nas salas para conseguir mais ouro.")
 		_tremer_lbl_moedas()
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("erro")
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			am.play_sfx("erro")
 
 func _contar_item(nome_item: String) -> int:
-	if not get_node_or_null("/root/PlayerStats"): return 0
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return 0
 	var contagem = 0
-	for item in PlayerStats.itens:
+	for item in ps.itens:
 		var nome_it = item.get("nome", "")
 		if nome_it == nome_item:
 			contagem += 1
@@ -509,23 +517,25 @@ func _contar_item(nome_item: String) -> int:
 	return contagem
 
 func _vender_sucata(nome_item: String, qtd_necessaria: int, recompensa: int) -> void:
-	if not get_node_or_null("/root/PlayerStats"): return
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return
 	
 	var qtd_atual = _contar_item(nome_item)
 	if qtd_atual >= qtd_necessaria:
 		var removidos = 0
-		var i = PlayerStats.itens.size() - 1
+		var i = ps.itens.size() - 1
 		while i >= 0 and removidos < qtd_necessaria:
-			var it = PlayerStats.itens[i]
+			var it = ps.itens[i]
 			var nome_it = it.get("nome", "")
 			var e_match = (nome_it == nome_item) or (nome_item == "Fragmento de Gelatina" and ("Gelatina" in nome_it or it.has("cor")))
 			if e_match:
-				PlayerStats.itens.remove_at(i)
+				ps.itens.remove_at(i)
 				removidos += 1
 			i -= 1
 			
-		PlayerStats.moedas += recompensa
-		PlayerStats.salvar()
+		ps.moedas += recompensa
+		if ps.has_method("salvar"):
+			ps.salvar()
 		_atualizar_todos_botoes()
 		
 		_animar_mudanca_moedas(true, recompensa)
@@ -542,16 +552,18 @@ func _vender_sucata(nome_item: String, qtd_necessaria: int, recompensa: int) -> 
 		if hud and hud.has_method("mostrar_mensagem"):
 			hud.mostrar_mensagem("Vendido: " + nome_item + " (+" + str(recompensa) + " Moedas)")
 			
-		if get_node_or_null("/root/AudioManager"):
-			if AudioManager.has_method("tocar_som_venda"):
-				AudioManager.tocar_som_venda()
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			if am.has_method("tocar_som_venda"):
+				am.tocar_som_venda()
 			else:
-				AudioManager.play_sfx("ui_5")
+				am.play_sfx("ui_5")
 	else:
 		_iniciar_fala_mercador("Você não tem %d %s para me vender! Derrote monstros para recolher materiais." % [qtd_necessaria, nome_item])
 		_tremer_lbl_moedas()
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("erro")
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			am.play_sfx("erro")
 
 func _animar_mudanca_moedas(positivo: bool, valor: int) -> void:
 	if lbl_moedas == null: return
@@ -611,8 +623,9 @@ func _atualizar_progresso_fala_mercador(prog: float) -> void:
 		var novo = int(prog * total_chars)
 		lbl_fala_mercador.visible_ratio = prog
 		if novo > antigo and novo % 3 == 0 and prog < 0.96:
-			if get_node_or_null("/root/AudioManager"):
-				AudioManager.play_sfx("ui-1")
+			var am = get_node_or_null("/root/AudioManager")
+			if am:
+				am.play_sfx("ui-1")
 
 func _iniciar_fala_mercador(texto: String) -> void:
 	if lbl_fala_mercador == null: return
@@ -638,26 +651,30 @@ func _unhandled_input(event: InputEvent) -> void:
 		queue_free()
 
 func _entregar_item(item: Dictionary) -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return
+	
 	if item["tipo"] == "pocao":
 		var tem = false
-		for p in PlayerStats.pocoes:
+		for p in ps.pocoes:
 			if p["nome"] == "Poção Grande":
 				p["qtd"] += 1
 				tem = true
 				break
 		if not tem:
-			PlayerStats.pocoes.append({"nome": "Poção Grande", "qtd": 1, "cura": 50, "desc": "Cura 50 HP"})
+			ps.pocoes.append({"nome": "Poção Grande", "qtd": 1, "cura": 50, "desc": "Cura 50 HP"})
 	
 	elif item["tipo"] == "pocao_menor":
 		var tem = false
-		for p in PlayerStats.pocoes:
+		for p in ps.pocoes:
 			if p["nome"] == "Poção Menor":
 				p["qtd"] += 1
 				tem = true
 				break
 		if not tem:
-			PlayerStats.pocoes.append({"nome": "Poção Menor", "qtd": 1, "cura": 20, "desc": "Cura 20 HP"})
+			ps.pocoes.append({"nome": "Poção Menor", "qtd": 1, "cura": 20, "desc": "Cura 20 HP"})
 			
 	elif item["tipo"] == "lore":
 		var id = randi() % 100
-		PlayerStats.adicionar_pergaminho("Conto Perdido #" + str(id), ["Este pergaminho relata histórias antigas sobre os fundadores de Synthesis..."])
+		if ps.has_method("adicionar_pergaminho"):
+			ps.adicionar_pergaminho("Conto Perdido #" + str(id), ["Este pergaminho relata histórias antigas sobre os fundadores de Synthesis..."])

@@ -37,7 +37,9 @@ const FUNDO_FISICA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_bat
 const FUNDO_BIOLOGIA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_biologia.png")
 
 func _ready() -> void:
-	AudioManager.play_battle_music(battle_music)
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_battle_music(battle_music)
 	# garante que os botoes funcionem mesmo com o jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
@@ -45,15 +47,18 @@ func _ready() -> void:
 		_botoes[i].pressed.connect(_on_botao_pressionado.bind(i))
 		
 	# se curar no inventario, arruma a barra verde
-	PlayerStats.vida_alterada.connect(_on_vida_jogador_alterada)
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		ps.vida_alterada.connect(_on_vida_jogador_alterada)
 	
 	# Configura o fundo conforme o andar ativo
 	var qm = get_node_or_null("/root/QuizManager")
+	var dm = get_node_or_null("/root/DatabaseManager")
 	var andar_detectado = 1
 	if qm and "_andar_atual" in qm and qm._andar_atual > 0:
 		andar_detectado = qm._andar_atual
-	elif get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
-		match DatabaseManager.active_dungeon:
+	elif dm and dm.active_dungeon != "":
+		match dm.active_dungeon:
 			"Química": andar_detectado = 1
 			"Física": andar_detectado = 2
 			"Biologia": andar_detectado = 3
@@ -220,7 +225,9 @@ func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 
 func _on_botao_pressionado(indice: int) -> void:
 	# [BugFix] Ignora cliques duplicados ou re-entrada do timer
-	AudioManager.play_sfx("ui_1")
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("ui_1")
 	if _processando_resposta:
 		return
 	_processando_resposta = true
@@ -263,8 +270,9 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 		await $AnimationPlayer.animation_finished
 		
 		# Som original de ataque/impacto
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.tocar_som_ataque()
+		var am = get_node_or_null("/root/AudioManager")
+		if am and am.has_method("tocar_som_ataque"):
+			am.tocar_som_ataque()
 		
 		# Flash e deformação física (Squash & Stretch) no monstro
 		var sprite_monstro = $Control/SpriteMonstro
@@ -715,8 +723,9 @@ func _exibir_feedback_erro(dados: Dictionary, idx_correto: int) -> void:
 	tw_in.tween_property(painel, "modulate:a", 1.0, 0.20)
 	tw_in.tween_property(painel, "scale", Vector2.ONE, 0.20).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_5")
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("ui_5")
 		
 	var finalizado = [false]
 	var fechar_caixa = func():

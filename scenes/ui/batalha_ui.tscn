@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ddlky8y123abc"]
 
-[ext_resource type="Script" uid="uid://dg0bo4jhp31cy" path="res://scripts/ui/batalha_ui.gd" id="1_abcde"]
+[ext_resource type="Script" path="res://scripts/ui/batalha_ui.gd" id="1_abcde"]
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_fghij"]
 [ext_resource type="Texture2D" uid="uid://da5t6wdvucdfb" path="res://assets/sprites/Backgrounds/Old Dungeon/OldDungeon.png" id="2_qhges"]
 [ext_resource type="SpriteFrames" uid="uid://q2ykqmtcfuv3" path="res://assets/sprites/Sprite Frames/slime_g.tres" id="3_su8ar"]

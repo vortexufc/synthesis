@@ -175,7 +175,11 @@ func _ready() -> void:
 	font_num_inv.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_num_inv.font_weight = 600
 	lbl_moedas_inv.add_theme_font_override("font", font_num_inv)
-	lbl_moedas_inv.pressed.connect(func(): _selecionar_item({"nome": "Moedas de Ouro", "qtd": PlayerStats.moedas}, "moeda", -1))
+	lbl_moedas_inv.pressed.connect(func():
+		var ps = get_node_or_null("/root/PlayerStats")
+		var m = ps.moedas if ps else 0
+		_selecionar_item({"nome": "Moedas de Ouro", "qtd": m}, "moeda", -1)
+	)
 	
 	var painel_principal = $Control/MarginContainer/Panel
 	var hbox_topo_direita = HBoxContainer.new()
@@ -290,17 +294,19 @@ func _criar_estilos_slots() -> void:
 var _tween_anim_inv: Tween = null
 
 func _process(_delta: float) -> void:
-	if visible and GlobalSignals.tem_interacao_ou_minigame_ativo():
+	var gs = get_node_or_null("/root/GlobalSignals")
+	if visible and gs and gs.tem_interacao_ou_minigame_ativo():
 		_toggle_inventario()
 		return
 	if Input.is_action_just_pressed("inventory"):
-		if not visible and GlobalSignals.tem_interacao_ou_minigame_ativo():
+		if not visible and gs and gs.tem_interacao_ou_minigame_ativo():
 			return
 		_toggle_inventario()
 
 func _on_btn_fechar_inventario_pressionado() -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-2")
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("ui-2")
 	if painel_leitura and painel_leitura.visible:
 		_fechar_leitura()
 	else:
@@ -321,7 +327,8 @@ func fechar_inventario() -> void:
 		_toggle_inventario()
 
 func _toggle_inventario() -> void:
-	if not visible and GlobalSignals.tem_interacao_ou_minigame_ativo():
+	var gs = get_node_or_null("/root/GlobalSignals")
+	if not visible and gs and gs.tem_interacao_ou_minigame_ativo():
 		return
 	var ui_pergaminho = get_tree().get_first_node_in_group("parchment_ui")
 	if ui_pergaminho and ui_pergaminho.visible:
@@ -330,15 +337,17 @@ func _toggle_inventario() -> void:
 		else:
 			ui_pergaminho.hide()
 
-	var em_batalha = (QuizManager.ui_instancia != null and QuizManager.ui_instancia.visible)
+	var qm = get_node_or_null("/root/QuizManager")
+	var em_batalha = (qm != null and qm.ui_instancia != null and qm.ui_instancia.visible)
 	var painel = $Control/MarginContainer
 	
 	if _tween_anim_inv and _tween_anim_inv.is_running():
 		_tween_anim_inv.kill()
 
 	if visible:
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-2")
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			am.play_sfx("ui-2")
 			
 		if painel:
 			_tween_anim_inv = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
@@ -361,10 +370,13 @@ func _toggle_inventario() -> void:
 		painel_leitura.visible = false
 		_limpar_detalhes()
 		_atualizar_listas()
-		PlayerStats.salvar()
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps:
+			ps.salvar()
 		
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui_1")
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			am.play_sfx("ui_1")
 			
 		if painel:
 			painel.pivot_offset = painel.size / 2.0
@@ -376,57 +388,63 @@ func _toggle_inventario() -> void:
 
 func _on_btn_descartar_pressionado() -> void:
 	if item_selecionado.is_empty(): return
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return
 	
 	var tipo = item_selecionado["tipo"]
 	var idx = item_selecionado["index"]
 	var qtd_descarte = int(spin_descarte.value)
 	
 	if tipo == "pocao":
-		var po = PlayerStats.pocoes[idx]
+		var po = ps.pocoes[idx]
 		po["qtd"] -= qtd_descarte
 		if po["qtd"] <= 0:
-			PlayerStats.pocoes.remove_at(idx)
+			ps.pocoes.remove_at(idx)
 	elif tipo == "item":
 		if item_selecionado["nome"] == "Chave de Porta":
-			PlayerStats.chaves = max(0, PlayerStats.chaves - qtd_descarte)
+			ps.chaves = max(0, ps.chaves - qtd_descarte)
 		else:
 			var removidos = 0
-			for k in range(PlayerStats.itens.size() - 1, -1, -1):
-				var it = PlayerStats.itens[k]
+			for k in range(ps.itens.size() - 1, -1, -1):
+				var it = ps.itens[k]
 				var mesmo_item = false
 				if it.get("nome") == item_selecionado.get("nome"):
 					mesmo_item = true
 				elif ("Gelatina" in item_selecionado.get("nome", "")) and it.get("cor") == item_selecionado.get("cor"):
 					mesmo_item = true
 				if mesmo_item:
-					PlayerStats.itens.remove_at(k)
+					ps.itens.remove_at(k)
 					removidos += 1
 					if removidos >= qtd_descarte:
 						break
 	elif tipo == "grimorio":
-		PlayerStats.grimorio.remove_at(idx)
+		ps.grimorio.remove_at(idx)
 	elif tipo == "moeda":
-		if PlayerStats.moedas > 0:
-			PlayerStats.moedas = max(0, PlayerStats.moedas - qtd_descarte)
+		if ps.moedas > 0:
+			ps.moedas = max(0, ps.moedas - qtd_descarte)
 	
 	_atualizar_listas()
 	_limpar_detalhes()
-	PlayerStats.salvar()
+	ps.salvar()
 
 func _atualizar_listas() -> void:
 	_limpar_filhos(grid_pocoes)
 	_limpar_filhos(grid_itens)
 	_limpar_filhos(grid_grimorio)
 	
-	if get_node_or_null("/root/PlayerStats") and lbl_moedas_inv:
-		lbl_moedas_inv.text = " 🪙  %d Moedas " % PlayerStats.moedas
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps:
+		return
+		
+	if lbl_moedas_inv:
+		lbl_moedas_inv.text = " 🪙  %d Moedas " % ps.moedas
 	
 	# carrega pocoes
-	if PlayerStats.pocoes.is_empty():
+	if ps.pocoes.is_empty():
 		_add_mensagem_vazia(grid_pocoes, tex_pocao, "Nenhuma Poção na Bolsa", "Visite o Mercador ou explore as salas para coletar novos elixires.")
 	else:
-		for i in range(PlayerStats.pocoes.size()):
-			var po = PlayerStats.pocoes[i]
+		for i in range(ps.pocoes.size()):
+			var po = ps.pocoes[i]
 			var icone_po = tex_pocao
 			var n_low = po.get("nome", "").to_lower()
 			var t_low = po.get("tipo", "").to_lower()
@@ -438,16 +456,16 @@ func _atualizar_listas() -> void:
 	# carrega itens e chaves
 	var tem_qualquer_item = false
 	
-	if get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0:
+	if ps.chaves > 0:
 		tem_qualquer_item = true
 		var icone_chave = load("res://assets/sprites/ui/icon_key_transparent.png")
 		var dic_chave = {"nome": "Chave de Porta", "descricao": "Uma chave dourada brilhante capaz de abrir portas mágicas seladas."}
-		var card = _criar_slot_card(icone_chave, "Chave de Porta", PlayerStats.chaves, func(): _selecionar_item(dic_chave, "item", -1))
+		var card = _criar_slot_card(icone_chave, "Chave de Porta", ps.chaves, func(): _selecionar_item(dic_chave, "item", -1))
 		grid_itens.add_child(card)
 		
 	# junta itens iguais por nome (separando os fragmentos por cor)
 	var itens_agrupados: Dictionary = {}
-	for it in PlayerStats.itens:
+	for it in ps.itens:
 		var nome = it.get("nome", "Item Desconhecido")
 		var cor = it.get("cor", "")
 		
@@ -501,11 +519,11 @@ func _atualizar_listas() -> void:
 		_add_mensagem_vazia(grid_itens, icone_reliquia_padrao, "Sem Relíquias no Momento", "Resolva enigmas ou derrote guardiões para obter artefatos e chaves.")
 			
 	# carrega folhas do grimorio
-	if PlayerStats.grimorio.is_empty():
+	if ps.grimorio.is_empty():
 		_add_mensagem_vazia(grid_grimorio, atlas_pergaminho_fechado, "Grimório em Branco", "Descubra pergaminhos antigos pelas masmorras para registrar fórmulas.")
 	else:
-		for i in range(PlayerStats.grimorio.size()):
-			var doc = PlayerStats.grimorio[i]
+		for i in range(ps.grimorio.size()):
+			var doc = ps.grimorio[i]
 			var icone_doc: Texture2D = atlas_pergaminho_fechado
 			if doc is Dictionary and doc.get("tipo_codice") == "mural":
 				var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
@@ -602,8 +620,9 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 		
 	# efeito de clique
 	btn.pressed.connect(func():
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-1")
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			am.play_sfx("ui-1")
 		callback.call()
 	)
 	
@@ -715,7 +734,9 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 			
 		btn_acao.visible = false
 		box_descarte.visible = true
-		spin_descarte.max_value = max(1, PlayerStats.chaves) if item["nome"] == "Chave de Porta" else max(1, item.get("qtd", 1))
+		var ps = get_node_or_null("/root/PlayerStats")
+		var max_v = ps.chaves if (ps and item["nome"] == "Chave de Porta") else max(1, item.get("qtd", 1))
+		spin_descarte.max_value = max_v
 		
 	elif tipo == "grimorio":
 		var e_codice = (item is Dictionary and item.get("tipo_codice") == "mural")
@@ -746,34 +767,39 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		lbl_detalhe_desc.text = "Tesouros cunhados em ouro puro.\n\nUtilizadas para negociar itens valiosos e poções revigorantes com o Mago Mercador no saguão central."
 		btn_acao.visible = false
 		box_descarte.visible = true
-		spin_descarte.max_value = max(1, PlayerStats.moedas)
+		var ps = get_node_or_null("/root/PlayerStats")
+		spin_descarte.max_value = max(1, ps.moedas if ps else 1)
 	
 	spin_descarte.value = 1
 
 func _on_btn_acao_pressionado() -> void:
 	if item_selecionado.is_empty(): return
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return
 	
 	var tipo = item_selecionado["tipo"]
 	var idx = item_selecionado["index"]
 	
 	if tipo == "pocao":
-		if PlayerStats.vida_atual_jogador >= PlayerStats.vida_maxima_jogador:
+		if ps.vida_atual_jogador >= ps.vida_maxima_jogador:
 			lbl_detalhe_desc.text = "✨ Sua vitalidade já está plena!\nGuarde este frasco para momentos de necessidade."
 			return
 			
-		var po = PlayerStats.pocoes[idx]
+		var po = ps.pocoes[idx]
 		if po["qtd"] > 0:
-			AudioManager.play_sfx("pocao_cura")
-			PlayerStats.curar_vida(po["cura"])
+			var am = get_node_or_null("/root/AudioManager")
+			if am:
+				am.play_sfx("pocao_cura")
+			ps.curar_vida(po["cura"])
 			po["qtd"] -= 1
 			if po["qtd"] <= 0:
-				PlayerStats.pocoes.remove_at(idx)
+				ps.pocoes.remove_at(idx)
 				_limpar_detalhes()
 			else:
 				_selecionar_item(po, "pocao", idx)
 			_atualizar_listas()
 	elif tipo == "grimorio":
-		var doc = PlayerStats.grimorio[idx]
+		var doc = ps.grimorio[idx]
 		if doc is Dictionary and doc.get("tipo_codice") == "mural":
 			var andar = int(doc.get("andar", 1))
 			var cena_mural = load("res://scenes/ui/mural_ui.tscn")
