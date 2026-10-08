@@ -748,7 +748,7 @@ func _is_sala_boss() -> bool:
 	if get_node_or_null("/root/DungeonGenerator"):
 		if DungeonGenerator.has_method("is_sala_boss") and DungeonGenerator.is_sala_boss(cena_atual):
 			return true
-	return ("boss" in cena_atual) or ("fisica12" in cena_atual) or ("física12" in cena_atual) or ("biologia04" in cena_atual)
+	return ("boss" in cena_atual) or ("fisica12" in cena_atual) or ("física12" in cena_atual) or ("biologia12" in cena_atual) or ("biologia04" in cena_atual)
 
 func _obter_andar_atual() -> int:
 	var cena_atual = ""

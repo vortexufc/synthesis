@@ -428,7 +428,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	_eh_chefe_atual = enemy_data.get("eh_boss", false)
 	var cena_atual_str = c_path
 	if not _eh_chefe_atual:
-		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "carnivora" in id_lower or "wizard" in id_lower or "boss" in cena_atual_str or "fisica12" in cena_atual_str or "física12" in cena_atual_str or "biologia04" in cena_atual_str:
+		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "carnivora" in id_lower or "wizard" in id_lower or "boss" in cena_atual_str or "fisica12" in cena_atual_str or "física12" in cena_atual_str or "biologia12" in cena_atual_str or "biologia04" in cena_atual_str:
 			_eh_chefe_atual = true
 
 	_furia_chefe_executada = false

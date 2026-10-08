@@ -79,7 +79,7 @@ func _deve_dropar_chave() -> bool:
 
 func _dropar_chave(pos: Vector2) -> void:
 	var cena_atual = scene_file_path.to_lower()
-	if "boss" in cena_atual or "biologia04" in cena_atual:
+	if "boss" in cena_atual or "biologia12" in cena_atual or "biologia04" in cena_atual:
 		return
 	var cena_chave = load("res://scenes/Entidades/Items/ItemChave.tscn")
 	if not cena_chave:

@@ -106,17 +106,37 @@ var salas_fisica: Array = [
 # salas do andar de biologia
 var sala_inicial_biologia = "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"
 var sala_01_biologia = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn"
+var sala_boss_biologia = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia12.tscn"
+
+# salas intermediarias sorteadas de biologia
 var salas_biologia_pool: Array = [
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn",
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn",
-	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn"
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia05.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia06.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia07.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia08.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia09.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia10.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia11.tscn"
 ]
+
+# todas as salas de biologia
 var salas_biologia: Array = [
 	"res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn",
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn",
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn",
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn",
-	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn"
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia05.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia06.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia07.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia08.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia09.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia10.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia11.tscn",
+	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia12.tscn"
 ]
 
 # ordem das salas da corrida atual
@@ -219,7 +239,7 @@ func get_index_da_cena(cena: String) -> int:
 			return 1
 		if "biologia01.tscn" in cena_lower:
 			return 2
-		if "biologia04.tscn" in cena_lower:
+		if "biologia12" in cena_lower or "biologia04.tscn" in cena_lower or "boss" in cena_lower:
 			return percurso_salas.size() - 1
 				
 	return -1
@@ -284,7 +304,7 @@ func get_proxima_sala(arquivo_cena_atual: String = "") -> String:
 				elif masmorra_da_cena == "Física":
 					return sala_boss_fisica
 				elif masmorra_da_cena == "Biologia":
-					return "res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn"
+					return sala_boss_biologia
 				break
 		
 	return hub_geral
@@ -432,7 +452,7 @@ func is_sala_boss(arquivo_cena: String = "") -> bool:
 	var cena_lower = arquivo_cena.to_lower()
 	if cena_lower == "" and get_tree() and get_tree().current_scene:
 		cena_lower = get_tree().current_scene.scene_file_path.to_lower()
-	if "boss" in cena_lower or "fisica12" in cena_lower or "física12" in cena_lower or "biologia04" in cena_lower:
+	if "boss" in cena_lower or "fisica12" in cena_lower or "física12" in cena_lower or "biologia12" in cena_lower or "biologia04" in cena_lower:
 		return true
 	if percurso_salas.size() > 1 and indice_atual == percurso_salas.size() - 1:
 		return true
@@ -537,18 +557,23 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		# andar de biologia (Estufa)
 		percurso_salas.append(sala_inicial_biologia)
 		percurso_salas.append(sala_01_biologia)
-		var salas_bio_inter: Array = [
-			"res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn",
-			"res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn"
-		]
-		for s in salas_bio_inter:
+		
+		# sorteia 6 salas intermediárias do pool (salas 02 a 11) sem repetição
+		var pool_bio = salas_biologia_pool.duplicate()
+		pool_bio.shuffle()
+		var salas_bio_escolhidas: Array = []
+		for i in range(min(6, pool_bio.size())):
+			var s = pool_bio[i]
 			percurso_salas.append(s)
-		percurso_salas.append("res://scenes/Salas/Estufa_Biologia/Sala_Biologia04.tscn")
+			salas_bio_escolhidas.append(s)
+			
+		# ultima sala: boss planta carnivora (Sala 12)
+		percurso_salas.append(sala_boss_biologia)
 		
 		# sorteia 2 salas intermediárias para ter mecânica de chave
 		# inclui sala_01 nas candidatas (não é corredor nem boss)
 		var candidatas_bio: Array = [sala_01_biologia]
-		candidatas_bio.append_array(salas_bio_inter)
+		candidatas_bio.append_array(salas_bio_escolhidas)
 		_sortear_salas_com_chave(candidatas_bio, 2)
 		print("[DungeonGenerator] Masmorra de Biologia gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
 	else:

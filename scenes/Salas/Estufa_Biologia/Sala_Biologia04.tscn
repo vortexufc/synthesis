@@ -15,7 +15,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_5n4mo"]
 [ext_resource type="PackedScene" uid="uid://b8txw21gc8e2h" path="res://scenes/Entidades/Plantas/CogumelinhoDoMal.tscn" id="14_twk0c"]
 [ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="15_2jlbj"]
-[ext_resource type="PackedScene" uid="uid://bmel7tnca765k" path="res://scenes/Entidades/Plantas/Planta_Carnivora.tscn" id="16_carnivora"]
+[ext_resource type="PackedScene" uid="uid://ctpw5sgh0b4c4" path="res://scenes/Entidades/Plantas/Flor_Vermelha.tscn" id="16_carnivora"]
 [ext_resource type="Script" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
 
 [node name="Node2D" type="Node2D" unique_id=613230570]
@@ -117,11 +117,9 @@ stretch_mode = 5
 
 [node name="PortaTransicao" parent="." unique_id=504229553 instance=ExtResource("13_5n4mo")]
 position = Vector2(964, 201)
-proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
 
 [node name="PortaRetorno" parent="." unique_id=691097805 instance=ExtResource("13_5n4mo")]
 position = Vector2(1358, 1283)
-proxima_cena = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia03.tscn"
 porta_de_retorno = true
 
 [node name="CharacterBody2D" parent="." unique_id=1698167466 instance=ExtResource("14_twk0c")]
