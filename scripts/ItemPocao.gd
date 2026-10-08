@@ -52,6 +52,11 @@ func _ready() -> void:
 	collision_mask = 15 # player
 	body_entered.connect(_coletar)
 	
+	if "menor" in nome_pocao.to_lower() and has_node("Sprite2D"):
+		var tex_m = load("res://assets/sprites/pocao_menor.png") as Texture2D
+		if tex_m:
+			$Sprite2D.texture = tex_m
+	
 	_criar_sombra()
 	_iniciar_efeito_brilho()
 	

@@ -521,6 +521,10 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 			anim_sprite.sprite_frames = sprite_frame_inimigo_atual
 			anim_sprite.play("default")
 
+	# configura o fundo de batalha correspondente ao andar (1=Química, 2=Física, 3=Biologia)
+	if ui_instancia.has_method("configurar_fundo"):
+		ui_instancia.configurar_fundo(_andar_atual)
+
 	# passa o sprite pro painel de batalha
 	var current_id = enemy_data.get("id_inimigo", "")
 	if sprite_frame_inimigo_atual != null:

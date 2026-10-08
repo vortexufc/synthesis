@@ -26,6 +26,7 @@ var btn_anterior: Button
 var btn_proxima: Button
 
 var tex_pocao = preload("res://assets/sprites/vida.png")
+var tex_pocao_menor = preload("res://assets/sprites/pocao_menor.png")
 var tex_pergaminho = preload("res://assets/sprites/pergaminho.png")
 var atlas_pergaminho_fechado: AtlasTexture
 var atlas_pergaminho_aberto: AtlasTexture
@@ -426,7 +427,12 @@ func _atualizar_listas() -> void:
 	else:
 		for i in range(PlayerStats.pocoes.size()):
 			var po = PlayerStats.pocoes[i]
-			var card = _criar_slot_card(tex_pocao, po["nome"], po["qtd"], func(): _selecionar_item(po, "pocao", i))
+			var icone_po = tex_pocao
+			var n_low = po.get("nome", "").to_lower()
+			var t_low = po.get("tipo", "").to_lower()
+			if "menor" in n_low or "pocao_menor" in t_low:
+				icone_po = tex_pocao_menor
+			var card = _criar_slot_card(icone_po, po["nome"], po["qtd"], func(): _selecionar_item(po, "pocao", i))
 			grid_pocoes.add_child(card)
 			
 	# carrega itens e chaves
@@ -668,7 +674,12 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 	if pedestal_icone: pedestal_icone.visible = true
 	
 	if tipo == "pocao":
-		if img_detalhe_icone: img_detalhe_icone.texture = tex_pocao
+		var icone_detalhe = tex_pocao
+		var n_low = item.get("nome", "").to_lower()
+		var t_low = item.get("tipo", "").to_lower()
+		if "menor" in n_low or "pocao_menor" in t_low:
+			icone_detalhe = tex_pocao_menor
+		if img_detalhe_icone: img_detalhe_icone.texture = icone_detalhe
 		lbl_detalhe_titulo.text = item["nome"]
 		var desc_formatada = "❤️ Cura Instantânea: +%d Pontos de Vida\n\nQuantidade Restante: %d frascos\n\nUm elixir revitalizante refinado em caldeirões mágicos da masmorra." % [item.get("cura", 30), item["qtd"]]
 		lbl_detalhe_desc.text = item.get("desc", desc_formatada)

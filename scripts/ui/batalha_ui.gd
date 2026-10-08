@@ -32,6 +32,10 @@ var _eh_pergunta_vf: bool = false
 var battle_music = preload("res://assets/audio/ost/2.wav")
 var _font_pixel_combate = preload("res://assets/fonts/PressStart2P-Regular.ttf")
 
+const FUNDO_QUIMICA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_quimica.png")
+const FUNDO_FISICA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_fisica.png")
+const FUNDO_BIOLOGIA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_biologia.png")
+
 func _ready() -> void:
 	AudioManager.play_battle_music(battle_music)
 	# garante que os botoes funcionem mesmo com o jogo pausado
@@ -42,6 +46,33 @@ func _ready() -> void:
 		
 	# se curar no inventario, arruma a barra verde
 	PlayerStats.vida_alterada.connect(_on_vida_jogador_alterada)
+	
+	# Configura o fundo conforme o andar ativo
+	var qm = get_node_or_null("/root/QuizManager")
+	var andar_detectado = 1
+	if qm and "_andar_atual" in qm and qm._andar_atual > 0:
+		andar_detectado = qm._andar_atual
+	elif get_node_or_null("/root/DatabaseManager") and DatabaseManager.active_dungeon != "":
+		match DatabaseManager.active_dungeon:
+			"Química": andar_detectado = 1
+			"Física": andar_detectado = 2
+			"Biologia": andar_detectado = 3
+			_: andar_detectado = 1
+	configurar_fundo(andar_detectado)
+
+func configurar_fundo(andar_id: int) -> void:
+	var tex: Texture2D = FUNDO_QUIMICA
+	match andar_id:
+		1:
+			tex = FUNDO_QUIMICA
+		2:
+			tex = FUNDO_FISICA
+		3:
+			tex = FUNDO_BIOLOGIA
+		_:
+			tex = FUNDO_QUIMICA
+	if has_node("Control/BackgroundMockup"):
+		$Control/BackgroundMockup.texture = tex
 
 func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 	if frames and $Control/SpriteMonstro/AnimatedSprite2D:

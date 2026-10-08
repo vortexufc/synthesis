@@ -15,6 +15,7 @@ var _font_pixel: Font = null
 var _font_num: Font = null
 
 var tex_pocao = preload("res://assets/sprites/vida.png")
+var tex_pocao_menor = preload("res://assets/sprites/pocao_menor.png")
 var tex_pergaminho = preload("res://assets/sprites/pergaminho.png")
 var tex_moeda = preload("res://assets/sprites/ui/coin.png")
 var tex_gelatina = preload("res://assets/sprites/ui/item_fragmento_gelatina_mercado.png")
@@ -206,7 +207,9 @@ func _ready() -> void:
 		
 		# icone
 		var icone = TextureRect.new()
-		if item["tipo"] == "pocao" or item["tipo"] == "pocao_menor":
+		if item["tipo"] == "pocao_menor":
+			icone.texture = tex_pocao_menor
+		elif item["tipo"] == "pocao":
 			icone.texture = tex_pocao
 		else:
 			icone.texture = tex_pergaminho
