@@ -13,6 +13,7 @@ var _tween_conteudo: Tween = null
 var _texto_quadro_atual: String = ""
 
 # Nós do pergaminho vertical e seu conteúdo
+var _bg_tex: TextureRect = null
 var _scroll_rect: NinePatchRect = null
 var _center_pergaminho: CenterContainer = null
 var _container_conteudo: MarginContainer = null
@@ -138,9 +139,15 @@ func _ready() -> void:
 		_construir_layout()
 
 func iniciar_vinheta(andar_id: int) -> void:
+	_andar_atual = clampi(andar_id, 1, 3)
 	if _container_conteudo == null:
 		_construir_layout()
-	_andar_atual = clampi(andar_id, 1, 3)
+	else:
+		if _bg_tex:
+			var tex_andar = _obter_textura_fundo_andar(_andar_atual)
+			if tex_andar:
+				_bg_tex.texture = tex_andar
+				
 	_quadro_atual_indice = 0
 	_concluida = false
 	_em_tela_vitoria = false
@@ -188,6 +195,39 @@ func _obter_textura(caminho: String) -> Texture2D:
 			return ImageTexture.create_from_image(img)
 	return null
 
+func _obter_textura_fundo_andar(andar_id: int) -> Texture2D:
+	var caminhos = []
+	match andar_id:
+		1:
+			caminhos = [
+				"res://assets/sprites/Backgrounds/tela_final_quimica.png",
+				"res://assets/sprites/tela_final_quimica.png",
+				"res://assets/sprites/Backgrounds/Batalha/fundo_batalha_quimica.png",
+				"res://assets/sprites/fundo_laboratorio_mago.png"
+			]
+		2:
+			caminhos = [
+				"res://assets/sprites/Backgrounds/tela_final_fisica.png",
+				"res://assets/sprites/tela_final_fisica.png",
+				"res://assets/sprites/Backgrounds/Batalha/fundo_batalha_fisica.png",
+				"res://assets/sprites/fundo_laboratorio_mago.png"
+			]
+		3:
+			caminhos = [
+				"res://assets/sprites/Backgrounds/tela_final_biologia.png",
+				"res://assets/sprites/tela_final_biologia.png",
+				"res://assets/sprites/Backgrounds/Batalha/fundo_batalha_biologia.png",
+				"res://assets/sprites/fundo_laboratorio_mago.png"
+			]
+		_:
+			caminhos = ["res://assets/sprites/fundo_laboratorio_mago.png"]
+			
+	for c in caminhos:
+		var tex = _obter_textura(c)
+		if tex != null:
+			return tex
+	return null
+
 func _construir_layout() -> void:
 	var font_titulo = SystemFont.new()
 	font_titulo.font_names = PackedStringArray(["Segoe UI", "Georgia", "Palatino Linotype", "Times New Roman", "serif"])
@@ -197,20 +237,14 @@ func _construir_layout() -> void:
 	font_corpo.font_names = PackedStringArray(["Segoe UI", "Georgia", "Palatino Linotype", "Times New Roman", "serif"])
 	font_corpo.font_weight = 600
 	
-	# 1. Fundo elegante do laboratório do mago (mesa de pedra, lanterna a óleo, livros, crânio, fórmulas em giz)
-	var tex_fundo = _obter_textura("res://assets/sprites/fundo_laboratorio_mago.png")
-	if tex_fundo:
-		var bg_tex = TextureRect.new()
-		bg_tex.set_anchors_preset(Control.PRESET_FULL_RECT)
-		bg_tex.texture = tex_fundo
-		bg_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		bg_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		add_child(bg_tex)
-	else:
-		var bg_escuro = ColorRect.new()
-		bg_escuro.set_anchors_preset(Control.PRESET_FULL_RECT)
-		bg_escuro.color = Color(0.05, 0.04, 0.07, 0.98)
-		add_child(bg_escuro)
+	# 1. Fundo temático do andar / sala final
+	_bg_tex = TextureRect.new()
+	_bg_tex.name = "BackgroundVinheta"
+	_bg_tex.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_bg_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_bg_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_bg_tex.texture = _obter_textura_fundo_andar(_andar_atual)
+	add_child(_bg_tex)
 		
 	# Partículas de fagulhas douradas arcanas no ambiente
 	var particulas_bg = CPUParticles2D.new()
