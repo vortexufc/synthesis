@@ -11,7 +11,7 @@ extends Control
 @onready var btn_dash = get_node_or_null("ActionsContainer/BtnDash")
 @onready var btn_pausa = $PauseContainer/BtnPausa
 
-const RAIO_MAXIMO: float = 55.0
+const RAIO_MAXIMO: float = 62.0
 const ZONA_MORTA: float = 8.0
 
 var _touch_id_joystick: int = -1

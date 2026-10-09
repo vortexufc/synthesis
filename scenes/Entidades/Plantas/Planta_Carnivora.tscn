@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://uwolmq2u841l" path="res://assets/sprites/Characters/Planta_Carnivora/carnivora.png" id="1_5get0"]
 [ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_7q26c"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="3_enemy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fpvat"]
 atlas = ExtResource("1_5get0")
@@ -105,6 +106,10 @@ radius = 28.0
 height = 118.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1883427817]
+script = ExtResource("3_enemy")
+vida_maxima = 150.0
+velocidade = 34.0
+dano = 32.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1518706844]
 sprite_frames = SubResource("SpriteFrames_tnsam")

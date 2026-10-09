@@ -21,17 +21,20 @@ const GOLEM_ANTIGO = { "num_questoes": 5, "duracao_batalha": 300.0 }
 
 
 func _ready() -> void:
-	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
+	var gs = get_node_or_null("/root/GlobalSignals")
+	if gs:
+		gs.batalha_encerrada.connect(_on_batalha_encerrada)
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
 	call_deferred("_garantir_alcance_trigger")
 
 	var pai = get_parent()
 	if pai:
-		if get_node_or_null("/root/DungeonGenerator"):
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg:
 			var room_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else ""
 			var key = room_path + "::" + pai.name
-			if DungeonGenerator.is_inimigo_derrotado(key):
+			if dg.is_inimigo_derrotado(key):
 				pai.queue_free()
 				return
 		pai.add_to_group("inimigos")
@@ -76,9 +79,11 @@ func _player_em_interacao(p_node: Node2D = null) -> bool:
 				return true
 		elif pl.get("travado") == true or pl.get("em_interacao") == true:
 			return true
-	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+	var qm = get_node_or_null("/root/QuizManager")
+	if qm and qm.em_batalha:
 		return true
-	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts and ts.is_transitioning:
 		return true
 	if get_tree():
 		if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
@@ -213,15 +218,42 @@ func _on_body_entered(body: Node2D) -> void:
 	set_deferred("monitoring", false)
 
 func _dropar_moeda_padrao(pos: Vector2) -> void:
+	var pai_sala = get_tree().current_scene if (get_tree() and get_tree().current_scene) else get_parent()
+	if not pai_sala:
+		return
+		
+	# Drop do item temático de biologia caso seja andar 3
+	if andar_id == 3:
+		var cena_dna = load("res://scenes/Entidades/Items/ItemChipDNA.tscn")
+		if cena_dna:
+			var dna = cena_dna.instantiate()
+			if "is_drop_dinamico" in dna:
+				dna.is_drop_dinamico = true
+			dna.position = pai_sala.to_local(pos + Vector2(-28, -14))
+			pai_sala.call_deferred("add_child", dna)
+	elif andar_id == 2:
+		var cena_chip = load("res://scenes/Entidades/Items/ItemChip.tscn")
+		if cena_chip:
+			var chip = cena_chip.instantiate()
+			if "is_drop_dinamico" in chip:
+				chip.is_drop_dinamico = true
+			chip.position = pai_sala.to_local(pos + Vector2(-28, -14))
+			pai_sala.call_deferred("add_child", chip)
+	elif andar_id == 1:
+		var cena_gel = load("res://scenes/Entidades/Items/ItemFragmentoGelatina.tscn")
+		if cena_gel:
+			var gel = cena_gel.instantiate()
+			if "is_drop_dinamico" in gel:
+				gel.is_drop_dinamico = true
+			gel.position = pai_sala.to_local(pos + Vector2(-28, -14))
+			pai_sala.call_deferred("add_child", gel)
+
 	var cena_moeda = load("res://scenes/Entidades/Items/ItemMoeda.tscn")
 	if not cena_moeda:
 		cena_moeda = load("res://scenes/Entidades/ItemMoeda.tscn")
-	if not cena_moeda:
-		return
-	var moeda = cena_moeda.instantiate()
-	if "is_drop_dinamico" in moeda:
-		moeda.is_drop_dinamico = true
-	var pai_sala = get_tree().current_scene
-	if pai_sala:
+	if cena_moeda:
+		var moeda = cena_moeda.instantiate()
+		if "is_drop_dinamico" in moeda:
+			moeda.is_drop_dinamico = true
 		moeda.position = pai_sala.to_local(pos)
 		pai_sala.call_deferred("add_child", moeda)

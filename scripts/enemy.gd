@@ -42,10 +42,11 @@ var DIRECOES: Array = [
 
 func _ready() -> void:
 	# Se este inimigo já foi derrotado nesta masmorra, remove ele imediatamente
-	if get_node_or_null("/root/DungeonGenerator"):
-		var room_path = get_tree().current_scene.scene_file_path
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		var room_path = get_tree().current_scene.scene_file_path if (get_tree() and get_tree().current_scene) else ""
 		var key = room_path + "::" + self.name
-		if DungeonGenerator.is_inimigo_derrotado(key):
+		if dg.is_inimigo_derrotado(key):
 			print("[Inimigo] Já derrotado anteriormente nesta masmorra, removendo: ", key)
 			queue_free()
 			return
@@ -59,8 +60,10 @@ func _ready() -> void:
 	_sortear_nova_direcao()
 
 	# Escuta sinais globais de batalha
-	GlobalSignals.iniciar_batalha.connect(_on_batalha_iniciada)
-	GlobalSignals.batalha_encerrada.connect(_on_batalha_encerrada)
+	var gs = get_node_or_null("/root/GlobalSignals")
+	if gs:
+		gs.iniciar_batalha.connect(_on_batalha_iniciada)
+		gs.batalha_encerrada.connect(_on_batalha_encerrada)
 
 	if sprite:
 		sprite.play("default")
@@ -69,7 +72,7 @@ func _ready() -> void:
 
 	# Campeão Rúnico: chance aleatória se não for boss
 	var nome_baixo = name.to_lower()
-	if not eh_runico and chance_ser_runico > 0.0 and not ("boss" in nome_baixo):
+	if not eh_runico and chance_ser_runico > 0.0 and not ("boss" in nome_baixo) and not ("carnivora" in nome_baixo):
 		if randf() < chance_ser_runico:
 			eh_runico = true
 
@@ -87,11 +90,11 @@ func _calibrar_balanceamento_inimigo() -> void:
 			break
 
 	# 1. Chefes
-	if ("boss" in nome_baixo) or ("boss" in enemy_id) or ("roxo" in nome_baixo) or ("roxo" in enemy_id):
-		vida_maxima = 130.0
-		dano = 30.0
-		velocidade = 30.0
-		velocidade_perseguicao = 48.0
+	if ("boss" in nome_baixo) or ("boss" in enemy_id) or ("roxo" in nome_baixo) or ("roxo" in enemy_id) or ("carnivora" in nome_baixo) or ("carnivora" in enemy_id):
+		vida_maxima = 150.0
+		dano = 32.0
+		velocidade = 34.0
+		velocidade_perseguicao = 50.0
 		distancia_perseguicao = 220.0
 	elif ("robo_g" in nome_baixo) or ("robo_g" in enemy_id):
 		vida_maxima = 140.0
@@ -106,21 +109,21 @@ func _calibrar_balanceamento_inimigo() -> void:
 		velocidade_perseguicao = 60.0
 		distancia_perseguicao = 200.0
 	# 2. Tier 3 (Inimigos Grandes / Avançados)
-	elif ("laranja" in nome_baixo) or ("laranja" in enemy_id) or ("slime_g" in nome_baixo) or ("slime_g" in enemy_id) or ("vermelho" in nome_baixo):
+	elif ("laranja" in nome_baixo) or ("laranja" in enemy_id) or ("slime_g" in nome_baixo) or ("slime_g" in enemy_id) or ("vermelho" in nome_baixo) or ("vermelha" in enemy_id) or ("vermelh" in nome_baixo):
 		vida_maxima = 100.0
 		dano = 24.0
 		velocidade = 46.0
 		velocidade_perseguicao = 70.0
 		distancia_perseguicao = 190.0
-	# 3. Tier 2 (Inimigos Médios / Ácidos / Ciano)
-	elif ("verde" in nome_baixo) or ("verde" in enemy_id) or ("ciano" in nome_baixo) or ("ciano" in enemy_id):
-		vida_maxima = 75.0
-		dano = 18.0
-		velocidade = 40.0
-		velocidade_perseguicao = 62.0
+	# 3. Tier 2 (Inimigos Médios / Ácidos / Ciano / Cogumelo / Flor Roxa)
+	elif ("verde" in nome_baixo) or ("verde" in enemy_id) or ("ciano" in nome_baixo) or ("ciano" in enemy_id) or ("cogumelo" in nome_baixo) or ("cogumelo" in enemy_id) or ("roxa" in enemy_id) or ("roxa" in nome_baixo):
+		vida_maxima = 70.0
+		dano = 16.0
+		velocidade = 44.0
+		velocidade_perseguicao = 64.0
 		distancia_perseguicao = 180.0
-	# 4. Tier 1 (Inimigos Menores / Salas Iniciais)
-	elif ("azul" in nome_baixo) or ("azul" in enemy_id) or ("slime_p" in nome_baixo) or ("slime_p" in enemy_id) or ("amarelo" in nome_baixo) or ("amarelo" in enemy_id):
+	# 4. Tier 1 (Inimigos Menores / Salas Iniciais / Flor Amarela)
+	elif ("azul" in nome_baixo) or ("azul" in enemy_id) or ("slime_p" in nome_baixo) or ("slime_p" in enemy_id) or ("amarelo" in nome_baixo) or ("amarelo" in enemy_id) or ("amarela" in enemy_id) or ("amarela" in nome_baixo):
 		vida_maxima = 50.0
 		dano = 12.0
 		velocidade = 36.0
@@ -152,7 +155,16 @@ func _criar_sombra() -> void:
 	
 	var pos_y: float = 20.0
 	
-	if "robo_g" in nome_baixo:
+	if "carnivora" in nome_baixo:
+		pos_y = 52.0
+		shadow_base_scale = Vector2(2.6, 1.5)
+	elif "cogumelo" in nome_baixo:
+		pos_y = 48.0
+		shadow_base_scale = Vector2(1.8, 1.2)
+	elif "flor" in nome_baixo:
+		pos_y = 26.0
+		shadow_base_scale = Vector2(1.6, 1.1)
+	elif "robo_g" in nome_baixo:
 		pos_y = 82.0
 		shadow_base_scale = Vector2(1.8, 1.2)
 	elif "robo_p" in nome_baixo:
@@ -279,6 +291,12 @@ func _criar_aura_runica() -> void:
 		tag_y = -68.0
 	elif eh_wizard:
 		tag_y = -55.0
+	elif ("carnivora" in nome_baixo) or ("carnivora" in enemy_id):
+		tag_y = -70.0
+	elif ("cogumelo" in nome_baixo) or ("cogumelo" in enemy_id):
+		tag_y = -54.0
+	elif ("flor" in nome_baixo) or ("flor" in enemy_id):
+		tag_y = -44.0
 	else:
 		tag_y = -38.0
 
@@ -325,9 +343,11 @@ func _player_em_interacao(p_node: Node2D = null) -> bool:
 				return true
 		elif pl.get("travado") == true or pl.get("em_interacao") == true:
 			return true
-	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+	var qm = get_node_or_null("/root/QuizManager")
+	if qm and qm.em_batalha:
 		return true
-	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts and ts.is_transitioning:
 		return true
 	if get_tree():
 		if get_tree().get_nodes_in_group("minigame_ativo").size() > 0:
@@ -403,21 +423,50 @@ func _physics_process(delta: float) -> void:
 		velocity = _direcao * velocidade
 
 	# Atualiza a animação dependendo da direção
-	if sprite:
-		if sprite.sprite_frames and sprite.sprite_frames.has_animation("walk_side"):
+	if sprite and sprite.sprite_frames:
+		var sf = sprite.sprite_frames
+		var anim_side = ""
+		var anim_up = ""
+		var anim_down = ""
+		
+		if sf.has_animation("walk_side") and sf.get_frame_count("walk_side") > 0:
+			anim_side = "walk_side"
+		elif sf.has_animation("Walk-Side") and sf.get_frame_count("Walk-Side") > 0:
+			anim_side = "Walk-Side"
+			
+		if sf.has_animation("walk_up") and sf.get_frame_count("walk_up") > 0:
+			anim_up = "walk_up"
+		elif sf.has_animation("Walk-Up") and sf.get_frame_count("Walk-Up") > 0:
+			anim_up = "Walk-Up"
+			
+		if sf.has_animation("walk_down") and sf.get_frame_count("walk_down") > 0:
+			anim_down = "walk_down"
+		elif sf.has_animation("Walk-Down") and sf.get_frame_count("Walk-Down") > 0:
+			anim_down = "Walk-Down"
+		elif sf.has_animation("Wals-Down") and sf.get_frame_count("Wals-Down") > 0:
+			anim_down = "Wals-Down"
+
+		if not anim_side.is_empty():
 			if abs(_direcao.x) > abs(_direcao.y):
-				sprite.play("walk_side")
-				# A arte original (Y=0) do robô está olhando para a ESQUERDA.
-				# Então para andar para a direita (> 0.0), precisamos virar (flip_h = true).
+				sprite.play(anim_side)
+				# Arte original olhando para a esquerda (Robôs e Cogumelos)
 				sprite.flip_h = (_direcao.x > 0.0)
-			elif _direcao.y > 0:
-				sprite.play("walk_down")
-			elif _direcao.y < 0:
-				sprite.play("walk_up")
+			elif _direcao.y > 0 and not anim_down.is_empty():
+				sprite.play(anim_down)
+			elif _direcao.y < 0 and not anim_up.is_empty():
+				sprite.play(anim_up)
 		else:
-			# Lógica antiga para inimigos simples (Slime, etc)
+			# Inimigos sem animação direcional de passos (Flores, Planta Carnívora, Slimes)
+			if sf.has_animation("default"):
+				if not sprite.is_playing() or sprite.animation != "default":
+					sprite.play("default")
 			if _direcao.x != 0.0:
-				sprite.flip_h = (_direcao.x < 0.0)
+				var nome_baixo = name.to_lower()
+				var flip_pra_direita = ("flor" in nome_baixo) or ("planta" in nome_baixo)
+				if flip_pra_direita:
+					sprite.flip_h = (_direcao.x > 0.0)
+				else:
+					sprite.flip_h = (_direcao.x < 0.0)
 
 	move_and_slide()
 
@@ -503,6 +552,8 @@ func _dropar_itens() -> void:
 
 	var is_quimica = enemy_id_lower.begins_with("slime") or ("slime" in nome_baixo) or ("slime" in sf_path)
 	var is_fisica = enemy_id_lower.begins_with("robo") or ("robo" in nome_baixo) or ("robo" in sf_path)
+	var current_scene_path = get_tree().current_scene.scene_file_path.to_lower() if (get_tree() and get_tree().current_scene) else ""
+	var is_biologia = ("flor" in enemy_id_lower) or ("cogumel" in enemy_id_lower) or ("planta" in enemy_id_lower) or ("flor" in nome_baixo) or ("cogumel" in nome_baixo) or ("planta" in nome_baixo) or ("planta" in sf_path) or ("bio" in enemy_id_lower) or ("bio" in nome_baixo) or ("estufa" in current_scene_path) or ("biologia" in current_scene_path)
 	var is_boss_slime = is_quimica and (("boss" in enemy_id_lower) or ("roxo" in enemy_id_lower) or ("boss" in nome_baixo) or ("roxo" in nome_baixo) or ("boss_roxo" in sf_path))
 	var is_boss = is_boss_slime or ("boss" in enemy_id_lower) or (enemy_id_lower == "robo_g") or ("boss" in nome_baixo)
 
@@ -515,10 +566,12 @@ func _dropar_itens() -> void:
 			_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		return
 
-	# boss robo
+	# boss robo / planta
 	if is_boss:
 		if is_fisica:
 			_instanciar_drop("res://scenes/Entidades/Items/ItemChip.tscn")
+		elif is_biologia:
+			_instanciar_drop("res://scenes/Entidades/Items/ItemChipDNA.tscn")
 		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 		if eh_runico:
@@ -540,6 +593,9 @@ func _dropar_itens() -> void:
 		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 	elif is_fisica:
 		_instanciar_drop("res://scenes/Entidades/Items/ItemChip.tscn")
+		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
+	elif is_biologia:
+		_instanciar_drop("res://scenes/Entidades/Items/ItemChipDNA.tscn")
 		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")
 	else:
 		_instanciar_drop("res://scenes/Entidades/Items/ItemMoeda.tscn")

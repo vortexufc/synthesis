@@ -1867,8 +1867,5 @@ position = Vector2(240, 476)
 [node name="ItemMoeda" parent="." unique_id=1086862922 instance=ExtResource("23_ncqp3")]
 position = Vector2(851, 847)
 
-[node name="NPCBiologia" parent="." unique_id=1037908605 instance=ExtResource("24_ddqsf")]
-position = Vector2(734, 399)
-
 [node name="AltarRegeneracao" parent="." unique_id=771122341 instance=ExtResource("ext_altar_hub")]
 position = Vector2(584, 620)

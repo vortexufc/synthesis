@@ -241,7 +241,25 @@ func _reposicionar_na_porta_correta() -> void:
 		for porta in portas:
 			if porta.porta_de_retorno:
 				global_position = porta.global_position
-				global_position.y -= 180 # Nasce mais acima (escapando de colisão)
+				var dist_spawn = 180
+				var cena_path = ""
+				var s_root: Node = self
+				while s_root.get_parent() and s_root.get_parent() != get_tree().root:
+					s_root = s_root.get_parent()
+				if s_root:
+					cena_path = s_root.scene_file_path.to_lower()
+				if cena_path == "" and get_tree() and get_tree().current_scene:
+					cena_path = get_tree().current_scene.scene_file_path.to_lower()
+					
+				var masmorra_ativa = ""
+				var db = get_node_or_null("/root/DatabaseManager")
+				if db and db.active_dungeon != "":
+					masmorra_ativa = db.active_dungeon.to_lower()
+					
+				if "biologia" in cena_path or "estufa" in cena_path or "biologia" in masmorra_ativa:
+					dist_spawn = 360 # Portas de biologia são mais altas (356px), mantendo a distância confortável idêntica a Física
+					
+				global_position.y -= dist_spawn # Nasce mais acima (longe da porta e fora do gatilho de abertura automática)
 				break
 
 func _physics_process(delta: float) -> void:

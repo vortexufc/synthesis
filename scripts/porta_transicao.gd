@@ -40,6 +40,13 @@ var _minigame_selo_aberto: bool = false
 var _indicador_selo_node: Node2D = null
 var _tw_indicador_selo: Tween = null
 
+var _tilemap_porta: TileMapLayer = null
+var _tile_coords_porta: Vector2i = Vector2i(-999, -999)
+var _tile_source_porta: int = -1
+var _tinha_inimigos_inicialmente: bool = false
+var _em_animacao: bool = false
+var _transicionando: bool = false
+
 # Cooldown para evitar teletransporte imediato ao carregar a cena (loop infinito)
 var _cooldown_ativo: bool = true
 
@@ -53,7 +60,8 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	
 	var porta_key = _obter_porta_id()
-	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.is_porta_destrancada(porta_key):
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg and dg.is_porta_destrancada(porta_key):
 		_chave_usada = true
 		_porta_aberta = true
 	
@@ -72,6 +80,17 @@ func _ready() -> void:
 		_sprite_porta.scale = Vector2(3, 3) # As texturas do hub costumam ser ampliadas
 		add_child(_sprite_porta)
 	
+	if not _sprite_porta:
+		_configurar_sprite_porta_automatico()
+	else:
+		_limpar_tiles_porta_no_wall()
+		if _porta_aberta and _sprite_porta.region_enabled and frames_animacao > 1 and stride_animacao > 0:
+			_sprite_porta.region_rect.position.x = _base_region_rect.position.x + ((frames_animacao - 1) * stride_animacao)
+
+	# Se a sala já possui monstros vivos no início, marca imediatamente como combate
+	if _tem_inimigos_vivos():
+		_tinha_inimigos_inicialmente = true
+
 	# Aguarda antes de ativar a porta
 	await get_tree().create_timer(0.6).timeout
 	_cooldown_ativo = false
@@ -118,29 +137,52 @@ func _unhandled_input(event: InputEvent) -> void:
 			_abrir_minigame_selo_runico()
 
 func _process(delta: float) -> void:
-	# Apenas portas de avanço em salas de combate precisam abrir automaticamente
-	if is_hub_door or porta_de_retorno or _porta_aberta:
+	if is_hub_door:
 		return
 		
-	# Fazemos a checagem a cada 0.5 segundos para não pesar o processamento
 	_checagem_timer += delta
-	if _checagem_timer >= 0.5:
-		_checagem_timer = 0.0
+	if _checagem_timer < 0.2:
+		return
+	_checagem_timer = 0.0
+	
+	# Detecta se a sala possui inimigos vivos
+	var tem_inimigos = _tem_inimigos_vivos()
+	if tem_inimigos:
+		_tinha_inimigos_inicialmente = true
+		return
+	
+	# Se precisa de chave ou selo rúnico pendente, não abre automaticamente
+	if tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
+		if not _selo_ativo:
+			_ativar_selo_runico()
+		return
+	if _sala_requer_chave() and not _chave_usada:
+		if _player_no_alcance:
+			_atualizar_texto_prompt_tranca()
+		return
+	if esta_trancada:
+		return
 		
-		# Se não houver mais inimigos:
-		if not _tem_inimigos_vivos():
-			if tem_selo_runico and not _selo_resolvido:
-				if not _selo_ativo:
-					_ativar_selo_runico()
-			elif _sala_requer_chave() and not _chave_usada:
-				# apenas mantem o texto atualizado se o jogador estiver encostado
-				if _player_no_alcance:
-					_atualizar_texto_prompt_tranca()
-			else:
-				# sem selo e sem chave: abre sozinha
-				if not _porta_aberta:
-					_porta_aberta = true
-					_abrir_porta_animacao()
+	# Cenário A: Sala de combate que TINHA inimigos e agora foram todos derrotados
+	# Como em Química e Física, a porta libera e abre para sempre!
+	if _tinha_inimigos_inicialmente and not porta_de_retorno:
+		if not _porta_aberta and not _em_animacao:
+			_porta_aberta = true
+			await _abrir_porta_animacao()
+		return
+	
+	# Cenário B: Sem combate na sala (corredor, porta de retorno ou sala pacífica)
+	# Abre quando o player estiver perto e fecha quando se afastar
+	var player = _obter_player()
+	if player:
+		var dist = global_position.distance_to(player.global_position)
+		if dist <= 220.0 or _player_no_alcance:
+			if not _porta_aberta and not _em_animacao:
+				_porta_aberta = true
+				await _abrir_porta_animacao()
+		elif dist > 270.0 and _porta_aberta and not _em_animacao and not _transicionando:
+			_porta_aberta = false
+			await _fechar_porta_animacao()
 
 # checa se essa porta ou a sala atual exige chave para abrir
 func _sala_requer_chave() -> bool:
@@ -150,7 +192,8 @@ func _sala_requer_chave() -> bool:
 		return false
 	if _chave_usada:
 		return false
-	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.is_porta_destrancada(_obter_porta_id()):
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg and dg.is_porta_destrancada(_obter_porta_id()):
 		return false
 	if precisa_de_chave:
 		return true
@@ -228,7 +271,8 @@ func _atualizar_texto_prompt_tranca() -> void:
 	var dev_mgr = get_node_or_null("/root/DevManager")
 	var ignorar = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
 	
-	var tem_chave = get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0
+	var ps = get_node_or_null("/root/PlayerStats")
+	var tem_chave = ps and ps.chaves > 0
 	
 	if tem_chave or ignorar:
 		_label_prompt_chave.text = "Pressione [F] para Destrancar a Porta"
@@ -249,25 +293,29 @@ func _tentar_abrir_com_chave_f() -> void:
 	var dev_mgr = get_node_or_null("/root/DevManager")
 	var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
 	
-	var tem_chave = get_node_or_null("/root/PlayerStats") and PlayerStats.chaves > 0
+	var ps = get_node_or_null("/root/PlayerStats")
+	var tem_chave = ps and ps.chaves > 0
 	
 	if not tem_chave and not ignorar_bloqueio:
 		_atualizar_texto_prompt_tranca()
 		return
 		
 	if tem_chave and not ignorar_bloqueio:
-		PlayerStats.chaves = max(0, PlayerStats.chaves - 1)
-		if PlayerStats.has_method("salvar"):
-			PlayerStats.salvar()
+		if ps:
+			ps.chaves = max(0, ps.chaves - 1)
+			if ps.has_method("salvar"):
+				ps.salvar()
 			
 	_chave_usada = true
-	if get_node_or_null("/root/DungeonGenerator"):
-		DungeonGenerator.registrar_porta_destrancada(_obter_porta_id())
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		dg.registrar_porta_destrancada(_obter_porta_id())
 		
 	_remover_prompt_tranca()
 	
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("lock")
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("lock")
 		
 	_gerar_particulas_destrancar()
 		
@@ -432,6 +480,15 @@ func _tem_inimigos_vivos() -> bool:
 	for inimigo in inimigos:
 		if is_instance_valid(inimigo) and not inimigo.is_queued_for_deletion():
 			return true
+	var cena = get_tree().current_scene if (get_tree() and get_tree().current_scene) else get_parent()
+	if cena:
+		if cena.get("monstros_na_sala") != null and cena.get("monstros_na_sala") > 0:
+			return true
+		for child in cena.get_children():
+			if not child.is_queued_for_deletion() and not child.is_in_group("player") and child.name != "Player" and not child.name.begins_with("Player"):
+				if child.has_node("EnemyTrigger") or child.name.begins_with("Slime") or child.name.begins_with("Robo") or child.name.begins_with("Cogumelo") or child.name.begins_with("Flor"):
+					if child is CharacterBody2D:
+						return true
 	return false
 
 # mostra mensagem de aviso na tela
@@ -491,30 +548,143 @@ func _mostrar_feedback_hub(mensagem: String, cor_borda: Color) -> void:
 	tween.tween_callback(canvas.queue_free)
 
 func _abrir_porta_animacao() -> void:
+	if _em_animacao:
+		return
+	_em_animacao = true
 	if _sprite_porta:
 		if _sprite_porta.hframes > 1:
 			for i in range(_sprite_porta.hframes):
 				_sprite_porta.frame = i
-				await get_tree().create_timer(0.15).timeout
+				await get_tree().create_timer(0.12).timeout
 		elif _sprite_porta.region_enabled and frames_animacao > 1 and stride_animacao > 0:
 			for i in range(frames_animacao):
 				var new_rect = _base_region_rect
 				new_rect.position.x = _base_region_rect.position.x + (i * stride_animacao)
 				_sprite_porta.region_rect = new_rect
-				await get_tree().create_timer(0.15).timeout
+				await get_tree().create_timer(0.12).timeout
+	_em_animacao = false
 
 func _fechar_porta_animacao() -> void:
+	if _em_animacao:
+		return
+	_em_animacao = true
 	if _sprite_porta:
 		if _sprite_porta.hframes > 1:
 			for i in range(_sprite_porta.hframes - 1, -1, -1):
 				_sprite_porta.frame = i
-				await get_tree().create_timer(0.15).timeout
+				await get_tree().create_timer(0.12).timeout
 		elif _sprite_porta.region_enabled and frames_animacao > 1 and stride_animacao > 0:
 			for i in range(frames_animacao - 1, -1, -1):
 				var new_rect = _base_region_rect
 				new_rect.position.x = _base_region_rect.position.x + (i * stride_animacao)
 				_sprite_porta.region_rect = new_rect
-				await get_tree().create_timer(0.15).timeout
+				await get_tree().create_timer(0.12).timeout
+	_em_animacao = false
+
+func _obter_tilemap_wall() -> TileMapLayer:
+	var cena = get_tree().current_scene if get_tree() else null
+	if get_parent() and get_parent().has_node("Wall"):
+		var w = get_parent().get_node("Wall")
+		if w is TileMapLayer:
+			return w
+	if cena and cena.has_node("Wall"):
+		var w = cena.get_node("Wall")
+		if w is TileMapLayer:
+			return w
+	return null
+
+func _limpar_tiles_porta_no_wall() -> void:
+	var cena_path = ""
+	var scene_root: Node = self
+	while scene_root.get_parent() and scene_root.get_parent() != get_tree().root:
+		scene_root = scene_root.get_parent()
+	if scene_root:
+		cena_path = scene_root.scene_file_path.to_lower()
+	if cena_path == "" and get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path.to_lower()
+	if not ("biologia" in cena_path or "estufa" in cena_path):
+		return
+		
+	var wall: TileMapLayer = null
+	if scene_root and scene_root.has_node("Wall"):
+		wall = scene_root.get_node("Wall") as TileMapLayer
+	if not wall:
+		wall = _obter_tilemap_wall()
+		
+	if wall and (wall is TileMapLayer):
+		var check_pos = global_position if global_position != Vector2.ZERO else position
+		var cells_limpar: Array[Vector2i] = []
+		for cell in wall.get_used_cells():
+			var src_id = wall.get_cell_source_id(cell)
+			var atlas = wall.get_cell_atlas_coords(cell)
+			var pos_cel = wall.to_global(wall.map_to_local(cell))
+			
+			if src_id == 2:
+				if check_pos.distance_to(pos_cel) < 500.0 or position.distance_to(pos_cel) < 500.0:
+					cells_limpar.append(cell)
+			elif atlas in [Vector2i(2, 24), Vector2i(20, 24), Vector2i(5, 24)]:
+				# Remove barreiras de parede que obstruem a passagem da porta de retorno
+				if abs(pos_cel.x - check_pos.x) < 90.0 and pos_cel.y >= check_pos.y - 280.0 and pos_cel.y <= check_pos.y + 30.0:
+					cells_limpar.append(cell)
+		for c in cells_limpar:
+			wall.erase_cell(c)
+
+func _configurar_sprite_porta_automatico() -> void:
+	if _sprite_porta:
+		return
+		
+	var cena_path = ""
+	if get_tree() and get_tree().current_scene:
+		cena_path = get_tree().current_scene.scene_file_path.to_lower()
+	if cena_path == "" and owner:
+		cena_path = owner.scene_file_path.to_lower()
+	if cena_path == "" and get_parent() and "scene_file_path" in get_parent():
+		cena_path = str(get_parent().scene_file_path).to_lower()
+
+	# Aplica EXCLUSIVAMENTE para a masmorra de Biologia/Estufa
+	var is_bio = ("biologia" in cena_path) or ("estufa" in cena_path)
+	if not is_bio:
+		return
+
+	frames_animacao = 4
+	stride_animacao = 128
+	
+	var fundo = ColorRect.new()
+	fundo.name = "FundoPreto"
+	fundo.z_index = 1
+	fundo.offset_left = -59.0
+	fundo.offset_top = -181.0
+	fundo.offset_right = 66.0
+	fundo.offset_bottom = 45.0
+	fundo.color = Color(0.08, 0.09, 0.11, 1.0)
+	add_child(fundo)
+	
+	var tex = load("res://assets/sprites/tilesets/Biologia/porta.png") as Texture2D
+	var spr = Sprite2D.new()
+	spr.name = "SpritePorta"
+	spr.z_index = 2
+	spr.texture = tex
+	spr.region_enabled = true
+	spr.region_rect = Rect2(16, 0, 96, 192)
+	spr.position = Vector2(0, -66)
+	spr.scale = Vector2(1.854167, 1.8580729)
+	add_child(spr)
+	
+	_sprite_porta = spr
+	_base_region_rect = spr.region_rect
+	if _porta_aberta:
+		spr.region_rect.position.x = _base_region_rect.position.x + (3 * 128)
+
+func _obter_player() -> Node2D:
+	var players = get_tree().get_nodes_in_group("player")
+	for p in players:
+		if is_instance_valid(p):
+			return p
+	if get_tree() and get_tree().current_scene:
+		var p = get_tree().current_scene.get_node_or_null("Player")
+		if p and is_instance_valid(p):
+			return p
+	return null
 
 func _fechar_prompt_hub() -> void:
 	_aguardando_confirmacao = false
@@ -550,13 +720,15 @@ func _mostrar_prompt_hub() -> void:
 	
 	var label = Label.new()
 	var e_concluido = false
-	if get_node_or_null("/root/PlayerStats") and PlayerStats.get("vinhetas_desbloqueadas") != null:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.get("vinhetas_desbloqueadas") != null:
 		var andar_porta = 1
 		if hub_dungeon_name == "Física": andar_porta = 2
 		elif hub_dungeon_name == "Biologia": andar_porta = 3
-		e_concluido = PlayerStats.vinhetas_desbloqueadas.has(andar_porta)
+		e_concluido = ps.vinhetas_desbloqueadas.has(andar_porta)
 		
-	if DatabaseManager.active_dungeon == hub_dungeon_name:
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.active_dungeon == hub_dungeon_name:
 		label.text = "Deseja continuar o andar de " + hub_dungeon_name + "?"
 	elif e_concluido:
 		label.text = "Andar Concluído!\nDeseja explorar novamente o andar de " + hub_dungeon_name + "?"
@@ -578,12 +750,14 @@ func _mostrar_prompt_hub() -> void:
 		canvas.queue_free()
 		
 		# Salvar a escolha do jogador localmente na conta
-		DatabaseManager.active_dungeon = hub_dungeon_name
-		if DatabaseManager.has_method("salvar_progresso"):
-			DatabaseManager.salvar_progresso()
-		if get_node_or_null("/root/DungeonGenerator"):
-			DungeonGenerator.masmorra_retorno_hub = hub_dungeon_name
-			DungeonGenerator.resetar_masmorra(hub_dungeon_name)
+		if db:
+			db.active_dungeon = hub_dungeon_name
+			if db.has_method("salvar_progresso"):
+				db.salvar_progresso()
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg:
+			dg.masmorra_retorno_hub = hub_dungeon_name
+			dg.resetar_masmorra(hub_dungeon_name)
 		_transacionar_porta()
 	)
 	
@@ -609,36 +783,39 @@ func _mostrar_prompt_hub() -> void:
 func _transacionar_porta() -> void:
 	if _cooldown_ativo: return
 	_cooldown_ativo = true
+	_transicionando = true
 	
 	if not _porta_aberta:
 		await _abrir_porta_animacao()
 	
 	var cena_alvo = proxima_cena
-	if get_node_or_null("/root/DungeonGenerator"):
-		DungeonGenerator.vindo_de_porta_de_retorno = porta_de_retorno
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	var db = get_node_or_null("/root/DatabaseManager")
+	if dg:
+		dg.vindo_de_porta_de_retorno = porta_de_retorno
 		var s_path = ""
 		if get_tree() and get_tree().current_scene:
 			s_path = get_tree().current_scene.scene_file_path.to_lower()
 		if "biologia" in s_path or "estufa" in s_path:
-			DungeonGenerator.masmorra_retorno_hub = "Biologia"
-			if get_node_or_null("/root/DatabaseManager"):
-				DatabaseManager.active_dungeon = "Biologia"
+			dg.masmorra_retorno_hub = "Biologia"
+			if db:
+				db.active_dungeon = "Biologia"
 		elif "fisica" in s_path or "física" in s_path or "oficina" in s_path:
-			DungeonGenerator.masmorra_retorno_hub = "Física"
-			if get_node_or_null("/root/DatabaseManager"):
-				DatabaseManager.active_dungeon = "Física"
+			dg.masmorra_retorno_hub = "Física"
+			if db:
+				db.active_dungeon = "Física"
 		elif "alquimia" in s_path or "quimica" in s_path or "química" in s_path or "laborat" in s_path or "corredor" in s_path:
-			DungeonGenerator.masmorra_retorno_hub = "Química"
-			if get_node_or_null("/root/DatabaseManager"):
-				DatabaseManager.active_dungeon = "Química"
+			dg.masmorra_retorno_hub = "Química"
+			if db:
+				db.active_dungeon = "Química"
 	
-	if cena_alvo == "" and get_node_or_null("/root/DungeonGenerator"):
+	if cena_alvo == "" and dg:
 		var arquivo_sala = get_tree().current_scene.scene_file_path
 		if porta_de_retorno:
-			cena_alvo = DungeonGenerator.get_sala_anterior(arquivo_sala)
+			cena_alvo = dg.get_sala_anterior(arquivo_sala)
 		else:
 			if is_hub_door:
-				var d_name = DatabaseManager.active_dungeon
+				var d_name = db.active_dungeon if db else ""
 				if d_name == "Química":
 					cena_alvo = "res://scenes/Salas/Laboratório_Alquimia/Corredor_Alquimia.tscn"
 				elif d_name == "Física":
@@ -646,28 +823,34 @@ func _transacionar_porta() -> void:
 				elif d_name == "Biologia":
 					cena_alvo = "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"
 			else:
-				cena_alvo = DungeonGenerator.get_proxima_sala(arquivo_sala)
+				cena_alvo = dg.get_proxima_sala(arquivo_sala)
 			
 		print("[PortaTransicao] Indo para: ", cena_alvo)
 			
 	if cena_alvo != "":
 		# Sincronizar o índice do percurso no DungeonGenerator para a cena de destino
-		if get_node_or_null("/root/DungeonGenerator"):
-			DungeonGenerator.sincronizar_cena(cena_alvo)
+		if dg:
+			dg.sincronizar_cena(cena_alvo)
 
 		# Se tiver mensagem de entrada (Ex: Porta Aberta do Hub)
 		if mensagem_customizada != "":
 			_mostrar_feedback_hub(mensagem_customizada, Color(0.25, 0.65, 0.85, 0.9)) # Borda Azul
 			await get_tree().create_timer(0.4).timeout
 			
-		TransitionScreen.change_scene(cena_alvo, porta_de_retorno)
+		var ts = get_node_or_null("/root/TransitionScreen")
+		if ts:
+			ts.change_scene(cena_alvo, porta_de_retorno)
+		else:
+			get_tree().change_scene_to_file(cena_alvo)
 
 func _on_body_entered(body: Node2D) -> void:
 	if _cooldown_ativo:
 		return
-	if get_node_or_null("/root/TransitionScreen") and TransitionScreen.is_transitioning:
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts and ts.is_transitioning:
 		return
-	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
+	var qm = get_node_or_null("/root/QuizManager")
+	if qm and qm.em_batalha:
 		return
 		
 	if body.is_in_group("player") or body.name == "Player" or body.name.begins_with("Player"):
@@ -731,8 +914,9 @@ func _on_body_entered(body: Node2D) -> void:
 			var dev_liberado = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.get("liberar_portas_hub") == true
 			if not dev_liberado:
 				var active = ""
-				if get_node_or_null("/root/DatabaseManager"):
-					active = DatabaseManager.active_dungeon
+				var db = get_node_or_null("/root/DatabaseManager")
+				if db:
+					active = db.active_dungeon
 				if active != "" and active != hub_dungeon_name:
 					_mostrar_feedback_hub("Você já iniciou a expedição em " + active + "!\nConclua o andar para poder trocar de expedição.", Color(0.95, 0.45, 0.25, 0.95))
 					return
@@ -745,8 +929,9 @@ func _is_sala_boss() -> bool:
 	var cena_atual = ""
 	if get_tree() and get_tree().current_scene:
 		cena_atual = get_tree().current_scene.scene_file_path.to_lower()
-	if get_node_or_null("/root/DungeonGenerator"):
-		if DungeonGenerator.has_method("is_sala_boss") and DungeonGenerator.is_sala_boss(cena_atual):
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		if dg.has_method("is_sala_boss") and dg.is_sala_boss(cena_atual):
 			return true
 	return ("boss" in cena_atual) or ("fisica12" in cena_atual) or ("física12" in cena_atual) or ("biologia12" in cena_atual) or ("biologia04" in cena_atual)
 
@@ -761,8 +946,9 @@ func _obter_andar_atual() -> int:
 		return 3
 		
 	var d_name = ""
-	if get_node_or_null("/root/DatabaseManager"):
-		d_name = DatabaseManager.active_dungeon.to_lower()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db:
+		d_name = db.active_dungeon.to_lower()
 	if "física" in d_name or "fisica" in d_name:
 		return 2
 	elif "biologia" in d_name:
@@ -774,12 +960,14 @@ func _exibir_vinheta_boss(andar_id: int) -> void:
 		await _abrir_porta_animacao()
 		
 	# Conclui a masmorra ativa, liberando o jogador para escolher o próximo andar no Hub
-	if get_node_or_null("/root/DatabaseManager"):
-		DatabaseManager.active_dungeon = ""
-		if DatabaseManager.has_method("salvar_progresso"):
-			DatabaseManager.salvar_progresso()
-	if get_node_or_null("/root/DungeonGenerator"):
-		DungeonGenerator.masmorra_retorno_hub = ""
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db:
+		db.active_dungeon = ""
+		if db.has_method("salvar_progresso"):
+			db.salvar_progresso()
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		dg.masmorra_retorno_hub = ""
 		
 	var vinheta_cena = load("res://scenes/ui/vinheta_historia.tscn")
 	if vinheta_cena:
@@ -787,7 +975,8 @@ func _exibir_vinheta_boss(andar_id: int) -> void:
 		get_tree().root.add_child(vinheta)
 		vinheta.iniciar_vinheta(andar_id)
 	else:
-		if get_node_or_null("/root/TransitionScreen"):
-			TransitionScreen.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+		var ts = get_node_or_null("/root/TransitionScreen")
+		if ts:
+			ts.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
 		else:
 			get_tree().change_scene_to_file("res://scenes/Salas/Comum/Hub_Geral.tscn")

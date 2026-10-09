@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://dml4ed26rhgq3" path="res://assets/sprites/Characters/Flor/Florzinha.png" id="1_q2xx0"]
 [ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_lhqpj"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="3_enemy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ykq62"]
 atlas = ExtResource("1_q2xx0")
@@ -54,6 +55,10 @@ height = 54.0
 radius = 28.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=218315084]
+script = ExtResource("3_enemy")
+vida_maxima = 100.0
+velocidade = 46.0
+dano = 24.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2110509373]
 sprite_frames = SubResource("SpriteFrames_ibho5")

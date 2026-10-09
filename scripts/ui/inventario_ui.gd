@@ -508,6 +508,10 @@ func _atualizar_listas() -> void:
 			icone = load("res://assets/sprites/ui/item_bateria.png")
 		elif nome == "Fragmento de Chip":
 			icone = load("res://assets/sprites/ui/item_chip.png")
+		elif nome == "Chip de DNA" or "DNA" in nome:
+			icone = load("res://assets/sprites/ui/item_chip_dna.png")
+		elif nome == "Flor Rara" or "Flor" in nome:
+			icone = load("res://assets/sprites/ui/item_flor_rara.png")
 			
 		var item_display = item_base.duplicate()
 		item_display["qtd"] = qtd
@@ -720,6 +724,10 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 			icone_item = load("res://assets/sprites/ui/item_bateria.png")
 		elif item["nome"] == "Fragmento de Chip":
 			icone_item = load("res://assets/sprites/ui/item_chip.png")
+		elif item["nome"] == "Chip de DNA" or "DNA" in item["nome"]:
+			icone_item = load("res://assets/sprites/ui/item_chip_dna.png")
+		elif item["nome"] == "Flor Rara" or "Flor" in item["nome"]:
+			icone_item = load("res://assets/sprites/ui/item_flor_rara.png")
 			
 		if img_detalhe_icone:
 			img_detalhe_icone.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

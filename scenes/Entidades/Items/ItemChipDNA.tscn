@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://chip_dna_item01"]
+
+[ext_resource type="Script" path="res://scripts/ItemChipDNA.gd" id="1_chip"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/chip_dna.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dna"]
+radius = 26.0
+
+[node name="ItemChipDNA" type="Area2D"]
+z_index = 2
+collision_layer = 0
+collision_mask = 15
+script = ExtResource("1_chip")
+nome_item = "Chip de DNA"
+descricao_item = "Um microdispositivo genético contendo sequências celulares da flora arcana."
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(1.0, 1.0)
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_dna")

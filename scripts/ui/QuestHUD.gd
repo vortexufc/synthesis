@@ -43,7 +43,9 @@ func _atualizar_hud() -> void:
 		"cientista_quest1": {"titulo": "Livros do Cientista", "item": "Livro de Fórmulas", "qtd": 5},
 		"cientista_quest2": {"titulo": "Gelatina do Cientista", "item": "Fragmento de Gelatina", "qtd": 5},
 		"fisica_quest1": {"titulo": "Baterias do Engenheiro", "item": "Bateria Elétrica", "qtd": 5},
-		"fisica_quest2": {"titulo": "Chips do Engenheiro", "item": "Fragmento de Chip", "qtd": 5}
+		"fisica_quest2": {"titulo": "Chips do Engenheiro", "item": "Fragmento de Chip", "qtd": 5},
+		"biologia_quest1": {"titulo": "Flores da Botânica", "item": "Flor Rara", "qtd": 5},
+		"biologia_quest2": {"titulo": "Chips de DNA Vegetal", "item": "Chip de DNA", "qtd": 5}
 	}
 	
 	# Remover cards de quests que não estão mais ativas

@@ -14,6 +14,8 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_qjbvw"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_bm3yc"]
 [ext_resource type="Script" path="res://scripts/levels/sala_biologia.gd" id="1_sala_bio"]
+[ext_resource type="Texture2D" uid="uid://d0lft226afsts" path="res://assets/sprites/tilesets/Biologia/porta.png" id="tex_biologia_porta"]
+[ext_resource type="PackedScene" uid="uid://npc_biologia01" path="res://scenes/Entidades/NPCBiologia.tscn" id="14_npc_bio"]
 
 [node name="Node2D" type="Node2D" unique_id=421101023]
 script = ExtResource("1_sala_bio")
@@ -34,7 +36,7 @@ tile_set = ExtResource("3_feh3b")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("4_aomgp")]
 z_index = 4
-position = Vector2(430, 747)
+position = Vector2(448, 664)
 scale = Vector2(1.2, 1.2)
 
 [node name="Node" type="Node" parent="." unique_id=819991200]
@@ -112,8 +114,48 @@ stretch_mode = 5
 [node name="PortaTransicao" parent="." unique_id=1120561421 instance=ExtResource("13_bm3yc")]
 position = Vector2(437, -31)
 proxima_cena = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn"
+frames_animacao = 4
+stride_animacao = 128
+
+[node name="FundoPreto" type="ColorRect" parent="PortaTransicao"]
+z_index = 1
+offset_left = -59.0
+offset_top = -181.0
+offset_right = 66.0
+offset_bottom = 45.0
+color = Color(0.08, 0.09, 0.11, 1)
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao"]
+z_index = 2
+position = Vector2(4, -66)
+scale = Vector2(1.854167, 1.8580729)
+texture = ExtResource("tex_biologia_porta")
+region_enabled = true
+region_rect = Rect2(16, 0, 96, 192)
 
 [node name="PortaRetorno" parent="." unique_id=1877277594 instance=ExtResource("13_bm3yc")]
-position = Vector2(448, 827)
+position = Vector2(448, 1024)
 proxima_cena = "res://scenes/Salas/Comum/Hub_Geral.tscn"
 porta_de_retorno = true
+frames_animacao = 4
+stride_animacao = 128
+
+[node name="FundoPreto" type="ColorRect" parent="PortaRetorno"]
+z_index = 1
+offset_left = -59.0
+offset_top = -181.0
+offset_right = 66.0
+offset_bottom = 45.0
+color = Color(0.08, 0.09, 0.11, 1)
+
+[node name="SpritePorta" type="Sprite2D" parent="PortaRetorno"]
+z_index = 2
+position = Vector2(4, -66)
+scale = Vector2(1.854167, 1.8580729)
+texture = ExtResource("tex_biologia_porta")
+region_enabled = true
+region_rect = Rect2(16, 0, 96, 192)
+
+[node name="NPCBiologia" parent="." unique_id=987654321 instance=ExtResource("14_npc_bio")]
+position = Vector2(400, 460)
+usar_angulo_isometrico = true

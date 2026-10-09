@@ -230,7 +230,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
-text = "• Felipe Kauan\n• Davi"
+text = "• Felipe Kauan"
 
 [node name="PanelAudio" type="PanelContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/GridEquipe" unique_id=987001026]
 layout_mode = 2

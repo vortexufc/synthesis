@@ -69,6 +69,12 @@ body {
 	outline: none;
 }
 
+/* Proteção ergonômica contra badges externos de hospedagem (ex: Netlify) */
+iframe[src*="netlify"], div[class*="netlify"], a[href*="netlify.com"] {
+	opacity: 0.25 !important;
+	pointer-events: none !important;
+}
+
 #status {
 	position: absolute;
 	top: 0;

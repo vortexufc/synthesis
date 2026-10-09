@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://cspjrbidaybsw" path="res://assets/sprites/Characters/Cogumelo/cogumelo.png" id="1_2dggt"]
 [ext_resource type="Script" uid="uid://by8rhj44yjfu8" path="res://scripts/enemy_trigger.gd" id="2_e4kgq"]
+[ext_resource type="Script" uid="uid://fff2ynw7u3o5" path="res://scripts/enemy.gd" id="3_enemy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_e4kgq"]
 atlas = ExtResource("1_2dggt")
@@ -167,6 +168,10 @@ height = 114.0
 radius = 54.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1698167466]
+script = ExtResource("3_enemy")
+vida_maxima = 65.0
+velocidade = 45.0
+dano = 16.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2003832849]
 scale = Vector2(2, 2)

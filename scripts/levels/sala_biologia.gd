@@ -10,19 +10,69 @@ var _chave_dropada: bool = false
 # ativa o drop de chave ao derrotar o ultimo monstro da sala
 @export var dropar_chave_no_ultimo_monstro: bool = false
 
+const POSICOES_FLORES = {
+	"Sala_Biologia01": {"pos": Vector2(200, 1100), "cor": "amarela"},
+	"Sala_Biologia02": {"pos": Vector2(400, 600), "cor": "azul"},
+	"Sala_Biologia03": {"pos": Vector2(600, 500), "cor": "roxa"},
+	"Sala_Biologia04": {"pos": Vector2(500, 800), "cor": "laranja"},
+	"Sala_Biologia05": {"pos": Vector2(450, 650), "cor": "vermelha"},
+	"Sala_Biologia06": {"pos": Vector2(700, 700), "cor": "amarela"},
+	"Sala_Biologia07": {"pos": Vector2(380, 550), "cor": "azul"},
+	"Sala_Biologia08": {"pos": Vector2(550, 750), "cor": "roxa"},
+	"Sala_Biologia09": {"pos": Vector2(480, 620), "cor": "laranja"},
+	"Sala_Biologia10": {"pos": Vector2(620, 800), "cor": "vermelha"},
+	"Sala_Biologia11": {"pos": Vector2(400, 700), "cor": "azul"},
+}
+
 func _ready() -> void:
-	if get_node_or_null("/root/DatabaseManager"):
-		DatabaseManager.active_dungeon = "Biologia"
-	if get_node_or_null("/root/DungeonGenerator"):
-		DungeonGenerator.masmorra_retorno_hub = "Biologia"
-		# consulta o DungeonGenerator para saber se essa sala usa chave
-		dropar_chave_no_ultimo_monstro = DungeonGenerator.sala_usa_chave(scene_file_path)
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db:
+		db.active_dungeon = "Biologia"
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg:
+		dg.masmorra_retorno_hub = "Biologia"
+		dropar_chave_no_ultimo_monstro = dg.sala_usa_chave(scene_file_path)
 		print("[Sala Biologia] dropar_chave_no_ultimo_monstro = ", dropar_chave_no_ultimo_monstro, " para ", scene_file_path)
 		
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.start_playlist()
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.start_playlist()
 		
 	_iniciar_sistema_inimigos_e_portas()
+	_spawn_flor_rara_se_necessario()
+
+func _spawn_flor_rara_se_necessario() -> void:
+	var cena_nome = ""
+	if scene_file_path:
+		cena_nome = scene_file_path.get_file().get_basename()
+	elif name:
+		cena_nome = name
+		
+	if not POSICOES_FLORES.has(cena_nome):
+		return
+		
+	var item_id = "FlorRara::" + cena_nome
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.is_item_coletado(item_id):
+		return
+		
+	# Checa se ja tem na cena
+	for child in get_children():
+		if child.name.begins_with("ItemFlorRara"):
+			return
+			
+	var cena_flor = load("res://scenes/Entidades/Items/ItemFlorRara.tscn") as PackedScene
+	if not cena_flor:
+		return
+		
+	var info = POSICOES_FLORES[cena_nome]
+	var flor_inst = cena_flor.instantiate()
+	flor_inst.name = "ItemFlorRara"
+	flor_inst.id_unico = item_id
+	if "tipo_cor" in flor_inst:
+		flor_inst.tipo_cor = info["cor"]
+	flor_inst.position = info["pos"]
+	add_child(flor_inst)
 
 func _iniciar_sistema_inimigos_e_portas() -> void:
 	var inimigos = get_tree().get_nodes_in_group("inimigos")
@@ -42,6 +92,7 @@ func _iniciar_sistema_inimigos_e_portas() -> void:
 			if not child.is_queued_for_deletion() and not child.is_in_group("player") and child.name != "Player" and not child.name.begins_with("Player"):
 				if child.has_node("EnemyTrigger") or child.name.begins_with("Slime") or child.name.begins_with("Robo") or (child is CharacterBody2D):
 					count += 1
+					child.add_to_group("inimigos")
 					if child.has_signal("inimigo_derrotado") and not child.inimigo_derrotado.is_connected(_on_inimigo_derrotado):
 						child.inimigo_derrotado.connect(_on_inimigo_derrotado)
 					elif child.has_node("EnemyTrigger"):
