@@ -202,12 +202,14 @@ func carregar():
 			
 			var dg_load = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
 			if dg_load:
-				for p in portas_destrancadas:
-					if not (p in dg_load.portas_destrancadas):
-						dg_load.portas_destrancadas.append(p)
-				for i in inimigos_derrotados:
-					if not (i in dg_load.inimigos_derrotados):
-						dg_load.inimigos_derrotados.append(i)
+				if "portas_destrancadas" in dg_load and dg_load.portas_destrancadas != null:
+					for p in portas_destrancadas:
+						if not (p in dg_load.portas_destrancadas):
+							dg_load.portas_destrancadas.append(p)
+				if "inimigos_derrotados" in dg_load and dg_load.inimigos_derrotados != null:
+					for i in inimigos_derrotados:
+						if not (i in dg_load.inimigos_derrotados):
+							dg_load.inimigos_derrotados.append(i)
 			
 			_normalizar_itens()
 			vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
