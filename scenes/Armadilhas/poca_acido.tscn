@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://poca_acido_01"]
 
 [ext_resource type="Script" path="res://scripts/armadilhas/poca_acido.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/sprites/Particles/bolha_caveira_toxica.png" id="2_caveira"]
+[ext_resource type="Texture2D" path="res://assets/sprites/Particles/caveira_toxica.png" id="2_caveira"]
 
 [sub_resource type="Gradient" id="Gradient_poca"]
 offsets = PackedFloat32Array(0, 0.45, 0.75, 1)

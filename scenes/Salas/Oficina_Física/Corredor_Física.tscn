@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_r7uls"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="15_5gi3m"]
 [ext_resource type="Script" path="res://scripts/levels/corredor_fisica.gd" id="1_corredor_fisica_script"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/NPCs/NPCFisica.tscn" id="16_npc_fisica"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rq110"]
 texture = ExtResource("1_g0k76")
@@ -467,3 +468,7 @@ orientacao = 1
 [node name="LuminariaLeste2" parent="Luminarias" unique_id=303497319 instance=ExtResource("15_5gi3m")]
 position = Vector2(669, 1620)
 orientacao = 2
+
+[node name="NPCFisica" parent="." unique_id=1810303523 instance=ExtResource("16_npc_fisica")]
+position = Vector2(495, 960)
+usar_angulo_isometrico = true

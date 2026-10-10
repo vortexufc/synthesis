@@ -1,7 +1,9 @@
 [gd_scene format=3 uid="uid://mercador01"]
 
 [ext_resource type="Script" uid="uid://bc18tt5y3uu5h" path="res://scripts/NPCMercador.gd" id="1_merc"]
-[ext_resource type="Texture2D" uid="uid://w304sn41pr27" path="res://assets/sprites/Characters/npcmercador.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://dqt1qfqonu4ly" path="res://assets/sprites/Characters/npc_mago.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://dxngte5fixvcd" path="res://assets/sprites/Characters/Maguinho/shadow.png" id="3_shadow"]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_merc"]
 radius = 80.0
 
@@ -10,11 +12,20 @@ collision_layer = 0
 collision_mask = 15
 script = ExtResource("1_merc")
 
+[node name="Shadow" type="Sprite2D" parent="." unique_id=987162544]
+z_index = 0
+position = Vector2(0, 0)
+scale = Vector2(1.8, 1.0)
+texture = ExtResource("3_shadow")
+modulate = Color(1, 1, 1, 0.65)
+
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1817003984]
+texture_filter = 1
 z_index = 1
-position = Vector2(0, -20)
-scale = Vector2(0.25, 0.25)
+position = Vector2(0, -48)
+scale = Vector2(1.6, 1.6)
 texture = ExtResource("2_tex")
+hframes = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1296786263]
 shape = SubResource("CircleShape2D_merc")

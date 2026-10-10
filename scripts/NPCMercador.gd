@@ -14,13 +14,13 @@ func _quando_corpo_sai(corpo: Node2D) -> void:
 		_esconder_prompt()
 		_fechar_loja()
 
-
 var _balao_interacao: Node2D = null
 var _indicador_loja: Control = null
 var _tempo_anim: float = 0.0
-var _base_balao_y: float = -95.0
-var _base_icone_y: float = -115.0
-var _curr_icone_y: float = -115.0
+var _tempo_anim_mago: float = 0.0
+var _base_balao_y: float = -140.0
+var _base_icone_y: float = -165.0
+var _curr_icone_y: float = -165.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -40,11 +40,18 @@ func _process(delta: float) -> void:
 		_balao_interacao.position.y = _base_balao_y + flutuacao
 		
 	if _indicador_loja:
-		var alvo_y = (_base_balao_y - 50.0) if player_perto else _base_icone_y
+		var alvo_y = (_base_balao_y - 45.0) if player_perto else _base_icone_y
 		_curr_icone_y = lerp(_curr_icone_y, alvo_y, delta * 12.0)
 		_indicador_loja.position.y = _curr_icone_y + flutuacao
 		var pulso = 1.0 + sin(_tempo_anim * 4.5) * 0.1
 		_indicador_loja.scale = Vector2(pulso, pulso)
+
+	# Animaçãozinha do Mago (respiração suave, movimento da túnica e pulso místico no orbe)
+	var sprite = get_node_or_null("Sprite2D") as Sprite2D
+	if sprite and sprite.hframes > 1:
+		_tempo_anim_mago += delta
+		# 4.0 FPS para uma animação contemplativa fluida
+		sprite.frame = int(_tempo_anim_mago * 4.0) % sprite.hframes
 
 func _criar_balao_e_indicadores() -> void:
 	# balao de interacao [F]
@@ -109,8 +116,9 @@ func _mostrar_prompt() -> void:
 		_balao_interacao.visible = true
 		var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_property(_balao_interacao, "scale", Vector2(1.0, 1.0), 0.22)
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("ui-1")
 
 func _esconder_prompt() -> void:
 	if _balao_interacao:

@@ -47,7 +47,9 @@ func _garantir_bolhas_caveira() -> void:
 	bolhas_caveira.scale_amount_min = 0.70
 	bolhas_caveira.scale_amount_max = 1.05
 	
-	var tex = load("res://assets/sprites/Particles/bolha_caveira_toxica.png")
+	var tex = load("res://assets/sprites/Particles/caveira_toxica.png")
+	if not tex:
+		tex = load("res://assets/sprites/Particles/bolha_caveira_toxica.png")
 	if tex:
 		bolhas_caveira.texture = tex
 		
@@ -125,6 +127,9 @@ func _aplicar_dano_acido() -> void:
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-2")
 			
+		# efeito visual de dano: caveira ácida subindo sobre o jogador
+		_spawn_efeito_dano_caveira(_player_dentro)
+			
 		# borbulha mais e solta mais caveirinhas quando o jogador pisa no ácido
 		if bolhas:
 			bolhas.amount = 16
@@ -142,3 +147,37 @@ func _aplicar_dano_acido() -> void:
 					bolhas_caveira.amount = 2
 					bolhas_caveira.speed_scale = 1.0
 			)
+
+func _spawn_efeito_dano_caveira(alvo: Node2D) -> void:
+	if not alvo or not is_instance_valid(alvo):
+		return
+	var tex = load("res://assets/sprites/Particles/caveira_toxica.png") as Texture2D
+	if not tex:
+		tex = load("res://assets/sprites/Particles/bolha_caveira_toxica.png") as Texture2D
+	if not tex:
+		return
+		
+	var spr = Sprite2D.new()
+	spr.texture = tex
+	spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	spr.z_index = 100
+	spr.global_position = alvo.global_position + Vector2(randf_range(-8.0, 8.0), -22.0)
+	spr.scale = Vector2(0.45, 0.45)
+	spr.modulate = Color(0.65, 1.0, 0.35, 0.0)
+	
+	var parent_node = get_tree().current_scene if get_tree() and get_tree().current_scene else get_parent()
+	if parent_node:
+		parent_node.add_child(spr)
+	else:
+		add_child(spr)
+		
+	var tw = spr.create_tween().set_parallel(true)
+	tw.tween_property(spr, "scale", Vector2(1.25, 1.25), 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(spr, "modulate:a", 1.0, 0.14)
+	tw.tween_property(spr, "global_position:y", spr.global_position.y - 40.0, 0.70).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(spr, "global_position:x", spr.global_position.x + randf_range(-12.0, 12.0), 0.70)
+	
+	var tw_fade = spr.create_tween()
+	tw_fade.tween_interval(0.32)
+	tw_fade.tween_property(spr, "modulate", Color(0.75, 0.25, 0.95, 0.0), 0.38)
+	tw_fade.tween_callback(spr.queue_free)

@@ -255,6 +255,39 @@ theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
 text = "• Davi"
 
+[node name="PanelOrientador" type="PanelContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain" unique_id=987001034]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_RoleBox")
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/PanelOrientador" unique_id=987001035]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Cargo" type="Label" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/PanelOrientador/HBox" unique_id=987001036]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_fonts/font = ExtResource("2_font_title")
+theme_override_font_sizes/font_size = 11
+text = "🎓 PROFESSOR ORIENTADOR"
+vertical_alignment = 1
+
+[node name="Separador" type="Label" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/PanelOrientador/HBox" unique_id=987001037]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.65, 0.9, 0.8)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 18
+text = "•"
+vertical_alignment = 1
+
+[node name="Nome" type="Label" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/PanelOrientador/HBox" unique_id=987001038]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_font_body")
+theme_override_font_sizes/font_size = 18
+text = "Rafael Ivo"
+vertical_alignment = 1
+
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain" unique_id=987001030]
 layout_mode = 2
 

@@ -9,7 +9,7 @@ var id_unico: String = ""
 @export var dano: float = 70.0
 
 @onready var sprite: Sprite2D = get_node_or_null("BauSprite")
-var tex_aberto: AtlasTexture = null
+var tex_mimico: Texture2D = preload("res://assets/sprites/items/bau_mimico.png")
 
 func _obter_id_unico() -> String:
 	if id_unico != "":
@@ -30,11 +30,8 @@ func _ready() -> void:
 		return
 		
 	body_entered.connect(_on_body_entered)
-	var base_tex = load("res://assets/sprites/tilesets/Alquimia/OBJETOS.png")
-	if base_tex:
-		tex_aberto = AtlasTexture.new()
-		tex_aberto.atlas = base_tex
-		tex_aberto.region = Rect2(1024, 528, 48, 48)
+	if sprite:
+		sprite.texture = tex_mimico
 
 func _on_body_entered(body: Node2D) -> void:
 	if ja_ativado:
@@ -62,13 +59,16 @@ func _sequencia_mimico(player: Node2D) -> void:
 		$StaticBody2D/CollisionShape2D.set_deferred("disabled", false)
 
 	# animacao do bau abrindo e mordendo
-	if sprite and tex_aberto:
-		sprite.texture = tex_aberto
-		sprite.self_modulate = Color(2.0, 0.35, 0.35)
+	if sprite:
+		sprite.texture = tex_mimico
+		sprite.self_modulate = Color(2.4, 0.4, 0.4)
 		var tw_m = create_tween().set_loops(4)
-		tw_m.tween_property(sprite, "rotation", deg_to_rad(6.0), 0.06)
-		tw_m.tween_property(sprite, "rotation", deg_to_rad(-6.0), 0.06)
-		tw_m.tween_property(sprite, "rotation", 0.0, 0.06)
+		tw_m.tween_property(sprite, "scale", Vector2(1.15, 0.8), 0.05).set_trans(Tween.TRANS_QUAD)
+		tw_m.tween_property(sprite, "scale", Vector2(0.9, 1.25), 0.05).set_trans(Tween.TRANS_BACK)
+		tw_m.tween_property(sprite, "rotation", deg_to_rad(7.0), 0.04)
+		tw_m.tween_property(sprite, "rotation", deg_to_rad(-7.0), 0.04)
+		tw_m.tween_property(sprite, "rotation", 0.0, 0.04)
+		tw_m.tween_property(sprite, "scale", Vector2.ONE, 0.05)
 
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-2")
@@ -213,6 +213,14 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 	btn_x.add_theme_stylebox_override("hover", sb_x_hover)
 	btn_x.add_theme_stylebox_override("pressed", sb_x_hover)
 	hbox_top.add_child(btn_x)
+
+	var icon_mimico = TextureRect.new()
+	icon_mimico.texture = tex_mimico
+	icon_mimico.custom_minimum_size = Vector2(56, 56)
+	icon_mimico.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_mimico.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_mimico.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vbox.add_child(icon_mimico)
 
 	# Mensagem descritiva
 	var lbl_desc = Label.new()

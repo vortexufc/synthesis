@@ -24,6 +24,21 @@ func _obter_id_unico() -> String:
 	var pai_nome = get_parent().name if get_parent() else ""
 	return "%s::%s/%s@%s" % [cena_path, pai_nome, name, pos_str]
 
+var _tempo_anim_moeda: float = 0.0
+
+func _process(delta: float) -> void:
+	var sprite = get_node_or_null("Sprite2D") as Sprite2D
+	if sprite and sprite.hframes > 1:
+		_tempo_anim_moeda += delta
+		# Ciclo do brilho da moeda: passa pelos 5 frames a 7.5 FPS (~0.66s), pausa 1.4s, e repete
+		var duracao_brilho = 5.0 / 7.5
+		var intervalo_total = duracao_brilho + 1.4
+		var t = fmod(_tempo_anim_moeda, intervalo_total)
+		if t < duracao_brilho:
+			sprite.frame = int(t * 7.5) % sprite.hframes
+		else:
+			sprite.frame = 4 # frame neutro/estável
+
 func _physics_process(delta: float) -> void:
 	if not coletavel or _coletado:
 		return
@@ -42,7 +57,8 @@ func _ready() -> void:
 	if not is_drop_dinamico:
 		if id_unico == "":
 			id_unico = _obter_id_unico()
-		if get_node_or_null("/root/PlayerStats") and PlayerStats.is_item_coletado(id_unico):
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.is_item_coletado(id_unico):
 			queue_free()
 			return
 
@@ -123,9 +139,9 @@ func _iniciar_efeito_brilho() -> void:
 		_criar_sombra()
 		if _shadow:
 			var tw_s = create_tween().set_loops()
-			tw_s.tween_property(_shadow, "scale", Vector2(1.30, 0.70), 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			tw_s.tween_property(_shadow, "scale", Vector2(1.00, 0.55), 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.65, 0.85)
-			tw_s.tween_property(_shadow, "scale", Vector2(1.65, 0.95), 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			tw_s.tween_property(_shadow, "scale", Vector2(1.25, 0.75), 0.85).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.90, 0.85)
 
 var _shadow: Sprite2D = null
@@ -142,8 +158,8 @@ func _criar_sombra() -> void:
 	var tex_shadow = load("res://assets/sprites/Characters/Maguinho/shadow.png") as Texture2D
 	if tex_shadow:
 		_shadow.texture = tex_shadow
-		_shadow.position = Vector2(0, 44)
-		_shadow.scale = Vector2(1.5, 0.85)
+		_shadow.position = Vector2(0, 20)
+		_shadow.scale = Vector2(1.15, 0.65)
 		_shadow.modulate = Color(1.0, 1.0, 1.0, 0.85)
 		_shadow.z_as_relative = false
 		_shadow.z_index = 1
@@ -158,9 +174,10 @@ func _criar_sombra() -> void:
 		var tex_glow = load("res://assets/sprites/ui/glow_yellow.png") as Texture2D
 		if tex_glow:
 			luz.texture = tex_glow
-			luz.texture_scale = 0.35
+			luz.texture_scale = 0.28
+			luz.position = Vector2(0, 4)
 			luz.color = Color(1.0, 0.85, 0.35)
-			luz.energy = 0.65
+			luz.energy = 0.55
 			add_child(luz)
 
 func _verificar_coleta_imediata() -> void:
@@ -177,11 +194,12 @@ func _coletar(corpo: Node2D) -> void:
 		coletavel = false
 		
 		var ganho = valor_custom if valor_custom > 0 else randi_range(3, 5)
-		if get_node_or_null("/root/PlayerStats"):
-			PlayerStats.moedas += ganho
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps:
+			ps.moedas += ganho
 			if not is_drop_dinamico and id_unico != "":
-				PlayerStats.registrar_item_coletado(id_unico)
-			PlayerStats.salvar()
+				ps.registrar_item_coletado(id_unico)
+			ps.salvar()
 			
 		# Combo escalonado de som
 		var agora = Time.get_ticks_msec() / 1000.0
@@ -192,11 +210,12 @@ func _coletar(corpo: Node2D) -> void:
 		_ultimo_tempo_moeda = agora
 		
 		var pitch = 1.0 + (_combo_moedas * 0.08)
-		if get_node_or_null("/root/AudioManager"):
-			if AudioManager.has_method("play_sfx_pitch"):
-				AudioManager.play_sfx_pitch("moedas", pitch)
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			if am.has_method("play_sfx_pitch"):
+				am.play_sfx_pitch("moedas", pitch)
 			else:
-				AudioManager.play_sfx("moedas")
+				am.play_sfx("moedas")
 				
 		_exibir_texto_flutuante_moeda(ganho)
 			

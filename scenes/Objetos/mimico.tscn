@@ -1,14 +1,10 @@
-[gd_scene format=4]
+[gd_scene load_steps=5 format=3 uid="uid://mimico_objeto_01"]
 
-[ext_resource type="Script" uid="uid://d2lgndoapt4jk" path="res://scripts/mimico.gd" id="1_mimico"]
-[ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_chest"]
+[ext_resource type="Script" path="res://scripts/mimico.gd" id="1_mimico"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/bau_mimico.png" id="2_bau_mimico"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mimico"]
 size = Vector2(40, 34)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_chest_closed"]
-atlas = ExtResource("2_chest")
-region = Rect2(1024, 336, 48, 48)
 
 [node name="Mimico" type="Area2D"]
 scale = Vector2(1.25, 1.25)
@@ -18,7 +14,8 @@ script = ExtResource("1_mimico")
 shape = SubResource("RectangleShape2D_mimico")
 
 [node name="BauSprite" type="Sprite2D" parent="."]
-texture = SubResource("AtlasTexture_chest_closed")
+texture_filter = 1
+texture = ExtResource("2_bau_mimico")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 collision_layer = 1

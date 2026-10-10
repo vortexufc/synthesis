@@ -109,11 +109,15 @@ func _configurar_sistema_iluminacao() -> void:
 		_luz_cajado = PointLight2D.new()
 		_luz_cajado.name = "LuzCajadoArcano"
 		_luz_cajado.texture = tex_luz
-		_luz_cajado.color = Color(0.15, 0.70, 1.0, 1.0) # Azul celeste místico
-		_luz_cajado.energy = 0.18
-		_luz_cajado.texture_scale = 0.35 # Raio compacto apenas no orbe, sem lavar o chão
-		_luz_cajado.position = Vector2(46, -58) # Posição exata do orbe no cajado
+		_luz_cajado.color = Color(0.20, 0.75, 1.0, 1.0) # Azul celeste místico
+		_luz_cajado.energy = 0.28
+		_luz_cajado.texture_scale = 0.40 # Raio compacto no orbe
+		_luz_cajado.position = Vector2(-28, -90) # Posição exata do orbe no novo sprite
 		mercador.add_child(_luz_cajado)
+		
+		var tw_luz = create_tween().set_loops()
+		tw_luz.tween_property(_luz_cajado, "energy", 0.40, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw_luz.tween_property(_luz_cajado, "energy", 0.22, 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	
 	# luz no pe do player
 	var player = find_child("Player", true, false)

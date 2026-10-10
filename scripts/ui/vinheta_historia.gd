@@ -12,8 +12,14 @@ var _animando_transicao: bool = false
 var _tween_conteudo: Tween = null
 var _texto_quadro_atual: String = ""
 
+const SCROLL_WIDTH: float = 580.0
+const SCROLL_HEIGHT_OPEN: float = 650.0
+const SCROLL_HEIGHT_CLOSED: float = 96.0
+
 # Nós do pergaminho vertical e seu conteúdo
 var _bg_tex: TextureRect = null
+var _scroll_wrapper: Control = null
+var _container_clipping: Control = null
 var _scroll_rect: NinePatchRect = null
 var _center_pergaminho: CenterContainer = null
 var _container_conteudo: MarginContainer = null
@@ -195,6 +201,31 @@ func _obter_textura(caminho: String) -> Texture2D:
 			return ImageTexture.create_from_image(img)
 	return null
 
+func _obter_textura_pergaminho() -> Texture2D:
+	var tex = _obter_textura("res://assets/sprites/pergaminho_vertical_4x.png")
+	if tex:
+		return tex
+	tex = _obter_textura("res://assets/sprites/pergaminho_vertical.png")
+	if tex:
+		return tex
+	# Caso exista pergaminho2.png na raiz ou em assets, extrai o Frame 0
+	for p in ["res://pergaminho2.png", "res://assets/sprites/pergaminho2.png"]:
+		var p_abs = ProjectSettings.globalize_path(p)
+		if FileAccess.file_exists(p_abs):
+			var img = Image.load_from_file(p_abs)
+			if img:
+				var f0 = img.get_region(Rect2i(0, 0, 64, 64))
+				f0.resize(256, 256, Image.INTERPOLATE_NEAREST)
+				return ImageTexture.create_from_image(f0)
+	return null
+
+func _definir_altura_scroll(altura: float) -> void:
+	if _scroll_rect and is_instance_valid(_scroll_rect):
+		_scroll_rect.size.y = altura
+	if _container_clipping and is_instance_valid(_container_clipping):
+		_container_clipping.size.y = altura
+
+
 func _obter_textura_fundo_andar(andar_id: int) -> Texture2D:
 	var caminhos = []
 	match andar_id:
@@ -265,34 +296,48 @@ func _construir_layout() -> void:
 	_center_pergaminho.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_center_pergaminho)
 	
-	# O Grande Pergaminho vertical desenrolado com papiro largo e hastes de madeira
-	var tex_scroll = _obter_textura("res://assets/sprites/pergaminho_vertical_4x.png")
-	if not tex_scroll:
-		tex_scroll = _obter_textura("res://assets/sprites/pergaminho_vertical.png")
+	# Invólucro que garante o topo do pergaminho 100% ancorado e fixo no mesmo ponto da tela
+	_scroll_wrapper = Control.new()
+	_scroll_wrapper.name = "PergaminhoWrapper"
+	_scroll_wrapper.custom_minimum_size = Vector2(SCROLL_WIDTH, SCROLL_HEIGHT_OPEN)
+	_scroll_wrapper.size = Vector2(SCROLL_WIDTH, SCROLL_HEIGHT_OPEN)
+	_center_pergaminho.add_child(_scroll_wrapper)
+	
+	# O Grande Pergaminho vertical desenrolado com papiro largo e hastes de madeira de pergaminho2.png
+	var tex_scroll = _obter_textura_pergaminho()
 		
 	_scroll_rect = NinePatchRect.new()
 	_scroll_rect.name = "PergaminhoScroll"
-	_scroll_rect.custom_minimum_size = Vector2(580, 650)
+	_scroll_rect.custom_minimum_size = Vector2(SCROLL_WIDTH, 0)
+	_scroll_rect.size = Vector2(SCROLL_WIDTH, SCROLL_HEIGHT_OPEN)
 	_scroll_rect.texture = tex_scroll
-	_scroll_rect.patch_margin_left = 44
+	_scroll_rect.patch_margin_left = 60
 	_scroll_rect.patch_margin_top = 48
-	_scroll_rect.patch_margin_right = 44
+	_scroll_rect.patch_margin_right = 60
 	_scroll_rect.patch_margin_bottom = 48
 	_scroll_rect.axis_stretch_horizontal = NinePatchRect.AXIS_STRETCH_MODE_STRETCH
 	_scroll_rect.axis_stretch_vertical = NinePatchRect.AXIS_STRETCH_MODE_STRETCH
 	_scroll_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_scroll_rect.pivot_offset = Vector2(290, 0)
-	_center_pergaminho.add_child(_scroll_rect)
+	_scroll_wrapper.add_child(_scroll_rect)
+	
+	# Container com recorte que acompanha o desenrolar e recolher da haste inferior
+	_container_clipping = Control.new()
+	_container_clipping.name = "ContainerClipping"
+	_container_clipping.custom_minimum_size = Vector2(SCROLL_WIDTH, 0)
+	_container_clipping.size = Vector2(SCROLL_WIDTH, SCROLL_HEIGHT_OPEN)
+	_container_clipping.clip_contents = true
+	_scroll_wrapper.add_child(_container_clipping)
 	
 	# Margens seguras: todo o texto fica 100% contido sobre o papiro claro, sem nunca vazar para fora
 	_container_conteudo = MarginContainer.new()
 	_container_conteudo.name = "ContainerConteudo"
-	_container_conteudo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_container_conteudo.custom_minimum_size = Vector2(SCROLL_WIDTH, SCROLL_HEIGHT_OPEN)
+	_container_conteudo.size = Vector2(SCROLL_WIDTH, SCROLL_HEIGHT_OPEN)
 	_container_conteudo.add_theme_constant_override("margin_left", 118)
 	_container_conteudo.add_theme_constant_override("margin_right", 118)
 	_container_conteudo.add_theme_constant_override("margin_top", 54)
 	_container_conteudo.add_theme_constant_override("margin_bottom", 54)
-	_scroll_rect.add_child(_container_conteudo)
+	_container_clipping.add_child(_container_conteudo)
 	
 	var vbox_corpo = VBoxContainer.new()
 	vbox_corpo.add_theme_constant_override("separation", 5)
@@ -488,10 +533,11 @@ func _animar_abertura_pergaminho() -> void:
 	if not _scroll_rect or not _container_conteudo: return
 	
 	_animando_transicao = true
-	# Começa enrolado no topo (haste inferior encostada na haste superior fixa)
-	_scroll_rect.pivot_offset = Vector2(290, 0)
-	_scroll_rect.scale = Vector2(1.0, 0.15)
-	_scroll_rect.self_modulate = Color(1.0, 1.0, 1.0)
+	# Começa totalmente enrolado no topo (haste inferior encostada na haste superior fixa)
+	_definir_altura_scroll(SCROLL_HEIGHT_CLOSED)
+	_scroll_rect.scale = Vector2.ONE
+	_scroll_rect.self_modulate = Color(1.0, 1.0, 1.0, 1.0)
+	_scroll_rect.visible = true
 	_container_conteudo.modulate.a = 0.0
 	
 	# Som de abrir o pergaminho
@@ -500,9 +546,9 @@ func _animar_abertura_pergaminho() -> void:
 		am.play_sfx("transicao-1")
 		
 	var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	# O pergaminho se desenrola verticalmente de cima para baixo suavemente
-	tw.tween_property(_scroll_rect, "scale:y", 1.0, 1.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.60).set_delay(0.20).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	# A haste inferior desce desenrolando suavemente o pergaminho do topo até embaixo
+	tw.tween_method(_definir_altura_scroll, SCROLL_HEIGHT_CLOSED, SCROLL_HEIGHT_OPEN, 1.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.45).set_delay(0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(func():
 		_animando_transicao = false
 		_iniciar_revelacao_conteudo()
@@ -621,15 +667,11 @@ func _avancar_quadro() -> void:
 		if am and am.has_method("play_sfx"):
 			am.play_sfx("transicao-1")
 				
-		# Garante que o topo fique 100% fixo: pivô no topo (y=0) e sem alteração no eixo X
-		_scroll_rect.pivot_offset = Vector2(290, 0)
-		_scroll_rect.scale.x = 1.0
-		
 		var tw = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		
-		# 1. Apenas a parte inferior sobe suavemente até o topo fixo (mais cadenciado e elegante)
-		tw.tween_property(_container_conteudo, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw.parallel().tween_property(_scroll_rect, "scale:y", 0.15, 0.95).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		# 1. O texto desaparece suavemente e a parte de baixo sobe até o topo fixo
+		tw.tween_property(_container_conteudo, "modulate:a", 0.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_method(_definir_altura_scroll, SCROLL_HEIGHT_OPEN, SCROLL_HEIGHT_CLOSED, 0.85).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		
 		# 2. Toque sutil quando a haste de baixo alcança o topo
 		tw.tween_callback(func():
@@ -638,7 +680,7 @@ func _avancar_quadro() -> void:
 				am_click.play_sfx("ui-1")
 		)
 		
-		tw.tween_interval(0.18)
+		tw.tween_interval(0.15)
 		
 		# 3. Com o pergaminho fechado no topo, prepara o novo conteúdo
 		tw.tween_callback(func():
@@ -649,8 +691,8 @@ func _avancar_quadro() -> void:
 		)
 		
 		# 4. A haste inferior desce desenrolando suavemente o pergaminho
-		tw.tween_property(_scroll_rect, "scale:y", 1.0, 1.05).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.50).set_delay(0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw.tween_method(_definir_altura_scroll, SCROLL_HEIGHT_CLOSED, SCROLL_HEIGHT_OPEN, 0.95).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(_container_conteudo, "modulate:a", 1.0, 0.40).set_delay(0.50).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		
 		# 5. Após abrir completamente, libera a interação e inicia as letras e desenho surgindo devagar
 		tw.tween_callback(func():
@@ -1012,15 +1054,13 @@ func _mostrar_tela_vitoria() -> void:
 	if _scroll_rect and is_instance_valid(_scroll_rect):
 		if _tween_conteudo and _tween_conteudo.is_running():
 			_tween_conteudo.kill()
-		_scroll_rect.pivot_offset = Vector2(290, 0)
-		_scroll_rect.scale.x = 1.0
 		var am_roll = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null
 		if am_roll and am_roll.has_method("play_sfx"):
 			am_roll.play_sfx("transicao-1")
 			
 		var tw_fade = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tw_fade.tween_property(_container_conteudo, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw_fade.parallel().tween_property(_scroll_rect, "scale:y", 0.15, 0.90).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		tw_fade.tween_property(_container_conteudo, "modulate:a", 0.0, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw_fade.parallel().tween_method(_definir_altura_scroll, SCROLL_HEIGHT_OPEN, SCROLL_HEIGHT_CLOSED, 0.85).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		
 		tw_fade.tween_callback(func():
 			var am_click = get_tree().root.get_node_or_null("AudioManager") if is_inside_tree() and get_tree() and get_tree().root else null

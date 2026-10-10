@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://b88fskp86tqc2"]
 
 [ext_resource type="Script" uid="uid://dubk8vpes24y5" path="res://scripts/ItemMoeda.gd" id="1_moeda"]
-[ext_resource type="Texture2D" uid="uid://brltfh5o2kc3f" path="res://assets/sprites/ui/coin.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://ubg4ctgqeikr" path="res://assets/sprites/items/moeda_sheet.png" id="2_tex"]
 [ext_resource type="Texture2D" uid="uid://dxngte5fixvcd" path="res://assets/sprites/Characters/Maguinho/shadow.png" id="3_shadow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_moeda"]
-radius = 20.0
+radius = 18.0
 
 [node name="ItemMoeda" type="Area2D" unique_id=1086862922]
 z_index = 2
@@ -16,13 +16,15 @@ script = ExtResource("1_moeda")
 [node name="Shadow" type="Sprite2D" parent="." unique_id=987162544]
 z_index = 1
 z_as_relative = false
-position = Vector2(0, 44)
-scale = Vector2(1.5, 0.85)
+position = Vector2(0, 20)
+scale = Vector2(1.15, 0.65)
 texture = ExtResource("3_shadow")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1538542789]
-scale = Vector2(0.2, 0.2)
+texture_filter = 1
+scale = Vector2(0.55, 0.55)
 texture = ExtResource("2_tex")
+hframes = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1910334043]
 shape = SubResource("CircleShape2D_moeda")

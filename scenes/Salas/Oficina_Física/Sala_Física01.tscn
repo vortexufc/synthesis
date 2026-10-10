@@ -18,10 +18,8 @@
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="16_3407d"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsde8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Laranja.tscn" id="16_ijptx"]
 [ext_resource type="PackedScene" uid="uid://bavvcg7n5masf" path="res://scenes/Entidades/Items/ItemBateria.tscn" id="17_wbf8q"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/NPCs/NPCFisica.tscn" id="18_uglgd"]
 [ext_resource type="PackedScene" uid="uid://bwg5w1f6gk1sk" path="res://scenes/Entidades/Items/ItemChip.tscn" id="19_osp8w"]
 [ext_resource type="PackedScene" path="res://scenes/Objetos/bau3.tscn" id="22_k76es"]
-[ext_resource type="PackedScene" path="res://scenes/Objetos/mural_parede.tscn" id="25_mural"]
 [ext_resource type="PackedScene" path="res://scenes/Objetos/bau3.tscn" id="bau3_cena"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="lum_fisica_inst"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="ponto_bau"]
@@ -472,10 +470,6 @@ scale = Vector2(1.2, 1.2)
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_3407d")]
 position = Vector2(757, 1269)
 
-[node name="NPCFisica" parent="." unique_id=1810303523 instance=ExtResource("18_uglgd")]
-position = Vector2(158, 1015)
-usar_angulo_isometrico = true
-
 [node name="Luminarias" type="Node2D" parent="." unique_id=1437129072]
 
 [node name="LuminariaNorte1" parent="Luminarias" unique_id=2074827193 instance=ExtResource("lum_fisica_inst")]
@@ -500,10 +494,6 @@ orientacao = 2
 
 [node name="LuminariaOeste2" parent="Luminarias" unique_id=342507567 instance=ExtResource("lum_fisica_inst")]
 position = Vector2(72, 1131)
-
-[node name="MuralParede" parent="." unique_id=1179287943 instance=ExtResource("25_mural")]
-position = Vector2(161, 1117)
-forcar_andar = 2
 
 [node name="PontosDeBateria" type="Node2D" parent="." unique_id=861910281]
 script = ExtResource("spawner_item")
