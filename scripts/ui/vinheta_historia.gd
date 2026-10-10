@@ -1120,7 +1120,7 @@ func _mostrar_tela_vitoria() -> void:
 	var hub_curto = "Retorne ao Hub para escolher sua próxima expedição."
 	
 	if pendentes.is_empty():
-		badge_texto = "👑 A GRANDE SÍNTESE ALCANÇADA POR %s 👑" % nick.to_upper()
+		badge_texto = "A GRANDE SÍNTESE ALCANÇADA POR %s" % nick.to_upper()
 		titulo_texto = "MESTRE SUPREMO DA SÍNTESE!"
 		subtitulo_texto = "%s uniu Química, Física e Biologia na mais sublime sinfonia do saber!" % nick
 		insignia_nome = "Insígnia do Arquimago Supremo"
@@ -1337,9 +1337,9 @@ func _mostrar_tela_vitoria() -> void:
 	
 	# Definição dos 3 domínios para os slots
 	var dados_runas = [
-		{"id": 1, "nome": "QUÍMICA", "icone": "🧪", "sub": "Matéria", "cor": Color(0.95, 0.72, 0.22)},
-		{"id": 2, "nome": "FÍSICA", "icone": "⚡", "sub": "Energia", "cor": Color(0.35, 0.85, 1.0)},
-		{"id": 3, "nome": "BIOLOGIA", "icone": "🧬", "sub": "Vida", "cor": Color(0.40, 0.95, 0.60)}
+		{"id": 1, "nome": "QUÍMICA", "sub": "Matéria", "cor": Color(0.95, 0.72, 0.22)},
+		{"id": 2, "nome": "FÍSICA", "sub": "Energia", "cor": Color(0.35, 0.85, 1.0)},
+		{"id": 3, "nome": "BIOLOGIA", "sub": "Vida", "cor": Color(0.40, 0.95, 0.60)}
 	]
 	
 	for dr in dados_runas:
@@ -1372,7 +1372,7 @@ func _mostrar_tela_vitoria() -> void:
 		p_runa.add_child(vbox_r)
 		
 		var lbl_r_top = Label.new()
-		lbl_r_top.text = "%s %s • %s" % [dr.icone, dr.nome, dr.sub]
+		lbl_r_top.text = "%s • %s" % [dr.nome, dr.sub]
 		lbl_r_top.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl_r_top.add_theme_font_override("font", font_serif_bold)
 		lbl_r_top.add_theme_font_size_override("font_size", 11)
@@ -1380,7 +1380,7 @@ func _mostrar_tela_vitoria() -> void:
 		vbox_r.add_child(lbl_r_top)
 		
 		var lbl_r_bot = Label.new()
-		lbl_r_bot.text = "✦ SELO DESPERTADO ✦" if feito else "🔒 Selo Adormecido"
+		lbl_r_bot.text = "SELO DESPERTADO" if feito else "Selo Adormecido"
 		lbl_r_bot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl_r_bot.add_theme_font_override("font", font_sans_bold if feito else font_sans_norm)
 		lbl_r_bot.add_theme_font_size_override("font_size", 10)
@@ -1416,9 +1416,9 @@ func _mostrar_tela_vitoria() -> void:
 	
 	var lbl_ce_tag = Label.new()
 	if nick.to_lower() == "você" or nick.to_lower() == "voce":
-		lbl_ce_tag.text = "🏆  INSÍGNIA CONQUISTADA POR VOCÊ"
+		lbl_ce_tag.text = "INSÍGNIA CONQUISTADA POR VOCÊ"
 	else:
-		lbl_ce_tag.text = "🏆  INSÍGNIA CONQUISTADA PELO MAGO %s" % nick.to_upper()
+		lbl_ce_tag.text = "INSÍGNIA CONQUISTADA PELO MAGO %s" % nick.to_upper()
 	lbl_ce_tag.add_theme_font_override("font", font_sans_bold)
 	lbl_ce_tag.add_theme_font_size_override("font_size", 10)
 	lbl_ce_tag.add_theme_color_override("font_color", cor_tema)
@@ -1463,7 +1463,7 @@ func _mostrar_tela_vitoria() -> void:
 	card_dir.add_child(vbox_cd)
 	
 	var lbl_cd_tag = Label.new()
-	lbl_cd_tag.text = "🧭  DESTINO ARCANO"
+	lbl_cd_tag.text = "DESTINO ARCANO"
 	lbl_cd_tag.add_theme_font_override("font", font_sans_bold)
 	lbl_cd_tag.add_theme_font_size_override("font_size", 10)
 	lbl_cd_tag.add_theme_color_override("font_color", Color(0.45, 0.85, 1.0))

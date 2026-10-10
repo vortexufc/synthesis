@@ -10,9 +10,13 @@ var _tween_brilho: Tween
 var _tween_glow: Tween
 var _tween_bob: Tween
 
-# Controle de combo de som de moedas
+# Controle de combo e cadência rítmica de moedas
 static var _ultimo_tempo_moeda: float = 0.0
+static var _proximo_som_tempo: float = 0.0
 static var _combo_moedas: int = 0
+static var _texto_moeda_ativo: Label = null
+static var _valor_acumulado_moedas: int = 0
+static var _tempo_ultimo_texto: float = 0.0
 
 func _obter_id_unico() -> String:
 	if id_unico != "":
@@ -201,21 +205,40 @@ func _coletar(corpo: Node2D) -> void:
 				ps.registrar_item_coletado(id_unico)
 			ps.salvar()
 			
-		# Combo escalonado de som
+		# Combo musical escalonado com debounce inteligente (arpeggio suave sem sobreposição)
 		var agora = Time.get_ticks_msec() / 1000.0
-		if agora - _ultimo_tempo_moeda < 1.3:
-			_combo_moedas = min(_combo_moedas + 1, 8)
-		else:
+		if agora - _ultimo_tempo_moeda > 0.8:
 			_combo_moedas = 0
+			_proximo_som_tempo = agora
+		else:
+			_combo_moedas = min(_combo_moedas + 1, 9)
 		_ultimo_tempo_moeda = agora
 		
-		var pitch = 1.0 + (_combo_moedas * 0.08)
+		# Cadência rítmica: espaça os sons em pelo menos 0.075s para criar uma melodia ascendente
+		var delay_som = max(0.0, _proximo_som_tempo - agora)
+		_proximo_som_tempo = max(agora, _proximo_som_tempo) + 0.075
+		
+		var pitch = 1.0 + (_combo_moedas * 0.06)
 		var am = get_node_or_null("/root/AudioManager")
 		if am:
-			if am.has_method("play_sfx_pitch"):
-				am.play_sfx_pitch("moedas", pitch)
-			else:
-				am.play_sfx("moedas")
+			# Limita delay máximo para 0.35s para não acumular fila excessiva
+			if delay_som <= 0.35:
+				if delay_som > 0.005:
+					var tw_snd = am.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+					tw_snd.tween_interval(delay_som)
+					tw_snd.tween_callback(func():
+						var a_mgr = get_node_or_null("/root/AudioManager")
+						if a_mgr:
+							if a_mgr.has_method("play_sfx_pitch"):
+								a_mgr.play_sfx_pitch("moedas", pitch)
+							else:
+								a_mgr.play_sfx("moedas")
+					)
+				else:
+					if am.has_method("play_sfx_pitch"):
+						am.play_sfx_pitch("moedas", pitch)
+					else:
+						am.play_sfx("moedas")
 				
 		_exibir_texto_flutuante_moeda(ganho)
 			
@@ -290,9 +313,27 @@ func _coletar(corpo: Node2D) -> void:
 		await tween_coleta.finished
 		queue_free()
 
-func _exibir_texto_flutuante_moeda(qtd: int) -> void:
+func _exibir_texto_flutuante_moeda(ganho: int) -> void:
+	var agora = Time.get_ticks_msec() / 1000.0
+	
+	# Se já houver um texto recente flutuando (combo de coleta), acumula o valor nele com um pop animado!
+	if is_instance_valid(_texto_moeda_ativo) and (agora - _tempo_ultimo_texto < 0.45):
+		_valor_acumulado_moedas += ganho
+		_tempo_ultimo_texto = agora
+		_texto_moeda_ativo.text = "+%d 🪙" % _valor_acumulado_moedas
+		
+		var tw_pop = _texto_moeda_ativo.create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_pop.tween_property(_texto_moeda_ativo, "scale", Vector2(1.28, 1.28), 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw_pop.chain().tween_property(_texto_moeda_ativo, "scale", Vector2(1.0, 1.0), 0.12)
+		tw_pop.parallel().tween_property(_texto_moeda_ativo, "modulate:a", 1.0, 0.08)
+		return
+		
+	_valor_acumulado_moedas = ganho
+	_tempo_ultimo_texto = agora
+	
 	var lbl = Label.new()
-	lbl.text = "+%d 🪙" % qtd
+	_texto_moeda_ativo = lbl
+	lbl.text = "+%d 🪙" % ganho
 	lbl.z_index = 25
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	lbl.add_theme_font_size_override("font_size", 14)
@@ -314,18 +355,18 @@ func _exibir_texto_flutuante_moeda(qtd: int) -> void:
 		
 	lbl.global_position = global_position + Vector2(-15, -20)
 	lbl.scale = Vector2(0.8, 0.8)
+	lbl.pivot_offset = Vector2(20, 10)
 	
-	var tw = lbl.create_tween()
+	var tw = lbl.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.set_parallel(true)
-	tw.tween_property(lbl, "global_position:y", lbl.global_position.y - 28.0, 0.65).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "global_position:y", lbl.global_position.y - 28.0, 0.70).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(lbl, "scale", Vector2(1.15, 1.15), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tw.chain().tween_property(lbl, "scale", Vector2(1.0, 1.0), 0.15)
-	tw.tween_property(lbl, "modulate:a", 0.0, 0.22).set_delay(0.40)
-	tw.chain().tween_callback(lbl.queue_free)
-	
-	if arvore:
-		arvore.create_timer(0.75).timeout.connect(func():
-			if is_instance_valid(lbl):
-				lbl.queue_free()
-		)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.25).set_delay(0.45)
+	tw.chain().tween_callback(func():
+		if _texto_moeda_ativo == lbl:
+			_texto_moeda_ativo = null
+		if is_instance_valid(lbl):
+			lbl.queue_free()
+	)
 

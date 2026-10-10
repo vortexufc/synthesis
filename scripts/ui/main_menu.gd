@@ -138,7 +138,7 @@ func _ready() -> void:
 	var _ao_clicar_perfil = func():
 		var db_click = get_node_or_null("/root/DatabaseManager")
 		if db_click == null or db_click.user_token == "":
-			_abrir_modal_aviso_visitante(_ir_login)
+			_abrir_modal_aviso_visitante(Callable())
 		else:
 			_ir_login.call()
 	

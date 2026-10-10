@@ -110,8 +110,8 @@ func _input(event: InputEvent) -> void:
 			if music_state == MusicState.MENU and music_player and not music_player.playing:
 				play_menu_music()
 
-# toca efeito sonoro
-func play_sfx(audio: String) -> void:
+# toca efeito sonoro com micro-variação orgânica de tom (Item 2)
+func play_sfx(audio: String, variacao_organica: bool = true) -> void:
 	if not sfx.has(audio):
 		push_error("SFX não encontrado: " + audio)
 		return
@@ -120,6 +120,12 @@ func play_sfx(audio: String) -> void:
 
 	player.stream = sfx[audio]
 	player.bus = "SFX"
+	
+	# Sons que não devem variar o tom (jingles fixos de vitória/derrota)
+	var sem_variacao = (audio in ["win", "fail", "transicao-1", "transicao-2"])
+	if variacao_organica and not sem_variacao:
+		player.pitch_scale = randf_range(0.95, 1.05)
+	
 	add_child(player)
 
 	player.play()
@@ -238,6 +244,7 @@ func tocar_som_caminhada():
 
 	var player := AudioStreamPlayer.new()
 	player.stream = sfx_caminhar.pick_random()
+	player.pitch_scale = randf_range(0.92, 1.08)
 	player.bus = "SFX"
 	add_child(player)
 
@@ -259,6 +266,7 @@ func tocar_som_dano():
 
 	var player := AudioStreamPlayer.new()
 	player.stream = sfx_tomar_dano.pick_random()
+	player.pitch_scale = randf_range(0.94, 1.06)
 	player.bus = "SFX"
 	add_child(player)
 
@@ -279,6 +287,7 @@ func tocar_som_ataque():
 
 	var player := AudioStreamPlayer.new()
 	player.stream = sfx_atacar.pick_random()
+	player.pitch_scale = randf_range(0.95, 1.05)
 	player.bus = "SFX"
 	add_child(player)
 

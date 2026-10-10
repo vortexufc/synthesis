@@ -14,6 +14,12 @@ signal resposta_escolhida(indice: int, tempo_usado: float)
 @onready var health_enemy: Control = $Control/HealthEnemy
 @onready var health_player_fill: NinePatchRect = $Control/HealthPlayer/HealthBarFill
 @onready var health_enemy_fill: NinePatchRect = $Control/HealthEnemy/HealthBarFill
+var health_player_ghost: NinePatchRect = null
+var health_enemy_ghost: NinePatchRect = null
+var _tween_p_fill: Tween = null
+var _tween_p_ghost: Tween = null
+var _tween_e_fill: Tween = null
+var _tween_e_ghost: Tween = null
 
 var _botoes: Array = []
 
@@ -42,6 +48,7 @@ func _ready() -> void:
 		am.play_battle_music(battle_music)
 	# garante que os botoes funcionem mesmo com o jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_configurar_ghost_bars()
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
 	for i in range(_botoes.size()):
 		_botoes[i].pressed.connect(_on_botao_pressionado.bind(i))
@@ -194,6 +201,23 @@ func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 		else:
 			_botoes[i].hide()
 
+func _configurar_ghost_bars() -> void:
+	if health_player_fill and health_player:
+		health_player_ghost = health_player_fill.duplicate() as NinePatchRect
+		health_player_ghost.name = "HealthBarGhost"
+		# Rastro de dano ambar/dourado suave (Item 1)
+		health_player_ghost.modulate = Color(1.0, 0.88, 0.40, 0.95)
+		health_player.add_child(health_player_ghost)
+		health_player.move_child(health_player_ghost, health_player_fill.get_index())
+		
+	if health_enemy_fill and health_enemy:
+		health_enemy_ghost = health_enemy_fill.duplicate() as NinePatchRect
+		health_enemy_ghost.name = "HealthBarGhost"
+		# Rastro de dano alaranjado/branco suave no inimigo (Item 1)
+		health_enemy_ghost.modulate = Color(1.0, 0.65, 0.35, 0.95)
+		health_enemy.add_child(health_enemy_ghost)
+		health_enemy.move_child(health_enemy_ghost, health_enemy_fill.get_index())
+
 func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 	pct_player = clamp(pct_player, 0.0, 1.0)
 	pct_enemy = clamp(pct_enemy, 0.0, 1.0)
@@ -202,25 +226,50 @@ func atualizar_vida(pct_player: float, pct_enemy: float) -> void:
 	
 	if target_p > 0:
 		health_player_fill.visible = true
+		if health_player_ghost: health_player_ghost.visible = true
 	if target_e > 0:
 		health_enemy_fill.visible = true
+		if health_enemy_ghost: health_enemy_ghost.visible = true
 		
-	# tween de pausa senao a animacao nao toca
-	var t = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
+	# --- PLAYER: Ghost Bar com queda rápida da barra principal e rastro suave ---
+	if _tween_p_fill and _tween_p_fill.is_running(): _tween_p_fill.kill()
+	if _tween_p_ghost and _tween_p_ghost.is_running(): _tween_p_ghost.kill()
 	
-	# tamanho do retangulo (200px / 230px)
-	t.tween_property(health_player_fill, "size:x", target_p, 0.5)
-	t.tween_property(health_enemy_fill, "size:x", target_e, 0.5)
+	_tween_p_fill = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tween_p_fill.tween_property(health_player_fill, "size:x", target_p, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	
+	if health_player_ghost:
+		_tween_p_ghost = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		if target_p < health_player_ghost.size.x:
+			_tween_p_ghost.tween_interval(0.28)
+			_tween_p_ghost.tween_property(health_player_ghost, "size:x", target_p, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		else:
+			_tween_p_ghost.tween_property(health_player_ghost, "size:x", target_p, 0.14)
+
+	# --- INIMIGO: Ghost Bar de impacto ---
+	if _tween_e_fill and _tween_e_fill.is_running(): _tween_e_fill.kill()
+	if _tween_e_ghost and _tween_e_ghost.is_running(): _tween_e_ghost.kill()
+	
+	_tween_e_fill = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tween_e_fill.tween_property(health_enemy_fill, "size:x", target_e, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	
+	if health_enemy_ghost:
+		_tween_e_ghost = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		if target_e < health_enemy_ghost.size.x:
+			_tween_e_ghost.tween_interval(0.28)
+			_tween_e_ghost.tween_property(health_enemy_ghost, "size:x", target_e, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		else:
+			_tween_e_ghost.tween_property(health_enemy_ghost, "size:x", target_e, 0.14)
 	
 	if target_p <= 0:
-		t.chain().tween_callback(func():
-			if is_instance_valid(health_player_fill):
-				health_player_fill.visible = false
+		_tween_p_fill.chain().tween_callback(func():
+			if is_instance_valid(health_player_fill): health_player_fill.visible = false
+			if is_instance_valid(health_player_ghost): health_player_ghost.visible = false
 		)
 	if target_e <= 0:
-		t.chain().tween_callback(func():
-			if is_instance_valid(health_enemy_fill):
-				health_enemy_fill.visible = false
+		_tween_e_fill.chain().tween_callback(func():
+			if is_instance_valid(health_enemy_fill): health_enemy_fill.visible = false
+			if is_instance_valid(health_enemy_ghost): health_enemy_ghost.visible = false
 		)
 
 func _on_botao_pressionado(indice: int) -> void:

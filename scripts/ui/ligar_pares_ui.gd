@@ -209,9 +209,13 @@ func iniciar_conexao(p_andar_id: int = 1) -> void:
 	if painel_central:
 		painel_central.modulate.a = 0.0
 		painel_central.scale = Vector2(0.85, 0.85)
+		if backdrop:
+			backdrop.modulate.a = 0.0
 		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		if backdrop:
+			tween.tween_property(backdrop, "modulate:a", 1.0, 0.20)
 		tween.tween_property(painel_central, "modulate:a", 1.0, 0.25)
-		tween.tween_property(painel_central, "scale", Vector2(1.0, 1.0), 0.25)
+		tween.tween_property(painel_central, "scale", Vector2(1.0, 1.0), 0.28)
 
 	_tocar_sfx("ui_5")
 
@@ -222,6 +226,20 @@ func _construir_interface() -> void:
 	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
 	backdrop.gui_input.connect(_ao_gui_input_backdrop)
 	add_child(backdrop)
+	
+	# Partículas de poeira mágica flutuante no fundo (Item 6)
+	var particulas = CPUParticles2D.new()
+	particulas.name = "ParticulasFundo"
+	particulas.amount = 26
+	particulas.lifetime = 4.0
+	particulas.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particulas.emission_rect_extents = Vector2(640, 360)
+	particulas.position = Vector2(640, 360)
+	particulas.gravity = Vector2(0, -16)
+	particulas.scale_amount_min = 1.5
+	particulas.scale_amount_max = 3.5
+	particulas.color = Color(1.0, 0.85, 0.45, 0.30)
+	backdrop.add_child(particulas)
 	
 	var font_sans = SystemFont.new()
 	font_sans.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
@@ -522,6 +540,18 @@ func _criar_botao_bloco(dados: Dictionary, cor_borda: Color) -> Button:
 	btn.set_meta("coluna", col)
 	btn.set_meta("cor_borda", cor_borda)
 	btn.set_meta("resolvido", false)
+	
+	# Micro-pop no hover para blocos não conectados (Item 4)
+	btn.mouse_entered.connect(func():
+		if jogo_ativo and not _finalizado and not btn.get_meta("resolvido", false):
+			var tw_h = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw_h.tween_property(btn, "scale", Vector2(1.03, 1.03), 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	)
+	btn.mouse_exited.connect(func():
+		if not btn.get_meta("resolvido", false):
+			var tw_h = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw_h.tween_property(btn, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	)
 	
 	btn.button_down.connect(func(): _ao_pressionar_bloco(btn))
 	return btn
@@ -1022,6 +1052,10 @@ func _finalizar_vitoria() -> void:
 	bloqueio_input = true
 	
 	_tocar_sfx("win")
+	
+	# Dispara explosão comemorativa de confetes/estrelas (Item 3)
+	var vp_size = get_viewport().get_visible_rect().size
+	_disparar_confetes_vitoria(vp_size * 0.5)
 		
 	lbl_banner_titulo.text = "BARREIRA RÚNICA DESTRUÍDA!"
 	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
@@ -1031,6 +1065,7 @@ func _finalizar_vitoria() -> void:
 	banner_resultado.visible = true
 	banner_resultado.modulate.a = 0.0
 	banner_resultado.scale = Vector2(0.8, 0.8)
+	_aplicar_efeito_sheen(banner_resultado) # Brilho reluzente no banner (Item 7)
 	
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(banner_resultado, "modulate:a", 1.0, 0.25)
@@ -1038,6 +1073,39 @@ func _finalizar_vitoria() -> void:
 	
 	await get_tree().create_timer(1.8, true, false, true).timeout
 	_fechar_e_emitir(true)
+
+func _disparar_confetes_vitoria(pos_centro: Vector2) -> void:
+	var part = CPUParticles2D.new()
+	part.name = "ConfetesVitoria"
+	part.z_index = 60
+	part.amount = 46
+	part.lifetime = 1.35
+	part.one_shot = true
+	part.explosiveness = 0.95
+	part.direction = Vector2(0, -1)
+	part.spread = 180.0
+	part.gravity = Vector2(0, 160)
+	part.initial_velocity_min = 120.0
+	part.initial_velocity_max = 250.0
+	part.scale_amount_min = 3.0
+	part.scale_amount_max = 5.5
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1.0, 0.85, 0.25, 1.0), # Dourado
+		Color(0.2, 1.0, 0.45, 1.0),  # Verde esmeralda
+		Color(0.3, 0.85, 1.0, 1.0),  # Ciano místico
+		Color(1.0, 0.35, 0.65, 1.0), # Rubi / Rosa
+		Color(1.0, 1.0, 1.0, 0.0)    # Fade
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.25, 0.50, 0.75, 1.0])
+	part.color_ramp = grad
+	
+	add_child(part)
+	part.position = pos_centro
+	part.emitting = true
+	part.restart()
+	get_tree().create_timer(1.5, true, false, true).timeout.connect(part.queue_free)
 
 func _finalizar_derrota() -> void:
 	if _finalizado:
@@ -1082,3 +1150,53 @@ func _tocar_sfx(nome: String) -> void:
 	var am = get_node_or_null("/root/AudioManager")
 	if am and am.has_method("play_sfx"):
 		am.play_sfx(nome)
+
+func _aplicar_efeito_sheen(alvo: Control, cor_brilho: Color = Color(1.0, 1.0, 1.0, 0.38), intervalo: float = 3.2) -> void:
+	if alvo == null or not is_instance_valid(alvo):
+		return
+	alvo.clip_contents = true
+	
+	var sheen = TextureRect.new()
+	sheen.name = "SheenEffect"
+	sheen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sheen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0),
+		cor_brilho,
+		Color(1, 1, 1, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	
+	var tex = GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_LINEAR
+	tex.fill_from = Vector2(0.0, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 64
+	tex.height = 128
+	sheen.texture = tex
+	
+	alvo.add_child(sheen)
+	
+	alvo.resized.connect(func():
+		_iniciar_animacao_sheen(alvo, sheen, intervalo)
+	)
+	_iniciar_animacao_sheen(alvo, sheen, intervalo)
+
+func _iniciar_animacao_sheen(alvo: Control, sheen: TextureRect, intervalo: float) -> void:
+	if not is_instance_valid(alvo) or not is_instance_valid(sheen): return
+	var w = max(alvo.size.x, alvo.custom_minimum_size.x)
+	var h = max(alvo.size.y, alvo.custom_minimum_size.y)
+	if w <= 0 or h <= 0: return
+	
+	sheen.size = Vector2(w * 0.45, h * 2.4)
+	sheen.rotation = deg_to_rad(24.0)
+	sheen.pivot_offset = sheen.size * 0.5
+	sheen.position = Vector2(-sheen.size.x * 2.0, -h * 0.7)
+	
+	var tw = sheen.create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_interval(intervalo)
+	tw.tween_property(sheen, "position:x", w + sheen.size.x, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(sheen, "position:x", -sheen.size.x * 2.0, 0.0)

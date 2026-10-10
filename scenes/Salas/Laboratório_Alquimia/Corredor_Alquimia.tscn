@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_wjkwu"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_n8ijl"]
 [ext_resource type="PackedScene" uid="uid://bc4o04l2tcu36" path="res://scenes/Entidades/NPCs/NPCCientista.tscn" id="14_wlvpg"]
+[ext_resource type="PackedScene" uid="uid://tocha_entidade_01" path="res://scenes/Entidades/Tocha.tscn" id="15_tocha"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ndrqi"]
 texture = ExtResource("3_r6rlg")
@@ -170,11 +171,36 @@ scale = Vector2(3, 3)
 tile_map_data = PackedByteArray("AAANABcAAAAaACQAAAANABMAAAAaACQAAAANAA8AAAAaACQAAAANAAsAAAAaACQAAAANAAcAAAAaACQAAAANACIAAAAaACQAAAANACYAAAAaACQAAAA=")
 tile_set = SubResource("TileSet_n8ijl")
 
-[node name="Decoration" type="TileMapLayer" parent="." unique_id=477020574]
+[node name="Tochas" type="Node2D" parent="." unique_id=891851315]
 z_index = 3
-scale = Vector2(2, 2)
-tile_map_data = PackedByteArray("AAAWACcAAgAAAAAAAAAWACEAAgAAAAAAAAAWABsAAgAAAAAAAAAWABUAAgAAAAAAAAAWAA8AAgAAAAAAAAAQAA8AAgAAAAAAABAQABUAAgAAAAAAABAQABsAAgAAAAAAABAQACEAAgAAAAAAABAQACcAAgAAAAAAABA=")
-tile_set = SubResource("TileSet_cvuar")
+
+[node name="TochaEsq1" parent="Tochas" unique_id=101001 instance=ExtResource("15_tocha")]
+position = Vector2(516, 480)
+
+[node name="TochaEsq2" parent="Tochas" unique_id=101002 instance=ExtResource("15_tocha")]
+position = Vector2(516, 672)
+
+[node name="TochaEsq3" parent="Tochas" unique_id=101003 instance=ExtResource("15_tocha")]
+position = Vector2(516, 864)
+
+[node name="TochaEsq4" parent="Tochas" unique_id=101004 instance=ExtResource("15_tocha")]
+position = Vector2(516, 1056)
+
+[node name="TochaDir1" parent="Tochas" unique_id=101005 instance=ExtResource("15_tocha")]
+position = Vector2(740, 480)
+scale = Vector2(-1, 1)
+
+[node name="TochaDir2" parent="Tochas" unique_id=101006 instance=ExtResource("15_tocha")]
+position = Vector2(740, 672)
+scale = Vector2(-1, 1)
+
+[node name="TochaDir3" parent="Tochas" unique_id=101007 instance=ExtResource("15_tocha")]
+position = Vector2(740, 864)
+scale = Vector2(-1, 1)
+
+[node name="TochaDir4" parent="Tochas" unique_id=101008 instance=ExtResource("15_tocha")]
+position = Vector2(740, 1056)
+scale = Vector2(-1, 1)
 
 [node name="Wall" type="TileMapLayer" parent="." unique_id=2089861276]
 scale = Vector2(3, 3)

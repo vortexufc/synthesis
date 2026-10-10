@@ -31,11 +31,17 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="MarginRight" type="Control" parent="HBox"]
-custom_minimum_size = Vector2(20, 0)
+custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
 
+[node name="BtnVerMembros" type="Button" parent="HBox"]
+custom_minimum_size = Vector2(100, 36)
+layout_mode = 2
+size_flags_vertical = 4
+text = "MEMBROS"
+
 [node name="BtnEntrar" type="Button" parent="HBox"]
-custom_minimum_size = Vector2(120, 36)
+custom_minimum_size = Vector2(110, 36)
 layout_mode = 2
 size_flags_vertical = 4
 text = "ENTRAR"

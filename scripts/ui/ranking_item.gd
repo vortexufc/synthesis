@@ -17,29 +17,26 @@ var defs_insignias = {
 	1: {
 		"nome": "Química",
 		"tag": "ALQ",
-		"icone": "🧪",
 		"cor": Color(1.0, 0.82, 0.35),
 		"cor_bg": Color(0.14, 0.10, 0.22, 0.95),
-		"lore_ok": "✦ Insígnia da Alquimia (Química) ✦\nConquistada por dominar as reações e purificar os caldeirões!",
-		"lore_lock": "✦ Insígnia da Alquimia ✦\nNão conquistada por este jogador."
+		"lore_ok": "Insígnia da Alquimia (Química)\nConquistada por dominar as reações e purificar os caldeirões!",
+		"lore_lock": "Insígnia da Alquimia\nNão conquistada por este jogador."
 	},
 	2: {
 		"nome": "Física",
 		"tag": "FÍS",
-		"icone": "⚡",
 		"cor": Color(0.35, 0.85, 1.0),
 		"cor_bg": Color(0.08, 0.15, 0.26, 0.95),
-		"lore_ok": "✦ Insígnia do Relâmpago (Física) ✦\nConquistada por domar as leis da inércia e os relâmpagos de Faraday!",
-		"lore_lock": "✦ Insígnia do Relâmpago ✦\nNão conquistada por este jogador."
+		"lore_ok": "Insígnia do Relâmpago (Física)\nConquistada por domar as leis da inércia e os relâmpagos de Faraday!",
+		"lore_lock": "Insígnia do Relâmpago\nNão conquistada por este jogador."
 	},
 	3: {
 		"nome": "Biologia",
 		"tag": "BIO",
-		"icone": "🧬",
 		"cor": Color(0.45, 1.0, 0.65),
 		"cor_bg": Color(0.08, 0.18, 0.12, 0.95),
-		"lore_ok": "✦ Insígnia da Vida (Biologia) ✦\nConquistada por desvendar os mistérios celulares e a espiral do DNA!",
-		"lore_lock": "✦ Insígnia da Vida ✦\nNão conquistada por este jogador."
+		"lore_ok": "Insígnia da Vida (Biologia)\nConquistada por desvendar os mistérios celulares e a espiral do DNA!",
+		"lore_lock": "Insígnia da Vida\nNão conquistada por este jogador."
 	}
 }
 
@@ -153,28 +150,15 @@ func _atualizar_insignias(nome: String, dados_extras: Dictionary) -> void:
 		sb.content_margin_top = 2
 		sb.content_margin_bottom = 2
 		
-		var hbox = HBoxContainer.new()
-		hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-		hbox.add_theme_constant_override("separation", 3)
-		hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		badge.add_child(hbox)
-		
-		var lbl_ico = Label.new()
-		lbl_ico.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl_ico.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl_ico.add_theme_font_size_override("font_size", 11)
-		lbl_ico.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hbox.add_child(lbl_ico)
-		
 		var lbl_tag = Label.new()
 		lbl_tag.text = info["tag"]
 		lbl_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl_tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		if font:
 			lbl_tag.add_theme_font_override("font", font)
-		lbl_tag.add_theme_font_size_override("font_size", 10)
+		lbl_tag.add_theme_font_size_override("font_size", 11)
 		lbl_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hbox.add_child(lbl_tag)
+		badge.add_child(lbl_tag)
 		
 		if conquistada:
 			sb.bg_color = info["cor_bg"]
@@ -182,15 +166,12 @@ func _atualizar_insignias(nome: String, dados_extras: Dictionary) -> void:
 			sb.set_border_width_all(1)
 			sb.shadow_color = Color(info["cor"].r, info["cor"].g, info["cor"].b, 0.35)
 			sb.shadow_size = 4
-			lbl_ico.text = info["icone"]
 			lbl_tag.add_theme_color_override("font_color", info["cor"])
 			badge.tooltip_text = info["lore_ok"]
 		else:
 			sb.bg_color = Color(0.05, 0.07, 0.10, 0.45)
 			sb.border_color = Color(0.25, 0.28, 0.35, 0.35)
 			sb.set_border_width_all(1)
-			lbl_ico.text = "🔒"
-			lbl_ico.modulate = Color(0.45, 0.5, 0.6, 0.45)
 			lbl_tag.add_theme_color_override("font_color", Color(0.38, 0.42, 0.52, 0.45))
 			badge.tooltip_text = info["lore_lock"]
 			

@@ -10,6 +10,8 @@ extends CanvasLayer
 @onready var pedestal_icone: PanelContainer = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/PedestalIcone
 @onready var img_detalhe_icone: TextureRect = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/PedestalIcone/DetalheIcone
 @onready var lbl_detalhe_titulo: Label = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/DetalheTitulo
+@onready var detalhe_divisor: Label = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/DetalheDivisor
+@onready var scroll_desc: ScrollContainer = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/ScrollDesc
 @onready var lbl_detalhe_desc: Label = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/ScrollDesc/DetalheDesc
 @onready var btn_acao: Button = $Control/MarginContainer/Panel/VBox/HBox/MarginDetalhes/PainelDetalhes/Margin/VBox/BtnAcao
 
@@ -18,6 +20,8 @@ extends CanvasLayer
 @onready var label_texto_leitura: Label = $Control/PainelLeitura/Margem/VBox/LabelTexto
 @onready var btn_fechar_leitura: Button = $Control/PainelLeitura/Margem/VBox/BtnFecharLeitura
 @onready var margem_leitura: MarginContainer = $Control/PainelLeitura/Margem
+
+const SLOTS_POR_GRADE: int = 15
 
 var item_selecionado: Dictionary = {}
 var paginas_leitura: Array[String] = []
@@ -32,10 +36,17 @@ var atlas_pergaminho_fechado: AtlasTexture
 var atlas_pergaminho_aberto: AtlasTexture
 
 var lbl_moedas_inv: Button
+var lbl_capacidade_inv: Button
 var btn_fechar_inv: Button
 var box_descarte: HBoxContainer
 var spin_descarte: SpinBox
 var btn_descartar: Button
+
+var badge_categoria: PanelContainer
+var lbl_badge_categoria: Label
+var painel_placeholder: VBoxContainer
+var lbl_ph_icone: Label
+var _card_selecionado: Button = null
 
 var _style_slot_normal: StyleBoxFlat
 var _style_slot_hover: StyleBoxFlat
@@ -46,6 +57,7 @@ func _ready() -> void:
 	painel_leitura.visible = false
 	btn_fechar_leitura.pressed.connect(_fechar_leitura)
 	btn_acao.pressed.connect(_on_btn_acao_pressionado)
+	_aplicar_efeito_sheen(btn_acao) # Efeito de varredura reluzente (Item 7)
 	
 	_criar_estilos_slots()
 	
@@ -54,6 +66,8 @@ func _ready() -> void:
 		tab_container.set_tab_title(0, " 🧪 Poções ")
 		tab_container.set_tab_title(1, " 🗝️ Relíquias ")
 		tab_container.set_tab_title(2, " 📜 Grimório ")
+		if not tab_container.tab_changed.is_connected(_on_tab_changed):
+			tab_container.tab_changed.connect(_on_tab_changed)
 
 	# barra pra descartar item
 	box_descarte = HBoxContainer.new()
@@ -88,6 +102,117 @@ func _ready() -> void:
 	box_descarte.add_child(btn_descartar)
 	
 	btn_acao.get_parent().add_child(box_descarte)
+	
+	# Badge de Categoria e Raridade do item selecionado
+	var vbox_detalhes = lbl_detalhe_titulo.get_parent()
+	badge_categoria = PanelContainer.new()
+	badge_categoria.name = "BadgeCategoria"
+	badge_categoria.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	lbl_badge_categoria = Label.new()
+	lbl_badge_categoria.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_badge_categoria.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl_badge_categoria.add_theme_font_size_override("font_size", 9)
+	var font_badge = SystemFont.new()
+	font_badge.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_badge.font_weight = 700
+	lbl_badge_categoria.add_theme_font_override("font", font_badge)
+	badge_categoria.add_child(lbl_badge_categoria)
+	vbox_detalhes.add_child(badge_categoria)
+	vbox_detalhes.move_child(badge_categoria, lbl_detalhe_titulo.get_index() + 1)
+	
+	# Painel Placeholder quando nenhum item esta selecionado
+	painel_placeholder = VBoxContainer.new()
+	painel_placeholder.name = "PainelPlaceholder"
+	painel_placeholder.alignment = BoxContainer.ALIGNMENT_CENTER
+	painel_placeholder.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	painel_placeholder.add_theme_constant_override("separation", 12)
+	
+	var pedestal_ph = PanelContainer.new()
+	pedestal_ph.custom_minimum_size = Vector2(72, 72)
+	pedestal_ph.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var sb_ph = StyleBoxFlat.new()
+	sb_ph.bg_color = Color(0.12, 0.08, 0.18, 0.95)
+	sb_ph.border_width_left = 2
+	sb_ph.border_width_top = 2
+	sb_ph.border_width_right = 2
+	sb_ph.border_width_bottom = 2
+	sb_ph.border_color = Color(0.65, 0.45, 0.85, 0.6)
+	sb_ph.corner_radius_top_left = 36
+	sb_ph.corner_radius_top_right = 36
+	sb_ph.corner_radius_bottom_right = 36
+	sb_ph.corner_radius_bottom_left = 36
+	sb_ph.shadow_size = 10
+	sb_ph.shadow_color = Color(0.6, 0.3, 0.8, 0.25)
+	pedestal_ph.add_theme_stylebox_override("panel", sb_ph)
+	
+	lbl_ph_icone = Label.new()
+	lbl_ph_icone.text = "✦"
+	lbl_ph_icone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_ph_icone.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl_ph_icone.add_theme_font_size_override("font_size", 28)
+	lbl_ph_icone.add_theme_color_override("font_color", Color(1.0, 0.85, 0.45))
+	pedestal_ph.add_child(lbl_ph_icone)
+	painel_placeholder.add_child(pedestal_ph)
+	
+	var lbl_ph_tit = Label.new()
+	lbl_ph_tit.text = "✦ INSPECIONAR ITEM ✦"
+	lbl_ph_tit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_ph_tit.add_theme_font_size_override("font_size", 12)
+	lbl_ph_tit.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
+	painel_placeholder.add_child(lbl_ph_tit)
+	
+	var lbl_ph_div = Label.new()
+	lbl_ph_div.text = "────── ❖ ──────"
+	lbl_ph_div.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_ph_div.add_theme_font_size_override("font_size", 8)
+	lbl_ph_div.add_theme_color_override("font_color", Color(0.65, 0.52, 0.25, 0.6))
+	painel_placeholder.add_child(lbl_ph_div)
+	
+	var lbl_ph_desc = Label.new()
+	lbl_ph_desc.text = "Toque ou clique em qualquer item da bolsa para inspecionar poderes, fórmulas e propriedades arcanas."
+	lbl_ph_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_ph_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl_ph_desc.add_theme_font_size_override("font_size", 9)
+	lbl_ph_desc.add_theme_color_override("font_color", Color(0.78, 0.72, 0.85, 0.85))
+	painel_placeholder.add_child(lbl_ph_desc)
+	
+	var card_dica = PanelContainer.new()
+	card_dica.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sb_dica = StyleBoxFlat.new()
+	sb_dica.bg_color = Color(0.06, 0.04, 0.10, 0.85)
+	sb_dica.border_width_left = 1
+	sb_dica.border_width_top = 1
+	sb_dica.border_width_right = 1
+	sb_dica.border_width_bottom = 1
+	sb_dica.border_color = Color(0.55, 0.42, 0.22, 0.6)
+	sb_dica.corner_radius_top_left = 8
+	sb_dica.corner_radius_top_right = 8
+	sb_dica.corner_radius_bottom_right = 8
+	sb_dica.corner_radius_bottom_left = 8
+	sb_dica.content_margin_left = 10
+	sb_dica.content_margin_right = 10
+	sb_dica.content_margin_top = 10
+	sb_dica.content_margin_bottom = 10
+	card_dica.add_theme_stylebox_override("panel", sb_dica)
+	
+	var vbox_dica = VBoxContainer.new()
+	vbox_dica.add_theme_constant_override("separation", 5)
+	var lbl_dica_tit = Label.new()
+	lbl_dica_tit.text = "💡 DICA ALQUÍMICA"
+	lbl_dica_tit.add_theme_font_size_override("font_size", 9)
+	lbl_dica_tit.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	vbox_dica.add_child(lbl_dica_tit)
+	
+	var lbl_dica_corpo = Label.new()
+	lbl_dica_corpo.text = "Poções recuperam seus pontos de vida durante confrontos com guardiões. Pergaminhos contêm fórmulas essenciais para os murais e desafios!"
+	lbl_dica_corpo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl_dica_corpo.add_theme_font_size_override("font_size", 8)
+	lbl_dica_corpo.add_theme_color_override("font_color", Color(0.7, 0.65, 0.78, 0.8))
+	vbox_dica.add_child(lbl_dica_corpo)
+	card_dica.add_child(vbox_dica)
+	painel_placeholder.add_child(card_dica)
+	
+	vbox_detalhes.add_child(painel_placeholder)
 	
 	_limpar_detalhes()
 	
@@ -182,6 +307,27 @@ func _ready() -> void:
 	)
 	
 	var painel_principal = $Control/MarginContainer/Panel
+	if painel_principal:
+		var particulas = CPUParticles2D.new()
+		particulas.name = "ParticulasArcanas"
+		particulas.position = Vector2(560, 560)
+		particulas.amount = 18
+		particulas.lifetime = 4.0
+		particulas.preprocess = 2.5
+		particulas.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		particulas.emission_rect_extents = Vector2(480, 10)
+		particulas.direction = Vector2(0, -1)
+		particulas.spread = 15.0
+		particulas.gravity = Vector2(0, -12)
+		particulas.initial_velocity_min = 12.0
+		particulas.initial_velocity_max = 28.0
+		particulas.scale_amount_min = 1.8
+		particulas.scale_amount_max = 3.6
+		particulas.color = Color(1.0, 0.88, 0.45, 0.28)
+		particulas.process_mode = Node.PROCESS_MODE_ALWAYS
+		painel_principal.add_child(particulas)
+		painel_principal.move_child(particulas, 0)
+	
 	var hbox_topo_direita = HBoxContainer.new()
 	hbox_topo_direita.name = "HBoxTopoDireita"
 	hbox_topo_direita.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -193,7 +339,33 @@ func _ready() -> void:
 	hbox_topo_direita.offset_top = 14
 	hbox_topo_direita.offset_right = -18
 	
+	# Indicador de Capacidade de Slots
+	lbl_capacidade_inv = Button.new()
+	lbl_capacidade_inv.mouse_filter = Control.MOUSE_FILTER_PASS
+	lbl_capacidade_inv.focus_mode = Control.FOCUS_NONE
+	var sb_cap = StyleBoxFlat.new()
+	sb_cap.bg_color = Color(0.12, 0.08, 0.18, 0.95)
+	sb_cap.border_width_left = 2
+	sb_cap.border_width_top = 2
+	sb_cap.border_width_right = 2
+	sb_cap.border_width_bottom = 2
+	sb_cap.border_color = Color(0.55, 0.42, 0.70, 0.9)
+	sb_cap.corner_radius_top_left = 10
+	sb_cap.corner_radius_top_right = 10
+	sb_cap.corner_radius_bottom_right = 10
+	sb_cap.corner_radius_bottom_left = 10
+	sb_cap.content_margin_left = 12
+	sb_cap.content_margin_right = 12
+	sb_cap.content_margin_top = 6
+	sb_cap.content_margin_bottom = 6
+	lbl_capacidade_inv.add_theme_stylebox_override("normal", sb_cap)
+	lbl_capacidade_inv.add_theme_color_override("font_color", Color(0.9, 0.85, 0.95))
+	lbl_capacidade_inv.add_theme_font_size_override("font_size", 11)
+	lbl_capacidade_inv.add_theme_font_override("font", font_num_inv)
+	hbox_topo_direita.add_child(lbl_capacidade_inv)
+	
 	hbox_topo_direita.add_child(lbl_moedas_inv)
+	_aplicar_efeito_sheen(lbl_moedas_inv, Color(1.0, 0.9, 0.4, 0.38), 3.8)
 	
 	# Botão de Fechar Inventário (Mobile + PC)
 	btn_fechar_inv = Button.new()
@@ -293,7 +465,13 @@ func _criar_estilos_slots() -> void:
 
 var _tween_anim_inv: Tween = null
 
-func _process(_delta: float) -> void:
+var _tempo_ph: float = 0.0
+
+func _process(delta: float) -> void:
+	if visible and painel_placeholder and painel_placeholder.visible and lbl_ph_icone:
+		_tempo_ph += delta * 2.5
+		lbl_ph_icone.position.y = sin(_tempo_ph) * 3.5
+		
 	var gs = get_node_or_null("/root/GlobalSignals")
 	if visible and gs and gs.tem_interacao_ou_minigame_ativo():
 		_toggle_inventario()
@@ -440,24 +618,25 @@ func _atualizar_listas() -> void:
 		lbl_moedas_inv.text = " 🪙  %d Moedas " % ps.moedas
 	
 	# carrega pocoes
-	if ps.pocoes.is_empty():
-		_add_mensagem_vazia(grid_pocoes, tex_pocao, "Nenhuma Poção na Bolsa", "Visite o Mercador ou explore as salas para coletar novos elixires.")
-	else:
-		for i in range(ps.pocoes.size()):
-			var po = ps.pocoes[i]
-			var icone_po = tex_pocao
-			var n_low = po.get("nome", "").to_lower()
-			var t_low = po.get("tipo", "").to_lower()
-			if "menor" in n_low or "pocao_menor" in t_low:
-				icone_po = tex_pocao_menor
-			var card = _criar_slot_card(icone_po, po["nome"], po["qtd"], func(): _selecionar_item(po, "pocao", i))
-			grid_pocoes.add_child(card)
+	for i in range(ps.pocoes.size()):
+		var po = ps.pocoes[i]
+		var icone_po = tex_pocao
+		var n_low = po.get("nome", "").to_lower()
+		var t_low = po.get("tipo", "").to_lower()
+		if "menor" in n_low or "pocao_menor" in t_low:
+			icone_po = tex_pocao_menor
+		var card = _criar_slot_card(icone_po, po["nome"], po["qtd"], func(): _selecionar_item(po, "pocao", i))
+		grid_pocoes.add_child(card)
+
+	var cap_pocoes = max(SLOTS_POR_GRADE, int(ceil(float(ps.pocoes.size()) / 5.0)) * 5)
+	var vazios_pocoes = max(0, cap_pocoes - ps.pocoes.size())
+	for k in range(vazios_pocoes):
+		grid_pocoes.add_child(_criar_slot_vazio("poção"))
 			
 	# carrega itens e chaves
-	var tem_qualquer_item = false
-	
+	var total_reliquias_cards = 0
 	if ps.chaves > 0:
-		tem_qualquer_item = true
+		total_reliquias_cards += 1
 		var icone_chave = load("res://assets/sprites/ui/icon_key_transparent.png")
 		var dic_chave = {"nome": "Chave de Porta", "descricao": "Uma chave dourada brilhante capaz de abrir portas mágicas seladas."}
 		var card = _criar_slot_card(icone_chave, "Chave de Porta", ps.chaves, func(): _selecionar_item(dic_chave, "item", -1))
@@ -493,7 +672,7 @@ func _atualizar_listas() -> void:
 		itens_agrupados[nome]["qtd"] += 1
 			
 	for nome in itens_agrupados.keys():
-		tem_qualquer_item = true
+		total_reliquias_cards += 1
 		var grupo = itens_agrupados[nome]
 		var item_base = grupo["item_base"]
 		var qtd = grupo["qtd"]
@@ -518,23 +697,28 @@ func _atualizar_listas() -> void:
 		var card = _criar_slot_card(icone, nome, qtd, func(): _selecionar_item(item_display, "item", -1))
 		grid_itens.add_child(card)
 		
-	if not tem_qualquer_item:
-		var icone_reliquia_padrao = load("res://assets/sprites/ui/icon_key_transparent.png")
-		_add_mensagem_vazia(grid_itens, icone_reliquia_padrao, "Sem Relíquias no Momento", "Resolva enigmas ou derrote guardiões para obter artefatos e chaves.")
+	var cap_itens = max(SLOTS_POR_GRADE, int(ceil(float(total_reliquias_cards) / 5.0)) * 5)
+	var vazios_itens = max(0, cap_itens - total_reliquias_cards)
+	for k in range(vazios_itens):
+		grid_itens.add_child(_criar_slot_vazio("relíquia"))
 			
 	# carrega folhas do grimorio
-	if ps.grimorio.is_empty():
-		_add_mensagem_vazia(grid_grimorio, atlas_pergaminho_fechado, "Grimório em Branco", "Descubra pergaminhos antigos pelas masmorras para registrar fórmulas.")
-	else:
-		for i in range(ps.grimorio.size()):
-			var doc = ps.grimorio[i]
-			var icone_doc: Texture2D = atlas_pergaminho_fechado
-			if doc is Dictionary and doc.get("tipo_codice") == "mural":
-				var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
-				if tex_livro:
-					icone_doc = tex_livro
-			var card = _criar_slot_card(icone_doc, doc["titulo"], 1, func(): _selecionar_item(doc, "grimorio", i))
-			grid_grimorio.add_child(card)
+	for i in range(ps.grimorio.size()):
+		var doc = ps.grimorio[i]
+		var icone_doc: Texture2D = atlas_pergaminho_fechado
+		if doc is Dictionary and doc.get("tipo_codice") == "mural":
+			var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
+			if tex_livro:
+				icone_doc = tex_livro
+		var card = _criar_slot_card(icone_doc, doc["titulo"], 1, func(): _selecionar_item(doc, "grimorio", i))
+		grid_grimorio.add_child(card)
+
+	var cap_grimorio = max(SLOTS_POR_GRADE, int(ceil(float(ps.grimorio.size()) / 5.0)) * 5)
+	var vazios_grimorio = max(0, cap_grimorio - ps.grimorio.size())
+	for k in range(vazios_grimorio):
+		grid_grimorio.add_child(_criar_slot_vazio("manuscrito"))
+
+	_atualizar_capacidade_label()
 
 # monta o slot do item na grade
 func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callable) -> Control:
@@ -627,20 +811,122 @@ func _criar_slot_card(icone: Texture2D, nome: String, qtd: int, callback: Callab
 		var am = get_node_or_null("/root/AudioManager")
 		if am:
 			am.play_sfx("ui-1")
+		_destacar_card_ativo(btn)
 		callback.call()
 	)
 	
 	# animacao de hover
 	btn.mouse_entered.connect(func():
-		var tw = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tw.tween_property(btn, "scale", Vector2(1.03, 1.03), 0.08)
+		if btn != _card_selecionado:
+			var tw = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw.tween_property(btn, "scale", Vector2(1.04, 1.04), 0.08)
 	)
 	btn.mouse_exited.connect(func():
-		var tw = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tw.tween_property(btn, "scale", Vector2.ONE, 0.08)
+		if btn != _card_selecionado:
+			var tw = btn.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw.tween_property(btn, "scale", Vector2.ONE, 0.08)
 	)
 	
 	return btn
+
+func _destacar_card_ativo(btn: Button) -> void:
+	if _card_selecionado and is_instance_valid(_card_selecionado):
+		_card_selecionado.add_theme_stylebox_override("normal", _style_slot_normal)
+	_card_selecionado = btn
+	if _card_selecionado and is_instance_valid(_card_selecionado):
+		_card_selecionado.add_theme_stylebox_override("normal", _style_slot_selected)
+		var tw_click = _card_selecionado.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_click.tween_property(_card_selecionado, "scale", Vector2(0.96, 0.96), 0.05)
+		tw_click.tween_property(_card_selecionado, "scale", Vector2(1.03, 1.03), 0.10).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func _criar_slot_vazio(_categoria_hint: String = "") -> Control:
+	var slot = PanelContainer.new()
+	slot.custom_minimum_size = Vector2(118, 118)
+	slot.focus_mode = Control.FOCUS_NONE
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.07, 0.05, 0.11, 0.65)
+	sb.border_width_left = 1
+	sb.border_width_top = 1
+	sb.border_width_right = 1
+	sb.border_width_bottom = 1
+	sb.border_color = Color(0.35, 0.25, 0.45, 0.35)
+	sb.corner_radius_top_left = 8
+	sb.corner_radius_top_right = 8
+	sb.corner_radius_bottom_right = 8
+	sb.corner_radius_bottom_left = 8
+	slot.add_theme_stylebox_override("panel", sb)
+	
+	var center = CenterContainer.new()
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot.add_child(center)
+	
+	var vbox = VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 2)
+	center.add_child(vbox)
+	
+	var lbl_icone = Label.new()
+	lbl_icone.text = "◇"
+	lbl_icone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_icone.add_theme_font_size_override("font_size", 14)
+	lbl_icone.add_theme_color_override("font_color", Color(0.55, 0.45, 0.70, 0.25))
+	vbox.add_child(lbl_icone)
+	
+	var lbl_txt = Label.new()
+	lbl_txt.text = "Vazio"
+	lbl_txt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_txt.add_theme_font_size_override("font_size", 8)
+	lbl_txt.add_theme_color_override("font_color", Color(0.55, 0.48, 0.70, 0.25))
+	vbox.add_child(lbl_txt)
+	
+	slot.mouse_entered.connect(func():
+		var sb_h = sb.duplicate() as StyleBoxFlat
+		sb_h.border_color = Color(0.65, 0.50, 0.85, 0.6)
+		sb_h.bg_color = Color(0.12, 0.08, 0.18, 0.8)
+		slot.add_theme_stylebox_override("panel", sb_h)
+	)
+	slot.mouse_exited.connect(func():
+		slot.add_theme_stylebox_override("panel", sb)
+	)
+	
+	return slot
+
+func _atualizar_capacidade_label() -> void:
+	if not lbl_capacidade_inv: return
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps: return
+	var aba = tab_container.current_tab if tab_container else 0
+	var qtd = 0
+	var icone = "🎒"
+	if aba == 0:
+		qtd = ps.pocoes.size()
+		icone = "🧪"
+	elif aba == 1:
+		var total_reliquias = 0
+		if ps.chaves > 0: total_reliquias += 1
+		var vistos = {}
+		for it in ps.itens:
+			var n = it.get("nome", "")
+			if not vistos.has(n):
+				vistos[n] = true
+				total_reliquias += 1
+		qtd = total_reliquias
+		icone = "🗝️"
+	elif aba == 2:
+		qtd = ps.grimorio.size()
+		icone = "📜"
+	
+	var cap_max = max(SLOTS_POR_GRADE, int(ceil(float(qtd) / 5.0)) * 5)
+	lbl_capacidade_inv.text = " %s  %d / %d " % [icone, qtd, cap_max]
+
+func _on_tab_changed(_tab_idx: int) -> void:
+	var am = get_node_or_null("/root/AudioManager")
+	if am:
+		am.play_sfx("ui-3")
+	_limpar_detalhes()
+	_atualizar_capacidade_label()
 
 func _add_mensagem_vazia(node: Node, icone_recurso: Variant, titulo: String, dica: String) -> void:
 	var vbox = VBoxContainer.new()
@@ -683,20 +969,59 @@ func _limpar_filhos(node: Node) -> void:
 func _limpar_detalhes() -> void:
 	if pedestal_icone: pedestal_icone.visible = false
 	if img_detalhe_icone: img_detalhe_icone.texture = null
-	lbl_detalhe_titulo.text = "Selecione um item"
-	lbl_detalhe_desc.text = "Selecione qualquer item da bolsa para inspecionar seus poderes e propriedades."
-	btn_acao.visible = false
+	if lbl_detalhe_titulo: lbl_detalhe_titulo.visible = false
+	if badge_categoria: badge_categoria.visible = false
+	if detalhe_divisor: detalhe_divisor.visible = false
+	if scroll_desc: scroll_desc.visible = false
+	if btn_acao: btn_acao.visible = false
 	if box_descarte: box_descarte.visible = false
+	if painel_placeholder: painel_placeholder.visible = true
+	if _card_selecionado and is_instance_valid(_card_selecionado):
+		_card_selecionado.add_theme_stylebox_override("normal", _style_slot_normal)
+	_card_selecionado = null
 	item_selecionado = {}
+
+func _aplicar_estilo_badge(texto: String, cor_texto: Color, cor_bg: Color, cor_borda: Color) -> void:
+	if not badge_categoria or not lbl_badge_categoria: return
+	lbl_badge_categoria.text = texto
+	lbl_badge_categoria.add_theme_color_override("font_color", cor_texto)
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = cor_bg
+	sb.border_width_left = 1
+	sb.border_width_top = 1
+	sb.border_width_right = 1
+	sb.border_width_bottom = 1
+	sb.border_color = cor_borda
+	sb.corner_radius_top_left = 6
+	sb.corner_radius_top_right = 6
+	sb.corner_radius_bottom_right = 6
+	sb.corner_radius_bottom_left = 6
+	sb.content_margin_left = 10
+	sb.content_margin_right = 10
+	sb.content_margin_top = 4
+	sb.content_margin_bottom = 4
+	badge_categoria.add_theme_stylebox_override("panel", sb)
 
 func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 	item_selecionado = item
 	item_selecionado["tipo"] = tipo
 	item_selecionado["index"] = index
 	
-	if pedestal_icone: pedestal_icone.visible = true
+	if painel_placeholder: painel_placeholder.visible = false
+	if pedestal_icone:
+		pedestal_icone.visible = true
+		pedestal_icone.scale = Vector2(0.88, 0.88)
+		pedestal_icone.pivot_offset = pedestal_icone.size * 0.5
+		var tw_ped = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_ped.tween_property(pedestal_icone, "scale", Vector2.ONE, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	if lbl_detalhe_titulo: lbl_detalhe_titulo.visible = true
+	if badge_categoria: badge_categoria.visible = true
+	if detalhe_divisor: detalhe_divisor.visible = true
+	if scroll_desc: scroll_desc.visible = true
 	
 	if tipo == "pocao":
+		_aplicar_estilo_badge("🧪 CONSUMÍVEL REVITALIZANTE", Color(0.4, 1.0, 0.6), Color(0.06, 0.20, 0.12, 0.95), Color(0.28, 0.85, 0.45, 0.95))
 		var icone_detalhe = tex_pocao
 		var n_low = item.get("nome", "").to_lower()
 		var t_low = item.get("tipo", "").to_lower()
@@ -713,6 +1038,11 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		spin_descarte.max_value = max(1, item["qtd"])
 		
 	elif tipo == "item":
+		if item["nome"] == "Chave de Porta":
+			_aplicar_estilo_badge("🗝️ CHAVE DE MASMORRA", Color(1.0, 0.88, 0.45), Color(0.22, 0.16, 0.06, 0.95), Color(0.95, 0.75, 0.25, 0.95))
+		else:
+			_aplicar_estilo_badge("💎 ARTEFATO ALQUÍMICO", Color(0.5, 0.9, 1.0), Color(0.08, 0.16, 0.28, 0.95), Color(0.3, 0.75, 1.0, 0.95))
+			
 		var icone_item: Texture2D = null
 		if item["nome"] == "Chave de Porta":
 			icone_item = load("res://assets/sprites/ui/icon_key_transparent.png")
@@ -748,6 +1078,11 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		
 	elif tipo == "grimorio":
 		var e_codice = (item is Dictionary and item.get("tipo_codice") == "mural")
+		if e_codice:
+			_aplicar_estilo_badge("🏛️ CÓDICE ACADÊMICO", Color(0.9, 0.75, 1.0), Color(0.18, 0.10, 0.30, 0.95), Color(0.85, 0.55, 1.0, 0.95))
+		else:
+			_aplicar_estilo_badge("📜 PERGAMINHO DE FÓRMULAS", Color(1.0, 0.80, 0.50), Color(0.22, 0.14, 0.08, 0.95), Color(0.95, 0.65, 0.30, 0.95))
+			
 		if img_detalhe_icone:
 			if e_codice:
 				var tex_livro = load("res://assets/sprites/ui/item_livro_formulas.png") as Texture2D
@@ -769,6 +1104,7 @@ func _selecionar_item(item: Dictionary, tipo: String, index: int) -> void:
 		btn_acao.visible = true
 		
 	elif tipo == "moeda":
+		_aplicar_estilo_badge("🪙 TESOURO REAL", Color(1.0, 0.88, 0.45), Color(0.22, 0.16, 0.06, 0.95), Color(1.0, 0.82, 0.25, 0.95))
 		var icone_moeda = load("res://assets/sprites/ui/coin.png")
 		if img_detalhe_icone: img_detalhe_icone.texture = icone_moeda
 		lbl_detalhe_titulo.text = "Moedas de Ouro"
@@ -881,3 +1217,53 @@ func _pagina_proxima() -> void:
 
 func _fechar_leitura() -> void:
 	painel_leitura.visible = false
+
+func _aplicar_efeito_sheen(alvo: Control, cor_brilho: Color = Color(1.0, 1.0, 1.0, 0.38), intervalo: float = 3.2) -> void:
+	if alvo == null or not is_instance_valid(alvo):
+		return
+	alvo.clip_contents = true
+	
+	var sheen = TextureRect.new()
+	sheen.name = "SheenEffect"
+	sheen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sheen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0),
+		cor_brilho,
+		Color(1, 1, 1, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	
+	var tex = GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_LINEAR
+	tex.fill_from = Vector2(0.0, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 64
+	tex.height = 128
+	sheen.texture = tex
+	
+	alvo.add_child(sheen)
+	
+	alvo.resized.connect(func():
+		_iniciar_animacao_sheen(alvo, sheen, intervalo)
+	)
+	_iniciar_animacao_sheen(alvo, sheen, intervalo)
+
+func _iniciar_animacao_sheen(alvo: Control, sheen: TextureRect, intervalo: float) -> void:
+	if not is_instance_valid(alvo) or not is_instance_valid(sheen): return
+	var w = max(alvo.size.x, alvo.custom_minimum_size.x)
+	var h = max(alvo.size.y, alvo.custom_minimum_size.y)
+	if w <= 0 or h <= 0: return
+	
+	sheen.size = Vector2(w * 0.45, h * 2.4)
+	sheen.rotation = deg_to_rad(24.0)
+	sheen.pivot_offset = sheen.size * 0.5
+	sheen.position = Vector2(-sheen.size.x * 2.0, -h * 0.7)
+	
+	var tw = sheen.create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_interval(intervalo)
+	tw.tween_property(sheen, "position:x", w + sheen.size.x, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(sheen, "position:x", -sheen.size.x * 2.0, 0.0)

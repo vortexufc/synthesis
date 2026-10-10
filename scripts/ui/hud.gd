@@ -143,14 +143,15 @@ func _criar_vinheta_critica() -> void:
 	_vinheta_critica.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_vinheta_critica.modulate.a = 0.0
 	
-	# Gradiente radial suave vermelho escarlate nas bordas da tela
+	# Gradiente radial com túnel escurecido e vermelho escarlate nas bordas (Item 5 melhorado)
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([
-		Color(0.85, 0.05, 0.05, 0.0),
-		Color(0.85, 0.05, 0.05, 0.14),
-		Color(0.90, 0.02, 0.02, 0.78)
+		Color(0.85, 0.05, 0.05, 0.0),    # Centro limpo
+		Color(0.85, 0.05, 0.05, 0.16),   # Transição suave
+		Color(0.92, 0.02, 0.02, 0.68),   # Borda vermelha pulsante
+		Color(0.12, 0.0, 0.03, 0.90)     # Cantos com vinheta escura (visão de túnel)
 	])
-	grad.offsets = PackedFloat32Array([0.0, 0.48, 1.0])
+	grad.offsets = PackedFloat32Array([0.0, 0.40, 0.80, 1.0])
 	
 	var tex = GradientTexture2D.new()
 	tex.gradient = grad
@@ -165,7 +166,7 @@ func _criar_vinheta_critica() -> void:
 	parent_ctrl.move_child(_vinheta_critica, 0)
 
 func _verificar_estado_critico(atual: float, maxima: float) -> void:
-	var eh_critico = (atual > 0.0 and (atual / maxima) <= 0.25)
+	var eh_critico = (atual > 0.0 and (atual / maxima) <= 0.28)
 	if eh_critico != _em_alerta_critico:
 		_em_alerta_critico = eh_critico
 		_atualizar_alerta_critico(eh_critico)
@@ -176,9 +177,16 @@ func _atualizar_alerta_critico(ativo: bool) -> void:
 			_tween_vinheta.kill()
 		_tween_vinheta = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		if ativo:
+			# Ritmo cardiovascular duplo (Lub-Dub orgânico)
 			_tween_vinheta.set_loops()
-			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.70, 0.42).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.16, 0.42).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			# Pulso 1: Lub
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.55, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.30, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			# Pulso 2: DUB (impacto principal)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.88, 0.11).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.18, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			# Intervalo de descanso entre batimentos
+			_tween_vinheta.tween_interval(0.42)
 		else:
 			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 			
@@ -187,10 +195,17 @@ func _atualizar_alerta_critico(ativo: bool) -> void:
 			_tween_heart_critico.kill()
 		if ativo:
 			_tween_heart_critico = create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-			_tween_heart_critico.tween_property(heart_icon, "scale", Vector2(1.28, 1.28), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			_tween_heart_critico.parallel().tween_property(heart_icon, "modulate", Color(1.3, 0.35, 0.35), 0.12)
-			_tween_heart_critico.tween_property(heart_icon, "scale", Vector2(1.0, 1.0), 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-			_tween_heart_critico.parallel().tween_property(heart_icon, "modulate", Color(1.0, 0.85, 0.85), 0.28)
+			# Pulso 1: Lub
+			_tween_heart_critico.tween_property(heart_icon, "scale", Vector2(1.18, 1.18), 0.09).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			_tween_heart_critico.parallel().tween_property(heart_icon, "modulate", Color(1.2, 0.45, 0.45), 0.09)
+			_tween_heart_critico.tween_property(heart_icon, "scale", Vector2(1.05, 1.05), 0.08).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+			# Pulso 2: DUB (sístole profunda)
+			_tween_heart_critico.tween_property(heart_icon, "scale", Vector2(1.35, 1.35), 0.11).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			_tween_heart_critico.parallel().tween_property(heart_icon, "modulate", Color(1.4, 0.25, 0.25), 0.11)
+			_tween_heart_critico.tween_property(heart_icon, "scale", Vector2(1.0, 1.0), 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			_tween_heart_critico.parallel().tween_property(heart_icon, "modulate", Color(1.0, 0.85, 0.85), 0.22)
+			# Intervalo
+			_tween_heart_critico.tween_interval(0.42)
 		else:
 			var tw_h = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 			tw_h.tween_property(heart_icon, "scale", Vector2(1.0, 1.0), 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

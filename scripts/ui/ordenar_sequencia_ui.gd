@@ -129,6 +129,7 @@ var _card_selecionado_idx: int = -1
 var _resolvido: bool = false
 
 # referencias da tela
+var _backdrop: ColorRect = null
 var _painel_central: PanelContainer
 var _lbl_titulo: Label
 var _lbl_descricao: Label
@@ -191,6 +192,24 @@ func iniciar_minigame(tema: String = "auto") -> void:
 	_resolvido = false
 	
 	_atualizar_textos_e_cards()
+	_animar_entrada()
+
+func _animar_entrada() -> void:
+	if not _painel_central:
+		return
+	_painel_central.pivot_offset = Vector2(430, 250)
+	_painel_central.scale = Vector2(0.85, 0.85)
+	_painel_central.modulate.a = 0.0
+	
+	var tw_in = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	if _backdrop:
+		_backdrop.modulate.a = 0.0
+		tw_in.tween_property(_backdrop, "modulate:a", 1.0, 0.20)
+	tw_in.tween_property(_painel_central, "modulate:a", 1.0, 0.22)
+	tw_in.tween_property(_painel_central, "scale", Vector2.ONE, 0.32).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("ui_5")
 
 func _esta_na_ordem(lista: Array) -> bool:
 	if lista.size() != 3:
@@ -206,11 +225,25 @@ func _construir_ui() -> void:
 	add_child(root_container)
 	
 	# Fundo escuro cobrindo 100% da tela
-	var backdrop = ColorRect.new()
-	backdrop.color = Color(0.04, 0.04, 0.07, 0.88)
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
-	backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
-	root_container.add_child(backdrop)
+	_backdrop = ColorRect.new()
+	_backdrop.color = Color(0.04, 0.04, 0.07, 0.88)
+	_backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
+	root_container.add_child(_backdrop)
+	
+	# Partículas de poeira mágica flutuante no fundo
+	var particulas = CPUParticles2D.new()
+	particulas.name = "ParticulasFundo"
+	particulas.amount = 26
+	particulas.lifetime = 4.0
+	particulas.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particulas.emission_rect_extents = Vector2(640, 360)
+	particulas.position = Vector2(640, 360)
+	particulas.gravity = Vector2(0, -16)
+	particulas.scale_amount_min = 1.5
+	particulas.scale_amount_max = 3.5
+	particulas.color = Color(1.0, 0.85, 0.40, 0.30)
+	root_container.add_child(particulas)
 	
 	# Container centralizado na tela
 	var center = CenterContainer.new()
@@ -222,7 +255,8 @@ func _construir_ui() -> void:
 		if is_instance_valid(root_container) and is_inside_tree():
 			var vp_size = get_viewport().get_visible_rect().size
 			root_container.size = vp_size
-			backdrop.size = vp_size
+			if is_instance_valid(_backdrop):
+				_backdrop.size = vp_size
 			center.size = vp_size
 	
 	atualizar_tamanho.call()
@@ -231,6 +265,7 @@ func _construir_ui() -> void:
 	# painel principal
 	_painel_central = PanelContainer.new()
 	_painel_central.custom_minimum_size = Vector2(860, 500)
+	_painel_central.pivot_offset = Vector2(430, 250)
 	
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = Color(0.07, 0.08, 0.12, 0.98) # Grafite arcano escuro
@@ -316,7 +351,7 @@ func _construir_ui() -> void:
 	
 	# texto de instrucao
 	_lbl_status = Label.new()
-	_lbl_status.text = "💡 Clique em um card e depois em outro para trocar, ou use as setas [ ◀ ] [ ▶ ]."
+	_lbl_status.text = "Clique em um card e depois em outro para trocar, ou use as setas para ordenar."
 	_lbl_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lbl_status.add_theme_font_size_override("font_size", 13)
 	_lbl_status.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
@@ -330,12 +365,13 @@ func _construir_ui() -> void:
 	vbox_principal.add_child(hbox_acoes)
 	
 	_btn_verificar = Button.new()
-	_btn_verificar.text = "✦ VERIFICAR E QUEBRAR SELO ✦"
+	_btn_verificar.text = "VERIFICAR E QUEBRAR SELO"
 	_btn_verificar.custom_minimum_size = Vector2(300, 48)
 	_btn_verificar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_btn_verificar.pressed.connect(_on_verificar_clicado)
 	_aplicar_estilo_botao_dourado(_btn_verificar)
 	_aplicar_fonte_bold(_btn_verificar)
+	_aplicar_efeito_sheen(_btn_verificar) # Efeito de varredura brilhante (Item 7)
 	hbox_acoes.add_child(_btn_verificar)
 	
 	var btn_desistir = Button.new()
@@ -369,9 +405,21 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	var card = PanelContainer.new()
 	card.custom_minimum_size = Vector2(245, 230)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.pivot_offset = Vector2(122.5, 115.0)
 	
 	var eh_selecionado = (pos_idx == _card_selecionado_idx)
 	_aplicar_estilo_card(card, eh_selecionado, false)
+	
+	# Micro-pop suave ao passar o mouse (Item 4)
+	card.mouse_entered.connect(func():
+		if not _resolvido:
+			var tw_h = card.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw_h.tween_property(card, "scale", Vector2(1.03, 1.03), 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	)
+	card.mouse_exited.connect(func():
+		var tw_h = card.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_h.tween_property(card, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	)
 	
 	var vbox = VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 8)
@@ -398,18 +446,11 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	pnl_badge.add_child(lbl_pos)
 	vbox.add_child(pnl_badge)
 	
-	# icone
-	var lbl_icone = Label.new()
-	lbl_icone.text = dado.get("icone", "✦")
-	lbl_icone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl_icone.add_theme_font_size_override("font_size", 34)
-	vbox.add_child(lbl_icone)
-	
 	# botao pra selecionar card
 	var btn_corpo = Button.new()
 	btn_corpo.text = dado.get("texto", "")
 	btn_corpo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	btn_corpo.custom_minimum_size = Vector2(230, 85)
+	btn_corpo.custom_minimum_size = Vector2(230, 115)
 	btn_corpo.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	btn_corpo.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	btn_corpo.pressed.connect(func(): _on_card_clicado(pos_idx))
@@ -417,7 +458,7 @@ func _criar_widget_card(pos_idx: int, dado: Dictionary) -> PanelContainer:
 	var sb_btn = StyleBoxFlat.new()
 	sb_btn.bg_color = Color(0.1, 0.12, 0.18, 0.6)
 	sb_btn.set_corner_radius_all(6)
-	sb_btn.set_content_margin_all(8)
+	sb_btn.set_content_margin_all(10)
 	btn_corpo.add_theme_stylebox_override("normal", sb_btn)
 	btn_corpo.add_theme_font_size_override("font_size", 13)
 	btn_corpo.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
@@ -508,7 +549,11 @@ func _executar_vitoria() -> void:
 	_lbl_status.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
 	
 	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("acerto_1")
+		AudioManager.play_sfx("win")
+		
+	# Dispara rajada de confetes coloridos comemorativos (Item 3)
+	var vp_size = get_viewport().get_visible_rect().size
+	_disparar_confetes_vitoria(vp_size * 0.5)
 		
 	# brilho de acerto
 	for card in _card_nodes:
@@ -518,7 +563,7 @@ func _executar_vitoria() -> void:
 		tw.tween_property(card, "scale", Vector2(1.0, 1.0), 0.2)
 		
 	# espera antes de fechar
-	await get_tree().create_timer(1.2).timeout
+	await get_tree().create_timer(1.4).timeout
 	var p = get_tree().get_first_node_in_group("player")
 	if p:
 		if p.has_method("finalizar_interacao"):
@@ -529,11 +574,108 @@ func _executar_vitoria() -> void:
 	sequencia_concluida.emit(true)
 	queue_free()
 
+func _disparar_confetes_vitoria(pos_centro: Vector2) -> void:
+	var part = CPUParticles2D.new()
+	part.name = "ConfetesVitoria"
+	part.z_index = 60
+	part.amount = 46
+	part.lifetime = 1.35
+	part.one_shot = true
+	part.explosiveness = 0.95
+	part.direction = Vector2(0, -1)
+	part.spread = 180.0
+	part.gravity = Vector2(0, 160)
+	part.initial_velocity_min = 120.0
+	part.initial_velocity_max = 250.0
+	part.scale_amount_min = 3.0
+	part.scale_amount_max = 5.5
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1.0, 0.85, 0.25, 1.0), # Dourado
+		Color(0.2, 1.0, 0.45, 1.0),  # Verde esmeralda
+		Color(0.3, 0.85, 1.0, 1.0),  # Ciano místico
+		Color(1.0, 0.35, 0.65, 1.0), # Rubi / Rosa
+		Color(1.0, 1.0, 1.0, 0.0)    # Fade
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.25, 0.50, 0.75, 1.0])
+	part.color_ramp = grad
+	
+	add_child(part)
+	part.position = pos_centro
+	part.emitting = true
+	part.restart()
+	get_tree().create_timer(1.5, true, false, true).timeout.connect(part.queue_free)
+
+func _aplicar_efeito_sheen(alvo: Control, cor_brilho: Color = Color(1.0, 1.0, 1.0, 0.38), intervalo: float = 3.2) -> void:
+	if alvo == null or not is_instance_valid(alvo):
+		return
+	alvo.clip_contents = true
+	
+	var sheen = TextureRect.new()
+	sheen.name = "SheenEffect"
+	sheen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sheen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	
+	var grad = Gradient.new()
+	grad.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0),
+		cor_brilho,
+		Color(1, 1, 1, 0.0)
+	])
+	grad.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	
+	var tex = GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_LINEAR
+	tex.fill_from = Vector2(0.0, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 64
+	tex.height = 128
+	sheen.texture = tex
+	
+	alvo.add_child(sheen)
+	
+	alvo.resized.connect(func():
+		_iniciar_animacao_sheen(alvo, sheen, intervalo)
+	)
+	_iniciar_animacao_sheen(alvo, sheen, intervalo)
+
+func _iniciar_animacao_sheen(alvo: Control, sheen: TextureRect, intervalo: float) -> void:
+	if not is_instance_valid(alvo) or not is_instance_valid(sheen): return
+	var w = max(alvo.size.x, alvo.custom_minimum_size.x)
+	var h = max(alvo.size.y, alvo.custom_minimum_size.y)
+	if w <= 0 or h <= 0: return
+	
+	sheen.size = Vector2(w * 0.45, h * 2.4)
+	sheen.rotation = deg_to_rad(24.0)
+	sheen.pivot_offset = sheen.size * 0.5
+	sheen.position = Vector2(-sheen.size.x * 2.0, -h * 0.7)
+	
+	var tw = sheen.create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_interval(intervalo)
+	tw.tween_property(sheen, "position:x", w + sheen.size.x, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(sheen, "position:x", -sheen.size.x * 2.0, 0.0)
+
 func _executar_erro() -> void:
 	_lbl_status.text = "❌ A ordem ainda está incorreta! Pense na causa, processo e resultado."
 	_lbl_status.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
 	
-	# Som de derrota removido para evitar repetição/loop incômodo
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("ui_2")
+	
+	# Shake horizontal e flash vermelho suave nos cards (Item 4)
+	for card in _card_nodes:
+		if is_instance_valid(card):
+			card.modulate = Color(1.0, 0.45, 0.45)
+			var tw_c = card.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			var base_x = card.position.x
+			tw_c.tween_property(card, "position:x", base_x - 8.0, 0.05)
+			tw_c.tween_property(card, "position:x", base_x + 8.0, 0.05)
+			tw_c.tween_property(card, "position:x", base_x - 4.0, 0.05)
+			tw_c.tween_property(card, "position:x", base_x + 4.0, 0.05)
+			tw_c.tween_property(card, "position:x", base_x, 0.05)
+			tw_c.parallel().tween_property(card, "modulate", Color.WHITE, 0.35)
 	
 	# Treme o painel ao errar de forma segura
 	if _tween_shake and _tween_shake.is_valid():
@@ -546,9 +688,9 @@ func _executar_erro() -> void:
 		
 	var orig_x = _painel_central.position.x
 	_tween_shake = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	_tween_shake.tween_property(_painel_central, "position:x", orig_x + 8.0, 0.04)
-	_tween_shake.tween_property(_painel_central, "position:x", orig_x - 8.0, 0.04)
-	_tween_shake.tween_property(_painel_central, "position:x", orig_x + 4.0, 0.04)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x + 6.0, 0.04)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x - 6.0, 0.04)
+	_tween_shake.tween_property(_painel_central, "position:x", orig_x + 3.0, 0.04)
 	_tween_shake.tween_property(_painel_central, "position:x", orig_x, 0.04)
 
 func _on_fechar_clicado() -> void:

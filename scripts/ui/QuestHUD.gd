@@ -75,11 +75,11 @@ func _atualizar_hud() -> void:
 			var lbl_titulo = card.get_node("VBox/LblTitulo") as Label
 			var lbl_progresso = card.get_node("VBox/LblProgresso") as Label
 			
-			lbl_titulo.text = "📜 " + def["titulo"]
+			lbl_titulo.text = def["titulo"]
 			
 			var sb = card.get_theme_stylebox("panel") as StyleBoxFlat
 			if pronto:
-				lbl_progresso.text = "✔ Pronto para Entregar! (" + str(progresso) + "/" + str(def["qtd"]) + ")"
+				lbl_progresso.text = "Pronto para Entregar! (" + str(progresso) + "/" + str(def["qtd"]) + ")"
 				lbl_progresso.add_theme_color_override("font_color", Color(0.35, 1.0, 0.55))
 				lbl_titulo.add_theme_color_override("font_color", Color(0.5, 1.0, 0.7))
 				if sb:
