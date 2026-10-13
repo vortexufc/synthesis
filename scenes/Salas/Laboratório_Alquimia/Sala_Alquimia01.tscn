@@ -16,9 +16,6 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="15_gt6bf"]
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="16_pergaminho"]
 [ext_resource type="Texture2D" uid="uid://bqay358g20gec" path="res://assets/sprites/tilesets/Alquimia/porta.png" id="16_spvc0"]
-[ext_resource type="PackedScene" uid="uid://cy8k7baf" path="res://scenes/Entidades/Items/ItemChave.tscn" id="18_mgcqj"]
-[ext_resource type="PackedScene" uid="uid://b88fskp86tqc2" path="res://scenes/Entidades/Items/ItemMoeda.tscn" id="19_yo20j"]
-[ext_resource type="PackedScene" uid="uid://crfyxl12t7qm0" path="res://scenes/Entidades/Items/ItemLivroFormula.tscn" id="20_qyqlx"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="21_71yqb"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="23_objetos"]
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="24_spawner"]
@@ -325,22 +322,22 @@ porta_de_retorno = true
 
 [node name="Tocha" parent="." unique_id=272830461 instance=ExtResource("21_71yqb")]
 position = Vector2(1072, 926.0001)
-rotation = -0.61086524
+rotation = -1.0471976
 
 [node name="Tocha2" parent="." unique_id=1267392876 instance=ExtResource("21_71yqb")]
 position = Vector2(1069.0001, 557)
-rotation = -0.61086524
+rotation = -1.0471976
 
 [node name="Tocha3" parent="." unique_id=1986408434 instance=ExtResource("21_71yqb")]
 position = Vector2(623, 128)
 
 [node name="Tocha4" parent="." unique_id=36539113 instance=ExtResource("21_71yqb")]
 position = Vector2(1076.0001, 177.00003)
-rotation = -0.06981317
+rotation = -1.0471976
 
 [node name="Tocha5" parent="." unique_id=995698598 instance=ExtResource("21_71yqb")]
 position = Vector2(85.99997, 931)
-rotation = -5.2359877
+rotation = 1.0471976
 
 [node name="Tocha6" parent="." unique_id=1955335715 instance=ExtResource("21_71yqb")]
 position = Vector2(115.00003, 630)
@@ -348,7 +345,7 @@ rotation = -5.2359877
 
 [node name="Tocha7" parent="." unique_id=952558187 instance=ExtResource("21_71yqb")]
 position = Vector2(94.99999, 358)
-rotation = -5.2359877
+rotation = 1.0471976
 
 [node name="PontosDeBau" type="Node2D" parent="." unique_id=543473787]
 script = ExtResource("24_spawner")

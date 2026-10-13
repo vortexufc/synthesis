@@ -1806,16 +1806,20 @@ position = Vector2(672, 122)
 position = Vector2(1401, 129)
 
 [node name="Tocha3" parent="." unique_id=1741762610 instance=ExtResource("tocha_entidade")]
-position = Vector2(72, 359)
+position = Vector2(88.00001, 377)
+rotation = 1.0471976
 
 [node name="Tocha4" parent="." unique_id=888087375 instance=ExtResource("tocha_entidade")]
-position = Vector2(1125, 812)
+position = Vector2(1140, 809.0001)
+rotation = 1.0471976
 
 [node name="Tocha5" parent="." unique_id=239882235 instance=ExtResource("tocha_entidade")]
-position = Vector2(1899, 307)
+position = Vector2(1876.0001, 351.00006)
+rotation = -1.0471976
 
 [node name="Tocha6" parent="." unique_id=1528172917 instance=ExtResource("tocha_entidade")]
-position = Vector2(1898, 964)
+position = Vector2(1882.0001, 953)
+rotation = -1.0471976
 
 [node name="PontosDeBau" type="Node2D" parent="." unique_id=1010815051]
 script = ExtResource("22_h8nsg")

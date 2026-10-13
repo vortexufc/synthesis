@@ -22,11 +22,11 @@
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="21_nc4er"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="22_kqa6m"]
 [ext_resource type="PackedScene" path="res://scenes/Armadilhas/poca_acido.tscn" id="25_ulsdx"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="frasco_trap"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Items/ItemPocao.tscn" id="item_pocao"]
 [ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
 [ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
-[ext_resource type="PackedScene" uid="uid://frasco_instavel_01" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="frasco_trap"]
-[ext_resource type="PackedScene" uid="uid://item_pocao_01" path="res://scenes/Entidades/Items/ItemPocao.tscn" id="item_pocao"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_4oytm"]
 texture = ExtResource("2_qn8ir")
@@ -1872,15 +1872,19 @@ position = Vector2(893, 165)
 
 [node name="Tocha3" parent="." unique_id=746327147 instance=ExtResource("tocha_entidade")]
 position = Vector2(82, 596)
+rotation = 1.0471976
 
 [node name="Tocha4" parent="." unique_id=1071623934 instance=ExtResource("tocha_entidade")]
 position = Vector2(81, 1352)
+rotation = 1.0471976
 
 [node name="Tocha5" parent="." unique_id=553091630 instance=ExtResource("tocha_entidade")]
-position = Vector2(1271, 733)
+position = Vector2(1254.0001, 658.00006)
+rotation = -1.0471976
 
 [node name="Tocha6" parent="." unique_id=1722413100 instance=ExtResource("tocha_entidade")]
 position = Vector2(1270, 1220)
+rotation = -1.0471976
 
 [node name="PontosDeBau" type="Node2D" parent="." unique_id=862416986]
 script = ExtResource("21_nc4er")
@@ -1952,11 +1956,11 @@ position = Vector2(967, 469)
 [node name="PocaAcido3" parent="." unique_id=1037755517 instance=ExtResource("25_ulsdx")]
 position = Vector2(907, 458)
 
-[node name="ItemPocao" parent="." instance=ExtResource("item_pocao")]
+[node name="ItemPocao" parent="." unique_id=1284113997 instance=ExtResource("item_pocao")]
 position = Vector2(200, 700)
 
-[node name="FrascoInstavel1" parent="." instance=ExtResource("frasco_trap")]
+[node name="FrascoInstavel1" parent="." unique_id=1840204582 instance=ExtResource("frasco_trap")]
 position = Vector2(880, 480)
 
-[node name="FrascoInstavel2" parent="." instance=ExtResource("frasco_trap")]
+[node name="FrascoInstavel2" parent="." unique_id=388304899 instance=ExtResource("frasco_trap")]
 position = Vector2(320, 1150)

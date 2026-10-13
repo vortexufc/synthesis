@@ -22,11 +22,11 @@
 [ext_resource type="PackedScene" uid="uid://cv1hh557ja58c" path="res://scenes/Objetos/pergaminho.tscn" id="19_sa4t6"]
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="22_pgqs7"]
 [ext_resource type="Script" uid="uid://ousqlc31a3yx" path="res://scripts/PontoSpawnBau.gd" id="23_76nqq"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="frasco_trap"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Items/ItemPocao.tscn" id="item_pocao"]
 [ext_resource type="Script" uid="uid://bipoddrtlisll" path="res://scripts/PontoSpawnItem.gd" id="ponto_item"]
 [ext_resource type="Script" uid="uid://dqi7uc0bwuuvx" path="res://scripts/GerenciadorSpawnItens.gd" id="spawner_item"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="tocha_entidade"]
-[ext_resource type="PackedScene" path="res://scenes/Armadilhas/frasco_instavel.tscn" id="frasco_trap"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Items/ItemPocao.tscn" id="item_pocao"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sa4t6"]
 texture = ExtResource("3_baox0")
@@ -1797,18 +1797,23 @@ position = Vector2(125, 314)
 
 [node name="Tocha1" parent="." unique_id=1663310620 instance=ExtResource("tocha_entidade")]
 position = Vector2(75, 404)
+rotation = 1.0471976
 
 [node name="Tocha2" parent="." unique_id=694232249 instance=ExtResource("tocha_entidade")]
-position = Vector2(847, 260)
+position = Vector2(831.00006, 276)
+rotation = -1.0471976
 
 [node name="Tocha3" parent="." unique_id=852543441 instance=ExtResource("tocha_entidade")]
 position = Vector2(64, 810)
+rotation = 1.0471976
 
 [node name="Tocha4" parent="." unique_id=2074501796 instance=ExtResource("tocha_entidade")]
-position = Vector2(840, 1016)
+position = Vector2(820, 1009)
+rotation = -1.0471976
 
 [node name="Tocha5" parent="." unique_id=722185329 instance=ExtResource("tocha_entidade")]
-position = Vector2(854, 608)
+position = Vector2(823.00006, 618)
+rotation = -1.0471976
 
 [node name="Tocha6" parent="." unique_id=1807198028 instance=ExtResource("tocha_entidade")]
 position = Vector2(553, 137)
@@ -1869,11 +1874,11 @@ position = Vector2(129, 508)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
-[node name="ItemPocao" parent="." instance=ExtResource("item_pocao")]
+[node name="ItemPocao" parent="." unique_id=1860298623 instance=ExtResource("item_pocao")]
 position = Vector2(260, 400)
 
-[node name="FrascoInstavel1" parent="." instance=ExtResource("frasco_trap")]
+[node name="FrascoInstavel1" parent="." unique_id=1104011663 instance=ExtResource("frasco_trap")]
 position = Vector2(600, 520)
 
-[node name="FrascoInstavel2" parent="." instance=ExtResource("frasco_trap")]
+[node name="FrascoInstavel2" parent="." unique_id=436598348 instance=ExtResource("frasco_trap")]
 position = Vector2(220, 820)

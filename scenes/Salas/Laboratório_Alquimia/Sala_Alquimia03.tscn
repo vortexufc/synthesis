@@ -1837,12 +1837,15 @@ position = Vector2(1748, 178)
 
 [node name="Tocha3" parent="." unique_id=1410011150 instance=ExtResource("tocha_entidade")]
 position = Vector2(72, 416)
+rotation = 1.0466553
 
 [node name="Tocha4" parent="." unique_id=416393446 instance=ExtResource("tocha_entidade")]
 position = Vector2(74, 740)
+rotation = 1.0471976
 
 [node name="Tocha5" parent="." unique_id=433023082 instance=ExtResource("tocha_entidade")]
-position = Vector2(1850, 670)
+position = Vector2(1836.0001, 672.00006)
+rotation = -1.0471976
 
 [node name="Tocha6" parent="." unique_id=723698453 instance=ExtResource("tocha_entidade")]
 position = Vector2(996, 817)
