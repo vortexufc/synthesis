@@ -11,8 +11,8 @@ extends Control
 @onready var btn_dash = get_node_or_null("ActionsContainer/BtnDash")
 @onready var btn_pausa = $PauseContainer/BtnPausa
 
-const RAIO_MAXIMO: float = 62.0
-const ZONA_MORTA: float = 8.0
+const RAIO_MAXIMO: float = 78.0
+const ZONA_MORTA: float = 10.0
 
 var _touch_id_joystick: int = -1
 var _touch_id_interagir: int = -1
@@ -61,20 +61,29 @@ func _ready() -> void:
 	if btn_pausa:
 		btn_pausa.pressed.connect(_on_pausa_pressed)
 		
-	if get_node_or_null("/root/GlobalSignals") and GlobalSignals.has_signal("dash_executado"):
-		GlobalSignals.dash_executado.connect(_on_dash_cooldown)
+	var gs = get_node_or_null("/root/GlobalSignals")
+	if gs and gs.has_signal("dash_executado"):
+		gs.dash_executado.connect(_on_dash_cooldown)
 		
 	# Escuta mudanças no MobileControlsManager
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm:
 		mcm.joystick_toggled.connect(_on_joystick_toggled)
+		if mcm.has_signal("plataforma_detectada"):
+			mcm.plataforma_detectada.connect(func(_eh_mob: bool):
+				_atualizar_visibilidade(mcm.joystick_habilitado)
+			)
 		_atualizar_visibilidade(mcm.joystick_habilitado)
 	else:
 		_atualizar_visibilidade(false)
+
 		
 	# Esconde durante batalhas de turno para não atrapalhar o quiz
-	GlobalSignals.iniciar_batalha.connect(func(_enemy_data): _esconder_temporario(true))
-	GlobalSignals.batalha_encerrada.connect(func(_vitoria: bool): _esconder_temporario(false))
+	if gs:
+		if gs.has_signal("iniciar_batalha"):
+			gs.iniciar_batalha.connect(func(_enemy_data): _esconder_temporario(true))
+		if gs.has_signal("batalha_encerrada"):
+			gs.batalha_encerrada.connect(func(_vitoria: bool): _esconder_temporario(false))
 
 func _on_viewport_resized() -> void:
 	call_deferred("_atualizar_geometria_joystick")

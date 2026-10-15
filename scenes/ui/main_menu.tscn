@@ -202,25 +202,25 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -345.0
-offset_right = 295.0
+offset_top = -375.0
+offset_right = 310.0
 offset_bottom = 0.0
 grow_vertical = 0
 theme_override_constants/margin_left = 40
-theme_override_constants/margin_bottom = 35
+theme_override_constants/margin_bottom = 30
 
 [node name="VBoxButtons" type="VBoxContainer" parent="MarginContainer" unique_id=600201428]
 layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="BtnJogar" type="Button" parent="MarginContainer/VBoxButtons" unique_id=636761118]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -228,13 +228,13 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "NOVO JOGO"
 
 [node name="BtnRanking" type="Button" parent="MarginContainer/VBoxButtons" unique_id=2016836333]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -242,13 +242,13 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "RANKING"
 
 [node name="BtnClas" type="Button" parent="MarginContainer/VBoxButtons" unique_id=811134012]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -256,13 +256,13 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "CLÃS"
 
 [node name="BtnConfig" type="Button" parent="MarginContainer/VBoxButtons" unique_id=1039033382]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
@@ -270,13 +270,13 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_hover")
 text = "CONFIGURAÇÕES"
 
 [node name="BtnCreditos" type="Button" parent="MarginContainer/VBoxButtons" unique_id=1039033383]
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("4_x2yvf")
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_hover")

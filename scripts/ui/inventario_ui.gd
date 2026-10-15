@@ -418,8 +418,59 @@ func _ready() -> void:
 	)
 	btn_fechar_inv.pressed.connect(_on_btn_fechar_inventario_pressionado)
 	hbox_topo_direita.add_child(btn_fechar_inv)
+	
+	_aplicar_responsividade_mobile()
+	var mcm_inv = get_node_or_null("/root/MobileControlsManager")
+	if mcm_inv and mcm_inv.has_signal("plataforma_detectada"):
+		mcm_inv.plataforma_detectada.connect(func(_eh_mob: bool):
+			_aplicar_responsividade_mobile()
+		)
+
+func _aplicar_responsividade_mobile() -> void:
+	var mcm = get_node_or_null("/root/MobileControlsManager")
+	var eh_mob = mcm and mcm.has_method("is_mobile") and mcm.is_mobile()
+	var margem = $Control/MarginContainer
+	if margem:
+		if eh_mob:
+			margem.add_theme_constant_override("margin_left", 24)
+			margem.add_theme_constant_override("margin_right", 24)
+			margem.add_theme_constant_override("margin_top", 16)
+			margem.add_theme_constant_override("margin_bottom", 16)
+		else:
+			margem.add_theme_constant_override("margin_left", 80)
+			margem.add_theme_constant_override("margin_right", 80)
+			margem.add_theme_constant_override("margin_top", 40)
+			margem.add_theme_constant_override("margin_bottom", 40)
+			
+	if btn_fechar_inv:
+		btn_fechar_inv.custom_minimum_size = Vector2(44, 44) if eh_mob else Vector2(36, 36)
+		btn_fechar_inv.add_theme_font_size_override("font_size", 18 if eh_mob else 16)
+		
+	if tab_container:
+		tab_container.add_theme_font_size_override("font_size", 13 if eh_mob else 11)
+		
+	if btn_acao:
+		btn_acao.custom_minimum_size = Vector2(0, 48 if eh_mob else 38)
+		btn_acao.add_theme_font_size_override("font_size", 13 if eh_mob else 11)
+		
+	if btn_descartar:
+		btn_descartar.custom_minimum_size = Vector2(130, 38 if eh_mob else 32)
+		btn_descartar.add_theme_font_size_override("font_size", 11 if eh_mob else 9)
+		
+	if margem_leitura:
+		if eh_mob:
+			margem_leitura.add_theme_constant_override("margin_left", 70)
+			margem_leitura.add_theme_constant_override("margin_right", 70)
+			margem_leitura.add_theme_constant_override("margin_top", 40)
+			margem_leitura.add_theme_constant_override("margin_bottom", 40)
+		else:
+			margem_leitura.add_theme_constant_override("margin_left", 380)
+			margem_leitura.add_theme_constant_override("margin_right", 380)
+			margem_leitura.add_theme_constant_override("margin_top", 170)
+			margem_leitura.add_theme_constant_override("margin_bottom", 170)
 
 func _criar_estilos_slots() -> void:
+
 	# estilo normal do slot
 	_style_slot_normal = StyleBoxFlat.new()
 	_style_slot_normal.bg_color = Color(0.12, 0.08, 0.18, 0.95)
@@ -546,6 +597,7 @@ func _toggle_inventario() -> void:
 			get_tree().paused = true
 			
 		painel_leitura.visible = false
+		_aplicar_responsividade_mobile()
 		_limpar_detalhes()
 		_atualizar_listas()
 		var ps = get_node_or_null("/root/PlayerStats")

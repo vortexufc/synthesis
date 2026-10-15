@@ -442,10 +442,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 60
-theme_override_constants/margin_top = 30
-theme_override_constants/margin_right = 60
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 16
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/FooterColor/MarginContainer" unique_id=594675633]
 layout_mode = 2
@@ -503,45 +503,50 @@ theme_override_constants/v_separation = 10
 columns = 2
 
 [node name="BtnA" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=836706299]
-custom_minimum_size = Vector2(180, 40)
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("2_fghij")
 theme_override_font_sizes/font_size = 14
 text = "A) "
 autowrap_mode = 2
 
 [node name="BtnB" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=2146990982]
-custom_minimum_size = Vector2(180, 40)
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("2_fghij")
 theme_override_font_sizes/font_size = 14
 text = "B) "
 autowrap_mode = 2
 
 [node name="BtnC" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=833519478]
-custom_minimum_size = Vector2(180, 40)
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("2_fghij")
 theme_override_font_sizes/font_size = 14
 text = "C) "
 autowrap_mode = 2
 
 [node name="BtnD" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=184217321]
-custom_minimum_size = Vector2(180, 40)
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("2_fghij")
 theme_override_font_sizes/font_size = 14
 text = "D) "
 autowrap_mode = 2
 
 [node name="BtnE" type="Button" parent="Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons" unique_id=999999999]
-custom_minimum_size = Vector2(180, 40)
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("2_fghij")
 theme_override_font_sizes/font_size = 14
 text = "E) "

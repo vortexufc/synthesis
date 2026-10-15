@@ -164,6 +164,7 @@ theme_override_font_sizes/font_size = 14
 text = "MÚSICA"
 
 [node name="HSliderMusic" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxMusic" unique_id=1394328694]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 max_value = 1.0
 step = 0.1
@@ -180,6 +181,7 @@ theme_override_font_sizes/font_size = 14
 text = "EFEITOS SONOROS"
 
 [node name="HSliderSfx" type="HSlider" parent="CenterContainer/Panel/VBoxContainer/VBoxSfx" unique_id=470504719]
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 max_value = 1.0
 step = 0.1
@@ -198,8 +200,10 @@ text = "CONTA"
 vertical_alignment = 1
 
 [node name="BtnDeslogar" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxConta" unique_id=1485061309]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
@@ -221,8 +225,10 @@ text = "JOYSTICK VIRTUAL"
 vertical_alignment = 1
 
 [node name="CheckJoystick" type="CheckButton" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick" unique_id=942994873]
+custom_minimum_size = Vector2(64, 40)
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_default_cursor_shape = 2
 button_pressed = true
 
 [node name="HSeparatorControles" type="HSeparator" parent="CenterContainer/Panel/VBoxContainer" unique_id=1948201101]
@@ -346,10 +352,11 @@ theme_override_constants/separation = 25
 alignment = 1
 
 [node name="BtnVoltar" type="Button" parent="BotoesInferiores" unique_id=1617425864]
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(250, 48)
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
@@ -357,10 +364,11 @@ text = "VOLTAR"
 
 [node name="BtnMenuPrincipal" type="Button" parent="BotoesInferiores" unique_id=1617425865]
 visible = false
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(250, 48)
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_normal")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")

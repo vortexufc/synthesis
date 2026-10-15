@@ -66,8 +66,8 @@ func _ready() -> void:
 		var btn_novo = btn_jogar.duplicate()
 		btn_novo.name = "BtnNovoJogo"
 		btn_novo.text = "NOVO JOGO"
-		btn_novo.custom_minimum_size = Vector2(0, 36)
-		btn_novo.add_theme_font_size_override("font_size", 16)
+		btn_novo.custom_minimum_size = Vector2(0, 44)
+		btn_novo.add_theme_font_size_override("font_size", 19)
 		btn_novo.pressed.connect(_on_btn_novo_jogo_pressed)
 		var vbox = $MarginContainer/VBoxButtons
 		vbox.add_child(btn_novo)
@@ -80,8 +80,8 @@ func _ready() -> void:
 	if db and db.is_admin:
 		var btn_admin = btn_jogar.duplicate()
 		btn_admin.text = "PAINEL ADMIN"
-		btn_admin.custom_minimum_size = Vector2(0, 36)
-		btn_admin.add_theme_font_size_override("font_size", 16)
+		btn_admin.custom_minimum_size = Vector2(0, 44)
+		btn_admin.add_theme_font_size_override("font_size", 19)
 		btn_admin.pressed.connect(func(): _mudar_cena("res://scenes/ui/painel_admin.tscn"))
 		var vbox = $MarginContainer/VBoxButtons
 		vbox.add_child(btn_admin)

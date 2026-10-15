@@ -77,6 +77,7 @@ theme_override_fonts/font = ExtResource("4_vjchv")
 text = "E-MAIL"
 
 [node name="EmailInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxEmail" unique_id=519980463]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_vjchv")
 placeholder_text = "SEUEMAIL@EXEMPLO.COM"
@@ -94,6 +95,7 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="PasswordInput" type="LineEdit" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxPassword/HBoxPassword" unique_id=1320547984]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("4_vjchv")
@@ -101,7 +103,9 @@ placeholder_text = "SUASENHA123$"
 secret = true
 
 [node name="BtnShowPassword" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxPassword/HBoxPassword" unique_id=167941080]
+custom_minimum_size = Vector2(42, 42)
 layout_mode = 2
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("3_xebxy")
 theme_override_font_sizes/font_size = 12
 toggle_mode = true
@@ -117,14 +121,18 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="BtnLogin" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxButtons" unique_id=1679419733]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("3_xebxy")
 text = "ENTRAR"
 
 [node name="BtnBack" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxButtons" unique_id=257476115]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("3_xebxy")
 text = "VOLTAR"
 

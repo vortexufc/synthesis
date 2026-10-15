@@ -52,21 +52,46 @@ func _ready() -> void:
 	_atualizar_switch_joystick()
 	_configurar_estilo_controles()
 	
+	var mcm_init = get_node_or_null("/root/MobileControlsManager")
+	if mcm_init and mcm_init.has_signal("plataforma_detectada"):
+		mcm_init.plataforma_detectada.connect(func(_eh_mob: bool):
+			_configurar_estilo_controles()
+			_atualizar_switch_joystick()
+		)
+	
 	visibility_changed.connect(func():
 		if visible:
 			_atualizar_status_conta()
 			_atualizar_sliders()
 			_atualizar_switch_joystick()
+			_configurar_estilo_controles()
 	)
 
 func _configurar_estilo_controles() -> void:
+	var mcm = get_node_or_null("/root/MobileControlsManager")
+	var eh_mobile = mcm and mcm.has_method("is_mobile") and mcm.is_mobile()
+	
+	var lbl_controles = find_child("LabelControles", true, false) as Label
+	if lbl_controles:
+		lbl_controles.text = "CONTROLES (MOBILE / TOUCH)" if eh_mobile else "CONTROLES (TECLADO)"
+		lbl_controles.add_theme_font_size_override("font_size", 14)
+	
 	var font_desc = SystemFont.new()
 	font_desc.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
 	font_desc.font_weight = 500
 	
-	for node_name in ["LblDescMov", "LblDescDash", "LblDescInteragir", "LblDescGrimorio", "LblDescPause"]:
+	var mapa_desc = {
+		"LblDescMov": "Mover o Mago (Arrastar)" if eh_mobile else "Movimentar o Mago",
+		"LblDescDash": "Dash (Esquiva / Avanço)",
+		"LblDescInteragir": "Interagir / Coletar Itens",
+		"LblDescGrimorio": "Inventário & Grimório" if eh_mobile else "Grimório de Fórmulas / Inventário",
+		"LblDescPause": "Pausar Jogo (Menu)" if eh_mobile else "Pausar Jogo / Fechar Menus"
+	}
+	
+	for node_name in mapa_desc.keys():
 		var lbl = find_child(node_name, true, false) as Label
 		if lbl:
+			lbl.text = mapa_desc[node_name]
 			lbl.add_theme_font_override("font", font_desc)
 			lbl.add_theme_font_size_override("font_size", 14)
 			lbl.add_theme_color_override("font_color", Color(0.9, 0.93, 0.98, 0.95))
@@ -75,11 +100,20 @@ func _configurar_estilo_controles() -> void:
 	font_keys.font_names = PackedStringArray(["Consolas", "Courier New", "Segoe UI", "sans-serif"])
 	font_keys.font_weight = 700
 	
-	for node_name in ["LblKeyMov", "LblKeyDash", "LblKeyInteragir", "LblKeyGrimorio", "LblKeyPause"]:
+	var mapa_keys = {
+		"LblKeyMov": "[Analógico Virtual]" if eh_mobile else "[W, A, S, D] / [Setas]",
+		"LblKeyDash": "[Botão DASH]" if eh_mobile else "[ESPAÇO]",
+		"LblKeyInteragir": "[Botão INTERAGIR]" if eh_mobile else "[F]",
+		"LblKeyGrimorio": "[Botão MOCHILA]" if eh_mobile else "[E]",
+		"LblKeyPause": "[Botão ⏸ (Topo)]" if eh_mobile else "[ESC]"
+	}
+	
+	for node_name in mapa_keys.keys():
 		var lbl = find_child(node_name, true, false) as Label
 		if lbl:
+			lbl.text = mapa_keys[node_name]
 			lbl.add_theme_font_override("font", font_keys)
-			lbl.add_theme_font_size_override("font_size", 13)
+			lbl.add_theme_font_size_override("font_size", 14)
 			lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.35, 1)) # Amarelo/Dourado arcano
 
 func configurar_modo_in_game(ativo: bool) -> void:
@@ -98,6 +132,7 @@ func configurar_modo_in_game(ativo: bool) -> void:
 	_atualizar_status_conta()
 	_atualizar_sliders()
 	_atualizar_switch_joystick()
+	_configurar_estilo_controles()
 
 func _atualizar_switch_joystick() -> void:
 	if toggle_joystick:
@@ -109,7 +144,12 @@ func _atualizar_status_conta() -> void:
 	if btn_deslogar == null:
 		return
 		
-	if DatabaseManager.user_token.is_empty():
+	var db = get_node_or_null("/root/DatabaseManager")
+	var token_vazio = true
+	if db and "user_token" in db:
+		token_vazio = db.user_token.is_empty()
+		
+	if token_vazio:
 		btn_deslogar.disabled = true
 		btn_deslogar.text = "NÃO LOGADO"
 		btn_deslogar.modulate = Color(0.5, 0.5, 0.5, 1)
@@ -146,9 +186,10 @@ func _on_sfx_value_changed(value: float) -> void:
 func _on_joystick_toggled(button_pressed: bool) -> void:
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm:
-		mcm.set_joystick_habilitado(button_pressed)
+		mcm.set_joystick_habilitado(button_pressed, true)
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-1")
+
 
 func _on_voltar_pressed() -> void:
 	print("Botão VOLTAR pressionado")
@@ -225,9 +266,11 @@ func _executar_deslogar() -> void:
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui_4")
 	
-	DatabaseManager.user_token = ""
-	DatabaseManager.user_nick = ""
-	DatabaseManager.user_cla = "Nenhum"
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db:
+		db.user_token = ""
+		db.user_nick = ""
+		db.user_cla = "Nenhum"
 	
 	if modo_in_game:
 		if get_node_or_null("/root/MenuPausaManager"):
@@ -235,7 +278,11 @@ func _executar_deslogar() -> void:
 		else:
 			get_tree().paused = false
 			
-	TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts:
+		ts.change_scene("res://scenes/ui/main_menu.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
