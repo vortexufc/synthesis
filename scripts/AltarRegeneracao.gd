@@ -13,6 +13,7 @@ var canvas_prompt: CanvasLayer = null
 var panel_prompt: PanelContainer = null
 var label_prompt: Label = null
 
+@onready var sprite_altar: Sprite2D = get_node_or_null("SpriteAltar")
 @onready var sprite_base: Sprite2D = get_node_or_null("SpriteBase")
 @onready var sprite_cristal: Sprite2D = get_node_or_null("SpriteCristal")
 @onready var luz_altar: PointLight2D = get_node_or_null("LuzAltar")
@@ -20,7 +21,8 @@ var label_prompt: Label = null
 
 var _pos_cristal_base_y: float = -56.0
 var _escala_cristal_base: Vector2 = Vector2(0.72, 0.72)
-var _tempo_flutuacao: float = 0.0
+var _anim_timer: float = 0.0
+const FRAME_DURATION: float = 0.18 # Ciclo suave de levitação e pulso (~5.5 FPS)
 var _tween_pulso_luz: Tween = null
 var _em_canalizacao: bool = false
 
@@ -29,8 +31,11 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	
-	if sprite_base:
-		sprite_base.z_index = 0
+	if sprite_altar:
+		sprite_altar.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	elif sprite_base:
+		sprite_altar = sprite_base
+		
 	if sprite_cristal:
 		sprite_cristal.z_index = 1
 		sprite_cristal.z_as_relative = true
@@ -41,13 +46,19 @@ func _ready() -> void:
 	_animar_luz_idle()
 
 func _process(delta: float) -> void:
-	# A base de pedra permanece fixa no chão.
-	# Somente o cristal flutua misticamente acima do receptáculo central.
+	# Animação dos 6 frames do novo spritesheet pedra.png (levitação + pulso das runas)
+	if sprite_altar and sprite_altar.hframes > 1 and not _em_canalizacao:
+		_anim_timer += delta
+		if _anim_timer >= FRAME_DURATION:
+			_anim_timer -= FRAME_DURATION
+			sprite_altar.frame = (sprite_altar.frame + 1) % sprite_altar.hframes
+			
+	# Fallback caso ainda exista sprite_cristal separado legado
 	if sprite_cristal and not _em_canalizacao:
-		_tempo_flutuacao += delta * 2.4
-		var bob = sin(_tempo_flutuacao) * 5.0
-		var wobble = sin(_tempo_flutuacao * 0.7) * 0.035
-		var breath = 1.0 + sin(_tempo_flutuacao * 1.8) * 0.025
+		_anim_timer += delta * 2.4
+		var bob = sin(_anim_timer) * 5.0
+		var wobble = sin(_anim_timer * 0.7) * 0.035
+		var breath = 1.0 + sin(_anim_timer * 1.8) * 0.025
 		
 		sprite_cristal.position.y = _pos_cristal_base_y + bob
 		sprite_cristal.rotation = wobble
@@ -225,15 +236,20 @@ func _executar_efeito_cura(qtd_cura: float) -> void:
 		tw_luz.tween_property(luz_altar, "energy", energia_luz * 2.6, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw_luz.tween_property(luz_altar, "energy", energia_luz, 0.65).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
-	# Animação especial do Cristal elevando-se mais alto e brilhando intensamente
+	# Efeito especial de brilho e pulso místico no novo sprite do Altar
+	if sprite_altar:
+		var tw_altar = create_tween().set_parallel(true)
+		tw_altar.tween_property(sprite_altar, "modulate", Color(1.8, 2.4, 2.4, 1.0), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw_altar.tween_property(sprite_altar, "scale", Vector2(1.08, 1.08), 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw_altar.chain().tween_property(sprite_altar, "modulate", Color.WHITE, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw_altar.parallel().tween_property(sprite_altar, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+	# Animação legado caso ainda exista sprite_cristal separado
 	if sprite_cristal:
 		var tw_cristal = create_tween().set_parallel(true)
-		# Eleva 18px a mais temporariamente
 		tw_cristal.tween_property(sprite_cristal, "position:y", _pos_cristal_base_y - 18.0, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw_cristal.tween_property(sprite_cristal, "rotation", TAU, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw_cristal.tween_property(sprite_cristal, "modulate", Color(2.0, 2.5, 2.5, 1.0), 0.25)
-		
-		# Retorna à altura e brilho normais
 		tw_cristal.chain().tween_property(sprite_cristal, "position:y", _pos_cristal_base_y, 0.50).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw_cristal.parallel().tween_property(sprite_cristal, "rotation", 0.0, 0.40)
 		tw_cristal.parallel().tween_property(sprite_cristal, "modulate", Color.WHITE, 0.50)
