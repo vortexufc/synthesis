@@ -29,6 +29,7 @@ func _ready() -> void:
 	# cria o no http
 	http_request = HTTPRequest.new()
 	http_request.accept_gzip = false
+	http_request.timeout = 5.0
 	add_child(http_request)
 	http_request.request_completed.connect(_on_request_completed)
 	
@@ -70,6 +71,7 @@ func make_request(endpoint: String, method: HTTPClient.Method, data: Dictionary 
 	
 	var http := HTTPRequest.new()
 	http.accept_gzip = false
+	http.timeout = 5.0
 	add_child(http)
 	
 	# headers obrigatorios
@@ -279,6 +281,7 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 	var url: String = supabase_url + endpoint
 	var http: HTTPRequest = HTTPRequest.new()
 	http.accept_gzip = false
+	http.timeout = 5.0
 	add_child(http)
 	
 	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key
@@ -301,8 +304,12 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 	var response = await http.request_completed
 	http.queue_free()
 	
+	var result_status: int = response[0]
 	var response_code: int = response[1]
 	var response_body: PackedByteArray = response[3]
+	
+	if result_status != HTTPRequest.RESULT_SUCCESS:
+		return {"success": false, "code": response_code, "message": "Falha de conexão ou tempo limite excedido"}
 	
 	var body_text: String = response_body.get_string_from_utf8()
 	var json: JSON = JSON.new()

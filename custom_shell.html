@@ -523,11 +523,13 @@ const engine = new Engine(GODOT_CONFIG);
 			}
 		} catch (e) {}
 
-		// Minimizar barra de endereços em iOS Safari e navegadores baseados em scroll
-		try {
-			window.scrollTo(0, 1);
-			setTimeout(function() { window.scrollTo(0, 0); }, 60);
-		} catch (e) {}
+		// Minimizar barra de endereços apenas em dispositivos móveis (iOS Safari e navegadores baseados em scroll)
+		if (isMobileOrTouch()) {
+			try {
+				window.scrollTo(0, 1);
+				setTimeout(function() { window.scrollTo(0, 0); }, 60);
+			} catch (e) {}
+		}
 
 		updateFullscreenUI();
 	}
@@ -588,7 +590,10 @@ const engine = new Engine(GODOT_CONFIG);
 		});
 	}
 
+	let audioUnlocked = false;
 	function unlockAudio() {
+		if (audioUnlocked) return;
+		audioUnlocked = true;
 		userInteracted = true;
 		try {
 			const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -612,9 +617,16 @@ const engine = new Engine(GODOT_CONFIG);
 	canvas.addEventListener('touchstart', onCanvasInteraction, { passive: true });
 	canvas.addEventListener('pointerdown', onCanvasInteraction, { passive: true });
 
+	function removeUserGestureListeners() {
+		window.removeEventListener('pointerdown', onUserGesture, { capture: true });
+		window.removeEventListener('keydown', onUserGesture, { capture: true });
+		window.removeEventListener('touchstart', onUserGesture, { capture: true });
+	}
+
 	function onUserGesture() {
 		unlockAudio();
 		if (gameLoaded) {
+			removeUserGestureListeners();
 			startGameplay();
 		}
 	}
@@ -623,9 +635,15 @@ const engine = new Engine(GODOT_CONFIG);
 	window.addEventListener('keydown', onUserGesture, { capture: true });
 	window.addEventListener('touchstart', onUserGesture, { capture: true });
 
+	let gameplayStarted = false;
 	function startGameplay() {
+		removeUserGestureListeners();
 		unlockAudio();
-		requestFullscreenRobust(document.documentElement);
+		if (gameplayStarted) return;
+		gameplayStarted = true;
+		if (isMobileOrTouch()) {
+			requestFullscreenRobust(document.documentElement);
+		}
 		if (!initializing) return;
 		setStatusMode('hidden');
 		updateFullscreenUI();

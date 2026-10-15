@@ -462,7 +462,7 @@ region_enabled = true
 region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="PortaRetorno" parent="." unique_id=356010814 instance=ExtResource("13_1lcoj")]
-position = Vector2(3920, 1319)
+position = Vector2(3908, 1289)
 porta_de_retorno = true
 
 [node name="Robo_P_Laranja" parent="." unique_id=1200000001 instance=ExtResource("14_h2fov")]

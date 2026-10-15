@@ -12,6 +12,9 @@ var current_music: AudioStream = null
 var previous_music: AudioStream = null
 
 # som dos passos
+var _passo_player: AudioStreamPlayer = null
+var _ultimo_passo_ms: int = 0
+const INTERVALO_PASSO_MS: int = 280
 var pode_tocar_passo := true
 
 # sons de dano
@@ -103,6 +106,10 @@ func _ready():
 	music_player.finished.connect(_on_music_finished)
 	music_player.volume_db = 0
 	battle_player.volume_db = 0
+	
+	_passo_player = AudioStreamPlayer.new()
+	_passo_player.bus = "SFX"
+	add_child(_passo_player)
 
 func _input(event: InputEvent) -> void:
 	if OS.has_feature("web"):
@@ -237,26 +244,17 @@ func stop_battle_music():
 		battle_player.stop()
 
 func tocar_som_caminhada():
-	if !pode_tocar_passo:
+	if sfx_caminhar.is_empty():
 		return
+	var agora = Time.get_ticks_msec()
+	if agora - _ultimo_passo_ms < INTERVALO_PASSO_MS:
+		return
+	_ultimo_passo_ms = agora
 
-	pode_tocar_passo = false
-
-	var player := AudioStreamPlayer.new()
-	player.stream = sfx_caminhar.pick_random()
-	player.pitch_scale = randf_range(0.92, 1.08)
-	player.bus = "SFX"
-	add_child(player)
-
-	player.play()
-
-	player.finished.connect(func():
-		player.queue_free()
-	)
-
-	get_tree().create_timer(0.28).timeout.connect(func():
-		pode_tocar_passo = true
-	)
+	if _passo_player:
+		_passo_player.stream = sfx_caminhar.pick_random()
+		_passo_player.pitch_scale = randf_range(0.92, 1.08)
+		_passo_player.play()
 
 func tocar_som_dano():
 	if !pode_tocar_dano:
