@@ -83,8 +83,9 @@ func _on_backdrop_gui_input(event: InputEvent) -> void:
 		fechar()
 
 func _animar_entrada() -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_5")
+	var am = get_node_or_null("/root/AudioManager") if is_inside_tree() else null
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_5")
 	
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "modulate:a", 1.0, 0.30)
@@ -95,8 +96,9 @@ func fechar() -> void:
 		return
 	_fechando = true
 	
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_1")
+	var am = get_node_or_null("/root/AudioManager") if is_inside_tree() else null
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_1")
 	
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.tween_property(self, "modulate:a", 0.0, 0.22)

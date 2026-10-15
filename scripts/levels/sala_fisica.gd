@@ -342,7 +342,9 @@ func _garantir_luminarias_na_sala() -> void:
 	if not floor_layer:
 		return
 		
-	var cena_luminaria = load("res://scenes/Entidades/LuminariaFisica.tscn")
+	var cena_luminaria = load("res://scenes/Entidades/Iluminação/LuminariaFisica.tscn")
+	if not cena_luminaria:
+		cena_luminaria = load("res://scenes/Entidades/LuminariaFisica.tscn")
 	if not cena_luminaria:
 		return
 		

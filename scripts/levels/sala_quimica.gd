@@ -494,7 +494,9 @@ func _garantir_tochas_na_sala() -> void:
 	if not floor_layer:
 		return
 		
-	var cena_tocha = load("res://scenes/Entidades/Tocha.tscn")
+	var cena_tocha = load("res://scenes/Entidades/Iluminação/Tocha.tscn")
+	if not cena_tocha:
+		cena_tocha = load("res://scenes/Entidades/Tocha.tscn")
 	if not cena_tocha:
 		return
 		
