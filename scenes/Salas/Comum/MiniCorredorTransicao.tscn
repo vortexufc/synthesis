@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="1_floor_wall"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="2_porta"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Tocha.tscn" id="3_tocha"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/Tocha.tscn" id="3_tocha"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_floor"]
 texture = ExtResource("1_floor_wall")

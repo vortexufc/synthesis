@@ -20,7 +20,7 @@
 [ext_resource type="PackedScene" uid="uid://b7n7dsee8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Amarelo.tscn" id="21_robopa"]
 [ext_resource type="PackedScene" uid="uid://b7n7dsfe8y0a7" path="res://scenes/Entidades/Robos/Robo_P_Ciano.tscn" id="22_robopc"]
 [ext_resource type="PackedScene" uid="uid://robogfisica" path="res://scenes/Entidades/Robos/Robo_G.tscn" id="23_robog"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/NPCBiologia.tscn" id="24_bio"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/NPCs/NPCBiologia.tscn" id="24_bio"]
 [ext_resource type="PackedScene" path="res://scenes/Armadilhas/poca_acido.tscn" id="24_n2wle"]
 [ext_resource type="PackedScene" path="res://scenes/Armadilhas/esporos_toxicos.tscn" id="25_cvi65"]
 [ext_resource type="Script" uid="uid://dx2vqi44xm51l" path="res://scripts/GerenciadorSpawnBaus.gd" id="25_spawner"]

@@ -643,4 +643,3 @@ func _criar_particulas_dash(pos: Vector2, direcao: Vector2, eh_chegada: bool = f
 		if is_instance_valid(part):
 			part.queue_free()
 	)
-

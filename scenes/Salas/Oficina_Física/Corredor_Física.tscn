@@ -13,8 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://df2evw7knd00d" path="res://assets/sprites/Backgrounds/Old Dungeon/fechar_x.png" id="11_xghyp"]
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_qoveu"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_r7uls"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/LuminariaFisica.tscn" id="15_5gi3m"]
-[ext_resource type="Script" path="res://scripts/levels/corredor_fisica.gd" id="1_corredor_fisica_script"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/LuminariaFisica.tscn" id="15_5gi3m"]
+[ext_resource type="Script" uid="uid://def7g4xnm7ki" path="res://scripts/levels/corredor_fisica.gd" id="1_corredor_fisica_script"]
 [ext_resource type="PackedScene" path="res://scenes/Entidades/NPCs/NPCFisica.tscn" id="16_npc_fisica"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_rq110"]

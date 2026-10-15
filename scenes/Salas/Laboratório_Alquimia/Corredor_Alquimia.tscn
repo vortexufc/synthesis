@@ -14,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://cwg0mo350v3ub" path="res://assets/sprites/Backgrounds/Old Dungeon/proxima_pagina.png" id="12_wjkwu"]
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="14_n8ijl"]
 [ext_resource type="PackedScene" uid="uid://bc4o04l2tcu36" path="res://scenes/Entidades/NPCs/NPCCientista.tscn" id="14_wlvpg"]
-[ext_resource type="PackedScene" uid="uid://tocha_entidade_01" path="res://scenes/Entidades/Tocha.tscn" id="15_tocha"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/Tocha.tscn" id="15_tocha"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ndrqi"]
 texture = ExtResource("3_r6rlg")
