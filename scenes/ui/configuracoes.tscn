@@ -87,6 +87,40 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 anti_aliasing = false
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modo_ativo"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.18, 0.42, 0.78, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.85, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0.1, 0.5, 0.9, 0.45)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modo_inativo"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.08, 0.12, 0.22, 0.7)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.35, 0.55, 0.5)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [node name="Configuracoes" type="Control" unique_id=1251833727]
 process_mode = 3
 layout_mode = 3
@@ -221,7 +255,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 14
-text = "JOYSTICK VIRTUAL"
+text = "CONTROLES TOUCH"
 vertical_alignment = 1
 
 [node name="CheckJoystick" type="CheckButton" parent="CenterContainer/Panel/VBoxContainer/HBoxJoystick" unique_id=942994873]
@@ -230,6 +264,49 @@ layout_mode = 2
 size_flags_horizontal = 8
 mouse_default_cursor_shape = 2
 button_pressed = true
+
+[node name="HBoxTipoControle" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer" unique_id=776804255]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/VBoxContainer/HBoxTipoControle" unique_id=132690024]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 13
+text = "ESTILO MOVIMENTO"
+vertical_alignment = 1
+
+[node name="HBoxBotoesModo" type="HBoxContainer" parent="CenterContainer/Panel/VBoxContainer/HBoxTipoControle" unique_id=776804256]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnModoAnalogico" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxTipoControle/HBoxBotoesModo" unique_id=776804257]
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_modo_ativo")
+theme_override_styles/hover = SubResource("StyleBoxFlat_modo_ativo")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_modo_ativo")
+theme_override_styles/focus = SubResource("StyleBoxFlat_modo_ativo")
+text = "◯ Analógico"
+
+[node name="BtnModoDpad" type="Button" parent="CenterContainer/Panel/VBoxContainer/HBoxTipoControle/HBoxBotoesModo" unique_id=776804258]
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.8)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_modo_inativo")
+theme_override_styles/hover = SubResource("StyleBoxFlat_modo_inativo")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_modo_inativo")
+theme_override_styles/focus = SubResource("StyleBoxFlat_modo_inativo")
+text = "✚ Direcionais"
 
 [node name="HSeparatorControles" type="HSeparator" parent="CenterContainer/Panel/VBoxContainer" unique_id=1948201101]
 layout_mode = 2

@@ -3,12 +3,14 @@ extends Node
 # Gerenciador global dos controles virtuais / touch para dispositivos móveis
 
 signal joystick_toggled(ativo: bool)
+signal tipo_controle_alterado(novo_tipo: String)
 signal plataforma_detectada(eh_mobile: bool)
 
 var eh_mobile: bool = false
 var eh_pc: bool = false
 var eh_web: bool = false
 var joystick_habilitado: bool = false
+var tipo_controle: String = "analogico" # "analogico" ou "dpad"
 var _preferencia_manual: bool = false
 
 func _ready() -> void:
@@ -127,6 +129,10 @@ func _carregar_preferencia() -> void:
 			f.close()
 			if json is Dictionary:
 				_preferencia_manual = bool(json.get("manual", false))
+				if json.has("tipo_controle"):
+					var t = str(json["tipo_controle"])
+					if t == "dpad" or t == "analogico":
+						tipo_controle = t
 				if _preferencia_manual and json.has("joystick"):
 					joystick_habilitado = bool(json["joystick"])
 				elif eh_mobile:
@@ -140,12 +146,14 @@ func _carregar_preferencia() -> void:
 
 func _notificar_estado_inicial() -> void:
 	joystick_toggled.emit(joystick_habilitado)
+	tipo_controle_alterado.emit(tipo_controle)
 
 func _salvar_preferencia() -> void:
 	var f = FileAccess.open("user://controls_pref.json", FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify({
 			"joystick": joystick_habilitado,
+			"tipo_controle": tipo_controle,
 			"manual": _preferencia_manual
 		}))
 		f.close()
@@ -160,6 +168,19 @@ func set_joystick_habilitado(ativo: bool, manual: bool = true) -> void:
 	_salvar_preferencia()
 	print("[MobileControlsManager] Joystick virtual alterado para: ", "ATIVADO" if ativo else "DESATIVADO", " (Manual: %s)" % manual)
 	joystick_toggled.emit(ativo)
+
+func set_tipo_controle(tipo: String) -> void:
+	if tipo != "analogico" and tipo != "dpad":
+		tipo = "analogico"
+	if tipo_controle == tipo:
+		return
+	tipo_controle = tipo
+	_salvar_preferencia()
+	print("[MobileControlsManager] Estilo de controle de movimento alterado para: ", tipo_controle)
+	tipo_controle_alterado.emit(tipo_controle)
+
+func get_tipo_controle() -> String:
+	return tipo_controle
 
 func solicitar_tela_cheia_web() -> void:
 	if OS.has_feature("web") and JavaScriptBridge:

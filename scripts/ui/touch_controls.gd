@@ -1,10 +1,16 @@
 extends Control
 
-# HUD de Controles Touch / Mobile (Joystick Virtual + Botões de Ação + Pausa)
+# HUD de Controles Touch / Mobile (Joystick Virtual + Botões Direcionais D-Pad + Ações + Pausa)
 
 @onready var joystick_zone = $JoystickZone
 @onready var base_circle = $JoystickZone/BaseCircle
 @onready var knob = $JoystickZone/BaseCircle/Knob
+@onready var dpad_zone = get_node_or_null("DPadZone")
+@onready var btn_dpad_cima = get_node_or_null("DPadZone/BtnCima")
+@onready var btn_dpad_baixo = get_node_or_null("DPadZone/BtnBaixo")
+@onready var btn_dpad_esquerda = get_node_or_null("DPadZone/BtnEsquerda")
+@onready var btn_dpad_direita = get_node_or_null("DPadZone/BtnDireita")
+
 @onready var btn_interagir = $ActionsContainer/BtnInteragir
 @onready var btn_inventario = $ActionsContainer/BtnInventario
 @onready var btn_grimorio = $ActionsContainer/BtnGrimorio
@@ -19,7 +25,12 @@ var _touch_id_interagir: int = -1
 var _mouse_arrastando_joystick: bool = false
 var _mouse_pressionou_interagir: bool = false
 var _joystick_centro: Vector2 = Vector2.ZERO
+var _dpad_centro: Vector2 = Vector2.ZERO
 var _vetor_movimento: Vector2 = Vector2.ZERO
+var _tipo_controle: String = "analogico" # "analogico" ou "dpad"
+
+var _style_dpad_normal: StyleBox = null
+var _style_dpad_pressed: StyleBox = null
 
 var _interagir_ativo: bool = false
 var _ultimo_click_inventario: int = 0
@@ -34,10 +45,21 @@ func _ready() -> void:
 	if joystick_zone: joystick_zone.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if base_circle: base_circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if knob: knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if dpad_zone:
+		dpad_zone.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for child in dpad_zone.get_children():
+			if child is Control:
+				child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				
+	# Guarda os estilos do D-Pad para alternar ao pressionar
+	if btn_dpad_cima:
+		_style_dpad_normal = btn_dpad_cima.get_theme_stylebox("normal")
+		_style_dpad_pressed = btn_dpad_cima.get_theme_stylebox("pressed")
+		
 	if has_node("ActionsContainer"): $ActionsContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if has_node("PauseContainer"): $PauseContainer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
-	# Centraliza o knob no centro da base
+	# Centraliza elementos geométricos
 	call_deferred("_atualizar_geometria_joystick")
 	
 	# Atualiza a posição ao redimensionar a tela (rotação de celular, resize no navegador)
@@ -69,14 +91,17 @@ func _ready() -> void:
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm:
 		mcm.joystick_toggled.connect(_on_joystick_toggled)
+		if mcm.has_signal("tipo_controle_alterado"):
+			mcm.tipo_controle_alterado.connect(_on_tipo_controle_alterado)
 		if mcm.has_signal("plataforma_detectada"):
 			mcm.plataforma_detectada.connect(func(_eh_mob: bool):
 				_atualizar_visibilidade(mcm.joystick_habilitado)
 			)
+		if "tipo_controle" in mcm:
+			_tipo_controle = mcm.tipo_controle
 		_atualizar_visibilidade(mcm.joystick_habilitado)
 	else:
 		_atualizar_visibilidade(false)
-
 		
 	# Esconde durante batalhas de turno para não atrapalhar o quiz
 	if gs:
@@ -92,33 +117,58 @@ func _atualizar_geometria_joystick() -> void:
 	if base_circle and knob:
 		_joystick_centro = base_circle.global_position + (base_circle.size * 0.5)
 		knob.position = (base_circle.size - knob.size) * 0.5
+	if dpad_zone and is_instance_valid(dpad_zone):
+		_dpad_centro = dpad_zone.global_position + (dpad_zone.size * 0.5)
+
+func _atualizar_modo_movimento() -> void:
+	var mcm = get_node_or_null("/root/MobileControlsManager")
+	if mcm and "tipo_controle" in mcm:
+		_tipo_controle = mcm.tipo_controle
+	else:
+		_tipo_controle = "analogico"
+		
+	if _tipo_controle == "dpad":
+		if joystick_zone: joystick_zone.visible = false
+		if dpad_zone: dpad_zone.visible = visible
+	else:
+		if joystick_zone: joystick_zone.visible = visible
+		if dpad_zone: dpad_zone.visible = false
+		
+	call_deferred("_atualizar_geometria_joystick")
 
 func _atualizar_visibilidade(ativo: bool) -> void:
 	visible = ativo
 	if not ativo:
-		_liberar_joystick()
+		_liberar_tudo()
 	else:
+		_atualizar_modo_movimento()
 		call_deferred("_atualizar_geometria_joystick")
 
 func _esconder_temporario(esconder: bool) -> void:
 	if esconder:
-		_liberar_joystick()
+		_liberar_tudo()
 		visible = false
 	else:
 		var mcm = get_node_or_null("/root/MobileControlsManager")
 		if mcm:
 			visible = mcm.joystick_habilitado
 			if visible:
+				_atualizar_modo_movimento()
 				call_deferred("_atualizar_geometria_joystick")
 
 func _on_joystick_toggled(ativo: bool) -> void:
 	_atualizar_visibilidade(ativo)
 
+func _on_tipo_controle_alterado(novo_tipo: String) -> void:
+	_liberar_tudo()
+	_tipo_controle = novo_tipo
+	_atualizar_modo_movimento()
+
 func _process(_delta: float) -> void:
 	var bloqueado = GlobalSignals.tem_interacao_ou_minigame_ativo() or _inventario_aberto() or _pausa_aberta()
 	if bloqueado:
 		if visible:
-			_liberar_joystick()
+			_liberar_tudo()
 			visible = false
 	else:
 		var mcm = get_node_or_null("/root/MobileControlsManager")
@@ -126,6 +176,7 @@ func _process(_delta: float) -> void:
 		if visible != deve_exibir:
 			visible = deve_exibir
 			if visible:
+				_atualizar_modo_movimento()
 				call_deferred("_atualizar_geometria_joystick")
 
 func _inventario_aberto() -> bool:
@@ -171,21 +222,30 @@ func _input(event: InputEvent) -> void:
 					_on_pausa_pressed()
 					get_viewport().set_input_as_handled()
 					return
-				# Se clicou no quadrante do analógico (lado esquerdo inferior)
+				# Se clicou no quadrante de movimento (lado esquerdo inferior)
 				elif mouse_pos.x < get_viewport_rect().size.x * 0.45 and mouse_pos.y > get_viewport_rect().size.y * 0.35:
 					_mouse_arrastando_joystick = true
-					_processar_arrasto(mouse_pos)
+					if _tipo_controle == "dpad":
+						_processar_dpad(mouse_pos)
+					else:
+						_processar_arrasto(mouse_pos)
 			else:
 				if _mouse_pressionou_interagir:
 					_mouse_pressionou_interagir = false
 					_on_interagir_up()
 				if _mouse_arrastando_joystick:
 					_mouse_arrastando_joystick = false
-					_liberar_joystick()
+					if _tipo_controle == "dpad":
+						_liberar_dpad()
+					else:
+						_liberar_joystick()
 					
 	elif event is InputEventMouseMotion:
 		if _mouse_arrastando_joystick:
-			_processar_arrasto(event.position)
+			if _tipo_controle == "dpad":
+				_processar_dpad(event.position)
+			else:
+				_processar_arrasto(event.position)
 			
 	# 2. Toque em tela (Mobile Touch)
 	elif event is InputEventScreenTouch:
@@ -197,34 +257,136 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 			elif btn_inventario and btn_inventario.is_visible_in_tree() and btn_inventario.get_global_rect().has_point(touch_pos):
+				_touch_id_interagir = -1
 				_on_inventario_pressed()
 				get_viewport().set_input_as_handled()
 				return
 			elif btn_grimorio and btn_grimorio.is_visible_in_tree() and btn_grimorio.get_global_rect().has_point(touch_pos):
+				_touch_id_interagir = -1
 				_on_grimorio_pressed()
 				get_viewport().set_input_as_handled()
 				return
 			elif btn_dash and btn_dash.is_visible_in_tree() and btn_dash.get_global_rect().has_point(touch_pos):
+				_touch_id_interagir = -1
 				_on_dash_pressed()
 				get_viewport().set_input_as_handled()
 				return
 			elif btn_pausa and btn_pausa.is_visible_in_tree() and btn_pausa.get_global_rect().has_point(touch_pos):
+				_touch_id_interagir = -1
 				_on_pausa_pressed()
 				get_viewport().set_input_as_handled()
 				return
 			elif _touch_id_joystick == -1 and touch_pos.x < get_viewport_rect().size.x * 0.45 and touch_pos.y > get_viewport_rect().size.y * 0.35:
 				_touch_id_joystick = event.index
-				_processar_arrasto(touch_pos)
+				if _tipo_controle == "dpad":
+					_processar_dpad(touch_pos)
+				else:
+					_processar_arrasto(touch_pos)
 		else:
 			if event.index == _touch_id_interagir:
 				_touch_id_interagir = -1
 				_on_interagir_up()
 			elif event.index == _touch_id_joystick:
-				_liberar_joystick()
+				if _tipo_controle == "dpad":
+					_liberar_dpad()
+				else:
+					_liberar_joystick()
 				
 	elif event is InputEventScreenDrag:
 		if event.index == _touch_id_joystick:
-			_processar_arrasto(event.position)
+			if _tipo_controle == "dpad":
+				_processar_dpad(event.position)
+			else:
+				_processar_arrasto(event.position)
+
+func _processar_dpad(posicao_toque: Vector2) -> void:
+	if dpad_zone == null or not is_instance_valid(dpad_zone):
+		return
+		
+	_dpad_centro = dpad_zone.global_position + (dpad_zone.size * 0.5)
+	var delta = posicao_toque - _dpad_centro
+	var dist = delta.length()
+	
+	var quer_cima = false
+	var quer_baixo = false
+	var quer_esquerda = false
+	var quer_direita = false
+	
+	if dist >= 18.0:
+		var angle = rad_to_deg(delta.angle()) # -180 a +180
+		if angle >= -22.5 and angle <= 22.5:
+			quer_direita = true
+		elif angle > 22.5 and angle < 67.5:
+			quer_direita = true
+			quer_baixo = true
+		elif angle >= 67.5 and angle <= 112.5:
+			quer_baixo = true
+		elif angle > 112.5 and angle < 157.5:
+			quer_baixo = true
+			quer_esquerda = true
+		elif angle >= 157.5 or angle <= -157.5:
+			quer_esquerda = true
+		elif angle > -157.5 and angle < -112.5:
+			quer_esquerda = true
+			quer_cima = true
+		elif angle >= -112.5 and angle <= -67.5:
+			quer_cima = true
+		elif angle > -67.5 and angle < -22.5:
+			quer_cima = true
+			quer_direita = true
+			
+	if quer_cima:
+		Input.action_press("cima", 1.0)
+	else:
+		Input.action_release("cima")
+		
+	if quer_baixo:
+		Input.action_press("baixo", 1.0)
+	else:
+		Input.action_release("baixo")
+		
+	if quer_esquerda:
+		Input.action_press("esquerda", 1.0)
+	else:
+		Input.action_release("esquerda")
+		
+	if quer_direita:
+		Input.action_press("direita", 1.0)
+	else:
+		Input.action_release("direita")
+		
+	_set_botao_dpad_estado(btn_dpad_cima, quer_cima)
+	_set_botao_dpad_estado(btn_dpad_baixo, quer_baixo)
+	_set_botao_dpad_estado(btn_dpad_esquerda, quer_esquerda)
+	_set_botao_dpad_estado(btn_dpad_direita, quer_direita)
+
+func _set_botao_dpad_estado(btn: Button, pressionado: bool) -> void:
+	if btn == null or not is_instance_valid(btn):
+		return
+	if pressionado:
+		if _style_dpad_pressed:
+			btn.add_theme_stylebox_override("normal", _style_dpad_pressed)
+		btn.scale = Vector2(0.92, 0.92)
+		btn.modulate = Color(1.3, 1.3, 1.3, 1.0)
+	else:
+		if _style_dpad_normal:
+			btn.add_theme_stylebox_override("normal", _style_dpad_normal)
+		btn.scale = Vector2.ONE
+		btn.modulate = Color.WHITE
+
+func _liberar_dpad() -> void:
+	_touch_id_joystick = -1
+	_mouse_arrastando_joystick = false
+	
+	Input.action_release("esquerda")
+	Input.action_release("direita")
+	Input.action_release("cima")
+	Input.action_release("baixo")
+	
+	_set_botao_dpad_estado(btn_dpad_cima, false)
+	_set_botao_dpad_estado(btn_dpad_baixo, false)
+	_set_botao_dpad_estado(btn_dpad_esquerda, false)
+	_set_botao_dpad_estado(btn_dpad_direita, false)
 
 func _processar_arrasto(posicao_toque: Vector2) -> void:
 	if base_circle == null or knob == null:
@@ -284,6 +446,10 @@ func _liberar_joystick() -> void:
 		var knob_centro = (base_circle.size - knob.size) * 0.5
 		var tw = create_tween().set_trans(Tween.TRANS_SPRING).set_ease(Tween.EASE_OUT)
 		tw.tween_property(knob, "position", knob_centro, 0.15)
+
+func _liberar_tudo() -> void:
+	_liberar_joystick()
+	_liberar_dpad()
 
 func _on_interagir_down() -> void:
 	if _interagir_ativo or GlobalSignals.tem_interacao_ou_minigame_ativo() or _inventario_aberto() or _pausa_aberta():
