@@ -11,6 +11,9 @@ var particulas: CPUParticles2D
 var _pode_pular_vitoria: bool = false
 var _era_boss: bool = false
 var _andar_concluido: int = 1
+var _ultimo_toque_vitoria_ms: int = 0
+var _momento_vitoria_abriu_ms: int = 0
+const INTERVALO_DUPLO_TOQUE_MS: int = 400
 
 func _ready() -> void:
 	add_to_group("interacao_ativa")
@@ -79,13 +82,27 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 		btn_container.hide() # Esconde botões para voltar rápido ao jogo
 		particulas.emitting = true
 		
+		_momento_vitoria_abriu_ms = Time.get_ticks_msec()
+		_ultimo_toque_vitoria_ms = 0
+		
+		# Detecta se é mobile
+		var eh_mobile = false
+		var mc = get_node_or_null("/root/MobileControlsManager")
+		if mc and "is_mobile" in mc:
+			eh_mobile = mc.is_mobile
+		elif OS.has_feature("mobile") or (OS.has_feature("web") and DisplayServer.is_touchscreen_available()):
+			eh_mobile = true
+		
 		# Cria mensagem discreta para pular a animação de vitória
 		var lbl_skip = Label.new()
 		lbl_skip.name = "LblSkip"
-		lbl_skip.text = "( Pressione ESPAÇO para pular )"
+		if eh_mobile:
+			lbl_skip.text = "( Toque 2x na tela para pular )"
+		else:
+			lbl_skip.text = "( Pressione ESPAÇO ou clique 2x para pular )"
 		lbl_skip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl_skip.add_theme_font_size_override("font_size", 14)
-		lbl_skip.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 0.8)) # Cinza discreto
+		lbl_skip.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 0.85))
 		
 		var font_skip = SystemFont.new()
 		font_skip.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
@@ -143,10 +160,33 @@ func _on_fim_de_jogo(vitoria: bool, dict_stats: Dictionary = {}) -> void:
 			_finalizar_vitoria()
 
 func _input(event: InputEvent) -> void:
-	if _pode_pular_vitoria:
-		if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
+	if not _pode_pular_vitoria:
+		return
+		
+	# Teclado / PC: ESPAÇO ou ui_select pula direto
+	if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
+		get_viewport().set_input_as_handled()
+		_finalizar_vitoria()
+		return
+		
+	# Mobile / Touch / Clique: duplo toque
+	var eh_toque = false
+	if event is InputEventScreenTouch and event.pressed:
+		eh_toque = true
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		eh_toque = true
+		
+	if eh_toque:
+		var agora = Time.get_ticks_msec()
+		# Descarta toques residuais dos primeiros 200ms após abrir a vitória
+		if agora - _momento_vitoria_abriu_ms < 200:
+			return
+			
+		if agora - _ultimo_toque_vitoria_ms <= INTERVALO_DUPLO_TOQUE_MS:
 			get_viewport().set_input_as_handled()
 			_finalizar_vitoria()
+		else:
+			_ultimo_toque_vitoria_ms = agora
 
 func _finalizar_vitoria() -> void:
 	_pode_pular_vitoria = false

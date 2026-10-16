@@ -19,6 +19,12 @@ var _luzes_portais: Array = []
 var _luzes_props: Array = []
 var _tempo_iluminacao: float = 0.0
 
+var _cutscene_em_andamento: bool = false
+var _cutscene_tween: Tween = null
+var _cutscene_pular_ui: CanvasLayer = null
+var _ultimo_toque_cutscene_ms: int = 0
+const INTERVALO_DUPLO_TOQUE_MS: int = 400
+
 func _ready() -> void:
 	_configurar_sistema_iluminacao()
 	
@@ -309,6 +315,156 @@ func _process(delta: float) -> void:
 			var pulso = sin((_tempo_iluminacao + prop["offset"]) * prop["speed"]) * 0.04
 			node.energy = prop["base_energy"] + pulso
 
+func _input(event: InputEvent) -> void:
+	if not _cutscene_em_andamento:
+		return
+		
+	# Teclado / PC: ESPAÇO ou ui_select pula direto
+	if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
+		get_viewport().set_input_as_handled()
+		_pular_cutscene_inicial()
+		return
+		
+	# Mobile / Touch / Clique: duplo toque
+	var eh_toque = false
+	if event is InputEventScreenTouch and event.pressed:
+		eh_toque = true
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		eh_toque = true
+		
+	if eh_toque:
+		var agora = Time.get_ticks_msec()
+		if agora - _ultimo_toque_cutscene_ms <= INTERVALO_DUPLO_TOQUE_MS:
+			get_viewport().set_input_as_handled()
+			_pular_cutscene_inicial()
+		else:
+			_ultimo_toque_cutscene_ms = agora
+
+func _criar_ui_pular_cutscene() -> void:
+	if _cutscene_pular_ui and is_instance_valid(_cutscene_pular_ui):
+		_cutscene_pular_ui.queue_free()
+		
+	_cutscene_pular_ui = CanvasLayer.new()
+	_cutscene_pular_ui.layer = 95
+	add_child(_cutscene_pular_ui)
+	
+	# Detecta se é mobile
+	var eh_mobile = false
+	var mc = get_node_or_null("/root/MobileControlsManager")
+	if mc and "is_mobile" in mc:
+		eh_mobile = mc.is_mobile
+	elif OS.has_feature("mobile") or (OS.has_feature("web") and DisplayServer.is_touchscreen_available()):
+		eh_mobile = true
+		
+	# Botão Pular elegante e translúcido no canto superior direito
+	var btn_pular = Button.new()
+	btn_pular.text = "PULAR ❯❯"
+	btn_pular.custom_minimum_size = Vector2(100, 36)
+	btn_pular.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	btn_pular.offset_left = -120
+	btn_pular.offset_top = 16
+	btn_pular.offset_right = -16
+	btn_pular.offset_bottom = 52
+	
+	var font_btn = SystemFont.new()
+	font_btn.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_btn.font_weight = 700
+	btn_pular.add_theme_font_override("font", font_btn)
+	btn_pular.add_theme_font_size_override("font_size", 13)
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.08, 0.12, 0.20, 0.85)
+	sb.border_color = Color(0.95, 0.70, 0.20, 0.90)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(8)
+	sb.content_margin_left = 10
+	sb.content_margin_right = 10
+	btn_pular.add_theme_stylebox_override("normal", sb)
+	
+	var sb_hov = sb.duplicate() as StyleBoxFlat
+	sb_hov.bg_color = Color(0.18, 0.24, 0.36, 0.95)
+	sb_hov.border_color = Color(1.0, 0.85, 0.35, 1.0)
+	btn_pular.add_theme_stylebox_override("hover", sb_hov)
+	btn_pular.add_theme_stylebox_override("pressed", sb_hov)
+	btn_pular.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
+	
+	btn_pular.pressed.connect(_pular_cutscene_inicial)
+	_cutscene_pular_ui.add_child(btn_pular)
+	
+	# Legenda discreta na parte inferior
+	var lbl_dica = Label.new()
+	if eh_mobile:
+		lbl_dica.text = "( Toque 2x na tela para pular )"
+	else:
+		lbl_dica.text = "( Pressione ESPAÇO ou clique 2x para pular )"
+	lbl_dica.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	lbl_dica.offset_top = -45
+	lbl_dica.offset_bottom = -15
+	lbl_dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_dica.add_theme_font_size_override("font_size", 13)
+	lbl_dica.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85, 0.75))
+	var font_dica = SystemFont.new()
+	font_dica.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	font_dica.font_weight = 500
+	lbl_dica.add_theme_font_override("font", font_dica)
+	_cutscene_pular_ui.add_child(lbl_dica)
+
+func _pular_cutscene_inicial() -> void:
+	if not _cutscene_em_andamento:
+		return
+	_cutscene_em_andamento = false
+	
+	# Remove a interface de pular
+	if _cutscene_pular_ui and is_instance_valid(_cutscene_pular_ui):
+		_cutscene_pular_ui.queue_free()
+		_cutscene_pular_ui = null
+		
+	# Mata o tween se ainda estiver rodando
+	if _cutscene_tween and is_instance_valid(_cutscene_tween):
+		_cutscene_tween.kill()
+		_cutscene_tween = null
+		
+	var player = get_node_or_null("Player")
+	if player == null:
+		player = get_tree().get_first_node_in_group("player")
+		
+	if player and is_instance_valid(player):
+		player.global_position = Vector2(263, 710)
+		player.ultima_direcao = "cima"
+		var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
+		if sprite:
+			sprite.play("idle_cima")
+		var poeira = player.get_node_or_null("PoeiraPassos") as CPUParticles2D
+		if poeira:
+			poeira.emitting = false
+			
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("ui-1")
+		
+	# Some o pergaminho da mesa
+	var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
+	if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
+		if pergaminho_mesa.has_method("_remover_prompt_tela"):
+			pergaminho_mesa._remover_prompt_tela()
+		pergaminho_mesa.queue_free()
+		
+	# Salva o pergaminho no grimório
+	if get_node_or_null("/root/PlayerStats"):
+		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
+		PlayerStats.marcar_cutscene_inicial_vista()
+
+	# Abre o pergaminho na tela
+	var ui = get_tree().get_first_node_in_group("parchment_ui")
+	if ui == null and get_tree().current_scene:
+		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
+
+	if ui and ui.has_method("abrir_pergaminho"):
+		if ui.has_signal("pergaminho_fechado"):
+			ui.pergaminho_fechado.connect(_ao_fechar_pergaminho_cutscene.bind(player), CONNECT_ONE_SHOT)
+		ui.abrir_pergaminho(paginas_intro, player)
+	else:
+		_ao_fechar_pergaminho_cutscene(player)
+
 func _executar_cutscene_inicial() -> void:
 	var player = get_node_or_null("Player")
 	if player == null:
@@ -316,6 +472,10 @@ func _executar_cutscene_inicial() -> void:
 		
 	if player == null:
 		return
+
+	_cutscene_em_andamento = true
+	_ultimo_toque_cutscene_ms = 0
+	_criar_ui_pular_cutscene()
 
 	# Marca que a historinha inicial já foi iniciada/vista para nunca mais repetir em Novos Jogos
 	if get_node_or_null("/root/PlayerStats"):
@@ -337,10 +497,12 @@ func _executar_cutscene_inicial() -> void:
 		poeira.emitting = true
 		poeira.direction = Vector2(0, 1)
 		
-	var tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween.tween_property(player, "global_position:y", 710.0, 3.0)
+	_cutscene_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
+	_cutscene_tween.tween_property(player, "global_position:y", 710.0, 3.0)
 	_tocar_passos_cutscene(3.0)
-	await tween.finished
+	await _cutscene_tween.finished
+	if not _cutscene_em_andamento:
+		return
 	
 	# PASSO 2: Vira para a esquerda e anda até a mesa
 	player.ultima_direcao = "esquerda"
@@ -350,45 +512,20 @@ func _executar_cutscene_inicial() -> void:
 		poeira.emitting = true
 		poeira.direction = Vector2(1, 0)
 		
-	var tween2 = create_tween().set_trans(Tween.TRANS_LINEAR)
-	tween2.tween_property(player, "global_position:x", 263.0, 4.0)
+	_cutscene_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
+	_cutscene_tween.tween_property(player, "global_position:x", 263.0, 4.0)
 	_tocar_passos_cutscene(4.0)
-	await tween2.finished
+	await _cutscene_tween.finished
+	if not _cutscene_em_andamento:
+		return
 	
-	# PASSO 3: Para em frente à mesa olhando para cima (em direção ao pergaminho na mesa)
-	player.ultima_direcao = "cima"
-	if poeira:
-		poeira.emitting = false
-	if sprite:
-		sprite.play("idle_cima")
-		
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
-		
-	# Some o pergaminho da mesa
-	var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
-	if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
-		if pergaminho_mesa.has_method("_remover_prompt_tela"):
-			pergaminho_mesa._remover_prompt_tela()
-		pergaminho_mesa.queue_free()
-		
-	# Salva o pergaminho no grimório
-	if get_node_or_null("/root/PlayerStats"):
-		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
-
-	# Abre o pergaminho na tela
-	var ui = get_tree().get_first_node_in_group("parchment_ui")
-	if ui == null and get_tree().current_scene:
-		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
-
-	if ui and ui.has_method("abrir_pergaminho"):
-		if ui.has_signal("pergaminho_fechado"):
-			ui.pergaminho_fechado.connect(_ao_fechar_pergaminho_cutscene.bind(player), CONNECT_ONE_SHOT)
-		ui.abrir_pergaminho(paginas_intro, player)
-	else:
-		_ao_fechar_pergaminho_cutscene(player)
+	# PASSO 3: Chegou normalmente à mesa - finaliza e abre o pergaminho
+	_pular_cutscene_inicial()
 
 func _ao_fechar_pergaminho_cutscene(player: Node2D) -> void:
+	if _cutscene_pular_ui and is_instance_valid(_cutscene_pular_ui):
+		_cutscene_pular_ui.queue_free()
+		_cutscene_pular_ui = null
 	if player and is_instance_valid(player):
 		player.travado = false
 		player.em_interacao = false
@@ -405,7 +542,7 @@ func _ao_fechar_pergaminho_cutscene(player: Node2D) -> void:
 func _tocar_passos_cutscene(duracao: float) -> void:
 	var tempo_decorrido: float = 0.0
 	while tempo_decorrido < duracao:
-		if not is_inside_tree():
+		if not is_inside_tree() or not _cutscene_em_andamento:
 			return
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.tocar_som_caminhada()
