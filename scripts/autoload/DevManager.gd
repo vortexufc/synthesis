@@ -40,7 +40,7 @@ var _salas_teleporte = [
 	{"nome": "⚡ Física - Sala 09", "path": "res://scenes/Salas/Oficina_Física/Sala_Física09.tscn"},
 	{"nome": "⚡ Física - Sala 10", "path": "res://scenes/Salas/Oficina_Física/Sala_Física10.tscn"},
 	{"nome": "⚡ Física - Sala 11", "path": "res://scenes/Salas/Oficina_Física/Sala_Física11.tscn"},
-	{"nome": "⚡ Física - Sala 12", "path": "res://scenes/Salas/Oficina_Física/Sala_Física12.tscn"},
+	{"nome": "👑 Sala do Boss (Física)", "path": "res://scenes/Salas/Oficina_Física/Sala_BossFisica.tscn"},
 	{"nome": "🌿 Biologia - Corredor", "path": "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"},
 	{"nome": "🌿 Biologia - Sala 01", "path": "res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn"},
 	{"nome": "🌿 Biologia - Sala 02", "path": "res://scenes/Salas/Estufa_Biologia/Sala_Biologia02.tscn"},
@@ -53,7 +53,7 @@ var _salas_teleporte = [
 	{"nome": "🌿 Biologia - Sala 09", "path": "res://scenes/Salas/Estufa_Biologia/Sala_Biologia09.tscn"},
 	{"nome": "🌿 Biologia - Sala 10", "path": "res://scenes/Salas/Estufa_Biologia/Sala_Biologia10.tscn"},
 	{"nome": "🌿 Biologia - Sala 11", "path": "res://scenes/Salas/Estufa_Biologia/Sala_Biologia11.tscn"},
-	{"nome": "🌿 Biologia - Sala 12 (Boss)", "path": "res://scenes/Salas/Estufa_Biologia/Sala_Biologia12.tscn"}
+	{"nome": "👑 Sala do Boss (Biologia)", "path": "res://scenes/Salas/Estufa_Biologia/Sala_BossBiologia.tscn"}
 ]
 
 func _ready() -> void:

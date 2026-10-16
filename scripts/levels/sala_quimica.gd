@@ -221,8 +221,8 @@ func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2
 	luz.color = cor_luz
 	luz.energy = 0.52
 	luz.texture_scale = 0.50
-	luz.position = pos
 	add_child(luz)
+	luz.global_position = pos
 	
 	_luzes_caldeiroes.append({
 		"node": luz,
@@ -233,7 +233,6 @@ func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2
 	# fumaca e bolhas do caldeirao
 	var part = CPUParticles2D.new()
 	part.name = "ParticulasCaldeirao_" + id_sufixo
-	part.position = pos + Vector2(0, -10)
 	part.z_index = 5
 	
 	var mat = CanvasItemMaterial.new()
@@ -258,6 +257,7 @@ func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2
 	part.color_ramp = grad
 	
 	add_child(part)
+	part.global_position = pos + Vector2(0, -10)
 
 func _configurar_sistema_iluminacao() -> void:
 	var tex_luz = _obter_textura_luz()
@@ -340,8 +340,8 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 				luz_runa.color = cor_runa
 				luz_runa.energy = 0.35
 				luz_runa.texture_scale = 0.70
-				luz_runa.position = pos_runa
 				add_child(luz_runa)
+				luz_runa.global_position = pos_runa
 				_luzes_props.append({"node": luz_runa, "base_energy": 0.35, "speed": 1.5, "offset": randf() * 5.0})
 				
 		# caldeiroes de pe
@@ -444,8 +444,8 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 			luz_cristal.color = Color(0.18, 0.88, 1.0, 1.0)
 			luz_cristal.energy = 0.40
 			luz_cristal.texture_scale = 0.35
-			luz_cristal.position = cell_world + Vector2(4, -16)
 			add_child(luz_cristal)
+			luz_cristal.global_position = cell_world + Vector2(4, -16)
 			_luzes_props.append({"node": luz_cristal, "base_energy": 0.40, "speed": 1.9, "offset": randf() * 5.0})
 			
 		# frasco verde
@@ -456,8 +456,8 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 			luz_planta.color = Color(0.20, 0.98, 0.45, 1.0)
 			luz_planta.energy = 0.40
 			luz_planta.texture_scale = 0.35
-			luz_planta.position = cell_world + Vector2(0, -16)
 			add_child(luz_planta)
+			luz_planta.global_position = cell_world + Vector2(0, -16)
 			_luzes_props.append({"node": luz_planta, "base_energy": 0.40, "speed": 1.4, "offset": randf() * 5.0})
 
 func _criar_luz_portal(nome_porta: String, cor_luz: Color) -> void:
@@ -522,8 +522,8 @@ func _garantir_tochas_na_sala() -> void:
 	for i in range(posicoes_tochas.size()):
 		var tocha = cena_tocha.instantiate()
 		tocha.name = "TochaAuto_" + str(i + 1)
-		tocha.position = posicoes_tochas[i]
 		add_child(tocha)
+		tocha.global_position = posicoes_tochas[i]
 
 var _tempo_luz_tick: float = 0.0
 
@@ -616,6 +616,65 @@ func _deve_dropar_chave() -> bool:
 		return true
 	return false
 
+func _is_posicao_valida(pos: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> bool:
+	if not floor_node:
+		return true
+	var cell = floor_node.local_to_map(floor_node.to_local(pos))
+	if not _is_celula_coberta(cell, floor_node):
+		return false
+	if wall_node and _is_celula_coberta(cell, wall_node):
+		return false
+	return true
+
+func _is_celula_coberta(cell: Vector2i, layer: TileMapLayer) -> bool:
+	if not layer or not layer.tile_set:
+		return false
+	if layer.get_cell_source_id(cell) != -1:
+		return true
+	for used_cell in layer.get_used_cells():
+		var source_id = layer.get_cell_source_id(used_cell)
+		var atlas_coords = layer.get_cell_atlas_coords(used_cell)
+		var source = layer.tile_set.get_source(source_id) as TileSetAtlasSource
+		if source and source.has_tile(atlas_coords):
+			var size = source.get_tile_size_in_atlas(atlas_coords)
+			if size.x > 1 or size.y > 1:
+				if cell.x >= used_cell.x and cell.x < used_cell.x + size.x and \
+				   cell.y >= used_cell.y and cell.y < used_cell.y + size.y:
+					return true
+	return false
+
+func _encontrar_posicao_chao_segura(pos_desejada: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> Vector2:
+	if not floor_node:
+		return pos_desejada
+	var cells = floor_node.get_used_cells()
+	if cells.is_empty():
+		return pos_desejada
+		
+	var melhor_pos = Vector2.ZERO
+	var menor_dist = 9999999.0
+	
+	for cell in cells:
+		var source_id = floor_node.get_cell_source_id(cell)
+		var atlas_coords = floor_node.get_cell_atlas_coords(cell)
+		var source = floor_node.tile_set.get_source(source_id) as TileSetAtlasSource if floor_node.tile_set else null
+		var size = source.get_tile_size_in_atlas(atlas_coords) if (source and source.has_tile(atlas_coords)) else Vector2i(1, 1)
+		
+		var passos_x = [0] if size.x <= 1 else [0, int(size.x / 2), size.x - 1]
+		var passos_y = [0] if size.y <= 1 else [0, int(size.y / 2), size.y - 1]
+		
+		for px in passos_x:
+			for py in passos_y:
+				var sub_cell = cell + Vector2i(px, py)
+				if wall_node and _is_celula_coberta(sub_cell, wall_node):
+					continue
+				var wpos = floor_node.to_global(floor_node.map_to_local(sub_cell))
+				var dist = wpos.distance_to(pos_desejada)
+				if dist < menor_dist:
+					menor_dist = dist
+					melhor_pos = wpos
+			
+	return melhor_pos if melhor_pos != Vector2.ZERO else pos_desejada
+
 func _dropar_chave(pos: Vector2) -> void:
 	var cena_atual = scene_file_path.to_lower()
 	if "boss" in cena_atual:
@@ -628,6 +687,14 @@ func _dropar_chave(pos: Vector2) -> void:
 	var chave = cena_chave.instantiate()
 	if "is_drop_dinamico" in chave:
 		chave.is_drop_dinamico = true
-	chave.position = to_local(pos)
+		
+	var drop_pos = to_local(pos)
+	var floor_node = get_node_or_null("Floor") as TileMapLayer
+	var wall_node = get_node_or_null("Wall") as TileMapLayer
+	if floor_node:
+		if not _is_posicao_valida(to_global(drop_pos), floor_node, wall_node):
+			drop_pos = to_local(_encontrar_posicao_chao_segura(to_global(drop_pos), floor_node, wall_node))
+			
+	chave.position = drop_pos
 	call_deferred("add_child", chave)
-	print("[Sala Química] Chave dropada com sucesso na posição: ", pos)
+	print("[Sala Química] Chave dropada com sucesso na posição: ", drop_pos)

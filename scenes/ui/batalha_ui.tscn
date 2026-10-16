@@ -288,10 +288,10 @@ flip_h = true
 
 [node name="HealthPlayer" type="Control" parent="Control" unique_id=1149034248]
 layout_mode = 0
-offset_left = 130.0
-offset_top = 115.0
-offset_right = 330.0
-offset_bottom = 139.0
+offset_left = 140.0
+offset_top = 238.0
+offset_right = 340.0
+offset_bottom = 262.0
 mouse_filter = 2
 
 [node name="HeartIcon" type="TextureRect" parent="Control/HealthPlayer"]

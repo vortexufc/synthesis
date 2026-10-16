@@ -218,7 +218,7 @@ func _reposicionar_na_porta_correta() -> void:
 		return
 		
 	if DungeonGenerator.vindo_de_porta_de_retorno:
-		# Ao VOLTAR, nasce perto da porta de AVANÇO desta sala (porta de cima/norte)
+		# Ao VOLTAR, nasce perto da porta de AVANÇO desta sala (geralmente porta de cima/norte)
 		var masmorra_alvo = ""
 		if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.get("masmorra_retorno_hub") != "":
 			masmorra_alvo = DungeonGenerator.masmorra_retorno_hub
@@ -233,11 +233,17 @@ func _reposicionar_na_porta_correta() -> void:
 						continue
 					
 				global_position = porta.global_position
-				global_position.y += 180 # Nasce mais abaixo (escapando de colisão)
+				var s_root: Node = self
+				while s_root.get_parent() and s_root.get_parent() != get_tree().root:
+					s_root = s_root.get_parent()
+				if _is_porta_norte(porta, s_root):
+					global_position.y += 180 # Porta no topo: entra descendo para dentro da sala
+				else:
+					global_position.y -= 180 # Porta na base: entra subindo para dentro da sala
 				break
 		DungeonGenerator.vindo_de_porta_de_retorno = false
 	else:
-		# Ao AVANÇAR, nasce perto da porta de RETORNO desta sala (porta de baixo/sul)
+		# Ao AVANÇAR, nasce perto da porta de RETORNO desta sala
 		for porta in portas:
 			if porta.porta_de_retorno:
 				global_position = porta.global_position
@@ -256,11 +262,37 @@ func _reposicionar_na_porta_correta() -> void:
 				if db and db.active_dungeon != "":
 					masmorra_ativa = db.active_dungeon.to_lower()
 					
-				if "biologia" in cena_path or "estufa" in cena_path or "biologia" in masmorra_ativa:
-					dist_spawn = 360 # Portas de biologia são mais altas (356px), mantendo a distância confortável idêntica a Física
-					
-				global_position.y -= dist_spawn # Nasce mais acima (longe da porta e fora do gatilho de abertura automática)
+				var eh_biologia = "biologia" in cena_path or "estufa" in cena_path or "biologia" in masmorra_ativa
+				if eh_biologia:
+					dist_spawn = 360 # Portas de biologia são mais altas (356px)
+				
+				# Detecta se a porta fica no Norte (topo) ou Sul (base) da sala
+				if _is_porta_norte(porta, s_root):
+					global_position.y += 180 # Porta no topo: entra descendo para dentro da sala (evita nascer fora no telhado)
+				else:
+					global_position.y -= dist_spawn # Porta na base: entra subindo para dentro da sala
 				break
+
+func _is_porta_norte(porta: Node2D, s_root: Node) -> bool:
+	var floor_node = null
+	if s_root:
+		floor_node = s_root.get_node_or_null("Floor")
+	if not floor_node and get_tree() and get_tree().current_scene:
+		floor_node = get_tree().current_scene.get_node_or_null("Floor")
+		
+	if floor_node is TileMapLayer and floor_node.tile_set:
+		var cells = floor_node.get_used_cells()
+		if not cells.is_empty():
+			var min_y = 999999.0
+			var max_y = -999999.0
+			var ts_y = float(floor_node.tile_set.tile_size.y) * floor_node.scale.y
+			for c in cells:
+				var yw = float(c.y) * ts_y
+				if yw < min_y: min_y = yw
+				if yw > max_y: max_y = yw
+			var mid_y = (min_y + max_y) * 0.5
+			return porta.global_position.y < mid_y
+	return porta.global_position.y < 600.0
 
 func _physics_process(delta: float) -> void:
 	if _tempo_imunidade_pos_interacao > 0.0:

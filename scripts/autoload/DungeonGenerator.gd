@@ -70,7 +70,7 @@ var salas_alquimia: Array = [
 # salas do andar de fisica
 var sala_inicial_fisica = "res://scenes/Salas/Oficina_Física/Corredor_Física.tscn"
 var sala_01_fisica = "res://scenes/Salas/Oficina_Física/Sala_Física01.tscn"
-var sala_boss_fisica = "res://scenes/Salas/Oficina_Física/Sala_Física12.tscn"
+var sala_boss_fisica = "res://scenes/Salas/Oficina_Física/Sala_BossFisica.tscn"
 
 # salas intermediarias sorteadas de fisica
 var salas_fisica_pool: Array = [
@@ -100,13 +100,13 @@ var salas_fisica: Array = [
 	"res://scenes/Salas/Oficina_Física/Sala_Física09.tscn",
 	"res://scenes/Salas/Oficina_Física/Sala_Física10.tscn",
 	"res://scenes/Salas/Oficina_Física/Sala_Física11.tscn",
-	"res://scenes/Salas/Oficina_Física/Sala_Física12.tscn"
+	"res://scenes/Salas/Oficina_Física/Sala_BossFisica.tscn"
 ]
 
 # salas do andar de biologia
 var sala_inicial_biologia = "res://scenes/Salas/Estufa_Biologia/Corredor_Estufa.tscn"
 var sala_01_biologia = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia01.tscn"
-var sala_boss_biologia = "res://scenes/Salas/Estufa_Biologia/Sala_Biologia12.tscn"
+var sala_boss_biologia = "res://scenes/Salas/Estufa_Biologia/Sala_BossBiologia.tscn"
 
 # salas intermediarias sorteadas de biologia
 var salas_biologia_pool: Array = [
@@ -136,7 +136,7 @@ var salas_biologia: Array = [
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia09.tscn",
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia10.tscn",
 	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia11.tscn",
-	"res://scenes/Salas/Estufa_Biologia/Sala_Biologia12.tscn"
+	"res://scenes/Salas/Estufa_Biologia/Sala_BossBiologia.tscn"
 ]
 
 # ordem das salas da corrida atual
@@ -170,16 +170,17 @@ var tier_override: Dictionary = {}
 func _ready():
 	randomize()
 	resetar_masmorra()
-	if get_node_or_null("/root/PlayerStats"):
-		for i in PlayerStats.inimigos_derrotados:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		for i in ps.inimigos_derrotados:
 			if not (i in inimigos_derrotados):
 				inimigos_derrotados.append(i)
-		for p in PlayerStats.portas_destrancadas:
+		for p in ps.portas_destrancadas:
 			if not (p in portas_destrancadas):
 				portas_destrancadas.append(p)
-		if PlayerStats.percurso_salas_salvo.size() > 0:
-			percurso_salas = PlayerStats.percurso_salas_salvo.duplicate()
-			indice_atual = PlayerStats.indice_sala_salvo
+		if ps.percurso_salas_salvo.size() > 0:
+			percurso_salas = ps.percurso_salas_salvo.duplicate()
+			indice_atual = ps.indice_sala_salvo
 
 func get_masmorra_da_cena(cena: String) -> String:
 	var cena_lower = cena.to_lower()
@@ -232,14 +233,14 @@ func get_index_da_cena(cena: String) -> int:
 			return 1
 		if "sala_física01.tscn" in cena_lower or "sala_fisica01.tscn" in cena_lower:
 			return 2
-		if "fisica12" in cena_lower or "física12" in cena_lower or "boss" in cena_lower:
+		if "boss" in cena_lower:
 			return percurso_salas.size() - 1
 	elif masmorra_atual == "Biologia":
 		if "corredor" in cena_lower or "estufa" in cena_lower:
 			return 1
 		if "biologia01.tscn" in cena_lower:
 			return 2
-		if "biologia12" in cena_lower or "biologia04.tscn" in cena_lower or "boss" in cena_lower:
+		if "boss" in cena_lower:
 			return percurso_salas.size() - 1
 				
 	return -1
@@ -452,7 +453,7 @@ func is_sala_boss(arquivo_cena: String = "") -> bool:
 	var cena_lower = arquivo_cena.to_lower()
 	if cena_lower == "" and get_tree() and get_tree().current_scene:
 		cena_lower = get_tree().current_scene.scene_file_path.to_lower()
-	if "boss" in cena_lower or "fisica12" in cena_lower or "física12" in cena_lower or "biologia12" in cena_lower or "biologia04" in cena_lower:
+	if "boss" in cena_lower:
 		return true
 	if percurso_salas.size() > 1 and indice_atual == percurso_salas.size() - 1:
 		return true
@@ -485,25 +486,54 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	percurso_salas.append(hub_geral)
 	
 	if active == "Física":
-		# comeca no corredor de fisica (indice 1)
+		# andar de fisica com progressão ordenada e layout randômico:
+		# Index 0: Hub Geral (já adicionado)
+		# Index 1: Corredor_Física (sala_inicial_fisica)
+		# Index 2: Sala_Física01 (sala_01_fisica fixa) -> 1ª sala de combate (Ciano / Tier 1 - Fácil)
 		percurso_salas.append(sala_inicial_fisica)
-		# sala 01 (indice 2)
 		percurso_salas.append(sala_01_fisica)
 		
-		# sorteia 6 salas do meio sem repetir
-		var intermediarias = salas_fisica_pool.duplicate()
-		intermediarias.shuffle()
+		# Sorteia 6 salas intermediárias dentre todo o pool disponível (Sala 02 a Sala 11) sem repetição
+		var pool_intermediarias = salas_fisica_pool.duplicate()
+		pool_intermediarias.shuffle()
 		var salas_intermediarias_escolhidas: Array = []
-		for i in range(min(6, intermediarias.size())):
-			percurso_salas.append(intermediarias[i])
-			salas_intermediarias_escolhidas.append(intermediarias[i])
+		for i in range(min(6, pool_intermediarias.size())):
+			var s = pool_intermediarias[i]
+			percurso_salas.append(s)
+			salas_intermediarias_escolhidas.append(s)
 		
-		# ultima sala: boss robo
+		# Index 9: Boss Robô Grande (sala_boss_fisica fixa)
 		percurso_salas.append(sala_boss_fisica)
 		
-		# sorteia 2 salas intermediárias para ter mecânica de chave
-		_sortear_salas_com_chave(salas_intermediarias_escolhidas, 2)
-		print("[DungeonGenerator] Masmorra de Física gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
+		# Define os Tiers da progressão de combate (igual Química):
+		# Sequência exata: 3 fáceis -> 2 médias -> 2 difíceis -> Boss
+		# Index 2 (Sala 01): Tier 1 (Ciano / Fácil)
+		# Index 3 (Intermediária 1): Tier 1 (Ciano / Fácil)
+		# Index 4 (Intermediária 2): Tier 1 (Ciano / Fácil)
+		# Index 5 (Intermediária 3): Tier 2 (Amarelo / Médio)
+		# Index 6 (Intermediária 4): Tier 2 (Amarelo / Médio)
+		# Index 7 (Intermediária 5): Tier 3 (Laranja / Difícil)
+		# Index 8 (Intermediária 6): Tier 3 (Laranja / Difícil)
+		tier_override[sala_01_fisica] = 1
+		tier_override[salas_intermediarias_escolhidas[0]] = 1
+		tier_override[salas_intermediarias_escolhidas[1]] = 1
+		tier_override[salas_intermediarias_escolhidas[2]] = 2
+		tier_override[salas_intermediarias_escolhidas[3]] = 2
+		tier_override[salas_intermediarias_escolhidas[4]] = 3
+		tier_override[salas_intermediarias_escolhidas[5]] = 3
+		
+		# Sorteia 2 salas entre as 7 salas de combate para ter a mecânica de chave
+		var candidatas_chave: Array = [sala_01_fisica]
+		candidatas_chave.append_array(salas_intermediarias_escolhidas)
+		_sortear_salas_com_chave(candidatas_chave, 2)
+		
+		print("[DungeonGenerator] Masmorra de Física gerada com progressão dinâmica:")
+		print("  - Index 2..4 (3 salas): TIER 1 - Cianos (Fácil)")
+		print("  - Index 5..6 (2 salas): TIER 2 - Amarelos (Médio)")
+		print("  - Index 7..8 (2 salas): TIER 3 - Laranjas (Difícil)")
+		print("  - Index 9 (1 sala): BOSS - Robô Grande")
+		print("  - Percurso: ", percurso_salas)
+		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
 	elif active == "Química":
 		# andar de quimica com progressão ordenada e layout randômico:
 		# Index 0: Hub Geral (já adicionado)
@@ -554,11 +584,14 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		print("  - Percurso: ", percurso_salas)
 		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
 	elif active == "Biologia":
-		# andar de biologia (Estufa)
+		# andar de biologia com progressão ordenada e layout randômico:
+		# Index 0: Hub Geral (já adicionado)
+		# Index 1: Corredor_Estufa (sala_inicial_biologia)
+		# Index 2: Sala_Biologia01 (sala_01_biologia fixa) -> 1ª sala de combate (Flor Amarela / Tier 1 - Fácil)
 		percurso_salas.append(sala_inicial_biologia)
 		percurso_salas.append(sala_01_biologia)
 		
-		# sorteia 6 salas intermediárias do pool (salas 02 a 11) sem repetição
+		# Sorteia 6 salas intermediárias do pool (salas 02 a 11) sem repetição
 		var pool_bio = salas_biologia_pool.duplicate()
 		pool_bio.shuffle()
 		var salas_bio_escolhidas: Array = []
@@ -567,15 +600,38 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 			percurso_salas.append(s)
 			salas_bio_escolhidas.append(s)
 			
-		# ultima sala: boss planta carnivora (Sala 12)
+		# Index 9: Boss Planta Carnívora (sala_boss_biologia fixa)
 		percurso_salas.append(sala_boss_biologia)
 		
-		# sorteia 2 salas intermediárias para ter mecânica de chave
-		# inclui sala_01 nas candidatas (não é corredor nem boss)
+		# Define os Tiers da progressão de combate (igual Química e Física):
+		# Sequência exata: 3 fáceis -> 2 médias -> 2 difíceis -> Boss
+		# Index 2 (Sala 01): Tier 1 (Flor Amarela / Fácil)
+		# Index 3 (Intermediária 1): Tier 1 (Flor Amarela / Fácil)
+		# Index 4 (Intermediária 2): Tier 1 (Flor Amarela / Fácil)
+		# Index 5 (Intermediária 3): Tier 2 (Flor Roxa / Médio)
+		# Index 6 (Intermediária 4): Tier 2 (Flor Roxa / Médio)
+		# Index 7 (Intermediária 5): Tier 3 (Flor Vermelha / Difícil)
+		# Index 8 (Intermediária 6): Tier 3 (Flor Vermelha / Difícil)
+		tier_override[sala_01_biologia] = 1
+		tier_override[salas_bio_escolhidas[0]] = 1
+		tier_override[salas_bio_escolhidas[1]] = 1
+		tier_override[salas_bio_escolhidas[2]] = 2
+		tier_override[salas_bio_escolhidas[3]] = 2
+		tier_override[salas_bio_escolhidas[4]] = 3
+		tier_override[salas_bio_escolhidas[5]] = 3
+		
+		# Sorteia 2 salas entre as 7 salas de combate para ter a mecânica de chave
 		var candidatas_bio: Array = [sala_01_biologia]
 		candidatas_bio.append_array(salas_bio_escolhidas)
 		_sortear_salas_com_chave(candidatas_bio, 2)
-		print("[DungeonGenerator] Masmorra de Biologia gerada com %d salas. Salas com chave: %s" % [percurso_salas.size() - 1, str(salas_com_chave)])
+		
+		print("[DungeonGenerator] Masmorra de Biologia gerada com progressão dinâmica:")
+		print("  - Index 2..4 (3 salas): TIER 1 - Flor Amarela (Fácil)")
+		print("  - Index 5..6 (2 salas): TIER 2 - Flor Roxa (Médio)")
+		print("  - Index 7..8 (2 salas): TIER 3 - Flor Vermelha (Difícil)")
+		print("  - Index 9 (1 sala): BOSS - Planta Carnívora")
+		print("  - Percurso: ", percurso_salas)
+		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
 	else:
 		print("[DungeonGenerator] Nenhuma expedição ativa (Aguardando escolha de porta no Hub).")
 
@@ -608,9 +664,9 @@ func get_tier_da_sala(arquivo_cena: String = "") -> int:
 		if k_lower == cena_lower or (cena_file != "" and k_lower.get_file() == cena_file):
 			return tier_override[key]
 			
-	# 2. Fallback baseado no índice no percurso atual de Química
+	# 2. Fallback baseado no índice no percurso atual de Química, Física ou Biologia
 	var masmorra = get_masmorra_da_cena(cena)
-	if masmorra == "Química":
+	if masmorra == "Química" or masmorra == "Física" or masmorra == "Biologia":
 		var idx = get_index_da_cena(cena)
 		if idx >= 2 and idx <= 4:
 			return 1

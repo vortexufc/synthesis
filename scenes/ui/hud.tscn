@@ -87,12 +87,14 @@ patch_margin_right = 4
 patch_margin_bottom = 4
 mouse_filter = 2
 
-[node name="HealthText" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = 58.0
-offset_top = 50.0
-offset_right = 258.0
-offset_bottom = 75.0
+[node name="HealthText" type="Label" parent="Control/HealthBarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "100 / 100"
 horizontal_alignment = 1
+vertical_alignment = 1
 mouse_filter = 2

@@ -1855,7 +1855,7 @@ script = ExtResource("21_4qjmo")
 chance_mimico = 0.5
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=333934211]
-position = Vector2(552, 317)
+position = Vector2(553.0, 368.0)
 gizmo_extents = 24.0
 script = ExtResource("22_d1muj")
 

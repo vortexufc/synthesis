@@ -1925,7 +1925,7 @@ gizmo_extents = 24.0
 script = ExtResource("23_f8ovt")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=730601501]
-position = Vector2(143, 341)
+position = Vector2(169.0, 368.0)
 gizmo_extents = 24.0
 script = ExtResource("23_f8ovt")
 
@@ -1938,7 +1938,7 @@ gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeLivro" unique_id=1133984668]
-position = Vector2(1023, 329)
+position = Vector2(1033.0, 368.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 

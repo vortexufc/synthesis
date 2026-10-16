@@ -36,7 +36,115 @@ func _ready() -> void:
 		AudioManager.start_playlist()
 		
 	_configurar_sistema_iluminacao()
+	
+	# Configura os inimigos da sala de acordo com o tier dinâmico da masmorra
+	# Progressão: 3 salas Ciano (Tier 1) -> 2 salas Amarelo (Tier 2) -> 2 salas Laranja (Tier 3) -> Boss (Robô Grande)
+	var cena_atual = scene_file_path.to_lower()
+	var eh_boss = "boss" in cena_atual
+	if get_node_or_null("/root/DungeonGenerator"):
+		eh_boss = eh_boss or DungeonGenerator.is_sala_boss(scene_file_path)
+	
+	if not eh_boss and get_node_or_null("/root/DungeonGenerator"):
+		var tier = DungeonGenerator.get_tier_da_sala(scene_file_path)
+		if tier > 0:
+			_configurar_tier_dos_inimigos(tier)
+	
 	_iniciar_sistema_inimigos_e_portas()
+
+# Configura os inimigos da sala para o tier da progressão (1=ciano/fácil, 2=amarelo/médio, 3=laranja/difícil)
+func _configurar_tier_dos_inimigos(tier: int) -> void:
+	print("[Sala Física] Configurando inimigos para TIER %d em %s" % [tier, scene_file_path])
+	
+	var sprite_path = ""
+	var sprite_scale = Vector2(1.5, 1.5)
+	var enemy_id = ""
+	var stats = {}
+	
+	if tier == 1:
+		# Tier 1: Robô Ciano (Fácil)
+		sprite_path = "res://assets/sprites/Sprite Frames/robo_p_ciano.tres"
+		enemy_id = "robo_p_ciano"
+		stats = {
+			"vida_maxima": 60.0,
+			"dano": 15.0,
+			"velocidade": 35.0,
+			"velocidade_perseguicao": 55.0,
+			"distancia_perseguicao": 160.0
+		}
+	elif tier == 2:
+		# Tier 2: Robô Amarelo (Médio)
+		sprite_path = "res://assets/sprites/Sprite Frames/robo_p_amarelo.tres"
+		enemy_id = "robo_p_amarelo"
+		stats = {
+			"vida_maxima": 85.0,
+			"dano": 18.0,
+			"velocidade": 42.0,
+			"velocidade_perseguicao": 62.0,
+			"distancia_perseguicao": 180.0
+		}
+	elif tier == 3:
+		# Tier 3: Robô Laranja (Difícil)
+		sprite_path = "res://assets/sprites/Sprite Frames/robo_p_laranja.tres"
+		enemy_id = "robo_p_laranja"
+		stats = {
+			"vida_maxima": 115.0,
+			"dano": 24.0,
+			"velocidade": 48.0,
+			"velocidade_perseguicao": 70.0,
+			"distancia_perseguicao": 190.0
+		}
+	else:
+		return
+		
+	var sprite_frames = load(sprite_path) as SpriteFrames
+	if not sprite_frames:
+		push_warning("[Sala Física] Não foi possível carregar sprite frames: %s" % sprite_path)
+		return
+		
+	# Encontra todos os inimigos da sala
+	var inimigos_encontrados: Array = []
+	for node in get_tree().get_nodes_in_group("inimigos"):
+		if is_ancestor_of(node) and is_instance_valid(node) and not node.is_queued_for_deletion():
+			inimigos_encontrados.append(node)
+			
+	if inimigos_encontrados.is_empty():
+		for body in find_children("*", "CharacterBody2D", true, false):
+			if not body.is_queued_for_deletion() and not body.is_in_group("player") and body.name != "Player" and not body.name.begins_with("Player"):
+				inimigos_encontrados.append(body)
+				
+	for inimigo in inimigos_encontrados:
+		if not is_instance_valid(inimigo) or inimigo.is_queued_for_deletion():
+			continue
+			
+		# Se o inimigo tinha nome de chefe herdado de template antigo, limpa o nome e flag
+		if "boss" in inimigo.name.to_lower() or "robo_g" in inimigo.name.to_lower():
+			inimigo.name = "Robo_" + str(inimigo.get_index())
+		inimigo.set("eh_boss", false)
+		inimigo.scale = Vector2(1.2, 1.2)
+		
+		# Atualiza AnimatedSprite2D
+		var sprite_node = inimigo.get_node_or_null("AnimatedSprite2D")
+		if sprite_node and sprite_node is AnimatedSprite2D:
+			sprite_node.sprite_frames = sprite_frames
+			sprite_node.scale = sprite_scale
+			if sprite_node.sprite_frames.has_animation("default"):
+				sprite_node.play("default")
+				
+		# Atualiza atributos do enemy.gd
+		for key in stats:
+			if key in inimigo:
+				inimigo.set(key, stats[key])
+		inimigo.vida_atual = stats.get("vida_maxima", inimigo.vida_maxima)
+		
+		# Atualiza EnemyTrigger
+		var trigger = inimigo.get_node_or_null("EnemyTrigger")
+		if trigger:
+			if "id_inimigo" in trigger:
+				trigger.id_inimigo = enemy_id
+			if "nivel_dificuldade" in trigger:
+				trigger.nivel_dificuldade = tier
+			if "andar_id" in trigger:
+				trigger.andar_id = 2
 
 func _obter_textura_luz() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()
@@ -550,9 +658,68 @@ func _deve_dropar_chave() -> bool:
 		return true
 	return false
 
+func _is_posicao_valida(pos: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> bool:
+	if not floor_node:
+		return true
+	var cell = floor_node.local_to_map(floor_node.to_local(pos))
+	if not _is_celula_coberta(cell, floor_node):
+		return false
+	if wall_node and _is_celula_coberta(cell, wall_node):
+		return false
+	return true
+
+func _is_celula_coberta(cell: Vector2i, layer: TileMapLayer) -> bool:
+	if not layer or not layer.tile_set:
+		return false
+	if layer.get_cell_source_id(cell) != -1:
+		return true
+	for used_cell in layer.get_used_cells():
+		var source_id = layer.get_cell_source_id(used_cell)
+		var atlas_coords = layer.get_cell_atlas_coords(used_cell)
+		var source = layer.tile_set.get_source(source_id) as TileSetAtlasSource
+		if source and source.has_tile(atlas_coords):
+			var size = source.get_tile_size_in_atlas(atlas_coords)
+			if size.x > 1 or size.y > 1:
+				if cell.x >= used_cell.x and cell.x < used_cell.x + size.x and \
+				   cell.y >= used_cell.y and cell.y < used_cell.y + size.y:
+					return true
+	return false
+
+func _encontrar_posicao_chao_segura(pos_desejada: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> Vector2:
+	if not floor_node:
+		return pos_desejada
+	var cells = floor_node.get_used_cells()
+	if cells.is_empty():
+		return pos_desejada
+		
+	var melhor_pos = Vector2.ZERO
+	var menor_dist = 9999999.0
+	
+	for cell in cells:
+		var source_id = floor_node.get_cell_source_id(cell)
+		var atlas_coords = floor_node.get_cell_atlas_coords(cell)
+		var source = floor_node.tile_set.get_source(source_id) as TileSetAtlasSource if floor_node.tile_set else null
+		var size = source.get_tile_size_in_atlas(atlas_coords) if (source and source.has_tile(atlas_coords)) else Vector2i(1, 1)
+		
+		var passos_x = [0] if size.x <= 1 else [0, int(size.x / 2), size.x - 1]
+		var passos_y = [0] if size.y <= 1 else [0, int(size.y / 2), size.y - 1]
+		
+		for px in passos_x:
+			for py in passos_y:
+				var sub_cell = cell + Vector2i(px, py)
+				if wall_node and _is_celula_coberta(sub_cell, wall_node):
+					continue
+				var wpos = floor_node.to_global(floor_node.map_to_local(sub_cell))
+				var dist = wpos.distance_to(pos_desejada)
+				if dist < menor_dist:
+					menor_dist = dist
+					melhor_pos = wpos
+			
+	return melhor_pos if melhor_pos != Vector2.ZERO else pos_desejada
+
 func _dropar_recompensa(pos: Vector2) -> void:
 	var cena_atual = scene_file_path.to_lower()
-	if "boss" in cena_atual or "fisica12" in cena_atual or "física12" in cena_atual:
+	if "boss" in cena_atual:
 		return
 	# dropa a chave da porta
 	var cena_chave = load("res://scenes/Entidades/Items/ItemChave.tscn")
@@ -563,6 +730,14 @@ func _dropar_recompensa(pos: Vector2) -> void:
 	var chave = cena_chave.instantiate()
 	if "is_drop_dinamico" in chave:
 		chave.is_drop_dinamico = true
-	chave.position = to_local(pos)
+		
+	var drop_pos = to_local(pos)
+	var floor_node = get_node_or_null("Floor") as TileMapLayer
+	var wall_node = get_node_or_null("Wall") as TileMapLayer
+	if floor_node:
+		if not _is_posicao_valida(to_global(drop_pos), floor_node, wall_node):
+			drop_pos = to_local(_encontrar_posicao_chao_segura(to_global(drop_pos), floor_node, wall_node))
+			
+	chave.position = drop_pos
 	call_deferred("add_child", chave)
-	print("[Sala Física] Chave dropada com sucesso na posição: ", pos)
+	print("[Sala Física] Chave dropada com sucesso na posição: ", drop_pos)

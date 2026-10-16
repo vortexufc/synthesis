@@ -3,8 +3,11 @@
 [ext_resource type="Script" path="res://scripts/bau.gd" id="1_bau"]
 [ext_resource type="Texture2D" uid="uid://d0hll37c8xhjm" path="res://assets/sprites/tilesets/Alquimia/OBJETOS.png" id="2_chest"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_bau"]
-size = Vector2(40, 34)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
+size = Vector2(56, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_solido"]
+size = Vector2(34, 20)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_chest_runico"]
 atlas = ExtResource("2_chest")
@@ -17,7 +20,16 @@ tipo_bau = 1
 eh_desafio_memoria = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_bau")
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_trigger")
+
+[node name="CorpoFisico" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CorpoFisico"]
+position = Vector2(0, 5)
+shape = SubResource("RectangleShape2D_solido")
 
 [node name="BauSprite" type="Sprite2D" parent="."]
 texture = SubResource("AtlasTexture_chest_runico")

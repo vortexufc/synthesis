@@ -356,12 +356,12 @@ script = ExtResource("24_spawner")
 chance_mimico = 0.5
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=1807948208]
-position = Vector2(599, 298)
+position = Vector2(600.0, 360.0)
 gizmo_extents = 24.0
 script = ExtResource("25_ponto")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=414017216]
-position = Vector2(948, 996)
+position = Vector2(936.0, 1032.0)
 gizmo_extents = 24.0
 script = ExtResource("25_ponto")
 
@@ -369,17 +369,17 @@ script = ExtResource("25_ponto")
 script = ExtResource("26_item_spawner")
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeLivro" unique_id=396187228]
-position = Vector2(122, 539)
+position = Vector2(216.0, 552.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeLivro" unique_id=278579542]
-position = Vector2(359, 295)
+position = Vector2(408.0, 360.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeLivro" unique_id=1704818133]
-position = Vector2(966, 292)
+position = Vector2(984.0, 360.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 
@@ -388,22 +388,22 @@ script = ExtResource("26_item_spawner")
 tipo_item = 4
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=360541939]
-position = Vector2(180, 850)
+position = Vector2(216.0, 936.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeMoeda" unique_id=1881076950]
-position = Vector2(1011, 262)
+position = Vector2(984.0, 360.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=1741355871]
-position = Vector2(1024, 725)
+position = Vector2(984.0, 744.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 
 [node name="Ponto4" type="Marker2D" parent="PontosDeMoeda" unique_id=839145375]
-position = Vector2(520, 600)
+position = Vector2(600.0, 552.0)
 gizmo_extents = 20.0
 script = ExtResource("27_item_ponto")
 

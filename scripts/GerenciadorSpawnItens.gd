@@ -123,5 +123,78 @@ func _executar_spawn() -> void:
 		if "id_unico" in item_inst:
 			item_inst.id_unico = item_id
 		pai.add_child(item_inst)
-		item_inst.global_position = p.global_position
+		
+		# Validação dinâmica de segurança: garante que o item spawne no chão jogável e fora de paredes
+		var pos_final = p.global_position
+		var floor_node = pai.get_node_or_null("Floor") as TileMapLayer
+		if not floor_node and get_tree() and get_tree().current_scene:
+			floor_node = get_tree().current_scene.get_node_or_null("Floor") as TileMapLayer
+		var wall_node = pai.get_node_or_null("Wall") as TileMapLayer
+		if not wall_node and get_tree() and get_tree().current_scene:
+			wall_node = get_tree().current_scene.get_node_or_null("Wall") as TileMapLayer
+			
+		if floor_node:
+			if not _is_posicao_valida(pos_final, floor_node, wall_node):
+				pos_final = _encontrar_posicao_chao_segura(pos_final, floor_node, wall_node)
+				
+		item_inst.global_position = pos_final
+
+func _is_posicao_valida(pos: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> bool:
+	if not floor_node:
+		return true
+	var cell = floor_node.local_to_map(floor_node.to_local(pos))
+	if not _is_celula_coberta(cell, floor_node):
+		return false
+	if wall_node and _is_celula_coberta(cell, wall_node):
+		return false
+	return true
+
+func _is_celula_coberta(cell: Vector2i, layer: TileMapLayer) -> bool:
+	if not layer or not layer.tile_set:
+		return false
+	if layer.get_cell_source_id(cell) != -1:
+		return true
+	for used_cell in layer.get_used_cells():
+		var source_id = layer.get_cell_source_id(used_cell)
+		var atlas_coords = layer.get_cell_atlas_coords(used_cell)
+		var source = layer.tile_set.get_source(source_id) as TileSetAtlasSource
+		if source and source.has_tile(atlas_coords):
+			var size = source.get_tile_size_in_atlas(atlas_coords)
+			if size.x > 1 or size.y > 1:
+				if cell.x >= used_cell.x and cell.x < used_cell.x + size.x and \
+				   cell.y >= used_cell.y and cell.y < used_cell.y + size.y:
+					return true
+	return false
+
+func _encontrar_posicao_chao_segura(pos_desejada: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> Vector2:
+	if not floor_node:
+		return pos_desejada
+	var cells = floor_node.get_used_cells()
+	if cells.is_empty():
+		return pos_desejada
+		
+	var melhor_pos = Vector2.ZERO
+	var menor_dist = 9999999.0
+	
+	for cell in cells:
+		var source_id = floor_node.get_cell_source_id(cell)
+		var atlas_coords = floor_node.get_cell_atlas_coords(cell)
+		var source = floor_node.tile_set.get_source(source_id) as TileSetAtlasSource if floor_node.tile_set else null
+		var size = source.get_tile_size_in_atlas(atlas_coords) if (source and source.has_tile(atlas_coords)) else Vector2i(1, 1)
+		
+		var passos_x = [0] if size.x <= 1 else [0, int(size.x / 2), size.x - 1]
+		var passos_y = [0] if size.y <= 1 else [0, int(size.y / 2), size.y - 1]
+		
+		for px in passos_x:
+			for py in passos_y:
+				var sub_cell = cell + Vector2i(px, py)
+				if wall_node and _is_celula_coberta(sub_cell, wall_node):
+					continue
+				var wpos = floor_node.to_global(floor_node.map_to_local(sub_cell))
+				var dist = wpos.distance_to(pos_desejada)
+				if dist < menor_dist:
+					menor_dist = dist
+					melhor_pos = wpos
+			
+	return melhor_pos if melhor_pos != Vector2.ZERO else pos_desejada
 

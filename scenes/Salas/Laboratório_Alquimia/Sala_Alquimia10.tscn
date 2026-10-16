@@ -1972,7 +1972,7 @@ script = ExtResource("22_iggwl")
 chance_mimico = 0.5
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=2051077066]
-position = Vector2(1276, 775)
+position = Vector2(1270.0, 814.0)
 gizmo_extents = 24.0
 script = ExtResource("23_avta8")
 
@@ -1982,7 +1982,7 @@ gizmo_extents = 24.0
 script = ExtResource("23_avta8")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=2080073700]
-position = Vector2(185, 450)
+position = Vector2(214.0, 430.0)
 gizmo_extents = 24.0
 script = ExtResource("23_avta8")
 
@@ -2009,7 +2009,7 @@ script = ExtResource("spawner_item")
 tipo_item = 4
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=1856508608]
-position = Vector2(732, 357)
+position = Vector2(742.0, 382.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 

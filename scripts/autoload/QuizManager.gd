@@ -34,6 +34,12 @@ var sprite_frames_inimigos = {
 	"robo_p_amarelo":  preload("res://assets/sprites/Sprite Frames/robo_p_amarelo.tres"),
 	"robo_p_ciano":    preload("res://assets/sprites/Sprite Frames/robo_p_ciano.tres"),
 	"robo_g":          preload("res://assets/sprites/Sprite Frames/robo_g.tres"),
+	# monstros do andar de biologia
+	"flor_amarela":    preload("res://assets/sprites/Sprite Frames/flor_amarela.tres"),
+	"flor_roxa":       preload("res://assets/sprites/Sprite Frames/flor_roxa.tres"),
+	"flor_vermelha":   preload("res://assets/sprites/Sprite Frames/flor_vermelha.tres"),
+	"planta_carnivora": preload("res://assets/sprites/Sprite Frames/planta_carnivora.tres"),
+	"carnivora":       preload("res://assets/sprites/Sprite Frames/planta_carnivora.tres"),
 }
 
 var sprite_frame_inimigo_atual
@@ -206,42 +212,32 @@ func reset_questions():
 	if get_tree() and get_tree().current_scene:
 		current_scene_path = get_tree().current_scene.scene_file_path
 		
+	var sala_idx: int = -1
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg and dg.has_method("get_index_da_cena"):
+		sala_idx = dg.get_index_da_cena(current_scene_path)
+		
 	if _nivel_dificuldade_alvo > 0:
 		target_nivel = _nivel_dificuldade_alvo
 	elif current_scene_path.to_lower().find("boss") != -1:
 		target_nivel = 3
 	else:
 		# dificuldade de acordo com a sala:
-		var sala_idx = DungeonGenerator.get_index_da_cena(current_scene_path)
-		var total_salas = DungeonGenerator.percurso_salas.size()
 		if sala_idx != -1:
-			if total_salas > 8:
-				# salas de fisica:
-				# salas 1 a 4: nivel facil
-				# salas 5 a 8: nivel medio
-				# salas 9+: nivel dificil
-				if sala_idx <= 4:
-					target_nivel = 1
-				elif sala_idx <= 8:
-					target_nivel = 2
-				else:
-					target_nivel = 3
+			# Progressão unificada (Química e Física: 3 fácil, 2 médio, 2 difícil, 1 boss)
+			# Salas index 2..4: fácil (Tier 1)
+			# Salas index 5..6: médio (Tier 2)
+			# Salas index 7..8: difícil (Tier 3)
+			if sala_idx <= 4:
+				target_nivel = 1
+			elif sala_idx <= 6:
+				target_nivel = 2
 			else:
-				# salas de quimica:
-				# salas 1 a 3: facil (slime azul)
-				# salas 4 a 5: medio (slime verde)
-				# salas 6 a 7: dificil (slime laranja)
-				# sala 8: boss final (slime roxo)
-				if sala_idx <= 3:
-					target_nivel = 1
-				elif sala_idx <= 5:
-					target_nivel = 2
-				else:
-					target_nivel = 3
+				target_nivel = 3
 		else:
 			target_nivel = 1
 		
-	print("[QuizManager] Inimigo: %s | Sala: %s (index: %d) -> Dificuldade alvo TRI: %d" % [_inimigo_atual_id, current_scene_path.get_file(), DungeonGenerator.get_index_da_cena(current_scene_path), target_nivel])
+	print("[QuizManager] Inimigo: %s | Sala: %s (index: %d) -> Dificuldade alvo TRI: %d" % [_inimigo_atual_id, current_scene_path.get_file(), sala_idx, target_nivel])
 	
 	var disponiveis: Array = []
 	for q in base_list:
@@ -428,7 +424,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	_eh_chefe_atual = enemy_data.get("eh_boss", false)
 	var cena_atual_str = c_path
 	if not _eh_chefe_atual:
-		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "carnivora" in id_lower or "wizard" in id_lower or "boss" in cena_atual_str or "fisica12" in cena_atual_str or "física12" in cena_atual_str or "biologia12" in cena_atual_str or "biologia04" in cena_atual_str:
+		if "boss" in id_lower or "roxo" in id_lower or id_lower == "robo_g" or "carnivora" in id_lower or "wizard" in id_lower or "boss" in cena_atual_str:
 			_eh_chefe_atual = true
 
 	_furia_chefe_executada = false
@@ -437,13 +433,13 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 	
 	if nivel_explicit > 0:
 		_nivel_dificuldade_alvo = nivel_explicit
-	elif "boss" in id_lower or "roxo" in id_lower or "robo_g" in id_lower or "wizard" in id_lower or _eh_chefe_atual:
+	elif "boss" in id_lower or "roxo" in id_lower or "robo_g" in id_lower or "wizard" in id_lower or "carnivora" in id_lower or _eh_chefe_atual:
 		_nivel_dificuldade_alvo = 3
-	elif "laranja" in id_lower or "vermelho" in id_lower or "vermelha" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower or "carnivora" in id_lower:
+	elif "laranja" in id_lower or "vermelho" in id_lower or "vermelha" in id_lower or id_lower == "slime_g" or "slime_g_" in id_lower or "robo_p_laranja" in id_lower or "flor_vermelha" in id_lower:
 		_nivel_dificuldade_alvo = 3
-	elif "verde" in id_lower or "ciano" in id_lower or "roxa" in id_lower:
+	elif "verde" in id_lower or "roxa" in id_lower or "flor_roxa" in id_lower or "robo_p_amarelo" in id_lower:
 		_nivel_dificuldade_alvo = 2
-	elif "azul" in id_lower or "amarelo" in id_lower or "amarela" in id_lower or "cogumelo" in id_lower or "slime_p" in id_lower or "robo_p" in id_lower:
+	elif "azul" in id_lower or "ciano" in id_lower or "amarelo" in id_lower or "amarela" in id_lower or "flor_amarela" in id_lower or "cogumelo" in id_lower or "slime_p" in id_lower or "robo_p" in id_lower or "robo_p_ciano" in id_lower:
 		_nivel_dificuldade_alvo = 1
 	else:
 		_nivel_dificuldade_alvo = 0

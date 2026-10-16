@@ -3,15 +3,19 @@
 [ext_resource type="Script" path="res://scripts/mimico.gd" id="1_mimico"]
 [ext_resource type="Texture2D" path="res://assets/sprites/items/bau_mimico.png" id="2_bau_mimico"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_mimico"]
-size = Vector2(40, 34)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trigger"]
+size = Vector2(56, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_solido"]
+size = Vector2(34, 20)
 
 [node name="Mimico" type="Area2D"]
 scale = Vector2(1.25, 1.25)
 script = ExtResource("1_mimico")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_mimico")
+position = Vector2(0, 2)
+shape = SubResource("RectangleShape2D_trigger")
 
 [node name="BauSprite" type="Sprite2D" parent="."]
 texture_filter = 1
@@ -19,8 +23,8 @@ texture = ExtResource("2_bau_mimico")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 collision_layer = 1
-collision_mask = 1
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-shape = SubResource("RectangleShape2D_mimico")
-disabled = true
+position = Vector2(0, 5)
+shape = SubResource("RectangleShape2D_solido")

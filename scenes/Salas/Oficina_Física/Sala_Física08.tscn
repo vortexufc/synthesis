@@ -185,17 +185,17 @@ script = ExtResource("spawner_item")
 tipo_item = 2
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeBateria" unique_id=920479532]
-position = Vector2(-393, 465)
+position = Vector2(-400.0, 496.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeBateria" unique_id=1237867289]
-position = Vector2(732, 1238)
+position = Vector2(752.0, 1264.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeBateria" unique_id=907342271]
-position = Vector2(-50, 1550)
+position = Vector2(-16.0, 1488.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
@@ -204,22 +204,22 @@ script = ExtResource("spawner_item")
 tipo_item = 4
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=968404204]
-position = Vector2(-78, 445)
+position = Vector2(-16.0, 400.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeMoeda" unique_id=507833186]
-position = Vector2(746, 662)
+position = Vector2(720.0, 592.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=915988770]
-position = Vector2(-420, 899)
+position = Vector2(-400.0, 880.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto4" type="Marker2D" parent="PontosDeMoeda" unique_id=240626439]
-position = Vector2(236, 1875)
+position = Vector2(240.0, 1904.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
@@ -240,6 +240,6 @@ gizmo_extents = 24.0
 script = ExtResource("ponto_bau")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=1986810542]
-position = Vector2(-412, 1887)
+position = Vector2(-432.0, 1904.0)
 gizmo_extents = 24.0
 script = ExtResource("ponto_bau")

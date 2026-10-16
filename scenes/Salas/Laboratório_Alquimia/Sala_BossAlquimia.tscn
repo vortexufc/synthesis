@@ -1664,7 +1664,6 @@ sources/1 = SubResource("TileSetAtlasSource_7717u")
 sources/2 = SubResource("TileSetAtlasSource_uv14r")
 
 [node name="Node2D" type="Node2D" unique_id=103472613]
-position = Vector2(-434, 13)
 script = ExtResource("1_quimica_base")
 
 [node name="Player" parent="." unique_id=317542166 instance=ExtResource("1_cprru")]
@@ -1807,16 +1806,16 @@ script = ExtResource("21_2ao3w")
 chance_mimico = 0.5
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeBau" unique_id=1145598066]
-position = Vector2(162, 1042)
+position = Vector2(505.0, 944.0)
 gizmo_extents = 24.0
 script = ExtResource("22_qn2gd")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=1098048764]
-position = Vector2(152, 1638)
+position = Vector2(505.0, 1712.0)
 gizmo_extents = 24.0
 script = ExtResource("22_qn2gd")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=739425775]
-position = Vector2(146, 347)
+position = Vector2(505.0, 464.0)
 gizmo_extents = 24.0
 script = ExtResource("22_qn2gd")

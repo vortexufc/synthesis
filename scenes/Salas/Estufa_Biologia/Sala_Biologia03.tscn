@@ -120,7 +120,7 @@ position = Vector2(2974, 711)
 frames_animacao = 4
 stride_animacao = 128
 
-[node name="FundoPreto" type="ColorRect" parent="PortaTransicao"]
+[node name="FundoPreto" type="ColorRect" parent="PortaTransicao" unique_id=482434946]
 z_index = 1
 offset_left = -59.0
 offset_top = -181.0
@@ -128,9 +128,9 @@ offset_right = 66.0
 offset_bottom = 45.0
 color = Color(0.08, 0.09, 0.11, 1)
 
-[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao"]
+[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=1461006267]
 z_index = 2
-position = Vector2(4, -66)
+position = Vector2(0, -44)
 scale = Vector2(1.854167, 1.8580729)
 texture = ExtResource("tex_biologia_porta")
 region_enabled = true
@@ -142,7 +142,7 @@ porta_de_retorno = true
 frames_animacao = 4
 stride_animacao = 128
 
-[node name="FundoPreto" type="ColorRect" parent="PortaRetorno"]
+[node name="FundoPreto" type="ColorRect" parent="PortaRetorno" unique_id=2103817572]
 z_index = 1
 offset_left = -59.0
 offset_top = -181.0
@@ -150,7 +150,7 @@ offset_right = 66.0
 offset_bottom = 45.0
 color = Color(0.08, 0.09, 0.11, 1)
 
-[node name="SpritePorta" type="Sprite2D" parent="PortaRetorno"]
+[node name="SpritePorta" type="Sprite2D" parent="PortaRetorno" unique_id=1707363783]
 z_index = 2
 position = Vector2(4, -66)
 scale = Vector2(1.854167, 1.8580729)

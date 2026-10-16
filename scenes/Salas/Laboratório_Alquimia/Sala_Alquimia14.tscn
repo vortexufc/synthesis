@@ -384,12 +384,12 @@ gizmo_extents = 24.0
 script = ExtResource("22_hj1if")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeBau" unique_id=391630468]
-position = Vector2(1018, 366)
+position = Vector2(984.0, 360.0)
 gizmo_extents = 24.0
 script = ExtResource("22_hj1if")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeBau" unique_id=1485911943]
-position = Vector2(144, 947)
+position = Vector2(216.0, 936.0)
 gizmo_extents = 24.0
 script = ExtResource("22_hj1if")
 
@@ -397,17 +397,17 @@ script = ExtResource("22_hj1if")
 script = ExtResource("spawner_item")
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeLivro" unique_id=1399777291]
-position = Vector2(350, 450)
+position = Vector2(408.0, 360.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeLivro" unique_id=2025276814]
-position = Vector2(750, 520)
+position = Vector2(792.0, 552.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeLivro" unique_id=1505914112]
-position = Vector2(250, 800)
+position = Vector2(216.0, 744.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
@@ -416,22 +416,22 @@ script = ExtResource("spawner_item")
 tipo_item = 4
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeMoeda" unique_id=2038014559]
-position = Vector2(480, 650)
+position = Vector2(408.0, 744.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto2" type="Marker2D" parent="PontosDeMoeda" unique_id=630901283]
-position = Vector2(720, 380)
+position = Vector2(792.0, 360.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=1988891631]
-position = Vector2(850, 880)
+position = Vector2(792.0, 936.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto4" type="Marker2D" parent="PontosDeMoeda" unique_id=51090097]
-position = Vector2(380, 920)
+position = Vector2(408.0, 936.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 

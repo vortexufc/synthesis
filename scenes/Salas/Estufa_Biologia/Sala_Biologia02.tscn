@@ -131,7 +131,7 @@ color = Color(0.08, 0.09, 0.11, 1)
 
 [node name="SpritePorta" type="Sprite2D" parent="PortaTransicao" unique_id=506999473]
 z_index = 2
-position = Vector2(4, -66)
+position = Vector2(5, -61)
 scale = Vector2(1.854167, 1.8580729)
 texture = ExtResource("tex_biologia_porta")
 region_enabled = true

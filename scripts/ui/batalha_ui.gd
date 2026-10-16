@@ -38,9 +38,33 @@ var _eh_pergunta_vf: bool = false
 var battle_music = preload("res://assets/audio/ost/2.wav")
 var _font_pixel_combate = preload("res://assets/fonts/PressStart2P-Regular.ttf")
 
-const FUNDO_QUIMICA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_quimica.png")
-const FUNDO_FISICA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_fisica.png")
-const FUNDO_BIOLOGIA = preload("res://assets/sprites/Backgrounds/Batalha/fundo_batalha_biologia.png")
+const FRAMES_QUIMICA: Array[Texture2D] = [
+	preload("res://assets/sprites/Backgrounds/Batalha/Quimica/frame_0.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Quimica/frame_1.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Quimica/frame_2.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Quimica/frame_3.png")
+]
+
+const FRAMES_FISICA: Array[Texture2D] = [
+	preload("res://assets/sprites/Backgrounds/Batalha/Fisica/frame_0.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Fisica/frame_1.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Fisica/frame_2.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Fisica/frame_3.png")
+]
+
+const FRAMES_BIOLOGIA: Array[Texture2D] = [
+	preload("res://assets/sprites/Backgrounds/Batalha/Biologia/frame_0.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Biologia/frame_1.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Biologia/frame_2.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Biologia/frame_3.png"),
+	preload("res://assets/sprites/Backgrounds/Batalha/Biologia/frame_4.png")
+]
+
+var _fundo_frames_ativos: Array[Texture2D] = []
+var _fundo_frame_idx: int = 0
+var _fundo_tempo_acumulado: float = 0.0
+const _FUNDO_FPS: float = 5.0
+const _FUNDO_INTERVALO: float = 1.0 / _FUNDO_FPS
 
 func _ready() -> void:
 	var am = get_node_or_null("/root/AudioManager")
@@ -70,21 +94,189 @@ func _ready() -> void:
 			"Física": andar_detectado = 2
 			"Biologia": andar_detectado = 3
 			_: andar_detectado = 1
+	else:
+		var c_path = ""
+		if get_tree() and get_tree().current_scene:
+			c_path = get_tree().current_scene.scene_file_path.to_lower()
+		if "biologia" in c_path or "estufa" in c_path:
+			andar_detectado = 3
+		elif "fisica" in c_path or "física" in c_path or "oficina" in c_path:
+			andar_detectado = 2
+		elif "alquimia" in c_path or "quimica" in c_path or "laborat" in c_path:
+			andar_detectado = 1
 	configurar_fundo(andar_detectado)
 
+const CORES_TEMAS = {
+	# Andar 1: Laboratório de Alquimia / Química (Safira Arcana & Cristal Ciano)
+	1: {
+		"footer": Color(0.015, 0.055, 0.22, 0.98),
+		"question_bg": Color(0.05, 0.13, 0.33, 1.0),
+		"question_border": Color(0.0, 0.55, 1.0, 1.0),
+		"btn_bg": Color(0.04, 0.10, 0.25, 0.92),
+		"btn_border": Color(0.18, 0.42, 0.78, 0.90),
+		"btn_hover_bg": Color(0.09, 0.25, 0.52, 0.98),
+		"btn_hover_border": Color(0.28, 0.85, 1.0, 1.0),
+		"btn_hover_font": Color(1.0, 1.0, 1.0, 1.0),
+		"btn_pressed_bg": Color(0.03, 0.07, 0.18, 1.0),
+		"btn_correct_bg": Color(0.06, 0.38, 0.20, 0.98),
+		"btn_correct_border": Color(0.20, 1.0, 0.55, 1.0),
+		"btn_wrong_bg": Color(0.42, 0.08, 0.10, 0.98),
+		"btn_wrong_border": Color(1.0, 0.25, 0.25, 1.0),
+		"btn_dimmed_bg": Color(0.03, 0.06, 0.15, 0.65),
+		"btn_dimmed_border": Color(0.12, 0.22, 0.38, 0.40)
+	},
+	# Andar 2: Oficina de Física / Cobre Aquecido / Forja / Eletromagnetismo
+	2: {
+		"footer": Color(0.12, 0.07, 0.05, 0.98), # Cobre escuro / Marrom forja industrial
+		"question_bg": Color(0.19, 0.11, 0.08, 1.0), # Placa de cobre/ferro forjado
+		"question_border": Color(0.95, 0.52, 0.16, 1.0), # Friso de cobre polido / Âmbar da forja (harmoniza com o TEMPO)
+		"btn_bg": Color(0.15, 0.09, 0.07, 0.92), # Bronze escuro
+		"btn_border": Color(0.55, 0.32, 0.16, 0.90), # Borda de bronze oxidado
+		"btn_hover_bg": Color(0.28, 0.16, 0.10, 0.98), # Cobre aquecido sob corrente
+		"btn_hover_border": Color(0.15, 0.95, 1.0, 1.0), # ⚡ Arco Voltaico Cyan Elétrico (harmoniza com as lâmpadas azuis)
+		"btn_hover_font": Color(1.0, 1.0, 1.0, 1.0),
+		"btn_pressed_bg": Color(0.10, 0.06, 0.04, 1.0),
+		"btn_correct_bg": Color(0.04, 0.34, 0.28, 0.98), # ⚡ Pulso de Laser Cyan / Sobrecarga Estabilizada
+		"btn_correct_border": Color(0.15, 1.0, 0.88, 1.0), # Neon de Alta Voltagem
+		"btn_wrong_bg": Color(0.44, 0.10, 0.06, 0.98), # Curto-circuito / Sobreaquecimento
+		"btn_wrong_border": Color(1.0, 0.35, 0.12, 1.0),
+		"btn_dimmed_bg": Color(0.08, 0.05, 0.04, 0.65),
+		"btn_dimmed_border": Color(0.25, 0.16, 0.10, 0.40)
+	},
+	# Andar 3: Estufa de Biologia / Botânica / Pólen Solar & Floração Viva
+	3: {
+		"footer": Color(0.03, 0.08, 0.04, 0.98),
+		"question_bg": Color(0.06, 0.15, 0.08, 1.0),
+		"question_border": Color(0.30, 0.85, 0.30, 1.0),
+		"btn_bg": Color(0.06, 0.14, 0.08, 0.92),
+		"btn_border": Color(0.22, 0.46, 0.24, 0.90),
+		"btn_hover_bg": Color(0.22, 0.19, 0.05, 0.98), # 🌻 Pólen Solar Dourado (Alto Contraste)
+		"btn_hover_border": Color(1.0, 0.84, 0.18, 1.0), # Âmbar Radiante (Não funde com o fundo verde!)
+		"btn_hover_font": Color(1.0, 1.0, 1.0, 1.0),
+		"btn_pressed_bg": Color(0.14, 0.11, 0.03, 1.0),
+		"btn_correct_bg": Color(0.08, 0.42, 0.18, 0.98), # Floração Radiante
+		"btn_correct_border": Color(0.98, 0.88, 0.20, 1.0), # Borda Dourada Solar brilhante
+		"btn_wrong_bg": Color(0.42, 0.08, 0.08, 0.98), # Esporo tóxico / Corrupção
+		"btn_wrong_border": Color(1.0, 0.25, 0.25, 1.0),
+		"btn_dimmed_bg": Color(0.03, 0.07, 0.04, 0.65),
+		"btn_dimmed_border": Color(0.14, 0.24, 0.15, 0.40)
+	}
+}
+
+var _tema_atual: Dictionary = {}
+
 func configurar_fundo(andar_id: int) -> void:
-	var tex: Texture2D = FUNDO_QUIMICA
+	# Fallback inteligente se andar_id <= 0: detecta pelo caminho da cena ou masmorra
+	if andar_id <= 0:
+		var c_path = ""
+		if get_tree() and get_tree().current_scene:
+			c_path = get_tree().current_scene.scene_file_path.to_lower()
+		if "biologia" in c_path or "estufa" in c_path:
+			andar_id = 3
+		elif "fisica" in c_path or "física" in c_path or "oficina" in c_path:
+			andar_id = 2
+		else:
+			andar_id = 1
+
 	match andar_id:
 		1:
-			tex = FUNDO_QUIMICA
+			_fundo_frames_ativos = FRAMES_QUIMICA
 		2:
-			tex = FUNDO_FISICA
+			_fundo_frames_ativos = FRAMES_FISICA
 		3:
-			tex = FUNDO_BIOLOGIA
+			_fundo_frames_ativos = FRAMES_BIOLOGIA
 		_:
-			tex = FUNDO_QUIMICA
-	if has_node("Control/BackgroundMockup"):
-		$Control/BackgroundMockup.texture = tex
+			_fundo_frames_ativos = FRAMES_QUIMICA
+
+	_fundo_frame_idx = 0
+	_fundo_tempo_acumulado = 0.0
+
+	if has_node("Control/BackgroundMockup") and _fundo_frames_ativos.size() > 0:
+		$Control/BackgroundMockup.texture = _fundo_frames_ativos[0]
+		
+	_aplicar_tema_questoes(andar_id)
+
+func _aplicar_estilo_botao_padrao(btn: Button) -> void:
+	if not btn or not is_instance_valid(btn):
+		return
+	var tema = _tema_atual if not _tema_atual.is_empty() else CORES_TEMAS[1]
+	
+	var sb_norm = StyleBoxFlat.new()
+	sb_norm.bg_color = tema["btn_bg"]
+	sb_norm.border_color = tema["btn_border"]
+	sb_norm.set_border_width_all(2)
+	sb_norm.set_corner_radius_all(6)
+	sb_norm.content_margin_top = 8
+	sb_norm.content_margin_bottom = 8
+	sb_norm.content_margin_left = 12
+	sb_norm.content_margin_right = 12
+	
+	var sb_hov = StyleBoxFlat.new()
+	sb_hov.bg_color = tema["btn_hover_bg"]
+	sb_hov.border_color = tema["btn_hover_border"]
+	sb_hov.set_border_width_all(3)
+	sb_hov.set_corner_radius_all(6)
+	sb_hov.content_margin_top = 8
+	sb_hov.content_margin_bottom = 8
+	sb_hov.content_margin_left = 12
+	sb_hov.content_margin_right = 12
+	
+	var sb_press = StyleBoxFlat.new()
+	sb_press.bg_color = tema["btn_pressed_bg"]
+	sb_press.border_color = tema["btn_hover_border"]
+	sb_press.set_border_width_all(3)
+	sb_press.set_corner_radius_all(6)
+	sb_press.content_margin_top = 8
+	sb_press.content_margin_bottom = 8
+	sb_press.content_margin_left = 12
+	sb_press.content_margin_right = 12
+	
+	var sb_dis = sb_norm.duplicate()
+	
+	btn.add_theme_stylebox_override("normal", sb_norm)
+	btn.add_theme_stylebox_override("hover", sb_hov)
+	btn.add_theme_stylebox_override("focus", sb_hov)
+	btn.add_theme_stylebox_override("pressed", sb_press)
+	btn.add_theme_stylebox_override("disabled", sb_dis)
+	
+	# Tipografia sempre em alto contraste com contorno nítido
+	btn.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+	btn.add_theme_color_override("font_hover_color", tema.get("btn_hover_font", Color(1.0, 1.0, 1.0, 1.0)))
+	btn.add_theme_color_override("font_focus_color", tema.get("btn_hover_font", Color(1.0, 1.0, 1.0, 1.0)))
+	btn.add_theme_color_override("font_pressed_color", Color(1.0, 1.0, 1.0, 1.0))
+	btn.add_theme_color_override("font_disabled_color", Color(1.0, 1.0, 1.0, 1.0))
+	btn.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	btn.add_theme_constant_override("outline_size", 3)
+
+func _aplicar_tema_questoes(andar_id: int) -> void:
+	var tema = CORES_TEMAS.get(andar_id, CORES_TEMAS[1])
+	_tema_atual = tema
+	
+	# 1. Fundo geral do rodapé (FooterColor)
+	var footer = get_node_or_null("Control/FooterColor") as ColorRect
+	if footer:
+		footer.color = tema["footer"]
+		
+	# 2. Painel interno da questão
+	var q_bg = get_node_or_null("Control/FooterColor/MarginContainer/VBoxContainer/QuestionPanel/ColorRect") as ColorRect
+	if q_bg:
+		q_bg.color = tema["question_bg"]
+		
+	# 3. Borda do painel da questão
+	var q_border = get_node_or_null("Control/FooterColor/MarginContainer/VBoxContainer/QuestionPanel/ColorRect/BordaAzul") as ColorRect
+	if q_border:
+		q_border.color = tema["question_border"]
+		
+	# 4. Texto da pergunta com contorno nítido
+	if label_pergunta:
+		label_pergunta.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
+		label_pergunta.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+		label_pergunta.add_theme_constant_override("outline_size", 3)
+		
+	# 5. Botões de alternativas temáticos
+	for btn in _botoes:
+		if btn and is_instance_valid(btn):
+			_aplicar_estilo_botao_padrao(btn)
 
 func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 	if frames and $Control/SpriteMonstro/AnimatedSprite2D:
@@ -144,6 +336,15 @@ func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 		)
 
 func _process(delta: float) -> void:
+	# Animação contínua do cenário de fundo da batalha
+	if self.visible and _fundo_frames_ativos.size() > 1:
+		_fundo_tempo_acumulado += delta
+		if _fundo_tempo_acumulado >= _FUNDO_INTERVALO:
+			_fundo_tempo_acumulado = fmod(_fundo_tempo_acumulado, _FUNDO_INTERVALO)
+			_fundo_frame_idx = (_fundo_frame_idx + 1) % _fundo_frames_ativos.size()
+			if has_node("Control/BackgroundMockup"):
+				$Control/BackgroundMockup.texture = _fundo_frames_ativos[_fundo_frame_idx]
+
 	if self.visible and tempo_rodando:
 		tempo_restante -= delta
 		if tempo_restante <= 0:
@@ -184,22 +385,24 @@ func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	_eh_pergunta_vf = eh_vf
 		
 	for i in range(_botoes.size()):
-		_botoes[i].modulate = Color.WHITE
+		var b = _botoes[i]
+		b.scale = Vector2.ONE
+		b.pivot_offset = b.size * 0.5
+		b.modulate = Color.WHITE
+		_aplicar_estilo_botao_padrao(b)
 		if i < alternativas.size():
 			if eh_vf:
 				if i == 0:
-					_botoes[i].text = "[ V ]  VERDADEIRO"
-					_botoes[i].modulate = Color(0.7, 1.25, 0.8) # Verde esmeralda vivo
+					b.text = "[ V ]  VERDADEIRO"
 				elif i == 1:
-					_botoes[i].text = "[ F ]  FALSO"
-					_botoes[i].modulate = Color(1.25, 0.7, 0.7) # Vermelho rubi vivo
+					b.text = "[ F ]  FALSO"
 			else:
 				var prefix = ["A) ", "B) ", "C) ", "D) ", "E) "][i]
-				_botoes[i].text = prefix + str(alternativas[i]).replace('\\"', '"').replace("\\'", "'")
-			_botoes[i].show()
-			_botoes[i].disabled = false
+				b.text = prefix + str(alternativas[i]).replace('\\"', '"').replace("\\'", "'")
+			b.show()
+			b.disabled = false
 		else:
-			_botoes[i].hide()
+			b.hide()
 
 func _configurar_ghost_bars() -> void:
 	if health_player_fill and health_player:
@@ -295,16 +498,64 @@ func mostrar_resultado(acertou: bool, idx_correto: int, valor: int, dados_pergun
 	if _tween_botoes:
 		_tween_botoes.kill()
 		
-	_tween_botoes = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel(true)
+	var tema = _tema_atual if not _tema_atual.is_empty() else CORES_TEMAS[1]
 	
-	if idx_correto >= 0 and idx_correto < _botoes.size():
-		# Pinta instantaneamente e segura a cor (ou anima bem rápido)
-		_botoes[idx_correto].modulate = Color(0.2, 0.8, 0.2)
-		_tween_botoes.tween_property(_botoes[idx_correto], "modulate", Color(0.2, 0.8, 0.2), 1.2)
-		
-	if not acertou and _ultimo_botao_clicado >= 0 and _ultimo_botao_clicado < _botoes.size():
-		_botoes[_ultimo_botao_clicado].modulate = Color(0.9, 0.2, 0.2)
-		_tween_botoes.tween_property(_botoes[_ultimo_botao_clicado], "modulate", Color(0.9, 0.2, 0.2), 1.2)
+	# Estilo temático de acerto (alto contraste e tipografia branca pura)
+	var sb_correto = StyleBoxFlat.new()
+	sb_correto.bg_color = tema.get("btn_correct_bg", Color(0.06, 0.38, 0.20, 0.98))
+	sb_correto.border_color = tema.get("btn_correct_border", Color(0.20, 1.0, 0.55, 1.0))
+	sb_correto.set_border_width_all(3)
+	sb_correto.set_corner_radius_all(6)
+	sb_correto.content_margin_top = 8
+	sb_correto.content_margin_bottom = 8
+	sb_correto.content_margin_left = 12
+	sb_correto.content_margin_right = 12
+	
+	# Estilo temático de erro
+	var sb_errado = StyleBoxFlat.new()
+	sb_errado.bg_color = tema.get("btn_wrong_bg", Color(0.42, 0.08, 0.10, 0.98))
+	sb_errado.border_color = tema.get("btn_wrong_border", Color(1.0, 0.25, 0.25, 1.0))
+	sb_errado.set_border_width_all(3)
+	sb_errado.set_corner_radius_all(6)
+	sb_errado.content_margin_top = 8
+	sb_errado.content_margin_bottom = 8
+	sb_errado.content_margin_left = 12
+	sb_errado.content_margin_right = 12
+
+	# Estilo suavizado para as opções não selecionadas
+	var sb_apagado = StyleBoxFlat.new()
+	sb_apagado.bg_color = tema.get("btn_dimmed_bg", Color(0.04, 0.06, 0.10, 0.65))
+	sb_apagado.border_color = tema.get("btn_dimmed_border", Color(0.18, 0.22, 0.30, 0.40))
+	sb_apagado.set_border_width_all(1)
+	sb_apagado.set_corner_radius_all(6)
+	sb_apagado.content_margin_top = 8
+	sb_apagado.content_margin_bottom = 8
+	sb_apagado.content_margin_left = 12
+	sb_apagado.content_margin_right = 12
+
+	for i in range(_botoes.size()):
+		var b = _botoes[i]
+		if not is_instance_valid(b):
+			continue
+		b.modulate = Color.WHITE
+		if i == idx_correto:
+			b.add_theme_stylebox_override("disabled", sb_correto)
+			b.add_theme_color_override("font_disabled_color", Color(1.0, 1.0, 1.0, 1.0))
+			b.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
+			b.add_theme_constant_override("outline_size", 3)
+			# Micro-animação suave de escala para celebração do acerto
+			b.pivot_offset = b.size * 0.5
+			var tw_bump = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw_bump.tween_property(b, "scale", Vector2(1.035, 1.035), 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw_bump.tween_property(b, "scale", Vector2(1.0, 1.0), 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		elif not acertou and i == _ultimo_botao_clicado:
+			b.add_theme_stylebox_override("disabled", sb_errado)
+			b.add_theme_color_override("font_disabled_color", Color(1.0, 1.0, 1.0, 1.0))
+			b.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
+			b.add_theme_constant_override("outline_size", 3)
+		else:
+			b.add_theme_stylebox_override("disabled", sb_apagado)
+			b.add_theme_color_override("font_disabled_color", Color(0.70, 0.70, 0.70, 0.50))
 		
 	if acertou:
 		# Salto de conjuração do mago para a frente
@@ -496,7 +747,7 @@ func _mostrar_texto_flutuante_dano_jogador(qtd: int, por_tempo: bool = false) ->
 	$Control.add_child(lbl)
 	
 	var pos_mago = $Control.get_node_or_null("PosicaoMago")
-	var topo_mago = (pos_mago.position + Vector2(0.0, -90.0)) if pos_mago else Vector2(260.0, 300.0)
+	var topo_mago = Vector2(pos_mago.position.x - 20.0, 205.0) if pos_mago else Vector2(240.0, 205.0)
 	var spawn_pos = topo_mago - Vector2(largura_est * 0.5, 15.0) + Vector2(randf_range(-10.0, 10.0), randf_range(-4.0, 4.0))
 	lbl.position = spawn_pos
 	
@@ -641,12 +892,12 @@ func _exibir_feedback_erro(dados: Dictionary, idx_correto: int) -> void:
 	painel.custom_minimum_size = Vector2(0, 120)
 	
 	var sb = StyleBoxFlat.new()
-	sb.bg_color = Color(0.07, 0.08, 0.15, 0.98) # Azul/grafite escuro
+	sb.bg_color = _tema_atual.get("footer", Color(0.07, 0.08, 0.15, 0.98))
 	sb.border_width_left = 2
 	sb.border_width_top = 2
 	sb.border_width_right = 2
 	sb.border_width_bottom = 2
-	sb.border_color = Color(0.95, 0.72, 0.25, 1.0) # Borda dourada acadêmica
+	sb.border_color = _tema_atual.get("question_border", Color(0.95, 0.72, 0.25, 1.0))
 	sb.corner_radius_top_left = 8
 	sb.corner_radius_top_right = 8
 	sb.corner_radius_bottom_left = 8
@@ -683,24 +934,24 @@ func _exibir_feedback_erro(dados: Dictionary, idx_correto: int) -> void:
 	btn_avancar.focus_mode = Control.FOCUS_ALL
 	
 	var sb_btn_normal = StyleBoxFlat.new()
-	sb_btn_normal.bg_color = Color(0.18, 0.24, 0.38, 0.95)
-	sb_btn_normal.border_color = Color(0.4, 0.75, 1.0)
+	sb_btn_normal.bg_color = _tema_atual.get("btn_bg", Color(0.18, 0.24, 0.38, 0.95))
+	sb_btn_normal.border_color = _tema_atual.get("btn_border", Color(0.4, 0.75, 1.0))
 	sb_btn_normal.set_border_width_all(1)
 	sb_btn_normal.set_corner_radius_all(4)
 	sb_btn_normal.content_margin_left = 10
 	sb_btn_normal.content_margin_right = 10
 	
 	var sb_btn_hover = StyleBoxFlat.new()
-	sb_btn_hover.bg_color = Color(0.26, 0.40, 0.65, 1.0)
-	sb_btn_hover.border_color = Color(0.7, 0.9, 1.0)
+	sb_btn_hover.bg_color = _tema_atual.get("btn_hover_bg", Color(0.26, 0.40, 0.65, 1.0))
+	sb_btn_hover.border_color = _tema_atual.get("btn_hover_border", Color(0.7, 0.9, 1.0))
 	sb_btn_hover.set_border_width_all(1)
 	sb_btn_hover.set_corner_radius_all(4)
 	sb_btn_hover.content_margin_left = 10
 	sb_btn_hover.content_margin_right = 10
 	
 	var sb_btn_pressed = StyleBoxFlat.new()
-	sb_btn_pressed.bg_color = Color(0.12, 0.16, 0.26, 1.0)
-	sb_btn_pressed.border_color = Color(0.3, 0.6, 0.8)
+	sb_btn_pressed.bg_color = _tema_atual.get("btn_pressed_bg", Color(0.12, 0.16, 0.26, 1.0))
+	sb_btn_pressed.border_color = _tema_atual.get("btn_hover_border", Color(0.3, 0.6, 0.8))
 	sb_btn_pressed.set_border_width_all(1)
 	sb_btn_pressed.set_corner_radius_all(4)
 	sb_btn_pressed.content_margin_left = 10

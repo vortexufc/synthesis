@@ -2,7 +2,7 @@ extends CanvasLayer
 
 @onready var fill: NinePatchRect = $Control/HealthBarContainer/HealthBarFill
 @onready var ghost: NinePatchRect = $Control/HealthBarContainer/HealthBarGhost
-@onready var text_label: Label = $Control/HealthText
+@onready var text_label: Label = get_node_or_null("Control/HealthBarContainer/HealthText") if has_node("Control/HealthBarContainer/HealthText") else get_node_or_null("Control/HealthText")
 @onready var heart_icon: TextureRect = $Control/HeartIcon
 @onready var health_container: Control = $Control/HealthBarContainer
 
@@ -57,9 +57,9 @@ func _ready() -> void:
 		
 	if _font_pixel and text_label:
 		text_label.add_theme_font_override("font", _font_pixel)
-		text_label.add_theme_font_size_override("font_size", 16)
+		text_label.add_theme_font_size_override("font_size", 14)
 		text_label.add_theme_color_override("font_outline_color", Color(0.04, 0.04, 0.08, 0.95))
-		text_label.add_theme_constant_override("outline_size", 2)
+		text_label.add_theme_constant_override("outline_size", 3)
 		
 	_criar_vinheta_critica()
 	_criar_particulas_cura()
@@ -550,7 +550,7 @@ func _criar_indicador_dash() -> void:
 	var container = PanelContainer.new()
 	container.name = "DashContainer"
 	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	container.position = Vector2(58, 49)
+	container.position = Vector2(58, 50)
 	container.custom_minimum_size = Vector2(130, 15)
 	
 	var sb_bg = StyleBoxFlat.new()

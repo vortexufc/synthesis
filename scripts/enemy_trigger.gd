@@ -170,9 +170,9 @@ func _on_body_entered(body: Node2D) -> void:
 	var scene_low = get_tree().current_scene.scene_file_path.to_lower() if get_tree().current_scene else ""
 	if node_pai and "eh_boss" in node_pai and node_pai.eh_boss:
 		eh_boss_final = true
-	elif "boss" in id_low or "roxo" in id_low or id_low == "robo_g" or "wizard" in id_low:
+	elif "boss" in id_low or "roxo" in id_low or id_low == "robo_g" or "carnivora" in id_low or "wizard" in id_low:
 		eh_boss_final = true
-	elif "boss" in scene_low or "fisica12" in scene_low or "física12" in scene_low:
+	elif "boss" in scene_low:
 		eh_boss_final = true
 
 	var vida_val: float = 100.0

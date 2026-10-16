@@ -1,0 +1,46 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://cxr4cjll0xvj7"]
+
+[ext_resource type="Texture2D" uid="uid://dml4ed26rhgq3" path="res://assets/sprites/Characters/Flor/Florzinha.png" id="1_tex"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a1"]
+atlas = ExtResource("1_tex")
+region = Rect2(0, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a2"]
+atlas = ExtResource("1_tex")
+region = Rect2(64, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a3"]
+atlas = ExtResource("1_tex")
+region = Rect2(128, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a4"]
+atlas = ExtResource("1_tex")
+region = Rect2(192, 192, 64, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a5"]
+atlas = ExtResource("1_tex")
+region = Rect2(256, 192, 64, 96)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a5")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 3.0
+}]

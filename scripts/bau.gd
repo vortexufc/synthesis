@@ -413,7 +413,11 @@ func _executar_loot_pop(total_moedas: int) -> void:
 		if is_inside_tree() and get_world_2d():
 			var space = get_world_2d().direct_space_state
 			if space:
-				var q = PhysicsRayQueryParameters2D.create(global_position, pos_pouso, 1)
+				var exc: Array[RID] = []
+				var corpo = get_node_or_null("CorpoFisico")
+				if corpo and corpo is CollisionObject2D:
+					exc.append(corpo.get_rid())
+				var q = PhysicsRayQueryParameters2D.create(global_position, pos_pouso, 1, exc)
 				var hit = space.intersect_ray(q)
 				if hit and hit.has("position"):
 					pos_pouso = hit["position"] - offset_pouso.normalized() * 12.0

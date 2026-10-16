@@ -36,7 +36,7 @@ func _ready() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if ja_ativado:
 		return
-	if not body.name == "Player":
+	if not body.name == "Player" and not body.is_in_group("player"):
 		return
 
 	ja_ativado = true
