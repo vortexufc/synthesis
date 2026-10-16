@@ -18,6 +18,15 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_configurar_fontes_emoji()
 	Engine.max_fps = 60
+	_atualizar_icone_mago()
+
+func _atualizar_icone_mago() -> void:
+	if ResourceLoader.exists("res://assets/branding/icon.png"):
+		var tex = load("res://assets/branding/icon.png") as Texture2D
+		if tex:
+			var img: Image = tex.get_image()
+			if img:
+				DisplayServer.set_icon(img)
 
 func _configurar_fontes_emoji() -> void:
 	var emoji_font = load("res://assets/fonts/seguiemj.ttf") as FontFile
