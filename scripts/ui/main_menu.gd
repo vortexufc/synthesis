@@ -59,6 +59,22 @@ func _ready() -> void:
 	# Se já jogou antes, exibe CONTINUAR e NOVO JOGO. Se for primeira vez, exibe NOVO JOGO.
 	var ps = get_node_or_null("/root/PlayerStats")
 	var ja_jogou = ps and ps.tem_progresso_salvo()
+	var db = get_node_or_null("/root/DatabaseManager")
+	var eh_admin = db and db.is_admin
+	
+	# Calibra altura e espaçamento quando há 7 botões (admin + continuar) para garantir folga elegante com o rodapé
+	var precisa_compactar = (ja_jogou and eh_admin)
+	var btn_height = 38 if precisa_compactar else 42
+	var sep_vbox = 5 if precisa_compactar else 7
+	var vbox = $MarginContainer/VBoxButtons
+	vbox.add_theme_constant_override("separation", sep_vbox)
+	
+	for b in [btn_jogar, btn_ranking, btn_clas, btn_config, btn_creditos]:
+		if b:
+			b.custom_minimum_size = Vector2(0, btn_height)
+			if precisa_compactar:
+				b.add_theme_font_size_override("font_size", 18)
+
 	if ja_jogou:
 		btn_jogar.text = "CONTINUAR"
 		btn_jogar.pressed.connect(_on_btn_continuar_pressed)
@@ -66,24 +82,23 @@ func _ready() -> void:
 		var btn_novo = btn_jogar.duplicate()
 		btn_novo.name = "BtnNovoJogo"
 		btn_novo.text = "NOVO JOGO"
-		btn_novo.custom_minimum_size = Vector2(0, 44)
-		btn_novo.add_theme_font_size_override("font_size", 19)
+		btn_novo.custom_minimum_size = Vector2(0, btn_height)
+		if precisa_compactar:
+			btn_novo.add_theme_font_size_override("font_size", 18)
 		btn_novo.pressed.connect(_on_btn_novo_jogo_pressed)
-		var vbox = $MarginContainer/VBoxButtons
 		vbox.add_child(btn_novo)
 		vbox.move_child(btn_novo, 1)
 	else:
 		btn_jogar.text = "NOVO JOGO"
 		btn_jogar.pressed.connect(_on_btn_novo_jogo_pressed)
 
-	var db = get_node_or_null("/root/DatabaseManager")
-	if db and db.is_admin:
+	if eh_admin:
 		var btn_admin = btn_jogar.duplicate()
 		btn_admin.text = "PAINEL ADMIN"
-		btn_admin.custom_minimum_size = Vector2(0, 44)
-		btn_admin.add_theme_font_size_override("font_size", 19)
+		btn_admin.custom_minimum_size = Vector2(0, btn_height)
+		if precisa_compactar:
+			btn_admin.add_theme_font_size_override("font_size", 18)
 		btn_admin.pressed.connect(func(): _mudar_cena("res://scenes/ui/painel_admin.tscn"))
-		var vbox = $MarginContainer/VBoxButtons
 		vbox.add_child(btn_admin)
 		vbox.move_child(btn_admin, 0) # Coloca no topo
 		

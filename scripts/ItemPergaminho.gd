@@ -320,6 +320,7 @@ func coletar() -> void:
 	# salva no grimorio
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.adicionar_pergaminho(titulo_pergaminho, paginas)
+		PlayerStats.consultas_grimorio += 1
 		if not is_drop_dinamico and id_unico != "":
 			PlayerStats.registrar_pergaminho_coletado(id_unico)
 

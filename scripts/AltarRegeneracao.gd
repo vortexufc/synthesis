@@ -129,8 +129,11 @@ func _exibir_prompt_tela() -> void:
 	panel_prompt.add_theme_stylebox_override("panel", style)
 	
 	label_prompt = Label.new()
-	var hp_atual = PlayerStats.vida_atual_jogador if get_node_or_null("/root/PlayerStats") else 100.0
-	var hp_max = PlayerStats.vida_maxima_jogador if get_node_or_null("/root/PlayerStats") else 100.0
+	var hp_atual: float = 100.0
+	var hp_max: float = 100.0
+	if get_node_or_null("/root/PlayerStats"):
+		hp_atual = PlayerStats.vida_atual_jogador
+		hp_max = PlayerStats.vida_maxima_jogador
 	
 	if hp_atual < hp_max:
 		label_prompt.text = "Pressione [F] para Orar e Restaurar sua Vida"

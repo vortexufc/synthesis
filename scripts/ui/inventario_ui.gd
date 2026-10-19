@@ -977,6 +977,10 @@ func _on_tab_changed(_tab_idx: int) -> void:
 	var am = get_node_or_null("/root/AudioManager")
 	if am:
 		am.play_sfx("ui-3")
+	if _tab_idx == 2:
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps:
+			ps.consultas_grimorio += 1
 	_limpar_detalhes()
 	_atualizar_capacidade_label()
 

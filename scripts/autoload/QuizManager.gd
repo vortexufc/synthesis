@@ -20,6 +20,7 @@ var _inimigo_atual_id: String = ""
 var _nivel_dificuldade_alvo: int = 0
 var _eh_chefe_atual: bool = false
 var _furia_chefe_executada: bool = false
+var _tempo_inicio_pergunta: float = 0.0
 
 var sprite_frames_inimigos = {
 	"slime_p": preload("res://assets/sprites/Sprite Frames/slime_p.tres"),
@@ -597,6 +598,7 @@ func _nova_rodada() -> void:
 	print("rodada: ", _rodada_atual, " de ", _num_questoes)
 	pergunta_atual = get_random_question()
 	if pergunta_atual != null and is_instance_valid(ui_instancia):
+		_tempo_inicio_pergunta = Time.get_ticks_msec() / 1000.0
 		ui_instancia.atualizar_pergunta(pergunta_atual["question"], pergunta_atual["options"])
 
 func fechar_ui_batalha() -> void:
@@ -614,16 +616,50 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	var acertou = (indice_botao == pergunta_atual["answer"])
 	var dano_final = 0
 	
-	# manda a resposta pro painel admin
+	# Métrica A: Tempo de Resposta Gasto
+	var tempo_atual = Time.get_ticks_msec() / 1000.0
+	var tempo_gasto = maxf(0.1, tempo_atual - _tempo_inicio_pergunta) if _tempo_inicio_pergunta > 0.0 else maxf(0.1, _duracao_batalha - tempo_sobrando)
+	
+	# Métrica B: Alternativa Marcada e Distratores
+	var letras = ["A", "B", "C", "D"]
+	var letra_marcada = letras[indice_botao] if indice_botao >= 0 and indice_botao < letras.size() else str(indice_botao + 1)
+	var letra_correta = letras[pergunta_atual.get("answer", 0)] if pergunta_atual.get("answer", 0) >= 0 and pergunta_atual.get("answer", 0) < letras.size() else "A"
+	
+	var texto_opcao_marcada = ""
+	var opts = pergunta_atual.get("options", [])
+	if indice_botao >= 0 and indice_botao < opts.size():
+		texto_opcao_marcada = str(opts[indice_botao])
+		
+	# Métrica C & D: Gamificação (Clã), Consultas ao Grimório e Sessão da Escola
+	var cla_aluno = DatabaseManager.user_cla if DatabaseManager.user_cla != "" else "Nenhum"
+	var escola_id = DatabaseManager.escola_ativa_id
+	var escola_nome = DatabaseManager.escola_ativa_nome
+	var consultas = PlayerStats.consultas_grimorio if get_node_or_null("/root/PlayerStats") else 0
+	
+	# manda a resposta pro painel admin e salva no analytics de pesquisa
 	if pergunta_atual.has("id"):
-		var data_resp = {
+		var data_resp_completo = {
 			"pergunta_id": int(pergunta_atual["id"]),
+			"enunciado": str(pergunta_atual.get("question", "")),
 			"acertou": acertou,
 			"andar_id": int(pergunta_atual.get("andar_id", 1)),
-			"aluno_nick": DatabaseManager.user_nick
+			"aluno_nick": DatabaseManager.user_nick if DatabaseManager.user_nick != "" else "Mago Anônimo",
+			"cla_aluno": cla_aluno,
+			"escola_id": escola_id,
+			"escola_nome": escola_nome,
+			"tempo_resposta": snappedf(tempo_gasto, 0.1),
+			"alternativa_marcada": letra_marcada,
+			"alternativa_correta": letra_correta,
+			"texto_marcado": texto_opcao_marcada,
+			"consultas_grimorio": consultas,
+			"timestamp": Time.get_datetime_string_from_system()
 		}
-		# requisicao em background
-		DatabaseManager.request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, data_resp)
+		
+		# 1. Registro analítico local (garante persistência de dados mesmo offline)
+		DatabaseManager.registrar_resposta_analytics(data_resp_completo)
+		
+		# 2. Envio para o Supabase com fallback seguro
+		DatabaseManager.enviar_resposta_supabase(data_resp_completo)
 	
 	if acertou:
 		var rapidez = clamp(tempo_sobrando / _duracao_batalha, 0.0, 1.0)

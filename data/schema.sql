@@ -58,3 +58,56 @@ CREATE POLICY "Leitura publica do ranking" ON RankingGeral FOR SELECT USING (tru
 -- Apenas usuários autenticados podem inserir/atualizar
 CREATE POLICY "Insert autenticado" ON RankingGeral FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 CREATE POLICY "Update proprio player" ON RankingGeral FOR UPDATE USING (player_name = auth.jwt() ->> 'nick');
+
+-- ===================================================
+-- RESPOSTAS E ANALYTICS EDUCACIONAIS
+-- ===================================================
+
+CREATE TABLE IF NOT EXISTS respostas (
+    id                  BIGSERIAL PRIMARY KEY,
+    pergunta_id         INT NOT NULL,
+    acertou             BOOLEAN NOT NULL,
+    andar_id            INT NOT NULL DEFAULT 1,
+    aluno_nick          VARCHAR(255) NOT NULL,
+    escola_id           VARCHAR(100) DEFAULT 'geral',
+    tempo_resposta      FLOAT DEFAULT 0.0,
+    alternativa_marcada VARCHAR(10) DEFAULT '',
+    cla_aluno           VARCHAR(100) DEFAULT 'Nenhum',
+    consultas_grimorio  INT DEFAULT 0,
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Migração rápida caso a tabela respostas já exista no Supabase:
+-- ALTER TABLE respostas ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';
+-- ALTER TABLE respostas ADD COLUMN IF NOT EXISTS tempo_resposta FLOAT DEFAULT 0.0;
+-- ALTER TABLE respostas ADD COLUMN IF NOT EXISTS alternativa_marcada VARCHAR(10) DEFAULT '';
+-- ALTER TABLE respostas ADD COLUMN IF NOT EXISTS cla_aluno VARCHAR(100) DEFAULT 'Nenhum';
+-- ALTER TABLE respostas ADD COLUMN IF NOT EXISTS consultas_grimorio INT DEFAULT 0;
+
+-- ===================================================
+-- GESTÃO DE SESSÕES / ESCOLAS GLOBAIS (SINCRONIZAÇÃO EM NUVEM)
+-- ===================================================
+
+CREATE TABLE IF NOT EXISTS sessoes_escolas (
+    id             VARCHAR(100) PRIMARY KEY,
+    nome           VARCHAR(255) NOT NULL,
+    ativa          BOOLEAN NOT NULL DEFAULT false,
+    data_criacao   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    data_ativacao  TIMESTAMP WITH TIME ZONE
+);
+
+-- Habilita RLS e permissões públicas
+ALTER TABLE sessoes_escolas ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Leitura de sessoes" ON sessoes_escolas FOR SELECT USING (true);
+CREATE POLICY "Inserir sessoes" ON sessoes_escolas FOR INSERT WITH CHECK (true);
+CREATE POLICY "Atualizar sessoes" ON sessoes_escolas FOR UPDATE USING (true);
+
+-- Garante que a sessão Geral padrão exista
+INSERT INTO sessoes_escolas (id, nome, ativa)
+VALUES ('geral', 'Geral (Padrão)', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Suporte a escola no ranking geral:
+-- ALTER TABLE RankingGeral ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';
+
+

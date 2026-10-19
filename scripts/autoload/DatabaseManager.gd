@@ -35,14 +35,29 @@ func _ready() -> void:
 	
 	carregar_progresso()
 	print("banco carregado!")
+	
+	# 1. Verifica parâmetro de URL (?turma= ou ?escola=) no navegador Web
+	_verificar_parametro_url_web()
+	
+	# 2. Sincroniza sessão ativa global no Supabase (para clientes Desktop e Web)
+	sincronizar_sessao_global_supabase()
 
 # progresso salvo localmente
 const SAVE_FILE = "user://progresso.json"
+const SESSOES_FILE = "user://sessoes_escolas.json"
+const ANALYTICS_FILE = "user://pesquisa_analytics.json"
+
+var escola_ativa_id: String = "geral"
+var escola_ativa_nome: String = "Geral (Padrão)"
+
+signal sessao_escola_alterada(id_escola: String, nome_escola: String)
 
 func salvar_progresso() -> void:
 	var file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
 	var data = {
-		"active_dungeon": active_dungeon
+		"active_dungeon": active_dungeon,
+		"escola_ativa_id": escola_ativa_id,
+		"escola_ativa_nome": escola_ativa_nome
 	}
 	file.store_string(JSON.stringify(data))
 	file.close()
@@ -56,12 +71,252 @@ func carregar_progresso() -> void:
 		var data = json.data
 		if data is Dictionary:
 			active_dungeon = data.get("active_dungeon", "")
+			escola_ativa_id = data.get("escola_ativa_id", "geral")
+			escola_ativa_nome = data.get("escola_ativa_nome", "Geral (Padrão)")
 	file.close()
 
 func resetar_expedicao_ativa() -> void:
 	active_dungeon = ""
 	salvar_progresso()
 	print("[DatabaseManager] Expedição ativa resetada com sucesso!")
+
+# --- GESTÃO DE SESSÕES / ESCOLAS (AVALIAÇÃO PEDAGÓGICA) ---
+
+func _verificar_parametro_url_web() -> void:
+	if not OS.has_feature("web"):
+		return
+	if not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	var js_window = JavaScriptBridge.get_interface("window")
+	if js_window and js_window.location and js_window.location.search:
+		var search = str(js_window.location.search)
+		if not search.is_empty():
+			var params = search.trim_prefix("?").split("&")
+			for p in params:
+				var partes = p.split("=")
+				if partes.size() == 2:
+					var chave = partes[0].to_lower()
+					var valor = partes[1].strip_edges()
+					if (chave == "escola" or chave == "turma" or chave == "sessao") and not valor.is_empty():
+						escola_ativa_id = valor.to_lower()
+						escola_ativa_nome = valor.capitalize().replace("_", " ")
+						set_meta("escola_fixada_por_url", true)
+						salvar_progresso()
+						sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+						print("[DatabaseManager] Sessão forçada via URL Web: %s (%s)" % [escola_ativa_nome, escola_ativa_id])
+						return
+
+func sincronizar_sessao_global_supabase() -> void:
+	if has_meta("escola_fixada_por_url"):
+		return
+	var res = await request_async("/rest/v1/sessoes_escolas?ativa=eq.true&select=*&limit=1", HTTPClient.METHOD_GET)
+	if res.get("success", false) and res.get("data") is Array and not res["data"].is_empty():
+		var row = res["data"][0]
+		var s_id = str(row.get("id", "geral")).strip_edges()
+		var s_nome = str(row.get("nome", "Geral")).strip_edges()
+		if not s_id.is_empty() and (s_id != escola_ativa_id or s_nome != escola_ativa_nome):
+			escola_ativa_id = s_id
+			escola_ativa_nome = s_nome
+			salvar_progresso()
+			sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+			print("[DatabaseManager] Sessão global sincronizada do Supabase: %s (%s)" % [escola_ativa_nome, escola_ativa_id])
+
+func carregar_sessoes_escolas() -> Array[Dictionary]:
+	var lista: Array[Dictionary] = [
+		{"id": "geral", "nome": "Geral (Padrão / Lançamento)", "data_criacao": "2026-01-01"}
+	]
+	if not FileAccess.file_exists(SESSOES_FILE):
+		return lista
+	var f = FileAccess.open(SESSOES_FILE, FileAccess.READ)
+	if f:
+		var json = JSON.new()
+		if json.parse(f.get_as_text()) == OK and json.data is Array:
+			var carregadas: Array = json.data
+			var ids_existentes = {"geral": true}
+			for item in carregadas:
+				if item is Dictionary and item.has("id") and item.has("nome"):
+					if not ids_existentes.has(item["id"]):
+						lista.append(item)
+						ids_existentes[item["id"]] = true
+		f.close()
+	return lista
+
+func carregar_sessoes_escolas_async() -> Array[Dictionary]:
+	var lista = carregar_sessoes_escolas()
+	var res = await request_async("/rest/v1/sessoes_escolas?select=*&order=created_at.asc", HTTPClient.METHOD_GET)
+	if res.get("success", false) and res.get("data") is Array:
+		var ids_existentes = {}
+		for item in lista:
+			ids_existentes[item["id"]] = true
+		var mudou = false
+		for item in res["data"]:
+			if item is Dictionary and item.has("id") and item.has("nome"):
+				var sid = str(item["id"]).strip_edges()
+				var snome = str(item["nome"]).strip_edges()
+				if not ids_existentes.has(sid):
+					lista.append({
+						"id": sid,
+						"nome": snome,
+						"data_criacao": str(item.get("data_criacao", item.get("created_at", ""))),
+						"ativa": bool(item.get("ativa", false))
+					})
+					ids_existentes[sid] = true
+					mudou = true
+				if bool(item.get("ativa", false)) and not has_meta("escola_fixada_por_url"):
+					if sid != escola_ativa_id:
+						escola_ativa_id = sid
+						escola_ativa_nome = snome
+						salvar_progresso()
+						sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+		if mudou:
+			salvar_sessoes_escolas(lista)
+	return lista
+
+func salvar_sessoes_escolas(sessoes: Array) -> void:
+	var f = FileAccess.open(SESSOES_FILE, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(sessoes, "\t"))
+		f.close()
+
+func adicionar_sessao_escola(nome: String, id_codigo: String = "") -> Dictionary:
+	var sessoes = carregar_sessoes_escolas()
+	var clean_id = id_codigo.strip_edges().to_lower().replace(" ", "_")
+	if clean_id.is_empty():
+		clean_id = "escola_" + str(Time.get_unix_time_from_system())
+		
+	for s in sessoes:
+		if s["id"] == clean_id:
+			return s # Já existe
+			
+	var nova = {
+		"id": clean_id,
+		"nome": nome.strip_edges(),
+		"data_criacao": Time.get_datetime_string_from_system()
+	}
+	sessoes.append(nova)
+	salvar_sessoes_escolas(sessoes)
+	
+	# Propaga criação de fundo para o Supabase
+	_enviar_nova_sessao_supabase(nova)
+	return nova
+
+func adicionar_sessao_escola_async(nome: String, id_codigo: String = "") -> Dictionary:
+	var nova = adicionar_sessao_escola(nome, id_codigo)
+	await _enviar_nova_sessao_supabase(nova)
+	return nova
+
+func _enviar_nova_sessao_supabase(nova_sessao: Dictionary) -> void:
+	await request_async("/rest/v1/sessoes_escolas", HTTPClient.METHOD_POST, {
+		"id": nova_sessao["id"],
+		"nome": nova_sessao["nome"],
+		"ativa": false
+	})
+
+func definir_sessao_ativa(id_codigo: String, nome: String) -> void:
+	escola_ativa_id = id_codigo
+	escola_ativa_nome = nome
+	salvar_progresso()
+	sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+	print("[DatabaseManager] Sessão ativa alterada para: %s (%s)" % [escola_ativa_nome, escola_ativa_id])
+	_propagar_ativacao_sessao_supabase(id_codigo, nome)
+
+func definir_sessao_ativa_async(id_codigo: String, nome: String) -> void:
+	escola_ativa_id = id_codigo
+	escola_ativa_nome = nome
+	salvar_progresso()
+	sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+	print("[DatabaseManager] Sessão ativa alterada para: %s (%s)" % [escola_ativa_nome, escola_ativa_id])
+	await _propagar_ativacao_sessao_supabase(id_codigo, nome)
+
+func _propagar_ativacao_sessao_supabase(id_codigo: String, nome: String) -> void:
+	# 1. Desmarca qualquer sessão ativa anterior
+	await request_async("/rest/v1/sessoes_escolas?ativa=eq.true", HTTPClient.METHOD_PATCH, {"ativa": false})
+	
+	# 2. Marca a sessão alvo como ativa
+	var res_patch = await request_async("/rest/v1/sessoes_escolas?id=eq." + id_codigo.uri_encode(), HTTPClient.METHOD_PATCH, {
+		"ativa": true,
+		"nome": nome,
+		"data_ativacao": Time.get_datetime_string_from_system()
+	})
+	
+	# 3. Se a sessão ainda não existia na nuvem, insere diretamente
+	if not res_patch.get("success", false) or (res_patch.get("data") is Array and res_patch["data"].is_empty()):
+		await request_async("/rest/v1/sessoes_escolas", HTTPClient.METHOD_POST, {
+			"id": id_codigo,
+			"nome": nome,
+			"ativa": true,
+			"data_ativacao": Time.get_datetime_string_from_system()
+		})
+	print("[DatabaseManager] Sessão global propagada no Supabase: %s (%s)" % [nome, id_codigo])
+
+# --- ARMAZENAMENTO E CONSULTA DE ANALYTICS EDUCACIONAIS ---
+
+func registrar_resposta_analytics(dados: Dictionary) -> void:
+	var respostas: Array = []
+	if FileAccess.file_exists(ANALYTICS_FILE):
+		var f_read = FileAccess.open(ANALYTICS_FILE, FileAccess.READ)
+		if f_read:
+			var json = JSON.new()
+			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+				respostas = json.data
+			f_read.close()
+			
+	respostas.append(dados)
+	var f_write = FileAccess.open(ANALYTICS_FILE, FileAccess.WRITE)
+	if f_write:
+		f_write.store_string(JSON.stringify(respostas, "\t"))
+		f_write.close()
+
+func obter_respostas_analytics(filtro_escola_id: String = "") -> Array:
+	if not FileAccess.file_exists(ANALYTICS_FILE):
+		return []
+	var f = FileAccess.open(ANALYTICS_FILE, FileAccess.READ)
+	if not f: return []
+	var json = JSON.new()
+	var arr: Array = []
+	if json.parse(f.get_as_text()) == OK and json.data is Array:
+		var todas: Array = json.data
+		if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
+			arr = todas
+		else:
+			for r in todas:
+				if r is Dictionary and r.get("escola_id", "geral") == filtro_escola_id:
+					arr.append(r)
+	f.close()
+	return arr
+
+func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
+	# Envia payload enriquecido para o Supabase
+	var payload_servidor = {
+		"pergunta_id": data_resp_completo.get("pergunta_id", 0),
+		"acertou": data_resp_completo.get("acertou", false),
+		"andar_id": data_resp_completo.get("andar_id", 1),
+		"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+	}
+	
+	# Se a tabela tiver colunas extras adicionadas via migração SQL
+	if data_resp_completo.has("tempo_resposta"):
+		payload_servidor["tempo_resposta"] = data_resp_completo["tempo_resposta"]
+	if data_resp_completo.has("escola_id"):
+		payload_servidor["escola_id"] = data_resp_completo["escola_id"]
+	if data_resp_completo.has("alternativa_marcada"):
+		payload_servidor["alternativa_marcada"] = data_resp_completo["alternativa_marcada"]
+	if data_resp_completo.has("cla_aluno"):
+		payload_servidor["cla_aluno"] = data_resp_completo["cla_aluno"]
+	if data_resp_completo.has("consultas_grimorio"):
+		payload_servidor["consultas_grimorio"] = data_resp_completo["consultas_grimorio"]
+		
+	var res = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, payload_servidor)
+	
+	# Se falhar com erro 400 (ex: colunas extras ainda não criadas no Supabase), faz fallback para as 4 colunas padrão
+	if not res.get("success", false) and res.get("code", 0) == 400:
+		var baseline = {
+			"pergunta_id": data_resp_completo.get("pergunta_id", 0),
+			"acertou": data_resp_completo.get("acertou", false),
+			"andar_id": data_resp_completo.get("andar_id", 1),
+			"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+		}
+		await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline)
 
 
 # monta o header e envia requisicao pro supabase

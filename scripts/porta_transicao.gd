@@ -40,9 +40,6 @@ var _minigame_selo_aberto: bool = false
 var _indicador_selo_node: Node2D = null
 var _tw_indicador_selo: Tween = null
 
-var _tilemap_porta: TileMapLayer = null
-var _tile_coords_porta: Vector2i = Vector2i(-999, -999)
-var _tile_source_porta: int = -1
 var _tinha_inimigos_inicialmente: bool = false
 var _em_animacao: bool = false
 var _transicionando: bool = false

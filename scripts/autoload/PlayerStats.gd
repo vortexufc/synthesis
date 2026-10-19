@@ -12,6 +12,7 @@ var itens: Array = []
 
 # paginas do livro
 var grimorio: Array = []
+var consultas_grimorio: int = 0
 
 var chaves: int = 0
 var moedas: int = 0
@@ -73,6 +74,7 @@ func _inicializar_dados_padrao():
 	pocoes.clear()
 	itens.clear()
 	grimorio.clear()
+	consultas_grimorio = 0
 	chaves = 0
 	moedas = 0
 	vinhetas_desbloqueadas.clear()
@@ -134,6 +136,7 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		"pocoes": pocoes,
 		"itens": itens,
 		"grimorio": grimorio,
+		"consultas_grimorio": consultas_grimorio,
 		"chaves": chaves,
 		"moedas": moedas,
 		"vinhetas_desbloqueadas": vinhetas_desbloqueadas,
@@ -169,6 +172,7 @@ func carregar():
 			pocoes = data.get("pocoes", [])
 			itens = data.get("itens", [])
 			grimorio = data.get("grimorio", [])
+			consultas_grimorio = int(data.get("consultas_grimorio", 0))
 			chaves = int(data.get("chaves", 0))
 			moedas = int(data.get("moedas", 0))
 			vinhetas_desbloqueadas = []

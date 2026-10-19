@@ -233,13 +233,29 @@ func _reposicionar_na_porta_correta() -> void:
 						continue
 					
 				global_position = porta.global_position
+				var dist_spawn = 180
+				var cena_path = ""
 				var s_root: Node = self
 				while s_root.get_parent() and s_root.get_parent() != get_tree().root:
 					s_root = s_root.get_parent()
+				if s_root:
+					cena_path = s_root.scene_file_path.to_lower()
+				if cena_path == "" and get_tree() and get_tree().current_scene:
+					cena_path = get_tree().current_scene.scene_file_path.to_lower()
+					
+				var masmorra_ativa = ""
+				var db = get_node_or_null("/root/DatabaseManager")
+				if db and db.active_dungeon != "":
+					masmorra_ativa = db.active_dungeon.to_lower()
+					
+				var eh_biologia = "biologia" in cena_path or "estufa" in cena_path or "biologia" in masmorra_ativa
+				if eh_biologia:
+					dist_spawn = 360 # Portas de biologia são mais altas (356px)
+
 				if _is_porta_norte(porta, s_root):
 					global_position.y += 180 # Porta no topo: entra descendo para dentro da sala
 				else:
-					global_position.y -= 180 # Porta na base: entra subindo para dentro da sala
+					global_position.y -= dist_spawn # Porta na base: entra subindo para dentro da sala
 				break
 		DungeonGenerator.vindo_de_porta_de_retorno = false
 	else:
@@ -283,11 +299,37 @@ func _is_porta_norte(porta: Node2D, s_root: Node) -> bool:
 	if floor_node is TileMapLayer and floor_node.tile_set:
 		var cells = floor_node.get_used_cells()
 		if not cells.is_empty():
+			var p_local = floor_node.to_local(porta.global_position)
+			var dcx = floor_node.local_to_map(p_local).x
+			
+			# Procura células de chão na vizinhança horizontal da porta (raio de 5 tiles)
+			var nearby_cells: Array[Vector2i] = []
+			for c in cells:
+				if abs(c.x - dcx) <= 5:
+					nearby_cells.append(c)
+			
+			# Se a porta estiver ligeiramente deslocada horizontalmente do chão, busca as colunas mais próximas
+			if nearby_cells.is_empty():
+				var min_dx = 999999
+				for c in cells:
+					var dx = abs(c.x - dcx)
+					if dx < min_dx:
+						min_dx = dx
+				for c in cells:
+					if abs(c.x - dcx) <= min_dx + 4:
+						nearby_cells.append(c)
+						
+			if not nearby_cells.is_empty():
+				var sum_y = 0.0
+				for c in nearby_cells:
+					sum_y += floor_node.to_global(floor_node.map_to_local(c)).y
+				var avg_local_y = sum_y / float(nearby_cells.size())
+				return porta.global_position.y < avg_local_y
+				
 			var min_y = 999999.0
 			var max_y = -999999.0
-			var ts_y = float(floor_node.tile_set.tile_size.y) * floor_node.scale.y
 			for c in cells:
-				var yw = float(c.y) * ts_y
+				var yw = floor_node.to_global(floor_node.map_to_local(c)).y
 				if yw < min_y: min_y = yw
 				if yw > max_y: max_y = yw
 			var mid_y = (min_y + max_y) * 0.5

@@ -45,17 +45,20 @@ func _on_backdrop_gui_input(event: InputEvent) -> void:
 		fechar()
 
 func _on_btn_abrir_pressed() -> void:
-	(get_node_or_null("/root/AudioManager").play_sfx("ui_5") if get_node_or_null("/root/AudioManager") else null)
+	var am = get_node_or_null("/root/AudioManager")
+	if am: am.play_sfx("ui_5")
 	OS.shell_open(INSTAGRAM_URL)
 
 func _animar_entrada() -> void:
-	(get_node_or_null("/root/AudioManager").play_sfx("ui_5") if get_node_or_null("/root/AudioManager") else null)
+	var am = get_node_or_null("/root/AudioManager")
+	if am: am.play_sfx("ui_5")
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "modulate:a", 1.0, 0.22)
 	tw.tween_property(panel_card, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK)
 
 func fechar() -> void:
-	(get_node_or_null("/root/AudioManager").play_sfx("ui_1") if get_node_or_null("/root/AudioManager") else null)
+	var am = get_node_or_null("/root/AudioManager")
+	if am: am.play_sfx("ui_1")
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tw.tween_property(self, "modulate:a", 0.0, 0.16)
 	tw.tween_property(panel_card, "scale", Vector2(0.92, 0.92), 0.16)

@@ -19,6 +19,12 @@ const GUEST_FILE = "user://guest_config.json"
 var local_guest_nick: String = ""
 
 func _ready() -> void:
+	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
+		load_ranking()
+		load_ranking_periodo("quimica")
+		load_ranking_periodo("fisica")
+		load_ranking_periodo("biologia")
+	)
 	await get_tree().create_timer(0.3).timeout
 	await load_ranking()
 	await load_ranking_periodo("quimica")
@@ -28,10 +34,14 @@ func _ready() -> void:
 # busca o ranking no supabase
 func load_ranking() -> void:
 	print("[RankingManager] Buscando ranking online...")
-	var res = await DatabaseManager.request_async(
-		"/rest/v1/rankinggeral?select=*&order=score.desc&limit=20",
-		HTTPClient.METHOD_GET
-	)
+	var esc_id = DatabaseManager.escola_ativa_id
+	var endpoint = "/rest/v1/rankinggeral?select=*&order=score.desc&limit=20"
+	if esc_id != "geral" and not esc_id.is_empty():
+		endpoint = "/rest/v1/rankinggeral?escola_id=eq." + esc_id.uri_encode() + "&select=*&order=score.desc&limit=20"
+		
+	var res = await DatabaseManager.request_async(endpoint, HTTPClient.METHOD_GET)
+	if not res.get("success", false) and res.get("code", 0) == 400:
+		res = await DatabaseManager.request_async("/rest/v1/rankinggeral?select=*&order=score.desc&limit=20", HTTPClient.METHOD_GET)
 
 	print("[RankingManager] Resposta: success=%s | code=%s" % [res["success"], res.get("code", "?")])
 
@@ -93,10 +103,14 @@ func load_ranking_periodo(periodo: String) -> void:
 		"biologia": coluna = "score_mensal"
 		_: return
 	
-	var res = await DatabaseManager.request_async(
-		"/rest/v1/rankinggeral?select=*&order=%s.desc,score.desc&limit=20" % coluna,
-		HTTPClient.METHOD_GET
-	)
+	var esc_id = DatabaseManager.escola_ativa_id
+	var endpoint = "/rest/v1/rankinggeral?select=*&order=%s.desc,score.desc&limit=20" % coluna
+	if esc_id != "geral" and not esc_id.is_empty():
+		endpoint = "/rest/v1/rankinggeral?escola_id=eq." + esc_id.uri_encode() + "&select=*&order=%s.desc,score.desc&limit=20" % coluna
+		
+	var res = await DatabaseManager.request_async(endpoint, HTTPClient.METHOD_GET)
+	if not res.get("success", false) and res.get("code", 0) == 400:
+		res = await DatabaseManager.request_async("/rest/v1/rankinggeral?select=*&order=%s.desc,score.desc&limit=20" % coluna, HTTPClient.METHOD_GET)
 	if not (res["success"] and res["data"] is Array):
 		return
 	
@@ -223,24 +237,53 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 	var novo_score_mensal:  int = score_mensal_atual + (pontos_novos if subj == "Biologia" else 0)
 	var res_update: Dictionary
 
+	var payload_update: Dictionary = {
+		"score": novo_score,
+		"score_diario": novo_score_diario,
+		"score_semanal": novo_score_semanal,
+		"score_mensal": novo_score_mensal,
+		"updated_at": "now()"
+	}
+	var payload_insert: Dictionary = {
+		"player_name": player_name,
+		"score": novo_score,
+		"score_diario": novo_score_diario,
+		"score_semanal": novo_score_semanal,
+		"score_mensal": novo_score_mensal
+	}
+	var esc_id = DatabaseManager.escola_ativa_id
+	if esc_id != "geral" and not esc_id.is_empty():
+		payload_update["escola_id"] = esc_id
+		payload_insert["escola_id"] = esc_id
+
 	if existe:
 		# se ja existe atualiza
 		res_update = await DatabaseManager.request_async(
 			"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
 			HTTPClient.METHOD_PATCH,
-			{"score": novo_score, "score_diario": novo_score_diario,
-			 "score_semanal": novo_score_semanal, "score_mensal": novo_score_mensal,
-			 "updated_at": "now()"}
+			payload_update
 		)
+		if not res_update.get("success", false) and res_update.get("code", 0) == 400 and payload_update.has("escola_id"):
+			payload_update.erase("escola_id")
+			res_update = await DatabaseManager.request_async(
+				"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
+				HTTPClient.METHOD_PATCH,
+				payload_update
+			)
 	else:
 		# senao cria novo registro
 		res_update = await DatabaseManager.request_async(
 			"/rest/v1/rankinggeral",
 			HTTPClient.METHOD_POST,
-			{"player_name": player_name, "score": novo_score,
-			 "score_diario": novo_score_diario, "score_semanal": novo_score_semanal,
-			 "score_mensal": novo_score_mensal}
+			payload_insert
 		)
+		if not res_update.get("success", false) and res_update.get("code", 0) == 400 and payload_insert.has("escola_id"):
+			payload_insert.erase("escola_id")
+			res_update = await DatabaseManager.request_async(
+				"/rest/v1/rankinggeral",
+				HTTPClient.METHOD_POST,
+				payload_insert
+			)
 
 	if res_update["success"]:
 		print("[RankingManager] Score online de '%s' atualizado para %d." % [player_name, novo_score])

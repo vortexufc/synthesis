@@ -298,11 +298,43 @@ func _remover_itens(nome_item: String, quantidade: int) -> void:
 			removidos += 1
 		i -= 1
 
-func _definir_texto_dialogo(texto: String) -> void:
-	lbl_desc.text = texto
+var _tween_typewriter: Tween = null
+
+func _definir_texto_dialogo(novo_texto: String) -> void:
+	if lbl_desc == null: return
+	if lbl_desc.text == novo_texto and lbl_desc.visible_ratio >= 0.99:
+		return
+		
+	if _tween_typewriter and _tween_typewriter.is_running():
+		_tween_typewriter.kill()
+		
+	lbl_desc.text = novo_texto
+	lbl_desc.visible_ratio = 0.0
+	
+	var duracao = clamp(novo_texto.length() * 0.02, 0.45, 1.4)
+	_tween_typewriter = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tween_typewriter.tween_method(_atualizar_progresso_typewriter, 0.0, 1.0, duracao)
+
+func _atualizar_progresso_typewriter(progresso: float) -> void:
+	if lbl_desc:
+		var total_chars = lbl_desc.text.length()
+		var antigo_char = int(lbl_desc.visible_ratio * total_chars)
+		var novo_char = int(progresso * total_chars)
+		lbl_desc.visible_ratio = progresso
+		
+		if novo_char > antigo_char and novo_char % 3 == 0 and progresso < 0.96:
+			if get_node_or_null("/root/AudioManager"):
+				AudioManager.play_sfx("ui-1")
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and (event.keycode == KEY_ESCAPE or event.keycode == KEY_F)):
+	if (event is InputEventMouseButton and event.pressed) or event.is_action_pressed("interagir") or (event is InputEventKey and event.keycode == KEY_F and event.pressed):
+		if _tween_typewriter and _tween_typewriter.is_running():
+			_tween_typewriter.kill()
+			if lbl_desc: lbl_desc.visible_ratio = 1.0
+			get_viewport().set_input_as_handled()
+			return
+			
+	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("interagir") or (event is InputEventKey and event.pressed and (event.keycode == KEY_ESCAPE or event.keycode == KEY_F)):
 		get_viewport().set_input_as_handled()
 		_fechar()
 

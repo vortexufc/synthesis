@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="13_c55u2"]
 [ext_resource type="PackedScene" uid="uid://bxcq27yjlcmta" path="res://scenes/Entidades/Plantas/Flor_Amarela.tscn" id="14_8xvqa"]
 [ext_resource type="PackedScene" uid="uid://dtqmmxhnklhw8" path="res://scenes/Entidades/Plantas/Flor_Roxa.tscn" id="15_wvyn3"]
+[ext_resource type="PackedScene" path="res://scenes/Armadilhas/esporos_toxicos.tscn" id="18_b1h1p"]
 [ext_resource type="Texture2D" uid="uid://d0lft226afsts" path="res://assets/sprites/tilesets/Biologia/porta.png" id="tex_biologia_porta"]
 
 [node name="Node2D" type="Node2D" unique_id=1983435386]
@@ -183,3 +184,12 @@ position = Vector2(2372, 1648)
 
 [node name="CharacterBody2D4" parent="." unique_id=132198188 instance=ExtResource("15_wvyn3")]
 position = Vector2(1832, 1354)
+
+[node name="EsporosToxicos" parent="." unique_id=340046199 instance=ExtResource("18_b1h1p")]
+position = Vector2(1671, 1794)
+
+[node name="EsporosToxicos2" parent="." unique_id=290455585 instance=ExtResource("18_b1h1p")]
+position = Vector2(1671, 1714)
+
+[node name="EsporosToxicos3" parent="." unique_id=292865586 instance=ExtResource("18_b1h1p")]
+position = Vector2(1670, 1755)

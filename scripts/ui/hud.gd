@@ -2,7 +2,7 @@ extends CanvasLayer
 
 @onready var fill: NinePatchRect = $Control/HealthBarContainer/HealthBarFill
 @onready var ghost: NinePatchRect = $Control/HealthBarContainer/HealthBarGhost
-@onready var text_label: Label = get_node_or_null("Control/HealthBarContainer/HealthText") if has_node("Control/HealthBarContainer/HealthText") else get_node_or_null("Control/HealthText")
+@onready var text_label: Label = (get_node_or_null("Control/HealthBarContainer/HealthText") as Label) if has_node("Control/HealthBarContainer/HealthText") else (get_node_or_null("Control/HealthText") as Label)
 @onready var heart_icon: TextureRect = $Control/HeartIcon
 @onready var health_container: Control = $Control/HealthBarContainer
 
