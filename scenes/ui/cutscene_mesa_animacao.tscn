@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://cutscene_mesa_animacao"]
+
+[ext_resource type="Script" path="res://scripts/ui/cutscene_mesa_animacao.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/cutscenes/animacao_mesa_mago.png" id="2_texture"]
+
+[node name="CutsceneMesaAnimacao" type="CanvasLayer"]
+layer = 98
+script = ExtResource("1_script")
+
+[node name="ContainerGeral" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="FundoPreto" type="ColorRect" parent="ContainerGeral"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 1)
+
+[node name="SpriteAnimacao" type="Sprite2D" parent="ContainerGeral"]
+texture_filter = 1
+position = Vector2(640, 360)
+texture = ExtResource("2_texture")
+hframes = 9
+vframes = 9

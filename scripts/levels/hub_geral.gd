@@ -2,6 +2,7 @@ extends Node2D
 
 # script da sala principal (hub)
 
+@export var forcar_cutscene_teste: bool = false
 @export var titulo_intro: String = "Boas-Vindas à Masmorra Arcana"
 
 @export_multiline var paginas_intro: Array[String] = [
@@ -22,6 +23,7 @@ var _tempo_iluminacao: float = 0.0
 var _cutscene_em_andamento: bool = false
 var _cutscene_tween: Tween = null
 var _cutscene_pular_ui: CanvasLayer = null
+var _cutscene_mesa_instancia: CanvasLayer = null
 var _ultimo_toque_cutscene_ms: int = 0
 const INTERVALO_DUPLO_TOQUE_MS: int = 400
 
@@ -36,7 +38,9 @@ func _ready() -> void:
 		cutscene_ja_vista = true
 		
 	var deve_tocar_cutscene = false
-	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.tocar_cutscene_inicial:
+	if forcar_cutscene_teste:
+		deve_tocar_cutscene = true
+	elif get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.tocar_cutscene_inicial:
 		if not cutscene_ja_vista:
 			deve_tocar_cutscene = true
 		DungeonGenerator.tocar_cutscene_inicial = false
@@ -348,7 +352,7 @@ func _criar_ui_pular_cutscene() -> void:
 		_cutscene_pular_ui.queue_free()
 		
 	_cutscene_pular_ui = CanvasLayer.new()
-	_cutscene_pular_ui.layer = 95
+	_cutscene_pular_ui.layer = 99
 	add_child(_cutscene_pular_ui)
 	
 	# Detecta se é mobile
@@ -417,15 +421,25 @@ func _pular_cutscene_inicial() -> void:
 		return
 	_cutscene_em_andamento = false
 	
+	# Mata o tween de movimento se ainda estiver rodando
+	if _cutscene_tween and is_instance_valid(_cutscene_tween):
+		_cutscene_tween.kill()
+		_cutscene_tween = null
+		
+	# Encerra imediatamente a tela preta com a animação se estiver tocando
+	if _cutscene_mesa_instancia and is_instance_valid(_cutscene_mesa_instancia):
+		_cutscene_mesa_instancia.pular()
+		_cutscene_mesa_instancia = null
+		
+	_finalizar_cutscene_com_pergaminho()
+
+func _finalizar_cutscene_com_pergaminho() -> void:
+	_cutscene_em_andamento = false
+	
 	# Remove a interface de pular
 	if _cutscene_pular_ui and is_instance_valid(_cutscene_pular_ui):
 		_cutscene_pular_ui.queue_free()
 		_cutscene_pular_ui = null
-		
-	# Mata o tween se ainda estiver rodando
-	if _cutscene_tween and is_instance_valid(_cutscene_tween):
-		_cutscene_tween.kill()
-		_cutscene_tween = null
 		
 	var player = get_node_or_null("Player")
 	if player == null:
@@ -456,7 +470,7 @@ func _pular_cutscene_inicial() -> void:
 		PlayerStats.adicionar_pergaminho(titulo_intro, paginas_intro, "O pergaminho de introdução entregue ao jovem mago na mesa de alquimia.")
 		PlayerStats.marcar_cutscene_inicial_vista()
 
-	# Abre o pergaminho na tela
+	# Abre o pergaminho na tela com o jogador já destravando ao fechar
 	var ui = get_tree().get_first_node_in_group("parchment_ui")
 	if ui == null and get_tree().current_scene:
 		ui = get_tree().current_scene.find_child("ParchmentUI", true, false)
@@ -522,8 +536,26 @@ func _executar_cutscene_inicial() -> void:
 	if not _cutscene_em_andamento:
 		return
 	
-	# PASSO 3: Chegou normalmente à mesa - finaliza e abre o pergaminho
-	_pular_cutscene_inicial()
+	# PASSO 3: Chegou normalmente à mesa - para e olha para a mesa
+	player.ultima_direcao = "cima"
+	if sprite:
+		sprite.play("idle_cima")
+	if poeira:
+		poeira.emitting = false
+
+	# Troca para a tela preta com a animação cinematográfica do mago (cerca de 5 segundos)
+	var cena_anim = load("res://scenes/ui/cutscene_mesa_animacao.tscn")
+	if cena_anim:
+		_cutscene_mesa_instancia = cena_anim.instantiate()
+		add_child(_cutscene_mesa_instancia)
+		await _cutscene_mesa_instancia.animacao_concluida
+		_cutscene_mesa_instancia = null
+		
+	if not _cutscene_em_andamento:
+		return
+		
+	# Volta para o jogo normal já com o pergaminho aberto
+	_finalizar_cutscene_com_pergaminho()
 
 func _ao_fechar_pergaminho_cutscene(player: Node2D) -> void:
 	if _cutscene_pular_ui and is_instance_valid(_cutscene_pular_ui):

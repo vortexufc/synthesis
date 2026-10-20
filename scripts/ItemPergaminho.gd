@@ -46,6 +46,9 @@ func _ready() -> void:
 			visible = false
 			queue_free()
 			return
+		var sh = get_node_or_null("Shadow")
+		if sh:
+			sh.visible = false
 
 	if not is_drop_dinamico:
 		if id_unico == "":
@@ -58,7 +61,7 @@ func _ready() -> void:
 	body_entered.connect(_quando_corpo_entra)
 	body_exited.connect(_quando_corpo_sai)
 	_iniciar_efeito_brilho()
-	if not is_drop_dinamico:
+	if not is_drop_dinamico and name != "PergaminhoMesa":
 		call_deferred("_garantir_posicao_segura")
 
 func _garantir_posicao_segura() -> void:
@@ -173,19 +176,21 @@ func _iniciar_efeito_brilho() -> void:
 		_tween_brilho.tween_property(sprite, "modulate", Color(1.7, 1.45, 0.35, 1.0), 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_tween_brilho.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.75).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		
-		var pos_y = sprite.position.y
-		_tween_bob = create_tween().set_loops()
-		_tween_bob.tween_property(sprite, "position:y", pos_y - 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		_tween_bob.tween_property(sprite, "position:y", pos_y + 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		
-		# sombra
-		_criar_sombra()
-		if _shadow:
-			var tw_s = create_tween().set_loops()
-			tw_s.tween_property(_shadow, "scale", Vector2(0.55, 0.28), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.65, 1.0)
-			tw_s.tween_property(_shadow, "scale", Vector2(0.75, 0.40), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.90, 1.0)
+		# Animação de flutuar e sombra apenas para drops de masmorra, não para a mesa
+		if name != "PergaminhoMesa":
+			var pos_y = sprite.position.y
+			_tween_bob = create_tween().set_loops()
+			_tween_bob.tween_property(sprite, "position:y", pos_y - 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			_tween_bob.tween_property(sprite, "position:y", pos_y + 3.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			
+			# sombra
+			_criar_sombra()
+			if _shadow:
+				var tw_s = create_tween().set_loops()
+				tw_s.tween_property(_shadow, "scale", Vector2(0.55, 0.28), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+				tw_s.parallel().tween_property(_shadow, "modulate:a", 0.65, 1.0)
+				tw_s.tween_property(_shadow, "scale", Vector2(0.75, 0.40), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+				tw_s.parallel().tween_property(_shadow, "modulate:a", 0.90, 1.0)
 
 var _shadow: Sprite2D = null
 
