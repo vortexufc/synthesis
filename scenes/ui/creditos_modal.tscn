@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/creditos_modal.gd" id="1_script"]
 [ext_resource type="FontFile" uid="uid://dv4tjm47y3ygq" path="res://assets/fonts/PressStart2P-Regular.ttf" id="2_font_title"]
 [ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="3_font_body"]
-[ext_resource type="Texture2D" path="res://assets/branding/vortex_logo.jpg" id="4_vortex_logo"]
+[ext_resource type="Texture2D" path="res://assets/branding/vortex_logo_transparent.png" id="4_vortex_logo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Card"]
 bg_color = Color(0.0588235, 0.0901961, 0.176471, 0.960784)
@@ -97,7 +97,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelCard" type="PanelContainer" parent="CenterContainer" unique_id=987001004]
-custom_minimum_size = Vector2(620, 0)
+custom_minimum_size = Vector2(660, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_Card")
 
@@ -132,10 +132,10 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.82, 1, 0.95)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 17
-text = "Synthesis - Vortex UFC"
+text = "Synthesis - VORTEX UFC"
 
 [node name="LogoVortex" type="TextureRect" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/Header" unique_id=987001033]
-custom_minimum_size = Vector2(90, 42)
+custom_minimum_size = Vector2(130, 48)
 layout_mode = 2
 texture = ExtResource("4_vortex_logo")
 expand_mode = 1
@@ -184,7 +184,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
-text = "• Anderson\n• Daniel"
+text = "• Francisco Anderson
+• Daniel A. Gonçalves de Oliveira"
 
 [node name="PanelArte" type="PanelContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/GridEquipe" unique_id=987001018]
 layout_mode = 2
@@ -207,7 +208,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
-text = "• Patricia"
+text = "• Patrícia"
 
 [node name="PanelLevelDesign" type="PanelContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/GridEquipe" unique_id=987001022]
 layout_mode = 2
@@ -230,7 +231,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
-text = "• Felipe Kauan"
+text = "• Felipe Kauã"
 
 [node name="PanelAudio" type="PanelContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain/GridEquipe" unique_id=987001026]
 layout_mode = 2
@@ -253,7 +254,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
-text = "• Davi"
+text = "• Davi Lima Rodrigues"
 
 [node name="PanelOrientador" type="PanelContainer" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain" unique_id=987001034]
 layout_mode = 2
@@ -285,7 +286,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_font_body")
 theme_override_font_sizes/font_size = 18
-text = "Rafael Ivo"
+text = "Professor Doutor Rafael Fernandes Ivo"
 vertical_alignment = 1
 
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelCard/MarginContainer/VBoxMain" unique_id=987001030]

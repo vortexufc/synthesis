@@ -707,9 +707,9 @@ func _encontrar_posicao_chao_segura(pos_desejada: Vector2, floor_node: TileMapLa
 		for px in passos_x:
 			for py in passos_y:
 				var sub_cell = cell + Vector2i(px, py)
-				if wall_node and _is_celula_coberta(sub_cell, wall_node):
-					continue
 				var wpos = floor_node.to_global(floor_node.map_to_local(sub_cell))
+				if not _is_posicao_valida(wpos, floor_node, wall_node):
+					continue
 				var dist = wpos.distance_to(pos_desejada)
 				if dist < menor_dist:
 					menor_dist = dist

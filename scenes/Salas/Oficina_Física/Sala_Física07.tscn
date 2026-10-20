@@ -467,7 +467,7 @@ position = Vector2(1754, 810)
 scale = Vector2(1.2, 1.2)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("16_ijbh1")]
-position = Vector2(2420, 484)
+position = Vector2(2480, 528)
 
 [node name="Luminarias" type="Node2D" parent="." unique_id=113023864]
 

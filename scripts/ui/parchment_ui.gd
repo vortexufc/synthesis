@@ -243,7 +243,14 @@ func atualizar_tela() -> void:
 		v_scroll.value = 0
 		
 	btn_esquerda.visible = pagina_atual > 0
-	btn_direita.visible = pagina_atual < (paginas_do_texto.size() - 1)
+	btn_direita.visible = true
+	var eh_ultima_pagina: bool = pagina_atual >= (paginas_do_texto.size() - 1)
+	if eh_ultima_pagina:
+		btn_direita.text = "Fechar"
+		_estilar_botao(btn_direita, true)
+	else:
+		btn_direita.text = "Próxima >"
+		_estilar_botao(btn_direita, false)
 	
 	if lbl_pagina:
 		lbl_pagina.text = "Página %d de %d" % [pagina_atual + 1, paginas_do_texto.size()]
@@ -261,6 +268,8 @@ func _avancar_pagina() -> void:
 		atualizar_tela()
 		if get_node_or_null("/root/AudioManager"):
 			AudioManager.play_sfx("ui-1")
+	else:
+		_fechar_pergaminho()
 
 signal pergaminho_fechado
 

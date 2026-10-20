@@ -1930,7 +1930,7 @@ porta_de_retorno = true
 position = Vector2(1128, 732)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_bieog")]
-position = Vector2(570, 1052)
+position = Vector2(550, 1054)
 
 [node name="Tocha1" parent="." unique_id=655649822 instance=ExtResource("tocha_entidade")]
 position = Vector2(331, 134)

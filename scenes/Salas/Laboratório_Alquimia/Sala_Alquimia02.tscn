@@ -1957,7 +1957,7 @@ position = Vector2(967, 469)
 position = Vector2(907, 458)
 
 [node name="ItemPocao" parent="." unique_id=1284113997 instance=ExtResource("item_pocao")]
-position = Vector2(200, 700)
+position = Vector2(169, 608)
 
 [node name="FrascoInstavel1" parent="." unique_id=1840204582 instance=ExtResource("frasco_trap")]
 position = Vector2(880, 480)

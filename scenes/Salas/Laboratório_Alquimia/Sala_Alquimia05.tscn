@@ -1804,7 +1804,7 @@ z_index = 3
 position = Vector2(350, 520)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_ygk28")]
-position = Vector2(129, 344)
+position = Vector2(217, 416)
 
 [node name="Tocha1" parent="." unique_id=590299015 instance=ExtResource("tocha_entidade")]
 position = Vector2(433, 173)

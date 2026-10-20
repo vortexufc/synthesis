@@ -26,6 +26,9 @@ var _ultimo_toque_cutscene_ms: int = 0
 const INTERVALO_DUPLO_TOQUE_MS: int = 400
 
 func _ready() -> void:
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.start_playlist()
+
 	_configurar_sistema_iluminacao()
 	
 	var cutscene_ja_vista = false

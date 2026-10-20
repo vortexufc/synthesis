@@ -16,10 +16,10 @@ var _tempo_imunidade_pos_interacao: float = 0.0
 signal dash_iniciado(cooldown: float)
 signal dash_concluido()
 
-const DISTANCIA_DASH: float = 135.0
-const DURACAO_DASH: float = 0.16
+const DISTANCIA_DASH: float = 100.0
+const DURACAO_DASH: float = 0.22
 const COOLDOWN_DASH: float = 0.85
-const IFRAMES_POS_DASH: float = 0.20
+const IFRAMES_POS_DASH: float = 0.18
 
 var _em_dash: bool = false
 var _tempo_dash_restante: float = 0.0

@@ -2029,7 +2029,7 @@ gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="ItemPocao" parent="." unique_id=1847997550 instance=ExtResource("item_pocao")]
-position = Vector2(732, 420)
+position = Vector2(742, 382)
 
 [node name="FrascoInstavel1" parent="." unique_id=2060587936 instance=ExtResource("frasco_trap")]
 position = Vector2(550, 480)

@@ -5,8 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://bb58dqe3i4i1p" path="res://assets/sprites/Characters/Maguinho/idle.png" id="3_r0kh6"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2lcu3"]
-radius = 19.0
-height = 66.0
+radius = 11.0
+height = 24.0
 
 [sub_resource type="Gradient" id="Gradient_poeira_tex"]
 offsets = PackedFloat32Array(0, 0.6, 1)
@@ -384,6 +384,7 @@ z_index = 3
 script = ExtResource("1_uhc0a")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1919109920]
+position = Vector2(0, 24)
 shape = SubResource("CapsuleShape2D_2lcu3")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2105837662]

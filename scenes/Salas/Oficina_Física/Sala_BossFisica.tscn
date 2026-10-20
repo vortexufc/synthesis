@@ -469,7 +469,7 @@ porta_de_retorno = true
 position = Vector2(1281, 511)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("17_xmpol")]
-position = Vector2(4261, 948)
+position = Vector2(4272, 976)
 
 [node name="Luminarias" type="Node2D" parent="." unique_id=86408991]
 

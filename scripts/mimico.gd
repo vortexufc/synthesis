@@ -72,7 +72,7 @@ func _sequencia_mimico(player: Node2D) -> void:
 
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("ui-2")
-		AudioManager.play_sfx("fail")
+		AudioManager.tocar_som_dano()
 
 	# treme a tela e pisca vermelho
 	_executar_tremor(player)
@@ -83,7 +83,7 @@ func _sequencia_mimico(player: Node2D) -> void:
 	player.receber_dano_mimico(dano)
 
 	# popup avisando
-	_exibir_alerta_mimico(dano)
+	_exibir_alerta_mimico(dano, player)
 
 	# destrava o player
 	await get_tree().create_timer(0.4).timeout
@@ -121,7 +121,7 @@ func _flash_vermelho(player: Node2D) -> void:
 	canvas.queue_free()
 
 # modal avisando que era mimico
-func _exibir_alerta_mimico(dano_causado: float) -> void:
+func _exibir_alerta_mimico(dano_causado: float, player: Node2D = null) -> void:
 	var canvas = CanvasLayer.new()
 	canvas.layer = 106
 	canvas.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -157,13 +157,8 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 	panel.add_theme_stylebox_override("panel", sb)
 	center.add_child(panel)
 
-	var font_titulo = SystemFont.new()
-	font_titulo.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	font_titulo.font_weight = 800
-
-	var font_sans = SystemFont.new()
-	font_sans.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "sans-serif"])
-	font_sans.font_weight = 600
+	var font_titulo: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+	var font_sans: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 
 	var vbox = VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -183,7 +178,7 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 	var lbl_titulo = Label.new()
 	lbl_titulo.text = "⚠️ EMBOSCADA! VOCÊ FOI ENGANADO! ⚠️"
 	lbl_titulo.add_theme_font_override("font", font_titulo)
-	lbl_titulo.add_theme_font_size_override("font_size", 18)
+	lbl_titulo.add_theme_font_size_override("font_size", 20)
 	lbl_titulo.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
 	lbl_titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lbl_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -192,6 +187,7 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 	var btn_x = Button.new()
 	btn_x.text = "✕"
 	btn_x.custom_minimum_size = Vector2(28, 28)
+	btn_x.add_theme_font_override("font", font_sans)
 	btn_x.add_theme_font_size_override("font_size", 14)
 	btn_x.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	
@@ -226,7 +222,7 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 	var lbl_desc = Label.new()
 	lbl_desc.text = "O baú era uma criatura mímica voraz disfarçada!\nMandíbulas arcanas e espinhos venenosos morderam você causando -%.0f HP!" % dano_causado
 	lbl_desc.add_theme_font_override("font", font_sans)
-	lbl_desc.add_theme_font_size_override("font_size", 14)
+	lbl_desc.add_theme_font_size_override("font_size", 15)
 	lbl_desc.add_theme_color_override("font_color", Color(1.0, 0.88, 0.88))
 	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(lbl_desc)
@@ -235,7 +231,7 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 	var lbl_dica = Label.new()
 	lbl_dica.text = "💡 DICA: Abra seu Inventário [I] e tome uma Poção de Cura para sobreviver!"
 	lbl_dica.add_theme_font_override("font", font_sans)
-	lbl_dica.add_theme_font_size_override("font_size", 13)
+	lbl_dica.add_theme_font_size_override("font_size", 14)
 	lbl_dica.add_theme_color_override("font_color", Color(0.3, 0.9, 1.0))
 	lbl_dica.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(lbl_dica)
@@ -256,6 +252,31 @@ func _exibir_alerta_mimico(dano_causado: float) -> void:
 			canvas.queue_free()
 
 	btn_x.pressed.connect(fechar_alerta)
+
+	# Fecha automaticamente quando o player se afastar do baú
+	var player_alvo: Node2D = player
+	if player_alvo == null:
+		player_alvo = get_tree().get_first_node_in_group("player") as Node2D
+	var pos_mimico: Vector2 = global_position
+	
+	var timer_dist = Timer.new()
+	timer_dist.wait_time = 0.15
+	timer_dist.autostart = true
+	canvas.add_child(timer_dist)
+	timer_dist.timeout.connect(func():
+		if fechou[0]:
+			return
+		if player_alvo and is_instance_valid(player_alvo):
+			if player_alvo.global_position.distance_to(pos_mimico) > 115.0:
+				fechar_alerta.call()
+	)
+
+	# Fechamento automático de segurança após 6 segundos
+	var timer_timeout = get_tree().create_timer(6.0)
+	timer_timeout.timeout.connect(func():
+		if not fechou[0]:
+			fechar_alerta.call()
+	)
 
 	# Animação de entrada
 	panel.modulate.a = 0.0

@@ -1792,7 +1792,7 @@ position = Vector2(428, 1093)
 porta_de_retorno = true
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_sa4t6")]
-position = Vector2(125, 314)
+position = Vector2(169, 368)
 
 [node name="Tocha1" parent="." unique_id=1663310620 instance=ExtResource("tocha_entidade")]
 position = Vector2(75, 404)
@@ -1835,7 +1835,7 @@ script = ExtResource("23_76nqq")
 script = ExtResource("spawner_item")
 
 [node name="Ponto1" type="Marker2D" parent="PontosDeLivro" unique_id=1565037277]
-position = Vector2(294.0, 351.0)
+position = Vector2(169.0, 416.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
@@ -1845,7 +1845,7 @@ gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeLivro" unique_id=288285192]
-position = Vector2(294.0, 927.0)
+position = Vector2(361.0, 880.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
@@ -1864,7 +1864,7 @@ gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="Ponto3" type="Marker2D" parent="PontosDeMoeda" unique_id=1476720292]
-position = Vector2(294.0, 927.0)
+position = Vector2(361.0, 944.0)
 gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
@@ -1874,7 +1874,7 @@ gizmo_extents = 20.0
 script = ExtResource("ponto_item")
 
 [node name="ItemPocao" parent="." unique_id=1860298623 instance=ExtResource("item_pocao")]
-position = Vector2(260, 400)
+position = Vector2(217, 464)
 
 [node name="FrascoInstavel1" parent="." unique_id=1104011663 instance=ExtResource("frasco_trap")]
 position = Vector2(600, 520)

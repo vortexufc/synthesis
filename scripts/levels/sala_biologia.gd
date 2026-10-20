@@ -74,7 +74,7 @@ const POSICOES_FLORES = {
 	"Sala_Biologia02": {"pos": Vector2(816, 880), "cor": "azul"},
 	"Sala_Biologia03": {"pos": Vector2(3120, 848), "cor": "roxa"},
 	"Sala_Biologia04": {"pos": Vector2(1056, 640), "cor": "laranja"},
-	"Sala_Biologia05": {"pos": Vector2(2096, 816), "cor": "vermelha"},
+	"Sala_Biologia05": {"pos": Vector2(2096, 752), "cor": "vermelha"},
 	"Sala_Biologia06": {"pos": Vector2(2160, 1520), "cor": "amarela"},
 	"Sala_Biologia07": {"pos": Vector2(624, 976), "cor": "azul"},
 	"Sala_Biologia08": {"pos": Vector2(2896, 2352), "cor": "roxa"},
@@ -248,14 +248,23 @@ func _is_posicao_valida(pos: Vector2, floor_node: TileMapLayer, wall_node: TileM
 	if not _is_celula_coberta(cell, floor_node):
 		return false
 		
-	# Checa células vizinhas num raio de 1 célula (32px) para garantir folga segura de paredes e decorações
-	for dx in range(-1, 2):
-		for dy in range(-1, 2):
-			var check_cell = cell + Vector2i(dx, dy)
-			if wall_node and _is_celula_coberta(check_cell, wall_node):
-				return false
-			if decor_node and _is_celula_coberta(check_cell, decor_node):
-				return false
+	# Checa se a célula atual está em parede
+	if wall_node and _is_celula_coberta(cell, wall_node):
+		return false
+		
+	# Checa se há colisão física sólida na posição (paredes, balcões, obstáculos com colisão)
+	if is_inside_tree() and get_world_2d():
+		var space = get_world_2d().direct_space_state
+		var q = PhysicsShapeQueryParameters2D.new()
+		var shape = CircleShape2D.new()
+		shape.radius = 14.0
+		q.shape = shape
+		q.transform = Transform2D(0.0, pos)
+		q.collision_mask = 1
+		q.collide_with_bodies = true
+		if space.intersect_shape(q).size() > 0:
+			return false
+			
 	return true
 
 func _is_celula_coberta(cell: Vector2i, layer: TileMapLayer) -> bool:

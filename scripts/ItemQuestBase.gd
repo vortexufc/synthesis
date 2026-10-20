@@ -53,6 +53,86 @@ func _ready() -> void:
 			tw_s.tween_property(_shadow, "scale", Vector2(1.50, 0.90), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			tw_s.parallel().tween_property(_shadow, "modulate:a", 0.90, 1.0)
 
+	if not is_drop_dinamico:
+		call_deferred("_garantir_posicao_segura")
+
+func _garantir_posicao_segura() -> void:
+	if not is_inside_tree():
+		return
+	var root_sala = get_parent()
+	if not root_sala:
+		return
+	var floor_node = root_sala.get_node_or_null("Floor") as TileMapLayer
+	if not floor_node and get_tree() and get_tree().current_scene:
+		floor_node = get_tree().current_scene.get_node_or_null("Floor") as TileMapLayer
+	if not floor_node:
+		return
+		
+	var camadas_obstaculos: Array[TileMapLayer] = []
+	var containers = [root_sala]
+	if get_tree() and get_tree().current_scene and get_tree().current_scene != root_sala:
+		containers.append(get_tree().current_scene)
+	for cont in containers:
+		if not is_instance_valid(cont): continue
+		for child in cont.get_children():
+			if child is TileMapLayer and child.name != "Floor":
+				if not camadas_obstaculos.has(child):
+					camadas_obstaculos.append(child)
+					
+	if _posicao_tem_problema(global_position, floor_node, camadas_obstaculos):
+		var nova_pos = _encontrar_chao_seguro(global_position, floor_node, camadas_obstaculos)
+		if nova_pos != Vector2.ZERO:
+			global_position = nova_pos
+
+func _posicao_tem_problema(pos: Vector2, floor_node: TileMapLayer, camadas_obstaculos: Array[TileMapLayer]) -> bool:
+	var cell = floor_node.local_to_map(floor_node.to_local(pos))
+	if not _is_celula_coberta_item(cell, floor_node):
+		return true
+	for ol in camadas_obstaculos:
+		var o_cell = ol.local_to_map(ol.to_local(pos))
+		if _is_celula_coberta_item(o_cell, ol):
+			return true
+	if is_inside_tree() and get_world_2d():
+		var space = get_world_2d().direct_space_state
+		var q = PhysicsShapeQueryParameters2D.new()
+		var circle = CircleShape2D.new()
+		circle.radius = 12.0
+		q.shape = circle
+		q.transform = Transform2D(0.0, pos)
+		q.collision_mask = 1
+		q.collide_with_bodies = true
+		var hits = space.intersect_shape(q)
+		for h in hits:
+			if h.collider != self and not is_ancestor_of(h.collider):
+				return true
+	return false
+
+func _is_celula_coberta_item(cell: Vector2i, layer: TileMapLayer) -> bool:
+	if not layer or not layer.tile_set: return false
+	if layer.get_cell_source_id(cell) != -1: return true
+	for used in layer.get_used_cells():
+		var src_id = layer.get_cell_source_id(used)
+		var atlas = layer.get_cell_atlas_coords(used)
+		var source = layer.tile_set.get_source(src_id) as TileSetAtlasSource if layer.tile_set else null
+		var size = source.get_tile_size_in_atlas(atlas) if (source and source.has_tile(atlas)) else Vector2i(1, 1)
+		if cell.x >= used.x and cell.x < used.x + size.x and cell.y >= used.y and cell.y < used.y + size.y:
+			return true
+	return false
+
+func _encontrar_chao_seguro(pos_desejada: Vector2, floor_node: TileMapLayer, camadas_obstaculos: Array[TileMapLayer]) -> Vector2:
+	var cells = floor_node.get_used_cells()
+	var melhor_pos = Vector2.ZERO
+	var menor_dist = 9999999.0
+	for cell in cells:
+		var wpos = floor_node.to_global(floor_node.map_to_local(cell))
+		if _posicao_tem_problema(wpos, floor_node, camadas_obstaculos):
+			continue
+		var dist = wpos.distance_to(pos_desejada)
+		if dist < menor_dist:
+			menor_dist = dist
+			melhor_pos = wpos
+	return melhor_pos
+
 var _shadow: Sprite2D = null
 
 func _criar_sombra() -> void:

@@ -1891,7 +1891,7 @@ position = Vector2(737, 478)
 position = Vector2(485, 767)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("19_dxlyw")]
-position = Vector2(1459, 794)
+position = Vector2(1462, 814)
 
 [node name="Tocha1" parent="." unique_id=912411520 instance=ExtResource("tocha_entidade")]
 position = Vector2(433, 209)

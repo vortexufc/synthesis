@@ -120,6 +120,14 @@ func _on_btn_entrar_pressed() -> void:
 	if clan_name.is_empty():
 		return
 		
+	if DatabaseManager.user_token.is_empty():
+		var dialog_vis: AcceptDialog = AcceptDialog.new()
+		dialog_vis.title = "Acesso Restrito a Usuários Cadastrados"
+		dialog_vis.dialog_text = "Contas de Visitante não podem entrar em clãs!\nPor favor, faça login ou crie uma conta permanente para ingressar em um clã."
+		add_child(dialog_vis)
+		dialog_vis.popup_centered()
+		return
+		
 	btn_entrar.disabled = true
 	var resultado: Dictionary = await ClanManager.join_clan(clan_name)
 	btn_entrar.disabled = false

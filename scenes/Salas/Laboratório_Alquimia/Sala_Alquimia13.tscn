@@ -1830,7 +1830,7 @@ position = Vector2(327, 815)
 position = Vector2(846, 913)
 
 [node name="pergaminho" parent="." unique_id=706257676 instance=ExtResource("18_fvd5t")]
-position = Vector2(1942, 930)
+position = Vector2(1945, 944)
 
 [node name="Tocha1" parent="." unique_id=1442786672 instance=ExtResource("tocha_entidade")]
 position = Vector2(308, 177)

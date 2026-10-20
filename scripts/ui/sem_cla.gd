@@ -97,6 +97,13 @@ func _on_btn_buscar_pressed() -> void:
 		lbl_top.text = "RESULTADOS DA BUSCA"
 
 func _on_btn_criar_popup_pressed() -> void:
+	if DatabaseManager.user_token.is_empty():
+		var dialog: AcceptDialog = AcceptDialog.new()
+		dialog.title = "Acesso Restrito a Usuários Cadastrados"
+		dialog.dialog_text = "Contas de Visitante não podem criar clãs!\nPor favor, faça login ou cadastre-se para criar seu próprio clã."
+		add_child(dialog)
+		dialog.popup_centered()
+		return
 	var popup: Control = popup_criar_scene.instantiate() as Control
 	get_tree().current_scene.add_child(popup)
 

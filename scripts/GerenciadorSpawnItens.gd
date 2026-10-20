@@ -123,7 +123,6 @@ func _executar_spawn() -> void:
 		if "id_unico" in item_inst:
 			item_inst.id_unico = item_id
 		pai.add_child(item_inst)
-		
 		# Validação dinâmica de segurança: garante que o item spawne no chão jogável e fora de paredes
 		var pos_final = p.global_position
 		var floor_node = pai.get_node_or_null("Floor") as TileMapLayer
@@ -140,12 +139,12 @@ func _executar_spawn() -> void:
 		item_inst.global_position = pos_final
 
 func _is_posicao_valida(pos: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> bool:
-	if not floor_node:
+	if not floor_node or not is_instance_valid(floor_node):
 		return true
 	var cell = floor_node.local_to_map(floor_node.to_local(pos))
 	if not _is_celula_coberta(cell, floor_node):
 		return false
-	if wall_node and _is_celula_coberta(cell, wall_node):
+	if wall_node and is_instance_valid(wall_node) and _is_celula_coberta(cell, wall_node):
 		return false
 	return true
 
@@ -167,7 +166,7 @@ func _is_celula_coberta(cell: Vector2i, layer: TileMapLayer) -> bool:
 	return false
 
 func _encontrar_posicao_chao_segura(pos_desejada: Vector2, floor_node: TileMapLayer, wall_node: TileMapLayer) -> Vector2:
-	if not floor_node:
+	if not floor_node or not is_instance_valid(floor_node):
 		return pos_desejada
 	var cells = floor_node.get_used_cells()
 	if cells.is_empty():
@@ -188,7 +187,7 @@ func _encontrar_posicao_chao_segura(pos_desejada: Vector2, floor_node: TileMapLa
 		for px in passos_x:
 			for py in passos_y:
 				var sub_cell = cell + Vector2i(px, py)
-				if wall_node and _is_celula_coberta(sub_cell, wall_node):
+				if wall_node and is_instance_valid(wall_node) and _is_celula_coberta(sub_cell, wall_node):
 					continue
 				var wpos = floor_node.to_global(floor_node.map_to_local(sub_cell))
 				var dist = wpos.distance_to(pos_desejada)

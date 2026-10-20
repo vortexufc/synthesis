@@ -22,6 +22,7 @@ var _tween_e_fill: Tween = null
 var _tween_e_ghost: Tween = null
 
 var _botoes: Array = []
+var _btn_pocao: Button = null
 
 # [BugFix] Flag que bloqueia chamadas duplicadas enquanto uma resposta está sendo processada
 var _processando_resposta: bool = false
@@ -73,6 +74,7 @@ func _ready() -> void:
 	# garante que os botoes funcionem mesmo com o jogo pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_configurar_ghost_bars()
+	_criar_botao_pocao()
 	_botoes = [btn_a, btn_b, btn_c, btn_d, btn_e]
 	for i in range(_botoes.size()):
 		_botoes[i].pressed.connect(_on_botao_pressionado.bind(i))
@@ -292,6 +294,8 @@ func configurar_inimigo(frames: SpriteFrames, id_inimigo: String = "") -> void:
 		
 		# [UI] Ajusta posições para que a barra de vida nunca fique na frente das animações de pulo/ataque
 		$Control/HealthPlayer.position.y = 115.0
+		if _btn_pocao and is_instance_valid(_btn_pocao):
+			_btn_pocao.position.y = $Control/HealthPlayer.position.y + 30.0
 		if id_inimigo == "robo_g":
 			$Control/SpriteMonstro.position.y = 135.0
 			$Control/HealthEnemy.position.y = 105.0
@@ -334,6 +338,150 @@ func _on_vida_jogador_alterada(atual: float, maxima: float) -> void:
 			if is_instance_valid(health_player_fill):
 				health_player_fill.visible = false
 		)
+	_atualizar_botao_pocao()
+
+func _criar_botao_pocao() -> void:
+	if _btn_pocao and is_instance_valid(_btn_pocao):
+		return
+	
+	_btn_pocao = Button.new()
+	_btn_pocao.name = "BotaoPocaoBatalha"
+	_btn_pocao.focus_mode = Control.FOCUS_NONE
+	_btn_pocao.custom_minimum_size = Vector2(175, 32)
+	_btn_pocao.position = Vector2(140, 146)
+	
+	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+	if font:
+		_btn_pocao.add_theme_font_override("font", font)
+	_btn_pocao.add_theme_font_size_override("font_size", 14)
+	
+	var style_normal = StyleBoxFlat.new()
+	style_normal.bg_color = Color(0.04, 0.18, 0.12, 0.88)
+	style_normal.border_color = Color(0.18, 0.85, 0.45, 0.95)
+	style_normal.set_border_width_all(2)
+	style_normal.set_corner_radius_all(6)
+	style_normal.content_margin_left = 8
+	style_normal.content_margin_right = 8
+	
+	var style_hover = StyleBoxFlat.new()
+	style_hover.bg_color = Color(0.08, 0.28, 0.18, 0.95)
+	style_hover.border_color = Color(0.35, 1.0, 0.65, 1.0)
+	style_hover.set_border_width_all(2)
+	style_hover.set_corner_radius_all(6)
+	style_hover.content_margin_left = 8
+	style_hover.content_margin_right = 8
+	
+	var style_pressed = StyleBoxFlat.new()
+	style_pressed.bg_color = Color(0.02, 0.12, 0.08, 1.0)
+	style_pressed.border_color = Color(0.12, 0.65, 0.32, 1.0)
+	style_pressed.set_border_width_all(2)
+	style_pressed.set_corner_radius_all(6)
+	style_pressed.content_margin_left = 8
+	style_pressed.content_margin_right = 8
+	
+	var style_disabled = StyleBoxFlat.new()
+	style_disabled.bg_color = Color(0.08, 0.10, 0.12, 0.60)
+	style_disabled.border_color = Color(0.25, 0.30, 0.35, 0.50)
+	style_disabled.set_border_width_all(1)
+	style_disabled.set_corner_radius_all(6)
+	style_disabled.content_margin_left = 8
+	style_disabled.content_margin_right = 8
+	
+	_btn_pocao.add_theme_stylebox_override("normal", style_normal)
+	_btn_pocao.add_theme_stylebox_override("hover", style_hover)
+	_btn_pocao.add_theme_stylebox_override("pressed", style_pressed)
+	_btn_pocao.add_theme_stylebox_override("disabled", style_disabled)
+	_btn_pocao.add_theme_color_override("font_color", Color(0.9, 1.0, 0.9, 1.0))
+	_btn_pocao.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0, 1.0))
+	_btn_pocao.add_theme_color_override("font_disabled_color", Color(0.5, 0.55, 0.6, 0.7))
+	
+	_btn_pocao.pressed.connect(_usar_pocao_combate)
+	
+	if has_node("Control"):
+		$Control.add_child(_btn_pocao)
+	
+	_atualizar_botao_pocao()
+
+func _obter_total_pocoes() -> int:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps or not ("pocoes" in ps):
+		return 0
+	var total = 0
+	for p in ps.pocoes:
+		if p is Dictionary:
+			total += int(p.get("qtd", 1))
+	return total
+
+func _atualizar_botao_pocao() -> void:
+	if not _btn_pocao or not is_instance_valid(_btn_pocao):
+		return
+	var ps = get_node_or_null("/root/PlayerStats")
+	var total = _obter_total_pocoes()
+	if total <= 0:
+		_btn_pocao.text = "🧪 Sem Poções"
+		_btn_pocao.disabled = true
+	else:
+		if ps and ps.vida_atual_jogador >= ps.vida_maxima_jogador:
+			_btn_pocao.text = "🧪 Vida Plena (x%d)" % total
+			_btn_pocao.disabled = true
+		else:
+			_btn_pocao.text = "🧪 Curar [Q] (x%d)" % total
+			_btn_pocao.disabled = false
+
+func _usar_pocao_combate() -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if not ps:
+		return
+	if ps.vida_atual_jogador >= ps.vida_maxima_jogador:
+		return
+	if not ("pocoes" in ps) or ps.pocoes.is_empty():
+		_atualizar_botao_pocao()
+		return
+	
+	var idx = 0
+	var po = ps.pocoes[idx]
+	if po is Dictionary and int(po.get("qtd", 1)) > 0:
+		var am = get_node_or_null("/root/AudioManager")
+		if am:
+			am.play_sfx("pocao_cura")
+		
+		var cura = float(po.get("cura", 40.0))
+		ps.curar_vida(cura)
+		
+		po["qtd"] = int(po.get("qtd", 1)) - 1
+		if po["qtd"] <= 0:
+			ps.pocoes.remove_at(idx)
+		
+		_mostrar_feedback_cura(cura)
+		_atualizar_botao_pocao()
+
+func _mostrar_feedback_cura(valor: float) -> void:
+	if not has_node("Control"):
+		return
+	var lbl = Label.new()
+	lbl.text = "+%.0f HP" % valor
+	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+	if font:
+		lbl.add_theme_font_override("font", font)
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.add_theme_color_override("font_color", Color(0.2, 1.0, 0.4, 1.0))
+	lbl.add_theme_color_override("font_outline_color", Color(0.0, 0.2, 0.05, 0.9))
+	lbl.add_theme_constant_override("outline_size", 3)
+	lbl.position = Vector2(170, 110)
+	lbl.z_index = 20
+	$Control.add_child(lbl)
+	
+	var tw = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw.tween_property(lbl, "position:y", lbl.position.y - 30.0, 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "modulate:a", 0.0, 0.7).set_delay(0.2)
+	tw.chain().tween_callback(lbl.queue_free)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not self.visible:
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_Q:
+			_usar_pocao_combate()
 
 func _process(delta: float) -> void:
 	# Animação contínua do cenário de fundo da batalha
@@ -367,6 +515,7 @@ func iniciar_timer(duracao: float) -> void:
 func atualizar_pergunta(texto: String, alternativas: Array) -> void:
 	self.show()
 	_fechar_painel_feedback_imediato()
+	_atualizar_botao_pocao()
 	if has_node("Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons"):
 		$Control/FooterColor/MarginContainer/VBoxContainer/HBoxButtons.show()
 		

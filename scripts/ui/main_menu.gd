@@ -544,19 +544,17 @@ func _atualizar_leaderboard() -> void:
 	if not is_inside_tree() or _leaderboard_panel == null:
 		return
 
-	var font_normal = SystemFont.new()
-	font_normal.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	font_normal.font_weight = 600
+	var font_pixel: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 
-	# atualiza o titulo com fonte limpa e cor dourada
+	# atualiza o titulo com fonte pixelada e cor dourada
 	if _lbl_title:
-		_lbl_title.add_theme_font_override("font", font_normal)
-		_lbl_title.add_theme_font_size_override("font_size", 12)
+		_lbl_title.add_theme_font_override("font", font_pixel)
+		_lbl_title.add_theme_font_size_override("font_size", 13)
 		_lbl_title.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
 		match _periodo_atual:
-			"quimica":  _lbl_title.text = "LIDERANÇA QUÍMICA"
-			"fisica":   _lbl_title.text = "LIDERANÇA FÍSICA"
-			"biologia": _lbl_title.text = "LIDERANÇA BIOLOGIA"
+			"quimica":  _lbl_title.text = "LIDERANÇA GLOBAL QUÍMICA"
+			"fisica":   _lbl_title.text = "LIDERANÇA GLOBAL FÍSICA"
+			"biologia": _lbl_title.text = "LIDERANÇA GLOBAL BIOLOGIA"
 	
 	# busca o ranking do periodo
 	var rm = get_node_or_null("/root/RankingManager")
@@ -586,11 +584,11 @@ func _atualizar_leaderboard() -> void:
 		if name_lbl == null or pts_lbl == null:
 			continue
 			
-		# Aplica fonte normal para clareza e proporção perfeita da referência
-		name_lbl.add_theme_font_override("font", font_normal)
-		pts_lbl.add_theme_font_override("font", font_normal)
-		name_lbl.add_theme_font_size_override("font_size", 12)
-		pts_lbl.add_theme_font_size_override("font_size", 11)
+		# Aplica fonte pixelada consistente para os nomes e pontuações
+		name_lbl.add_theme_font_override("font", font_pixel)
+		pts_lbl.add_theme_font_override("font", font_pixel)
+		name_lbl.add_theme_font_size_override("font_size", 13)
+		pts_lbl.add_theme_font_size_override("font_size", 12)
 			
 		var idx = i - 1
 		if idx < lista.size():

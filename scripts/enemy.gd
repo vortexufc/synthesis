@@ -611,6 +611,8 @@ func _instanciar_drop(caminho: String, dados_custom: Dictionary = {}) -> void:
 		cena = load(caminho.replace("res://scenes/Entidades/", "res://scenes/Entidades/Items/"))
 	if not cena: return
 	var item = cena.instantiate()
+	if "is_drop_dinamico" in item:
+		item.is_drop_dinamico = true
 	
 	if dados_custom.has("cor") and item.has_method("configurar_cor"):
 		item.configurar_cor(dados_custom["cor"])

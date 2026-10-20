@@ -50,11 +50,11 @@ func _physics_process(delta: float) -> void:
 	var player = get_tree().get_first_node_in_group("player")
 	if player and is_instance_valid(player):
 		var dist = global_position.distance_to(player.global_position)
-		if dist < 80.0: # Raio de atração magnética
+		if dist < 150.0: # Raio de atração magnética ampliado para alcançar itens atrás de balcões e obstáculos
 			var dir = (player.global_position - global_position).normalized()
-			var speed = lerp(220.0, 520.0, 1.0 - (dist / 80.0))
+			var speed = lerp(260.0, 580.0, 1.0 - (dist / 150.0))
 			global_position += dir * speed * delta
-			if dist < 16.0:
+			if dist < 24.0:
 				_coletar(player)
 
 func _ready() -> void:

@@ -149,6 +149,9 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 	if description.is_empty():
 		return {"success": false, "message": "A descrição não pode ser vazia!"}
 		
+	if DatabaseManager.user_token.is_empty():
+		return {"success": false, "message": "Contas de Visitante não podem criar clãs. Crie uma conta ou faça login!"}
+
 	var nick: String = get_player_nick()
 	if nick.is_empty() or nick == "NÃO LOGADO":
 		return {"success": false, "message": "Você precisa estar logado para criar um clã!"}
@@ -190,6 +193,9 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 	return {"success": true, "message": "Clã criado com sucesso!"}
 
 func join_clan(clan_name: String) -> Dictionary:
+	if DatabaseManager.user_token.is_empty():
+		return {"success": false, "message": "Contas de Visitante não podem entrar em clãs. Crie uma conta ou faça login!"}
+
 	var nick: String = get_player_nick()
 	if nick.is_empty() or nick == "NÃO LOGADO":
 		return {"success": false, "message": "Você precisa estar logado para entrar em um clã!"}

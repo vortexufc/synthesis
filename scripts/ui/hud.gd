@@ -143,15 +143,15 @@ func _criar_vinheta_critica() -> void:
 	_vinheta_critica.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_vinheta_critica.modulate.a = 0.0
 	
-	# Gradiente radial com túnel escurecido e vermelho escarlate nas bordas (Item 5 melhorado)
+	# Gradiente radial com túnel escurecido e vermelho suave nas bordas
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([
 		Color(0.85, 0.05, 0.05, 0.0),    # Centro limpo
-		Color(0.85, 0.05, 0.05, 0.16),   # Transição suave
-		Color(0.92, 0.02, 0.02, 0.68),   # Borda vermelha pulsante
-		Color(0.12, 0.0, 0.03, 0.90)     # Cantos com vinheta escura (visão de túnel)
+		Color(0.85, 0.05, 0.05, 0.06),   # Transição muito sutil
+		Color(0.90, 0.05, 0.05, 0.32),   # Borda vermelha suave
+		Color(0.25, 0.01, 0.02, 0.45)    # Cantos discretos
 	])
-	grad.offsets = PackedFloat32Array([0.0, 0.40, 0.80, 1.0])
+	grad.offsets = PackedFloat32Array([0.0, 0.55, 0.88, 1.0])
 	
 	var tex = GradientTexture2D.new()
 	tex.gradient = grad
@@ -177,16 +177,16 @@ func _atualizar_alerta_critico(ativo: bool) -> void:
 			_tween_vinheta.kill()
 		_tween_vinheta = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		if ativo:
-			# Ritmo cardiovascular duplo (Lub-Dub orgânico)
+			# Ritmo cardiovascular duplo suave
 			_tween_vinheta.set_loops()
 			# Pulso 1: Lub
-			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.55, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.30, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-			# Pulso 2: DUB (impacto principal)
-			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.88, 0.11).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.18, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.22, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.10, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			# Pulso 2: DUB (impacto secundário contido)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.35, 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.06, 0.22).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			# Intervalo de descanso entre batimentos
-			_tween_vinheta.tween_interval(0.42)
+			_tween_vinheta.tween_interval(0.48)
 		else:
 			_tween_vinheta.tween_property(_vinheta_critica, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 			
@@ -355,7 +355,7 @@ func mostrar_notificacao_quest(titulo: String, subtitulo: String, cor_borda: Col
 		_toast_tween.tween_property(_toast_panel, "position:y", 35.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		_toast_tween.parallel().tween_property(_toast_panel, "modulate:a", 1.0, 0.25)
 	
-	_toast_tween.tween_interval(2.0)
+	_toast_tween.tween_interval(3.5)
 	
 	_toast_tween.tween_property(_toast_panel, "position:y", -90.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	_toast_tween.parallel().tween_property(_toast_panel, "modulate:a", 0.0, 0.30)

@@ -113,7 +113,7 @@ const PARES_POR_ANDAR = {
 	]
 }
 
-var _font_card: SystemFont
+var _font_card: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 
 func _ready() -> void:
 	add_to_group("minigame_ativo")
@@ -121,9 +121,6 @@ func _ready() -> void:
 	add_to_group("interacao_ativa")
 	layer = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_font_card = SystemFont.new()
-	_font_card.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	_font_card.font_weight = 700
 	_construir_interface()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -226,13 +223,8 @@ func _construir_interface() -> void:
 	particulas.color = Color(0.85, 0.65, 1.0, 0.30)
 	backdrop.add_child(particulas)
 	
-	var font_sans = SystemFont.new()
-	font_sans.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	font_sans.font_weight = 600
-
-	var font_titulo = SystemFont.new()
-	font_titulo.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	font_titulo.font_weight = 700
+	var font_sans: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+	var font_titulo: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 
 	# painel central
 	painel_central = PanelContainer.new()
@@ -256,6 +248,8 @@ func _construir_interface() -> void:
 	style_panel.content_margin_right = 24
 	style_panel.content_margin_top = 20
 	style_panel.content_margin_bottom = 20
+	painel_central.add_theme_stylebox_override("panel", style_panel)
+
 	# container central
 	var center_painel = CenterContainer.new()
 	center_painel.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -286,7 +280,7 @@ func _construir_interface() -> void:
 	lbl_titulo = Label.new()
 	lbl_titulo.text = "DESAFIO DA MEMÓRIA ARCANA"
 	lbl_titulo.add_theme_font_override("font", font_titulo)
-	lbl_titulo.add_theme_font_size_override("font_size", 20)
+	lbl_titulo.add_theme_font_size_override("font_size", 22)
 	lbl_titulo.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
 	lbl_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox_titulos.add_child(lbl_titulo)
@@ -294,7 +288,7 @@ func _construir_interface() -> void:
 	lbl_subtitulo = Label.new()
 	lbl_subtitulo.text = "Encontre os 3 pares correspondentes!"
 	lbl_subtitulo.add_theme_font_override("font", font_sans)
-	lbl_subtitulo.add_theme_font_size_override("font_size", 13)
+	lbl_subtitulo.add_theme_font_size_override("font_size", 15)
 	lbl_subtitulo.add_theme_color_override("font_color", Color(0.75, 0.80, 0.95))
 	lbl_subtitulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox_titulos.add_child(lbl_subtitulo)
@@ -304,6 +298,16 @@ func _construir_interface() -> void:
 	btn_fechar.custom_minimum_size = Vector2(36, 32)
 	btn_fechar.add_theme_font_override("font", font_sans)
 	btn_fechar.add_theme_font_size_override("font_size", 16)
+	var sb_btn_fechar = StyleBoxFlat.new()
+	sb_btn_fechar.bg_color = Color(0.3, 0.1, 0.15, 0.9)
+	sb_btn_fechar.border_color = Color(0.85, 0.3, 0.3)
+	sb_btn_fechar.set_border_width_all(1)
+	sb_btn_fechar.set_corner_radius_all(6)
+	btn_fechar.add_theme_stylebox_override("normal", sb_btn_fechar)
+	var sb_btn_fechar_h = sb_btn_fechar.duplicate()
+	sb_btn_fechar_h.bg_color = Color(0.65, 0.15, 0.15)
+	btn_fechar.add_theme_stylebox_override("hover", sb_btn_fechar_h)
+	btn_fechar.add_theme_stylebox_override("pressed", sb_btn_fechar_h)
 	btn_fechar.pressed.connect(_desistir)
 	hbox_top.add_child(btn_fechar)
 	
@@ -798,7 +802,7 @@ func _finalizar_derrota() -> void:
 	bloqueio_input = true
 	
 	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("fail")
+		AudioManager.tocar_som_dano()
 		
 	# da dano se o tempo acabar
 	if get_node_or_null("/root/PlayerStats"):
