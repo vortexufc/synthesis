@@ -30,8 +30,13 @@ var lbl_pares: Label
 var col_a_container: VBoxContainer
 var col_b_container: VBoxContainer
 var banner_resultado: PanelContainer
+var lbl_banner_emblema: Label
 var lbl_banner_titulo: Label
 var lbl_banner_sub: Label
+var box_banner_recompensas: HBoxContainer
+var btn_banner_continuar: Button
+var _fechamento_iniciado: bool = false
+var _ultimo_foi_vitoria: bool = false
 
 # pares por materia
 const PARES_POR_ANDAR = {
@@ -124,7 +129,16 @@ func _ready() -> void:
 		_construir_interface()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or not is_inside_tree() or not jogo_ativo or bloqueio_input or _finalizado:
+	if not visible or not is_inside_tree():
+		return
+		
+	if banner_resultado and banner_resultado.visible:
+		if event.is_action_pressed("ui_accept") or (event is InputEventKey and event.pressed and (event.keycode == KEY_SPACE or event.keycode == KEY_ENTER or event.keycode == KEY_F)):
+			get_viewport().set_input_as_handled()
+			_ao_clicar_continuar()
+			return
+			
+	if not jogo_ativo or bloqueio_input or _finalizado:
 		return
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
@@ -413,43 +427,97 @@ func _construir_interface() -> void:
 	backdrop.add_child(center_banner)
 	
 	banner_resultado = PanelContainer.new()
-	banner_resultado.custom_minimum_size = Vector2(520, 160)
+	banner_resultado.custom_minimum_size = Vector2(560, 270)
 	banner_resultado.visible = false
+	banner_resultado.clip_contents = true
 	
 	var sb_banner = StyleBoxFlat.new()
-	sb_banner.bg_color = Color(0.05, 0.04, 0.09, 0.98)
+	sb_banner.bg_color = Color(0.06, 0.12, 0.28, 0.98) # Azul royal arcano elegante
 	sb_banner.border_width_left = 3
 	sb_banner.border_width_right = 3
 	sb_banner.border_width_top = 3
 	sb_banner.border_width_bottom = 3
-	sb_banner.border_color = Color(1.0, 0.85, 0.3)
-	sb_banner.corner_radius_top_left = 10
-	sb_banner.corner_radius_top_right = 10
-	sb_banner.corner_radius_bottom_left = 10
-	sb_banner.corner_radius_bottom_right = 10
-	sb_banner.shadow_size = 25
-	sb_banner.content_margin_left = 20
-	sb_banner.content_margin_right = 20
-	sb_banner.content_margin_top = 16
-	sb_banner.content_margin_bottom = 16
+	sb_banner.border_color = Color(1.0, 0.84, 0.22, 1.0) # Borda amarela dourada brilhante
+	sb_banner.corner_radius_top_left = 14
+	sb_banner.corner_radius_top_right = 14
+	sb_banner.corner_radius_bottom_left = 14
+	sb_banner.corner_radius_bottom_right = 14
+	sb_banner.shadow_color = Color(0.98, 0.78, 0.18, 0.45) # Brilho dourado externo
+	sb_banner.shadow_size = 28
+	sb_banner.content_margin_left = 26
+	sb_banner.content_margin_right = 26
+	sb_banner.content_margin_top = 20
+	sb_banner.content_margin_bottom = 20
 	banner_resultado.add_theme_stylebox_override("panel", sb_banner)
 	
 	var vbox_b = VBoxContainer.new()
 	vbox_b.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox_b.add_theme_constant_override("separation", 8)
+	vbox_b.add_theme_constant_override("separation", 10)
 	banner_resultado.add_child(vbox_b)
+	
+	lbl_banner_emblema = Label.new()
+	lbl_banner_emblema.text = "⚡  VITÓRIA ELEMENTAL  ⚡"
+	lbl_banner_emblema.add_theme_font_override("font", font_titulo)
+	lbl_banner_emblema.add_theme_font_size_override("font_size", 14)
+	lbl_banner_emblema.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
+	lbl_banner_emblema.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox_b.add_child(lbl_banner_emblema)
 	
 	lbl_banner_titulo = Label.new()
 	lbl_banner_titulo.add_theme_font_override("font", font_titulo)
-	lbl_banner_titulo.add_theme_font_size_override("font_size", 22)
+	lbl_banner_titulo.add_theme_font_size_override("font_size", 24)
+	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.90, 0.35))
 	lbl_banner_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox_b.add_child(lbl_banner_titulo)
 	
 	lbl_banner_sub = Label.new()
 	lbl_banner_sub.add_theme_font_override("font", font_sans)
 	lbl_banner_sub.add_theme_font_size_override("font_size", 14)
+	lbl_banner_sub.add_theme_color_override("font_color", Color(0.80, 0.90, 1.0))
 	lbl_banner_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox_b.add_child(lbl_banner_sub)
+	
+	# Divisor com losangos decorativos dourados
+	var lbl_divisor = Label.new()
+	lbl_divisor.text = "――― ◆ ―――"
+	lbl_divisor.add_theme_font_size_override("font_size", 10)
+	lbl_divisor.add_theme_color_override("font_color", Color(1.0, 0.82, 0.28, 0.7))
+	lbl_divisor.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox_b.add_child(lbl_divisor)
+	
+	# Container de cards estilizados de efeitos/recompensas
+	box_banner_recompensas = HBoxContainer.new()
+	box_banner_recompensas.alignment = BoxContainer.ALIGNMENT_CENTER
+	box_banner_recompensas.add_theme_constant_override("separation", 12)
+	vbox_b.add_child(box_banner_recompensas)
+	
+	# Botão continuar com efeito hover azul/dourado
+	btn_banner_continuar = Button.new()
+	btn_banner_continuar.text = "✨ CONTINUAR [ESPAÇO] ✨"
+	btn_banner_continuar.custom_minimum_size = Vector2(240, 36)
+	btn_banner_continuar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	btn_banner_continuar.add_theme_font_override("font", font_titulo)
+	btn_banner_continuar.add_theme_font_size_override("font_size", 14)
+	btn_banner_continuar.add_theme_color_override("font_color", Color(1.0, 0.95, 0.55))
+	
+	var sb_btn_c = StyleBoxFlat.new()
+	sb_btn_c.bg_color = Color(0.10, 0.20, 0.45, 0.95)
+	sb_btn_c.border_color = Color(1.0, 0.84, 0.25, 0.95)
+	sb_btn_c.set_border_width_all(2)
+	sb_btn_c.set_corner_radius_all(8)
+	sb_btn_c.content_margin_left = 18
+	sb_btn_c.content_margin_right = 18
+	sb_btn_c.content_margin_top = 6
+	sb_btn_c.content_margin_bottom = 6
+	btn_banner_continuar.add_theme_stylebox_override("normal", sb_btn_c)
+	
+	var sb_btn_c_h = sb_btn_c.duplicate()
+	sb_btn_c_h.bg_color = Color(0.18, 0.32, 0.68, 1.0)
+	sb_btn_c_h.border_color = Color(1.0, 1.0, 0.65, 1.0)
+	btn_banner_continuar.add_theme_stylebox_override("hover", sb_btn_c_h)
+	btn_banner_continuar.add_theme_stylebox_override("pressed", sb_btn_c_h)
+	btn_banner_continuar.pressed.connect(_ao_clicar_continuar)
+	vbox_b.add_child(btn_banner_continuar)
 	
 	center_banner.add_child(banner_resultado)
 
@@ -1044,35 +1112,110 @@ func _atualizar_timer_ui() -> void:
 			else:
 				sb.bg_color = Color(0.2, 0.75, 1.0)
 
+func _criar_card_recompensa(icone: String, titulo: String, desc: String, cor_destaque: Color) -> PanelContainer:
+	var card = PanelContainer.new()
+	card.custom_minimum_size = Vector2(170, 56)
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.18, 0.90) # Fundo azul meia-noite translúcido
+	sb.border_color = Color(1.0, 0.82, 0.25, 0.75) # Borda dourada sutil
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(8)
+	sb.content_margin_left = 12
+	sb.content_margin_right = 12
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	card.add_theme_stylebox_override("panel", sb)
+	
+	var hbox = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 8)
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(hbox)
+	
+	var lbl_ico = Label.new()
+	lbl_ico.text = icone
+	lbl_ico.add_theme_font_size_override("font_size", 20)
+	hbox.add_child(lbl_ico)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 2)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_child(vbox)
+	
+	var lbl_tit = Label.new()
+	lbl_tit.text = titulo
+	lbl_tit.add_theme_font_size_override("font_size", 12)
+	lbl_tit.add_theme_color_override("font_color", cor_destaque)
+	vbox.add_child(lbl_tit)
+	
+	var lbl_desc = Label.new()
+	lbl_desc.text = desc
+	lbl_desc.add_theme_font_size_override("font_size", 11)
+	lbl_desc.add_theme_color_override("font_color", Color(0.85, 0.90, 0.98))
+	vbox.add_child(lbl_desc)
+	
+	return card
+
+func _ao_clicar_continuar() -> void:
+	if _fechamento_iniciado:
+		return
+	_fechamento_iniciado = true
+	_fechar_e_emitir(_ultimo_foi_vitoria)
+
 func _finalizar_vitoria() -> void:
 	if _finalizado:
 		return
 	_finalizado = true
 	jogo_ativo = false
 	bloqueio_input = true
+	_ultimo_foi_vitoria = true
+	_fechamento_iniciado = false
 	
 	_tocar_sfx("win")
 	
 	# Dispara explosão comemorativa de confetes/estrelas (Item 3)
 	var vp_size = get_viewport().get_visible_rect().size
 	_disparar_confetes_vitoria(vp_size * 0.5)
+	
+	var sb_banner = banner_resultado.get_theme_stylebox("panel") as StyleBoxFlat
+	if sb_banner:
+		sb_banner.bg_color = Color(0.06, 0.12, 0.28, 0.98) # Azul royal arcano
+		sb_banner.border_color = Color(1.0, 0.84, 0.22, 1.0) # Borda amarela dourada brilhante
+		sb_banner.shadow_color = Color(0.98, 0.78, 0.18, 0.45)
+		
+	lbl_banner_emblema.text = "⚡  VITÓRIA ELEMENTAL  ⚡"
+	lbl_banner_emblema.add_theme_color_override("font_color", Color(1.0, 0.88, 0.45))
 		
 	lbl_banner_titulo.text = "BARREIRA RÚNICA DESTRUÍDA!"
-	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
+	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.90, 0.35))
 	
-	lbl_banner_sub.text = "Conexões elementais estabelecidas com perfeição!\nO Mago desferiu um DANO CRÍTICO MASSIVO de -40 HP no Campeão!"
+	lbl_banner_sub.text = "Conexões elementais estabelecidas com perfeição!"
+	lbl_banner_sub.add_theme_color_override("font_color", Color(0.80, 0.90, 1.0))
+	
+	for c in box_banner_recompensas.get_children():
+		c.queue_free()
+		
+	box_banner_recompensas.add_child(_criar_card_recompensa("💥", "Dano Crítico Massivo", "-40 HP no Campeão Rúnico", Color(1.0, 0.45, 0.45)))
+	box_banner_recompensas.add_child(_criar_card_recompensa("🔮", "Quebra Elemental", "Defesa Rúnica Anulada!", Color(0.40, 0.88, 1.0)))
+	
+	btn_banner_continuar.text = "✨ CONTINUAR [ESPAÇO] ✨"
 	
 	banner_resultado.visible = true
 	banner_resultado.modulate.a = 0.0
 	banner_resultado.scale = Vector2(0.8, 0.8)
-	_aplicar_efeito_sheen(banner_resultado) # Brilho reluzente no banner (Item 7)
+	
+	# Efeito de brilho reluzente passando de lado contínuo e imediato
+	_aplicar_efeito_sheen(banner_resultado, Color(1.0, 0.95, 0.80, 0.65), 1.6)
 	
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(banner_resultado, "modulate:a", 1.0, 0.25)
 	tw.tween_property(banner_resultado, "scale", Vector2(1.0, 1.0), 0.25)
 	
-	await get_tree().create_timer(1.8, true, false, true).timeout
-	_fechar_e_emitir(true)
+	# Auto-fechamento após 4.2 segundos caso o jogador não clique
+	get_tree().create_timer(4.2, true, false, true).timeout.connect(func():
+		if not _fechamento_iniciado:
+			_ao_clicar_continuar()
+	)
 
 func _disparar_confetes_vitoria(pos_centro: Vector2) -> void:
 	var part = CPUParticles2D.new()
@@ -1113,13 +1256,32 @@ func _finalizar_derrota() -> void:
 	_finalizado = true
 	jogo_ativo = false
 	bloqueio_input = true
+	_ultimo_foi_vitoria = false
+	_fechamento_iniciado = false
 	
 	_tocar_sfx("fail")
-		
-	lbl_banner_titulo.text = "DESCARGA RÚNICA!"
-	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	
-	lbl_banner_sub.text = "O tempo esgotou e a barreira repeliu seu ataque!\nVocê sofreu uma descarga de -20 HP do Campeão Rúnico."
+	var sb_banner = banner_resultado.get_theme_stylebox("panel") as StyleBoxFlat
+	if sb_banner:
+		sb_banner.bg_color = Color(0.18, 0.05, 0.08, 0.98) # Vermelho rubi escuro
+		sb_banner.border_color = Color(1.0, 0.35, 0.35, 1.0) # Borda vermelha
+		sb_banner.shadow_color = Color(0.9, 0.2, 0.2, 0.4)
+		
+	lbl_banner_emblema.text = "⚠️  DESCARGA RÚNICA  ⚠️"
+	lbl_banner_emblema.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
+		
+	lbl_banner_titulo.text = "ATAQUE REPELIDO!"
+	lbl_banner_titulo.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
+	
+	lbl_banner_sub.text = "O tempo esgotou e a barreira repeliu seu feitiço!"
+	lbl_banner_sub.add_theme_color_override("font_color", Color(0.95, 0.8, 0.8))
+	
+	for c in box_banner_recompensas.get_children():
+		c.queue_free()
+		
+	box_banner_recompensas.add_child(_criar_card_recompensa("⚡", "Contra-Ataque", "-20 HP de Descarga no Mago", Color(1.0, 0.35, 0.35)))
+	
+	btn_banner_continuar.text = "✕ CONTINUAR [ESPAÇO]"
 	
 	banner_resultado.visible = true
 	banner_resultado.modulate.a = 0.0
@@ -1129,8 +1291,10 @@ func _finalizar_derrota() -> void:
 	tw.tween_property(banner_resultado, "modulate:a", 1.0, 0.25)
 	tw.tween_property(banner_resultado, "scale", Vector2(1.0, 1.0), 0.25)
 	
-	await get_tree().create_timer(1.8, true, false, true).timeout
-	_fechar_e_emitir(false)
+	get_tree().create_timer(3.5, true, false, true).timeout.connect(func():
+		if not _fechamento_iniciado:
+			_ao_clicar_continuar()
+	)
 
 func _fechar_e_emitir(vitoria: bool) -> void:
 	remove_from_group("minigame_ativo")
@@ -1151,10 +1315,14 @@ func _tocar_sfx(nome: String) -> void:
 	if am and am.has_method("play_sfx"):
 		am.play_sfx(nome)
 
-func _aplicar_efeito_sheen(alvo: Control, cor_brilho: Color = Color(1.0, 1.0, 1.0, 0.38), intervalo: float = 3.2) -> void:
+func _aplicar_efeito_sheen(alvo: Control, cor_brilho: Color = Color(1.0, 1.0, 1.0, 0.55), intervalo: float = 1.8) -> void:
 	if alvo == null or not is_instance_valid(alvo):
 		return
 	alvo.clip_contents = true
+	
+	var antigo = alvo.get_node_or_null("SheenEffect")
+	if antigo:
+		antigo.queue_free()
 	
 	var sheen = TextureRect.new()
 	sheen.name = "SheenEffect"
@@ -1164,17 +1332,21 @@ func _aplicar_efeito_sheen(alvo: Control, cor_brilho: Color = Color(1.0, 1.0, 1.
 	var grad = Gradient.new()
 	grad.colors = PackedColorArray([
 		Color(1, 1, 1, 0.0),
+		Color(cor_brilho.r, cor_brilho.g, cor_brilho.b, cor_brilho.a * 0.35),
 		cor_brilho,
+		Color(1.0, 1.0, 1.0, min(1.0, cor_brilho.a * 1.5)),
+		cor_brilho,
+		Color(cor_brilho.r, cor_brilho.g, cor_brilho.b, cor_brilho.a * 0.35),
 		Color(1, 1, 1, 0.0)
 	])
-	grad.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
+	grad.offsets = PackedFloat32Array([0.0, 0.30, 0.46, 0.50, 0.54, 0.70, 1.0])
 	
 	var tex = GradientTexture2D.new()
 	tex.gradient = grad
 	tex.fill = GradientTexture2D.FILL_LINEAR
 	tex.fill_from = Vector2(0.0, 0.5)
 	tex.fill_to = Vector2(1.0, 0.5)
-	tex.width = 64
+	tex.width = 120
 	tex.height = 128
 	sheen.texture = tex
 	
@@ -1191,12 +1363,13 @@ func _iniciar_animacao_sheen(alvo: Control, sheen: TextureRect, intervalo: float
 	var h = max(alvo.size.y, alvo.custom_minimum_size.y)
 	if w <= 0 or h <= 0: return
 	
-	sheen.size = Vector2(w * 0.45, h * 2.4)
+	sheen.size = Vector2(w * 0.55, h * 2.6)
 	sheen.rotation = deg_to_rad(24.0)
 	sheen.pivot_offset = sheen.size * 0.5
-	sheen.position = Vector2(-sheen.size.x * 2.0, -h * 0.7)
+	sheen.position = Vector2(-sheen.size.x * 2.2, -h * 0.8)
 	
 	var tw = sheen.create_tween().set_loops().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	# Executa imediatamente a varredura e depois aguarda o intervalo em loop
+	tw.tween_property(sheen, "position:x", w + sheen.size.x * 1.5, 0.85).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(sheen, "position:x", -sheen.size.x * 2.2, 0.0)
 	tw.tween_interval(intervalo)
-	tw.tween_property(sheen, "position:x", w + sheen.size.x, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(sheen, "position:x", -sheen.size.x * 2.0, 0.0)
