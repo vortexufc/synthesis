@@ -151,12 +151,8 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false, pular_co
 	if get_tree().current_scene and "corredor" in get_tree().current_scene.scene_file_path.to_lower():
 		pular_animacao = true
 		
-	# por enquanto so toca cutscene em quimica
-	if "Fisica" in target_scene or "Física" in target_scene or "Biologia" in target_scene:
-		pular_animacao = true
-	
 	if not pular_animacao:
-		await _tocar_animacao_corredor(vp_size, porta_de_retorno)
+		await _tocar_animacao_corredor(vp_size, porta_de_retorno, target_scene)
 
 	# troca a cena imediatamente
 	get_tree().change_scene_to_file(target_scene)
@@ -192,6 +188,35 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false, pular_co
 		if ps and ps.has_method("decrementar_buff_escudo"):
 			ps.decrementar_buff_escudo()
 
+func _obter_cena_corredor(target: String) -> PackedScene:
+	var t = target.to_lower()
+	var c = ""
+	if get_tree() and get_tree().current_scene:
+		c = get_tree().current_scene.scene_file_path.to_lower()
+		
+	if "biologia" in t or "estufa" in t or "biologia" in c or "estufa" in c:
+		var res_bio = load("res://scenes/Salas/Comum/MiniCorredorTransicao_Biologia.tscn")
+		if res_bio:
+			return res_bio
+	elif "fisica" in t or "física" in t or "oficina" in t or "fisica" in c or "física" in c or "oficina" in c:
+		var res_fis = load("res://scenes/Salas/Comum/MiniCorredorTransicao_Fisica.tscn")
+		if res_fis:
+			return res_fis
+			
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.active_dungeon != "":
+		var d = db.active_dungeon.to_lower()
+		if "biologia" in d:
+			var res_bio = load("res://scenes/Salas/Comum/MiniCorredorTransicao_Biologia.tscn")
+			if res_bio:
+				return res_bio
+		elif "fisica" in d or "física" in d:
+			var res_fis = load("res://scenes/Salas/Comum/MiniCorredorTransicao_Fisica.tscn")
+			if res_fis:
+				return res_fis
+
+	return load("res://scenes/Salas/Comum/MiniCorredorTransicao.tscn")
+
 func _obter_textura_luz() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()
 	var grad = Gradient.new()
@@ -210,7 +235,7 @@ func _obter_textura_luz() -> Texture2D:
 	grad_tex.height = 256
 	return grad_tex
 
-func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
+func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool, target: String = "") -> void:
 	# viewport pra renderizar a animacao do corredor
 	var vp_container = SubViewportContainer.new()
 	vp_container.anchors_preset = Control.PRESET_FULL_RECT
@@ -222,23 +247,34 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 	add_child(vp_container)
 	move_child(vp_container, -1)
 	
-	# carrega a ceninha do corredor
-	var cena_corredor = load("res://scenes/Salas/Comum/MiniCorredorTransicao.tscn")
+	# carrega a ceninha do corredor de acordo com o andar atual
+	var cena_corredor = _obter_cena_corredor(target)
 	var corredor = cena_corredor.instantiate()
 	vp.add_child(corredor)
 	
 	var porta_cima = corredor.get_node_or_null("PortaTransicao")
 	var porta_baixo = corredor.get_node_or_null("PortaRetorno")
 
-	# luzes dos portais
+	# luzes dos portais temáticas por andar
 	var tex_luz = _obter_textura_luz()
+	var cor_cima = Color(0.85, 0.38, 1.0, 1.0) # Roxo arcano alquímico
+	var cor_baixo = Color(0.25, 0.78, 1.0, 1.0) # Azul misterioso
+	
+	var t_low = target.to_lower()
+	var c_low = get_tree().current_scene.scene_file_path.to_lower() if (get_tree() and get_tree().current_scene) else ""
+	if "fisica" in t_low or "física" in t_low or "oficina" in t_low or "fisica" in c_low or "física" in c_low:
+		cor_cima = Color(0.35, 0.85, 1.0, 1.0) # Ciano elétrico
+		cor_baixo = Color(1.0, 0.75, 0.20, 1.0) # Âmbar/Dourado dinâmico
+	elif "biologia" in t_low or "estufa" in t_low or "biologia" in c_low or "estufa" in c_low:
+		cor_cima = Color(0.30, 1.0, 0.45, 1.0) # Verde esmeralda vivo
+		cor_baixo = Color(0.20, 0.85, 0.75, 1.0) # Turquesa natural
 				
 	# luz nos portais
 	if porta_cima:
 		var luz_p_cima = PointLight2D.new()
 		luz_p_cima.name = "LuzPortalCima"
 		luz_p_cima.texture = tex_luz
-		luz_p_cima.color = Color(0.85, 0.38, 1.0, 1.0) # Roxo arcano alquímico
+		luz_p_cima.color = cor_cima
 		luz_p_cima.energy = 0.50
 		luz_p_cima.texture_scale = 1.50
 		luz_p_cima.position = Vector2(0, -25)
@@ -247,7 +283,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool) -> void:
 		var luz_p_baixo = PointLight2D.new()
 		luz_p_baixo.name = "LuzPortalBaixo"
 		luz_p_baixo.texture = tex_luz
-		luz_p_baixo.color = Color(0.25, 0.78, 1.0, 1.0) # Azul misterioso
+		luz_p_baixo.color = cor_baixo
 		luz_p_baixo.energy = 0.50
 		luz_p_baixo.texture_scale = 1.50
 		luz_p_baixo.position = Vector2(0, -25)
