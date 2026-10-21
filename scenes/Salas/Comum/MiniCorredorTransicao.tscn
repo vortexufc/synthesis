@@ -1,8 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Texture2D" uid="uid://d06rnbcrd544y" path="res://assets/sprites/tilesets/Alquimia/Floor&Wall.png" id="1_floor_wall"]
-[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="2_porta"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/Tocha.tscn" id="3_tocha"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/Tocha.tscn" id="2_tocha"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_floor"]
 texture = ExtResource("1_floor_wall")
@@ -106,34 +105,33 @@ scale = Vector2(3, 3)
 tile_map_data = PackedByteArray("AAAJABMAAAAOAAQAAAAJABIAAAAOAAQAAAAJABEAAAAOAAQAAAAJABAAAAAOAAQAAAAJAA8AAAAOAAQAAAAKAA8AAAAOAAQAAAAKABAAAAAOAAQAAAAKABEAAAAOAAQAAAAKABIAAAAOAAQAAAAKABMAAAAOAAQAAAAPABMAAAAOAAQAAAAPABIAAAAOAAQAAAAPABEAAAAOAAQAAAAPABAAAAAOAAQAAAAPAA8AAAAOAAQAAAAPAA4AAAAOAAQAAAAOAA4AAAAOAAQAAAALAA4AAAAOAAQAAAAKAA4AAAAOAAQAAAAJAA4AAAAOAAQAAAAQAA4AAAAOAAQAAAAQAA8AAAAOAAQAAAAQABAAAAAOAAQAAAAQABEAAAAOAAQAAAAQABIAAAAOAAQAAAAQABMAAAAOAAQAAAAKABYAAAAsABQAAAAQABYAAAAyABQAAAAQABgAAAA2ABYAAAAQABkAAAA2ABYAAAAQABcAAAA2ABYAAAAQAAwAAAA2ABYAAAAQAA0AAAA2ABYAAAAQAA4AAAA2ABYAAAAQAA8AAAA2ABYAAAAQABAAAAA2ABYAAAAQABEAAAA2ABYAAAAQABIAAAA2ABYAAAAQABMAAAA2ABYAAAAQABQAAAA2ABYAAAAQABUAAAA2ABYAAAAQABYAAAA2ABYAAAAQABcAAAA2ABYAAAAQABgAAAA2ABYAAAAQABkAAAA2ABYAAAAQABoAAAA2ABYAAAAQABsAAAA2ABYAAAAQABwAAAA2ABYAAAAQAB0AAAA2ABYAAAAQAB4AAAA2ABYAAAAKABgAAAAoABYAAAAKABkAAAAoABYAAAAKAAwAAAAoABYAAAAKAA0AAAAoABYAAAAKAA4AAAAoABYAAAAKAA8AAAAoABYAAAAKABAAAAAoABYAAAAKABEAAAAoABYAAAAKABIAAAAoABYAAAAKABMAAAAoABYAAAAKABQAAAAoABYAAAAKABUAAAAoABYAAAAKABYAAAAoABYAAAAKABcAAAAoABYAAAAKABgAAAAoABYAAAAKABkAAAAoABYAAAAKABoAAAAoABYAAAAKABsAAAAoABYAAAAKABwAAAAoABYAAAAKAB0AAAAoABYAAAAKAB4AAAAoABYAAAANABIAAAAgAAAAAAAMAA4AAAAOAAQAAAANAA4AAAAOAAQAAAANAB0AAAAgAAAAAAAQAB8AAAA2ABYAAAAQACAAAAA2ABYAAAAQACEAAAA2ABYAAAAQACIAAAA2ABYAAAAQACMAAAA2ABYAAAAQACQAAAA2ABYAAAAQACUAAAA2ABYAAAAQACYAAAA2ABYAAAAKAB8AAAAoABYAAAAKACAAAAAoABYAAAAKACEAAAAoABYAAAAKACIAAAAoABYAAAAKACMAAAAoABYAAAAKACQAAAAoABYAAAAKACUAAAAoABYAAAAKACYAAAAoABYAAAAKACcAAAAoABYAAAA=")
 tile_set = SubResource("TileSet_wall")
 
-[node name="PortaTransicao" parent="." instance=ExtResource("2_porta")]
+[node name="PortaTransicao" type="Marker2D" parent="."]
 position = Vector2(628, 941)
 
-[node name="PortaRetorno" parent="." instance=ExtResource("2_porta")]
+[node name="PortaRetorno" type="Marker2D" parent="."]
 position = Vector2(628, 1237)
-porta_de_retorno = true
 
 [node name="Tochas" type="Node2D" parent="."]
 
-[node name="TochaCimaEsq" parent="Tochas" instance=ExtResource("3_tocha")]
+[node name="TochaCimaEsq" parent="Tochas" instance=ExtResource("2_tocha")]
 position = Vector2(544, 704)
 scale = Vector2(-1, 1)
 
-[node name="TochaCimaDir" parent="Tochas" instance=ExtResource("3_tocha")]
+[node name="TochaCimaDir" parent="Tochas" instance=ExtResource("2_tocha")]
 position = Vector2(712, 704)
 
-[node name="TochaMeioEsq" parent="Tochas" instance=ExtResource("3_tocha")]
+[node name="TochaMeioEsq" parent="Tochas" instance=ExtResource("2_tocha")]
 position = Vector2(544, 896)
 scale = Vector2(-1, 1)
 
-[node name="TochaMeioDir" parent="Tochas" instance=ExtResource("3_tocha")]
+[node name="TochaMeioDir" parent="Tochas" instance=ExtResource("2_tocha")]
 position = Vector2(712, 896)
 
-[node name="TochaBaixoEsq" parent="Tochas" instance=ExtResource("3_tocha")]
+[node name="TochaBaixoEsq" parent="Tochas" instance=ExtResource("2_tocha")]
 position = Vector2(544, 1088)
 scale = Vector2(-1, 1)
 
-[node name="TochaBaixoDir" parent="Tochas" instance=ExtResource("3_tocha")]
+[node name="TochaBaixoDir" parent="Tochas" instance=ExtResource("2_tocha")]
 position = Vector2(712, 1088)
 
 [node name="Camera2D" type="Camera2D" parent="."]

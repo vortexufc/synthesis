@@ -239,6 +239,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool, target: 
 	# viewport pra renderizar a animacao do corredor
 	var vp_container = SubViewportContainer.new()
 	vp_container.anchors_preset = Control.PRESET_FULL_RECT
+	vp_container.modulate.a = 0.0
 	
 	var vp = SubViewport.new()
 	vp.size = vp_size
@@ -246,6 +247,9 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool, target: 
 	vp_container.add_child(vp)
 	add_child(vp_container)
 	move_child(vp_container, -1)
+	
+	var tw_fade_in = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tw_fade_in.tween_property(vp_container, "modulate:a", 1.0, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
 	# carrega a ceninha do corredor de acordo com o andar atual
 	var cena_corredor = _obter_cena_corredor(target)
@@ -304,6 +308,7 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool, target: 
 	dummy.set_script(null)
 	for child in dummy.get_children():
 		if child is Camera2D or child is CollisionShape2D or child is AudioStreamPlayer2D or child.name == "PointLight2D":
+			dummy.remove_child(child)
 			child.queue_free()
 			
 	if porta_de_retorno:
@@ -354,18 +359,26 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool, target: 
 			luz_player.energy = randf_range(0.35, 0.41)
 	).set_delay(0.08)
 		
-	# move o boneco e a camera pro fim
+	# move o boneco e a camera pro fim com suavização
 	var tween_walk = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	if porta_de_retorno:
-		tween_walk.tween_property(dummy, "position:y", 1250, 1.0)
-		tween_walk.tween_property(cam, "position:y", 1150, 1.0)
+		tween_walk.tween_property(dummy, "position:y", 1250, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		tween_walk.tween_property(cam, "position:y", 1150, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	else:
-		tween_walk.tween_property(dummy, "position:y", 940, 1.0)
-		tween_walk.tween_property(cam, "position:y", 1040, 1.0)
+		tween_walk.tween_property(dummy, "position:y", 940, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		tween_walk.tween_property(cam, "position:y", 1040, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	
+	# Nos últimos passos, o mago entra no portal e se dissolve na luz
+	tween_walk.tween_property(dummy, "modulate:a", 0.0, 0.25).set_delay(0.72)
+	# E o viewport do corredor desvanece suavemente para o fundo preto da transição
+	tween_walk.tween_property(vp_container, "modulate:a", 0.0, 0.22).set_delay(0.76)
 	
 	await tween_walk.finished
 	tween_flicker.kill()
 	passo_timer.queue_free()
+	
+	# Aguarda a tela preta estar completamente apresentada antes de descarregar
+	await get_tree().process_frame
 		
 	# limpa o viewport
 	vp_container.queue_free()
