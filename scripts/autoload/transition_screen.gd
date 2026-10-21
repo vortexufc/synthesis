@@ -13,6 +13,7 @@ func _ready() -> void:
 		(color_rect.material as ShaderMaterial).set_shader_parameter("progresso", 0.0)
 	if color_rect:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		color_rect.visible = false
 	_configurar_vinheta_vida_baixa()
 
 func _configurar_vinheta_vida_baixa() -> void:
@@ -121,11 +122,9 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false, pular_co
 		mat.set_shader_parameter("progresso", 0.0)
 		
 	if color_rect:
+		color_rect.visible = true
 		color_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 		
-	# trava o player durante a transicao
-	get_tree().get_root().set_disable_input(true)
-	
 	# toca som de transicao
 	var am = get_node_or_null("/root/AudioManager")
 	if am and am.has_method("play_sfx"):
@@ -168,16 +167,16 @@ func change_scene(target_scene: String, porta_de_retorno: bool = false, pular_co
 		mat.set_shader_parameter("progresso", 1.0)
 		
 		var tween_out = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		tween_out.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 1.0, 0.0, 0.45).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween_out.tween_method(func(v: float): mat.set_shader_parameter("progresso", v), 1.0, 0.0, 0.40).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		await tween_out.finished
 		mat.set_shader_parameter("progresso", 0.0)
 		
 	if color_rect:
 		color_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		color_rect.visible = false
 	
-	# despausa o jogo
+	# despausa o jogo se estiver pausado
 	get_tree().paused = false
-	get_tree().get_root().set_disable_input(false)
 	is_transitioning = false
 	
 	# diminui 1 sala do buff de escudo
@@ -362,16 +361,16 @@ func _tocar_animacao_corredor(vp_size: Vector2, porta_de_retorno: bool, target: 
 	# move o boneco e a camera pro fim com suavização
 	var tween_walk = create_tween().set_parallel(true).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	if porta_de_retorno:
-		tween_walk.tween_property(dummy, "position:y", 1250, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-		tween_walk.tween_property(cam, "position:y", 1150, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		tween_walk.tween_property(dummy, "position:y", 1250, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tween_walk.tween_property(cam, "position:y", 1150, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	else:
-		tween_walk.tween_property(dummy, "position:y", 940, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-		tween_walk.tween_property(cam, "position:y", 1040, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		tween_walk.tween_property(dummy, "position:y", 940, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tween_walk.tween_property(cam, "position:y", 1040, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	
 	# Nos últimos passos, o mago entra no portal e se dissolve na luz
-	tween_walk.tween_property(dummy, "modulate:a", 0.0, 0.25).set_delay(0.72)
-	# E o viewport do corredor desvanece suavemente para o fundo preto da transição
-	tween_walk.tween_property(vp_container, "modulate:a", 0.0, 0.22).set_delay(0.76)
+	tween_walk.tween_property(dummy, "modulate:a", 0.0, 0.28).set_delay(0.65)
+	# E o viewport do corredor desvanece suavemente para o fundo preto da transição antes do término
+	tween_walk.tween_property(vp_container, "modulate:a", 0.0, 0.25).set_delay(0.70)
 	
 	await tween_walk.finished
 	tween_flicker.kill()

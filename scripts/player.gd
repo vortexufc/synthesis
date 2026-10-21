@@ -35,6 +35,9 @@ var _tempo_bloqueio_dash: float = 0.0
 func esta_em_interacao() -> bool:
 	if travado or em_interacao:
 		return true
+	var ts = get_node_or_null("/root/TransitionScreen")
+	if ts and ts.is_transitioning:
+		return true
 	if get_node_or_null("/root/QuizManager") and QuizManager.em_batalha:
 		return true
 	if get_tree():
@@ -256,6 +259,9 @@ func _reposicionar_na_porta_correta() -> void:
 					global_position.y += 180 # Porta no topo: entra descendo para dentro da sala
 				else:
 					global_position.y -= dist_spawn # Porta na base: entra subindo para dentro da sala
+				var cam = get_node_or_null("Camera2D") as Camera2D
+				if cam:
+					cam.reset_smoothing()
 				break
 		DungeonGenerator.vindo_de_porta_de_retorno = false
 	else:
@@ -287,6 +293,9 @@ func _reposicionar_na_porta_correta() -> void:
 					global_position.y += 180 # Porta no topo: entra descendo para dentro da sala (evita nascer fora no telhado)
 				else:
 					global_position.y -= dist_spawn # Porta na base: entra subindo para dentro da sala
+				var cam = get_node_or_null("Camera2D") as Camera2D
+				if cam:
+					cam.reset_smoothing()
 				break
 
 func _is_porta_norte(porta: Node2D, s_root: Node) -> bool:

@@ -20,18 +20,16 @@ void fragment() {
 	float dist = length(uv);
 	
 	if (modo == 0) {
-		// transicao em circulo
-		float max_raio = 1.15;
+		// transicao em circulo: raio amplo para ultrapassar com folga os cantos da tela (16:9, ultrawide, etc)
+		float max_raio = 1.35;
 		float raio = (1.0 - progresso) * max_raio;
 		
 		float alpha = smoothstep(raio - suavidade, raio + suavidade, dist);
 		
-		// brilho na borda do circulo
-		float halo = 0.0;
-		if (progresso > 0.005 && progresso < 0.995) {
-			float diff = abs(dist - raio);
-			halo = exp(-pow(diff / max(largura_borda, 0.001), 2.0));
-		}
+		// brilho na borda do circulo com fade suave contínuo para nunca dar corte brusco no final
+		float halo_fade = smoothstep(0.0, 0.08, progresso) * smoothstep(1.0, 0.92, progresso);
+		float diff = abs(dist - raio);
+		float halo = exp(-pow(diff / max(largura_borda, 0.001), 2.0)) * halo_fade;
 		
 		vec4 col = cor_fundo;
 		col.rgb = mix(col.rgb, cor_borda.rgb, halo * 0.95);
