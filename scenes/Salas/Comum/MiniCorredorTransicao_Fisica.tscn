@@ -2,9 +2,7 @@
 
 [ext_resource type="TileSet" uid="uid://ms6t05hijfja" path="res://scenes/Salas/Oficina_Física/Floor.tres" id="1_floor"]
 [ext_resource type="TileSet" uid="uid://d04gtlciy4pe8" path="res://scenes/Salas/Oficina_Física/Wall.tres" id="2_wall"]
-[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="3_porta"]
-[ext_resource type="Texture2D" uid="uid://dgt4spc1aviou" path="res://assets/sprites/tilesets/Física/porta.png" id="4_tex_porta"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/LuminariaFisica.tscn" id="5_luminaria"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/LuminariaFisica.tscn" id="3_luminaria"]
 
 [node name="MiniCorredor" type="Node2D"]
 
@@ -22,67 +20,30 @@ scale = Vector2(3, 3)
 tile_map_data = PackedByteArray("AAAKAA4AAABIAAQAAAAKABIAAABIAAQAAAAKABYAAABIAAQAAAAKABoAAABIAAQAAAAKAB4AAABIAAQAAAAKACIAAABIAAQAAAAQAA4AAABIAAQAAAAQABIAAABIAAQAAAAQABYAAABIAAQAAAAQABoAAABIAAQAAAAQAB4AAABIAAQAAAAQACIAAABIAAQAAAAKAAwAAAAAAAAAAAAOAAwAAAAEAAAAAAAKAA4AAAAAAAAAAAAOAA4AAAAEAAAAAAAKACQAAAAQAAwAAAAOACQAAAAQAAwAAAA=")
 tile_set = ExtResource("2_wall")
 
-[node name="PortaTransicao" parent="." instance=ExtResource("3_porta")]
+[node name="PortaTransicao" type="Marker2D" parent="."]
 position = Vector2(628, 941)
-frames_animacao = 4
-stride_animacao = 192
 
-[node name="FundoPreto" type="ColorRect" parent="PortaTransicao"]
-z_index = 1
-offset_left = -64.0
-offset_top = -178.0
-offset_right = 56.0
-offset_bottom = 42.0
-color = Color(0.08, 0.09, 0.11, 1)
-
-[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao"]
-z_index = 2
-position = Vector2(-3.5, -70)
-scale = Vector2(1.921875, 1.734375)
-texture = ExtResource("4_tex_porta")
-region_enabled = true
-region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
-
-[node name="PortaRetorno" parent="." instance=ExtResource("3_porta")]
+[node name="PortaRetorno" type="Marker2D" parent="."]
 position = Vector2(628, 1237)
-porta_de_retorno = true
-frames_animacao = 4
-stride_animacao = 192
-
-[node name="FundoPreto" type="ColorRect" parent="PortaRetorno"]
-z_index = 1
-offset_left = -64.0
-offset_top = -178.0
-offset_right = 56.0
-offset_bottom = 42.0
-color = Color(0.08, 0.09, 0.11, 1)
-
-[node name="SpritePorta" type="Sprite2D" parent="PortaRetorno"]
-z_index = 2
-position = Vector2(-3.5, -70)
-scale = Vector2(1.921875, 1.734375)
-texture = ExtResource("4_tex_porta")
-region_enabled = true
-region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 
 [node name="Luminarias" type="Node2D" parent="."]
 
-[node name="LuminariaCimaEsq" parent="Luminarias" instance=ExtResource("5_luminaria")]
+[node name="LuminariaCimaEsq" parent="Luminarias" instance=ExtResource("3_luminaria")]
 position = Vector2(536, 760)
 
-[node name="LuminariaCimaDir" parent="Luminarias" instance=ExtResource("5_luminaria")]
+[node name="LuminariaCimaDir" parent="Luminarias" instance=ExtResource("3_luminaria")]
 position = Vector2(720, 760)
 
-[node name="LuminariaMeioEsq" parent="Luminarias" instance=ExtResource("5_luminaria")]
+[node name="LuminariaMeioEsq" parent="Luminarias" instance=ExtResource("3_luminaria")]
 position = Vector2(536, 980)
 
-[node name="LuminariaMeioDir" parent="Luminarias" instance=ExtResource("5_luminaria")]
+[node name="LuminariaMeioDir" parent="Luminarias" instance=ExtResource("3_luminaria")]
 position = Vector2(720, 980)
 
-[node name="LuminariaBaixoEsq" parent="Luminarias" instance=ExtResource("5_luminaria")]
+[node name="LuminariaBaixoEsq" parent="Luminarias" instance=ExtResource("3_luminaria")]
 position = Vector2(536, 1200)
 
-[node name="LuminariaBaixoDir" parent="Luminarias" instance=ExtResource("5_luminaria")]
+[node name="LuminariaBaixoDir" parent="Luminarias" instance=ExtResource("3_luminaria")]
 position = Vector2(720, 1200)
 
 [node name="Camera2D" type="Camera2D" parent="."]

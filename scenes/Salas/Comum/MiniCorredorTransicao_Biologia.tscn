@@ -2,9 +2,7 @@
 
 [ext_resource type="TileSet" uid="uid://cntwv606ii4us" path="res://scenes/Salas/Estufa_Biologia/Floor_Estufa.tres" id="1_floor_bio"]
 [ext_resource type="TileSet" uid="uid://ydkhwchwav5o" path="res://scenes/Salas/Estufa_Biologia/Wall_Estufa.tres" id="2_wall_bio"]
-[ext_resource type="PackedScene" path="res://scenes/Mecanicas/porta_transicao.tscn" id="3_porta"]
-[ext_resource type="Texture2D" uid="uid://d0lft226afsts" path="res://assets/sprites/tilesets/Biologia/porta.png" id="4_tex_porta_bio"]
-[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/Tocha.tscn" id="5_tocha"]
+[ext_resource type="PackedScene" path="res://scenes/Entidades/Iluminação/Tocha.tscn" id="3_tocha"]
 
 [node name="MiniCorredor" type="Node2D"]
 
@@ -22,70 +20,33 @@ scale = Vector2(3, 3)
 tile_map_data = PackedByteArray("AAAKAA4AAAAAABAAAAAKABIAAAAAABAAAAAKABYAAAAAABAAAAAKABoAAAAAABAAAAAKAB4AAAAAABAAAAAKACIAAAAAABAAAAAQAA4AAAAGABAAAAAQABIAAAAGABAAAAAQABYAAAAGABAAAAAQABoAAAAGABAAAAAQAB4AAAAGABAAAAAQACIAAAAGABAAAAAKAAwAAAAEAAIAAAAOAAwAAAAEAAIAAAAKAA4AAAAEAAIAAAAOAA4AAAAEAAIAAAAKACQAAAAUABgAAAAOACQAAAAUABgAAAA=")
 tile_set = ExtResource("2_wall_bio")
 
-[node name="PortaTransicao" parent="." instance=ExtResource("3_porta")]
+[node name="PortaTransicao" type="Marker2D" parent="."]
 position = Vector2(628, 941)
-frames_animacao = 4
-stride_animacao = 128
 
-[node name="FundoPreto" type="ColorRect" parent="PortaTransicao"]
-z_index = 1
-offset_left = -59.0
-offset_top = -181.0
-offset_right = 66.0
-offset_bottom = 45.0
-color = Color(0.08, 0.09, 0.11, 1)
-
-[node name="SpritePorta" type="Sprite2D" parent="PortaTransicao"]
-z_index = 2
-position = Vector2(4, -66)
-scale = Vector2(1.854167, 1.8580729)
-texture = ExtResource("4_tex_porta_bio")
-region_enabled = true
-region_rect = Rect2(16, 0, 96, 192)
-
-[node name="PortaRetorno" parent="." instance=ExtResource("3_porta")]
+[node name="PortaRetorno" type="Marker2D" parent="."]
 position = Vector2(628, 1237)
-porta_de_retorno = true
-frames_animacao = 4
-stride_animacao = 128
-
-[node name="FundoPreto" type="ColorRect" parent="PortaRetorno"]
-z_index = 1
-offset_left = -59.0
-offset_top = -181.0
-offset_right = 66.0
-offset_bottom = 45.0
-color = Color(0.08, 0.09, 0.11, 1)
-
-[node name="SpritePorta" type="Sprite2D" parent="PortaRetorno"]
-z_index = 2
-position = Vector2(4, -66)
-scale = Vector2(1.854167, 1.8580729)
-texture = ExtResource("4_tex_porta_bio")
-region_enabled = true
-region_rect = Rect2(16, 0, 96, 192)
 
 [node name="Tochas" type="Node2D" parent="."]
 
-[node name="TochaCimaEsq" parent="Tochas" instance=ExtResource("5_tocha")]
+[node name="TochaCimaEsq" parent="Tochas" instance=ExtResource("3_tocha")]
 position = Vector2(536, 760)
 scale = Vector2(-1, 1)
 
-[node name="TochaCimaDir" parent="Tochas" instance=ExtResource("5_tocha")]
+[node name="TochaCimaDir" parent="Tochas" instance=ExtResource("3_tocha")]
 position = Vector2(720, 760)
 
-[node name="TochaMeioEsq" parent="Tochas" instance=ExtResource("5_tocha")]
+[node name="TochaMeioEsq" parent="Tochas" instance=ExtResource("3_tocha")]
 position = Vector2(536, 980)
 scale = Vector2(-1, 1)
 
-[node name="TochaMeioDir" parent="Tochas" instance=ExtResource("5_tocha")]
+[node name="TochaMeioDir" parent="Tochas" instance=ExtResource("3_tocha")]
 position = Vector2(720, 980)
 
-[node name="TochaBaixoEsq" parent="Tochas" instance=ExtResource("5_tocha")]
+[node name="TochaBaixoEsq" parent="Tochas" instance=ExtResource("3_tocha")]
 position = Vector2(536, 1200)
 scale = Vector2(-1, 1)
 
-[node name="TochaBaixoDir" parent="Tochas" instance=ExtResource("5_tocha")]
+[node name="TochaBaixoDir" parent="Tochas" instance=ExtResource("3_tocha")]
 position = Vector2(720, 1200)
 
 [node name="Camera2D" type="Camera2D" parent="."]
