@@ -357,6 +357,27 @@ func _criar_interface_dev() -> void:
 	hbox_vinhetas.add_child(btn_v3)
 	vbox.add_child(hbox_vinhetas)
 
+	var btn_test_retorno = _criar_botao_dev("🎬 Testar Retorno ao Hub (Cutscene)", Color(0.18, 0.45, 0.32))
+	btn_test_retorno.pressed.connect(func():
+		_panel_container.visible = false
+		get_tree().paused = false
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg:
+			dg.tocar_cutscene_vitoria = true
+			dg.andar_vitoria_concluido = 1
+		var hub_path = "res://scenes/Salas/Comum/Hub_Geral.tscn"
+		if get_tree().current_scene and get_tree().current_scene.scene_file_path == hub_path:
+			var hub = get_tree().current_scene
+			if hub.has_method("_executar_cutscene_retorno_vitoria"):
+				hub._executar_cutscene_retorno_vitoria(1)
+		else:
+			if get_node_or_null("/root/TransitionScreen"):
+				TransitionScreen.change_scene(hub_path, false, true)
+			else:
+				get_tree().change_scene_to_file(hub_path)
+	)
+	vbox.add_child(btn_test_retorno)
+
 	var hs3 = HSeparator.new()
 	vbox.add_child(hs3)
 	

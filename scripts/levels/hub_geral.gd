@@ -21,6 +21,7 @@ var _luzes_props: Array = []
 var _tempo_iluminacao: float = 0.0
 
 var _cutscene_em_andamento: bool = false
+var _cutscene_tipo: String = "" # "inicial" ou "retorno_vitoria"
 var _cutscene_tween: Tween = null
 var _cutscene_pular_ui: CanvasLayer = null
 var _cutscene_mesa_instancia: CanvasLayer = null
@@ -44,9 +45,25 @@ func _ready() -> void:
 		if not cutscene_ja_vista:
 			deve_tocar_cutscene = true
 		DungeonGenerator.tocar_cutscene_inicial = false
+
+	var deve_tocar_vitoria = false
+	var andar_vitoria = 1
+	if get_node_or_null("/root/DungeonGenerator") and DungeonGenerator.tocar_cutscene_vitoria:
+		deve_tocar_vitoria = true
+		andar_vitoria = DungeonGenerator.andar_vitoria_concluido
+		DungeonGenerator.tocar_cutscene_vitoria = false
 		
 	if deve_tocar_cutscene:
 		call_deferred("_executar_cutscene_inicial")
+	elif deve_tocar_vitoria:
+		# Se a historinha inicial já foi vista, garante que o pergaminho suma da mesa
+		var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
+		if pergaminho_mesa and is_instance_valid(pergaminho_mesa):
+			pergaminho_mesa.visible = false
+			if pergaminho_mesa.has_method("_remover_prompt_tela"):
+				pergaminho_mesa._remover_prompt_tela()
+			pergaminho_mesa.queue_free()
+		call_deferred("_executar_cutscene_retorno_vitoria", andar_vitoria)
 	else:
 		# Se a cutscene não for tocar, o pergaminho da historinha inicial NUNCA deve ficar na mesa!
 		var pergaminho_mesa = get_node_or_null("PergaminhoMesa")
@@ -329,7 +346,7 @@ func _input(event: InputEvent) -> void:
 	# Teclado / PC: ESPAÇO ou ui_select pula direto
 	if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
 		get_viewport().set_input_as_handled()
-		_pular_cutscene_inicial()
+		_pular_cutscene_atual()
 		return
 		
 	# Mobile / Touch / Clique: duplo toque
@@ -343,7 +360,7 @@ func _input(event: InputEvent) -> void:
 		var agora = Time.get_ticks_msec()
 		if agora - _ultimo_toque_cutscene_ms <= INTERVALO_DUPLO_TOQUE_MS:
 			get_viewport().set_input_as_handled()
-			_pular_cutscene_inicial()
+			_pular_cutscene_atual()
 		else:
 			_ultimo_toque_cutscene_ms = agora
 
@@ -395,7 +412,7 @@ func _criar_ui_pular_cutscene() -> void:
 	btn_pular.add_theme_stylebox_override("pressed", sb_hov)
 	btn_pular.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
 	
-	btn_pular.pressed.connect(_pular_cutscene_inicial)
+	btn_pular.pressed.connect(_pular_cutscene_atual)
 	_cutscene_pular_ui.add_child(btn_pular)
 	
 	# Legenda discreta na parte inferior
@@ -415,6 +432,14 @@ func _criar_ui_pular_cutscene() -> void:
 	font_dica.font_weight = 500
 	lbl_dica.add_theme_font_override("font", font_dica)
 	_cutscene_pular_ui.add_child(lbl_dica)
+
+func _pular_cutscene_atual() -> void:
+	if not _cutscene_em_andamento:
+		return
+	if _cutscene_tipo == "retorno_vitoria":
+		_pular_cutscene_retorno_vitoria()
+	else:
+		_pular_cutscene_inicial()
 
 func _pular_cutscene_inicial() -> void:
 	if not _cutscene_em_andamento:
@@ -491,6 +516,7 @@ func _executar_cutscene_inicial() -> void:
 		return
 
 	_cutscene_em_andamento = true
+	_cutscene_tipo = "inicial"
 	_ultimo_toque_cutscene_ms = 0
 	_criar_ui_pular_cutscene()
 
@@ -583,3 +609,147 @@ func _tocar_passos_cutscene(duracao: float) -> void:
 			AudioManager.tocar_som_caminhada()
 		await get_tree().create_timer(0.35).timeout
 		tempo_decorrido += 0.35
+
+func _executar_cutscene_retorno_vitoria(andar_id: int) -> void:
+	var player = get_node_or_null("Player")
+	if player == null:
+		player = get_tree().get_first_node_in_group("player")
+	if player == null:
+		return
+		
+	var hud = get_node_or_null("HUD")
+	if hud == null:
+		hud = get_tree().get_first_node_in_group("hud")
+	var hud_ctrl = hud.get_node_or_null("Control") if hud else null
+	if hud_ctrl:
+		hud_ctrl.modulate.a = 0.0
+
+	_cutscene_em_andamento = true
+	_cutscene_tipo = "retorno_vitoria"
+	_ultimo_toque_cutscene_ms = 0
+	_criar_ui_pular_cutscene()
+
+	# Trava o jogador na cutscene e posiciona no interior da porta de entrada inicial (sul do Hub)
+	player.travado = true
+	player.em_interacao = true
+	player.global_position = Vector2(580, 955)
+	player.ultima_direcao = "cima"
+
+	var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
+	var poeira = player.get_node_or_null("PoeiraPassos") as CPUParticles2D
+	
+	if sprite:
+		sprite.play("correr_cima")
+	if poeira:
+		poeira.emitting = true
+		poeira.direction = Vector2(0, 1)
+
+	# Criação de aura mística e partículas de fagulhas celebrando a saída do andar
+	var particulas_aura = CPUParticles2D.new()
+	particulas_aura.name = "AuraRetornoVitoria"
+	particulas_aura.amount = 20
+	particulas_aura.lifetime = 1.3
+	particulas_aura.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particulas_aura.emission_sphere_radius = 16.0
+	particulas_aura.gravity = Vector2(0, -32)
+	particulas_aura.initial_velocity_min = 10.0
+	particulas_aura.initial_velocity_max = 24.0
+	particulas_aura.scale_amount_min = 1.6
+	particulas_aura.scale_amount_max = 3.4
+	
+	var cor_aura = Color(1.0, 0.85, 0.35, 0.80) # Química / Dourado
+	if andar_id == 2:
+		cor_aura = Color(0.35, 0.85, 1.0, 0.80) # Física / Ciano
+	elif andar_id == 3:
+		cor_aura = Color(0.35, 0.95, 0.55, 0.80) # Biologia / Esmeralda
+	particulas_aura.color = cor_aura
+	player.add_child(particulas_aura)
+
+	# Movimento majestoso do boneco saindo da escuridão do portal e caminhando para o centro do saguão
+	_cutscene_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_cutscene_tween.tween_property(player, "global_position:y", 710.0, 2.5)
+	_tocar_passos_cutscene(2.5)
+	await _cutscene_tween.finished
+	
+	if not _cutscene_em_andamento:
+		return
+
+	# Chegou à soleira da entrada: para de caminhar e se vira para baixo com dignidade
+	player.ultima_direcao = "baixo"
+	if sprite:
+		sprite.play("idle_baixo")
+	if poeira:
+		poeira.emitting = false
+
+	# Dissipa suavemente a aura cintilante de retorno
+	var tw_aura = create_tween()
+	tw_aura.tween_property(particulas_aura, "modulate:a", 0.0, 0.70)
+	tw_aura.tween_callback(particulas_aura.queue_free)
+
+	# Som solene de conquista e triunfo
+	if get_node_or_null("/root/AudioManager"):
+		AudioManager.play_sfx("acerto_1")
+
+	# Fade suave revelando o HUD profissionalmente
+	if hud_ctrl:
+		var tw_hud = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_hud.tween_property(hud_ctrl, "modulate:a", 1.0, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+	# Notificação Toast triunfante no topo da tela
+	if hud and hud.has_method("mostrar_notificacao_quest"):
+		var nome_andar = "Alquimia"
+		if andar_id == 2: nome_andar = "Física"
+		elif andar_id == 3: nome_andar = "Biologia"
+		hud.mostrar_notificacao_quest("🏆 ANDAR DE " + nome_andar.to_upper() + " CONCLUÍDO!", "Você superou o Guardião e retornou são e salvo ao Saguão Central.", cor_aura, "acerto_1")
+
+	# Intervalo de contemplação e destravamento
+	await get_tree().create_timer(0.4).timeout
+	if not _cutscene_em_andamento:
+		return
+	_finalizar_cutscene_retorno_vitoria(player, hud_ctrl)
+
+func _pular_cutscene_retorno_vitoria() -> void:
+	if not _cutscene_em_andamento:
+		return
+	_cutscene_em_andamento = false
+	_cutscene_tipo = ""
+	
+	if _cutscene_tween and is_instance_valid(_cutscene_tween):
+		_cutscene_tween.kill()
+		_cutscene_tween = null
+		
+	var player = get_node_or_null("Player")
+	if player == null:
+		player = get_tree().get_first_node_in_group("player")
+	var hud = get_node_or_null("HUD")
+	if hud == null:
+		hud = get_tree().get_first_node_in_group("hud")
+	var hud_ctrl = hud.get_node_or_null("Control") if hud else null
+	
+	_finalizar_cutscene_retorno_vitoria(player, hud_ctrl)
+
+func _finalizar_cutscene_retorno_vitoria(player: Node2D, hud_ctrl: Control) -> void:
+	_cutscene_em_andamento = false
+	_cutscene_tipo = ""
+	
+	if _cutscene_pular_ui and is_instance_valid(_cutscene_pular_ui):
+		_cutscene_pular_ui.queue_free()
+		_cutscene_pular_ui = null
+		
+	if player and is_instance_valid(player):
+		player.global_position = Vector2(580, 710)
+		player.ultima_direcao = "baixo"
+		var sprite = player.get_node_or_null("sprite") as AnimatedSprite2D
+		if sprite:
+			sprite.play("idle_baixo")
+		var poeira = player.get_node_or_null("PoeiraPassos") as CPUParticles2D
+		if poeira:
+			poeira.emitting = false
+		var aura = player.get_node_or_null("AuraRetornoVitoria")
+		if aura and is_instance_valid(aura):
+			aura.queue_free()
+		player.travado = false
+		player.em_interacao = false
+		
+	if hud_ctrl and is_instance_valid(hud_ctrl):
+		hud_ctrl.modulate.a = 1.0

@@ -10,6 +10,8 @@ var _concluida: bool = false
 var _em_tela_vitoria: bool = false
 var _animando_transicao: bool = false
 var _tween_conteudo: Tween = null
+var _tween_auto_retorno: Tween = null
+var _segundos_restantes_retorno: int = 7
 var _texto_quadro_atual: String = ""
 
 const SCROLL_WIDTH: float = 580.0
@@ -240,6 +242,7 @@ func _obter_textura_fundo_andar(andar_id: int) -> Texture2D:
 			caminhos = [
 				"res://assets/sprites/Backgrounds/tela_final_fisica.png",
 				"res://assets/sprites/tela_final_fisica.png",
+				"res://assets/sprites/Backgrounds/tela_final_fisica.jpeg",
 				"res://assets/sprites/Backgrounds/Batalha/fundo_batalha_fisica.png",
 				"res://assets/sprites/fundo_laboratorio_mago.png"
 			]
@@ -1139,10 +1142,10 @@ func _mostrar_tela_vitoria() -> void:
 	_container_vitoria.modulate.a = 0.0
 	add_child(_container_vitoria)
 	
-	# Fundo escurecido semi-transparente
+	# Fundo escurecido semi-transparente que valoriza a arte de fundo do andar
 	var bg_dim = ColorRect.new()
 	bg_dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg_dim.color = Color(0.02, 0.03, 0.06, 0.88)
+	bg_dim.color = Color(0.02, 0.03, 0.06, 0.72)
 	_container_vitoria.add_child(bg_dim)
 	
 	# Partículas douradas / temáticas flutuantes
@@ -1533,7 +1536,31 @@ func _mostrar_tela_vitoria() -> void:
 	tw.tween_callback(func():
 		if _btn_ir_hub and _btn_ir_hub.is_inside_tree():
 			_btn_ir_hub.grab_focus()
+		_iniciar_auto_retorno()
 	)
+
+func _iniciar_auto_retorno() -> void:
+	if _tween_auto_retorno and _tween_auto_retorno.is_running():
+		_tween_auto_retorno.kill()
+		
+	_segundos_restantes_retorno = 6
+	_atualizar_texto_btn_retorno()
+	
+	_tween_auto_retorno = create_tween().set_loops(6).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_tween_auto_retorno.tween_interval(1.0)
+	_tween_auto_retorno.tween_callback(func():
+		_segundos_restantes_retorno -= 1
+		_atualizar_texto_btn_retorno()
+		if _segundos_restantes_retorno <= 0:
+			_encerrar_vinheta()
+	)
+
+func _atualizar_texto_btn_retorno() -> void:
+	if _btn_ir_hub and is_instance_valid(_btn_ir_hub):
+		if _segundos_restantes_retorno > 0:
+			_btn_ir_hub.text = "✦ RETORNAR AO SAGUÃO CENTRAL ✦ ▶ (Espaço / Enter) • [%ds]" % _segundos_restantes_retorno
+		else:
+			_btn_ir_hub.text = "✦ RETORNANDO AO SAGUÃO CENTRAL... ✦"
 
 func _encerrar_vinheta() -> void:
 	if _concluida: return
@@ -1541,23 +1568,42 @@ func _encerrar_vinheta() -> void:
 	_em_tela_vitoria = false
 	if _tween_conteudo and _tween_conteudo.is_running():
 		_tween_conteudo.kill()
+	if _tween_auto_retorno and _tween_auto_retorno.is_running():
+		_tween_auto_retorno.kill()
+		_tween_auto_retorno = null
 	
 	if get_tree():
 		get_tree().paused = false
 	vinheta_concluida.emit()
 	
 	var dg = get_tree().root.get_node_or_null("DungeonGenerator") if is_inside_tree() and get_tree() and get_tree().root else null
-	if dg and dg.has_method("resetar_masmorra"):
-		dg.resetar_masmorra()
+	if dg:
+		dg.tocar_cutscene_vitoria = true
+		dg.andar_vitoria_concluido = _andar_atual
+		if dg.has_method("resetar_masmorra"):
+			dg.resetar_masmorra()
 	var qm = get_tree().root.get_node_or_null("QuizManager") if is_inside_tree() and get_tree() and get_tree().root else null
 	if qm and qm.has_method("resetar_historico_perguntas"):
 		qm.resetar_historico_perguntas()
 		
-	# Volta para o Hub
-	var ts = get_tree().root.get_node_or_null("TransitionScreen") if is_inside_tree() and get_tree() and get_tree().root else null
-	if ts and ts.has_method("change_scene"):
-		ts.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
-	elif get_tree():
-		get_tree().change_scene_to_file("res://scenes/Salas/Comum/Hub_Geral.tscn")
-		
-	queue_free()
+	# Fade out suave dos elementos visuais para dar o efeito cinematográfico ao voltar pro Hub
+	if _container_vitoria and is_instance_valid(_container_vitoria):
+		var tw_fade = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+		tw_fade.tween_property(_container_vitoria, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		if _bg_tex and is_instance_valid(_bg_tex):
+			tw_fade.parallel().tween_property(_bg_tex, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw_fade.tween_callback(func():
+			var ts = get_tree().root.get_node_or_null("TransitionScreen") if is_inside_tree() and get_tree() and get_tree().root else null
+			if ts and ts.has_method("change_scene"):
+				ts.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+			elif get_tree():
+				get_tree().change_scene_to_file("res://scenes/Salas/Comum/Hub_Geral.tscn")
+			queue_free()
+		)
+	else:
+		var ts = get_tree().root.get_node_or_null("TransitionScreen") if is_inside_tree() and get_tree() and get_tree().root else null
+		if ts and ts.has_method("change_scene"):
+			ts.change_scene("res://scenes/Salas/Comum/Hub_Geral.tscn")
+		elif get_tree():
+			get_tree().change_scene_to_file("res://scenes/Salas/Comum/Hub_Geral.tscn")
+		queue_free()

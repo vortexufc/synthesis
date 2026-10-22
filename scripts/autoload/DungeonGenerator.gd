@@ -153,6 +153,8 @@ var masmorra_retorno_hub: String = ""
 
 # toca cutscene do hub
 var tocar_cutscene_inicial: bool = false
+var tocar_cutscene_vitoria: bool = false
+var andar_vitoria_concluido: int = 1
 
 # lista de monstros derrotados na run
 var inimigos_derrotados: Array = []
