@@ -180,6 +180,9 @@ func add_score(player_name: String, cla: String, pontos: int) -> void:
 
 	# recarrega a lista
 	await load_ranking()
+	await load_ranking_periodo("quimica")
+	await load_ranking_periodo("fisica")
+	await load_ranking_periodo("biologia")
 
 func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 	# ve quanto o player ja tem no banco
@@ -247,6 +250,7 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		payload_update["escola_id"] = esc_id
 		payload_insert["escola_id"] = esc_id
 
+	var res_update: Dictionary = {}
 	if existe:
 		# se ja existe atualiza
 		res_update = await DatabaseManager.request_async(

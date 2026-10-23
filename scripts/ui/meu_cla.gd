@@ -58,7 +58,7 @@ func _carregar_dados_cla() -> void:
 	var clan: Dictionary = ClanManager.get_clan_info(clan_name)
 	
 	if clan.is_empty():
-		push_error("Informações do clã não encontradas!")
+		print("[MeuCla] Informações do clã '%s' não encontradas." % clan_name)
 		return
 		
 	lbl_nome_tag.text = clan["name"] + " [" + clan["tag"] + "]"

@@ -58,7 +58,8 @@ func _montar_tela() -> void:
 		child.queue_free()
 		
 	var user_cla: String = DatabaseManager.user_cla
-	if user_cla == "Nenhum" or user_cla.is_empty():
+	var clan_info: Dictionary = ClanManager.get_clan_info(user_cla) if (user_cla != "Nenhum" and not user_cla.is_empty()) else {}
+	if clan_info.is_empty():
 		var sem_cla: VBoxContainer = sem_cla_scene.instantiate() as VBoxContainer
 		dynamic_container.add_child(sem_cla)
 	else:
