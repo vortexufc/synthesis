@@ -9,8 +9,12 @@ var supabase_key: String = ProjectSettings.get_setting("application/config/supab
 var user_token: String = ""
 var user_nick: String = ""
 var user_cla: String = "Nenhum"
+var user_id: String = ""
 var active_dungeon: String = "" # Registra a masmorra escolhida no hub
 var is_admin: bool = false # Define se a conta atual é um professor/pesquisador
+
+# chave usada para salvar sessao no localStorage (web)
+const SESSION_KEY := "synthesis_session"
 
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
@@ -36,10 +40,13 @@ func _ready() -> void:
 	carregar_progresso()
 	print("banco carregado!")
 	
-	# 1. Verifica parâmetro de URL (?turma= ou ?escola=) no navegador Web
+	# 1. Restaura sessão salva no localStorage (web) antes de qualquer outra coisa
+	_restaurar_sessao_web()
+	
+	# 2. Verifica parâmetro de URL (?turma= ou ?escola=) no navegador Web
 	_verificar_parametro_url_web()
 	
-	# 2. Sincroniza sessão ativa global no Supabase (para clientes Desktop e Web)
+	# 3. Sincroniza sessão ativa global no Supabase (para clientes Desktop e Web)
 	sincronizar_sessao_global_supabase()
 
 # progresso salvo localmente
@@ -380,6 +387,7 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 			
 			if dados.has("user") and dados.user is Dictionary:
 				var u = dados.user
+				user_id = str(u.get("id", ""))
 				if u.has("email") and u.email.to_lower() == "admin@synthesis.com":
 					is_admin = true
 					print("👑 Bem-vindo, Administrador!")
@@ -397,6 +405,9 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				if RankingManager.has_method("fundir_conta_guest"):
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
+			# Persiste sessão no localStorage para sobreviver a recarregamentos
+			_salvar_sessao_web()
+			
 			auth_sucesso.emit(user_token)
 		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
 			print("usuario cadastrado ou atualizado com sucesso!")
@@ -432,6 +443,86 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				msg_erro = dados["msg"]
 		push_error("erro http: " + str(response_code) + " | " + msg_erro)
 		auth_erro.emit(msg_erro)
+
+# --- PERSISTÊNCIA DE SESSÃO WEB (localStorage) ---
+
+func _salvar_sessao_web() -> void:
+	if not OS.has_feature("web"):
+		return
+	if not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	var dados_sessao = JSON.stringify({
+		"token": user_token,
+		"nick": user_nick,
+		"cla": user_cla,
+		"user_id": user_id,
+		"is_admin": is_admin
+	})
+	JavaScriptBridge.eval("localStorage.setItem('%s', '%s');" % [SESSION_KEY, dados_sessao.replace("'", "\\'")])
+	print("[DatabaseManager] Sessão salva no localStorage.")
+
+func _restaurar_sessao_web() -> void:
+	if not OS.has_feature("web"):
+		return
+	if not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	var raw = JavaScriptBridge.eval("localStorage.getItem('%s');" % SESSION_KEY)
+	if raw == null or str(raw) == "" or str(raw) == "null":
+		print("[DatabaseManager] Nenhuma sessão salva encontrada.")
+		return
+	var json = JSON.new()
+	if json.parse(str(raw)) != OK:
+		print("[DatabaseManager] Sessão salva corrompida. Ignorando.")
+		_limpar_sessao_web()
+		return
+	var d = json.data
+	if not (d is Dictionary) or not d.has("token") or str(d["token"]).is_empty():
+		print("[DatabaseManager] Sessão salva inválida. Ignorando.")
+		_limpar_sessao_web()
+		return
+	user_token = str(d.get("token", ""))
+	user_nick  = str(d.get("nick",  "Mago Desconhecido"))
+	user_cla   = str(d.get("cla",   "Nenhum"))
+	user_id    = str(d.get("user_id", ""))
+	is_admin   = bool(d.get("is_admin", false))
+	print("[DatabaseManager] Sessão restaurada do localStorage para: ", user_nick)
+	# Verifica silenciosamente se o token ainda é válido no Supabase
+	_verificar_token_restaurado()
+
+func _verificar_token_restaurado() -> void:
+	var res = await request_async("/auth/v1/user", HTTPClient.METHOD_GET)
+	if res.get("success", false) and res.get("data") is Dictionary:
+		var u = res["data"]
+		# Atualiza metadados frescos do servidor
+		if u.has("user_metadata") and u.user_metadata is Dictionary:
+			user_nick = u.user_metadata.get("nick", user_nick)
+			user_cla  = u.user_metadata.get("cla",  user_cla)
+		if u.has("email") and u.email.to_lower() == "admin@synthesis.com":
+			is_admin = true
+		user_id = str(u.get("id", user_id))
+		_salvar_sessao_web() # Atualiza localStorage com dados frescos
+		print("[DatabaseManager] Token restaurado validado com sucesso.")
+		auth_sucesso.emit(user_token)
+	else:
+		# Token expirado ou inválido — limpa a sessão
+		print("[DatabaseManager] Token restaurado expirado. Fazendo logout.")
+		logout()
+
+func _limpar_sessao_web() -> void:
+	if not OS.has_feature("web"):
+		return
+	if not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	JavaScriptBridge.eval("localStorage.removeItem('%s');" % SESSION_KEY)
+
+func logout() -> void:
+	user_token = ""
+	user_nick  = ""
+	user_cla   = "Nenhum"
+	user_id    = ""
+	is_admin   = false
+	_limpar_sessao_web()
+	print("[DatabaseManager] Logout realizado. Sessão encerrada.")
 
 # funcoes de login e cadastro
 

@@ -155,7 +155,7 @@ func _ready() -> void:
 		if db_click == null or db_click.user_token == "":
 			_abrir_modal_aviso_visitante(Callable())
 		else:
-			_ir_login.call()
+			_abrir_modal_sair()
 	
 	if db == null or db.user_token == "":
 		_lbl_nome.text = "VISITANTE  •  ENTRAR"
@@ -194,16 +194,23 @@ func _ready() -> void:
 		cm.clan_updated.connect(_atualizar_perfil)
 	if rm:
 		rm.ranking_atualizado.connect(_atualizar_leaderboard)
+	# Atualiza perfil quando sessão é restaurada do localStorage (ex: reload da página)
+	var db_sig = get_node_or_null("/root/DatabaseManager")
+	if db_sig and not db_sig.auth_sucesso.is_connected(_atualizar_perfil):
+		db_sig.auth_sucesso.connect(func(_t): _atualizar_perfil())
 
 func _exit_tree() -> void:
 	var cm = get_node_or_null("/root/ClanManager")
 	var rm = get_node_or_null("/root/RankingManager")
+	var db_sig = get_node_or_null("/root/DatabaseManager")
 	if cm and cm.clan_list_updated.is_connected(_atualizar_leaderboard):
 		cm.clan_list_updated.disconnect(_atualizar_leaderboard)
 	if rm and rm.ranking_atualizado.is_connected(_atualizar_leaderboard):
 		rm.ranking_atualizado.disconnect(_atualizar_leaderboard)
 	if cm and cm.clan_updated.is_connected(_atualizar_perfil):
 		cm.clan_updated.disconnect(_atualizar_perfil)
+	if db_sig and db_sig.auth_sucesso.is_connected(func(_t): _atualizar_perfil()):
+		pass # lambdas não podem ser desconectadas diretamente, Godot gerencia o ciclo de vida
 
 func _atualizar_perfil() -> void:
 	var db = get_node_or_null("/root/DatabaseManager")
@@ -409,6 +416,132 @@ func _executar_voltar_ao_inicio() -> void:
 	if dg:
 		dg.resetar_masmorra()
 	_mudar_cena("res://scenes/Salas/Comum/Hub_Geral.tscn")
+
+func _abrir_modal_sair() -> void:
+	_tocar_sfx("ui-1")
+	var canvas = CanvasLayer.new()
+	canvas.layer = 100
+	add_child(canvas)
+
+	var bg_overlay = ColorRect.new()
+	bg_overlay.color = Color(0, 0, 0, 0.78)
+	bg_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	canvas.add_child(bg_overlay)
+
+	var panel = PanelContainer.new()
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.08, 0.15, 0.96)
+	sb.border_color = Color(0.95, 0.35, 0.25, 0.95)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(10)
+	sb.shadow_color = Color(0, 0, 0, 0.85)
+	sb.shadow_size = 20
+	sb.content_margin_left = 26
+	sb.content_margin_right = 26
+	sb.content_margin_top = 22
+	sb.content_margin_bottom = 22
+	panel.add_theme_stylebox_override("panel", sb)
+	panel.custom_minimum_size = Vector2(420, 200)
+	canvas.add_child(panel)
+
+	# Animação suave de entrada
+	panel.scale = Vector2(0.88, 0.88)
+	panel.modulate.a = 0.0
+	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.22)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.18)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 16)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	panel.add_child(vbox)
+
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var sf = SystemFont.new()
+	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	sf.font_weight = 600
+
+	var lbl_tit = Label.new()
+	lbl_tit.text = "✦ SAIR DA CONTA ✦"
+	if font_pixel:
+		lbl_tit.add_theme_font_override("font", font_pixel)
+	lbl_tit.add_theme_font_size_override("font_size", 20)
+	lbl_tit.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
+	lbl_tit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(lbl_tit)
+
+	var lbl_msg = Label.new()
+	lbl_msg.text = "Deseja sair da sua conta?\nVocê poderá entrar novamente a qualquer momento."
+	lbl_msg.add_theme_font_override("font", sf)
+	lbl_msg.add_theme_font_size_override("font_size", 13)
+	lbl_msg.add_theme_color_override("font_color", Color(0.88, 0.90, 0.96))
+	lbl_msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(lbl_msg)
+
+	var hbox_btns = HBoxContainer.new()
+	hbox_btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox_btns.add_theme_constant_override("separation", 16)
+
+	var btn_cancelar = Button.new()
+	btn_cancelar.text = "CANCELAR"
+	btn_cancelar.custom_minimum_size = Vector2(140, 38)
+	btn_cancelar.add_theme_font_override("font", sf)
+	btn_cancelar.add_theme_font_size_override("font_size", 13)
+	var sb_canc = StyleBoxFlat.new()
+	sb_canc.bg_color = Color(0.12, 0.14, 0.20, 0.85)
+	sb_canc.border_color = Color(0.4, 0.45, 0.6, 0.6)
+	sb_canc.set_border_width_all(1)
+	sb_canc.set_corner_radius_all(6)
+	btn_cancelar.add_theme_stylebox_override("normal", sb_canc)
+	var sb_canc_hov = sb_canc.duplicate() as StyleBoxFlat
+	sb_canc_hov.bg_color = Color(0.18, 0.22, 0.30, 1.0)
+	sb_canc_hov.border_color = Color(0.6, 0.7, 0.9, 0.9)
+	btn_cancelar.add_theme_stylebox_override("hover", sb_canc_hov)
+	btn_cancelar.add_theme_stylebox_override("pressed", sb_canc_hov)
+	btn_cancelar.pressed.connect(func():
+		_tocar_sfx("ui-1")
+		canvas.queue_free()
+	)
+	hbox_btns.add_child(btn_cancelar)
+
+	var btn_sair = Button.new()
+	btn_sair.text = "SAIR DA CONTA"
+	btn_sair.custom_minimum_size = Vector2(160, 38)
+	btn_sair.add_theme_font_override("font", sf)
+	btn_sair.add_theme_font_size_override("font_size", 13)
+	var sb_sair = StyleBoxFlat.new()
+	sb_sair.bg_color = Color(0.28, 0.08, 0.06, 0.95)
+	sb_sair.border_color = Color(0.95, 0.35, 0.25, 0.9)
+	sb_sair.set_border_width_all(1)
+	sb_sair.set_corner_radius_all(6)
+	btn_sair.add_theme_stylebox_override("normal", sb_sair)
+	var sb_sair_hov = sb_sair.duplicate() as StyleBoxFlat
+	sb_sair_hov.bg_color = Color(0.45, 0.12, 0.08, 1.0)
+	sb_sair_hov.border_color = Color(1.0, 0.55, 0.45, 1.0)
+	btn_sair.add_theme_stylebox_override("hover", sb_sair_hov)
+	btn_sair.add_theme_stylebox_override("pressed", sb_sair_hov)
+	btn_sair.add_theme_color_override("font_color", Color(1.0, 0.9, 0.85))
+	btn_sair.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 1.0))
+	btn_sair.pressed.connect(func():
+		_tocar_sfx("ui_5")
+		canvas.queue_free()
+		var db_out = get_node_or_null("/root/DatabaseManager")
+		if db_out and db_out.has_method("logout"):
+			db_out.logout()
+		elif db_out:
+			db_out.user_token = ""
+			db_out.user_nick = ""
+			db_out.user_id = ""
+			db_out.user_cla = ""
+			db_out.is_admin = false
+		_mudar_cena("res://scenes/ui/main_menu.tscn", true, true)
+	)
+	hbox_btns.add_child(btn_sair)
+
+	vbox.add_child(hbox_btns)
+	panel.reset_size()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
 func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
 	var modal_cena = preload("res://scenes/ui/ModalAvisoVisitante.tscn")

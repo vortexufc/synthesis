@@ -110,6 +110,19 @@ func _ready():
 	_passo_player = AudioStreamPlayer.new()
 	_passo_player.bus = "SFX"
 	add_child(_passo_player)
+	
+	# Define volume padrão em 50% (médio) para Música e SFX ao iniciar o jogo
+	_aplicar_volume_padrao()
+
+func _aplicar_volume_padrao() -> void:
+	# Volume padrão de 50% (médio) para Music e SFX
+	const VOL_MEDIO_DB: float = -6.02 # linear_to_db(0.5) ≈ -6 dB
+	var bus_music = AudioServer.get_bus_index("Music")
+	if bus_music >= 0:
+		AudioServer.set_bus_volume_db(bus_music, VOL_MEDIO_DB)
+	var bus_sfx = AudioServer.get_bus_index("SFX")
+	if bus_sfx >= 0:
+		AudioServer.set_bus_volume_db(bus_sfx, VOL_MEDIO_DB)
 
 func _input(event: InputEvent) -> void:
 	if OS.has_feature("web"):
