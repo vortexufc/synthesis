@@ -196,8 +196,8 @@ func _ready() -> void:
 		rm.ranking_atualizado.connect(_atualizar_leaderboard)
 	# Atualiza perfil quando sessão é restaurada do localStorage (ex: reload da página)
 	var db_sig = get_node_or_null("/root/DatabaseManager")
-	if db_sig and not db_sig.auth_sucesso.is_connected(_atualizar_perfil):
-		db_sig.auth_sucesso.connect(func(_t): _atualizar_perfil())
+	if db_sig and not db_sig.auth_sucesso.is_connected(_on_db_auth_sucesso):
+		db_sig.auth_sucesso.connect(_on_db_auth_sucesso)
 
 func _exit_tree() -> void:
 	var cm = get_node_or_null("/root/ClanManager")
@@ -209,8 +209,11 @@ func _exit_tree() -> void:
 		rm.ranking_atualizado.disconnect(_atualizar_leaderboard)
 	if cm and cm.clan_updated.is_connected(_atualizar_perfil):
 		cm.clan_updated.disconnect(_atualizar_perfil)
-	if db_sig and db_sig.auth_sucesso.is_connected(func(_t): _atualizar_perfil()):
-		pass # lambdas não podem ser desconectadas diretamente, Godot gerencia o ciclo de vida
+	if db_sig and db_sig.auth_sucesso.is_connected(_on_db_auth_sucesso):
+		db_sig.auth_sucesso.disconnect(_on_db_auth_sucesso)
+
+func _on_db_auth_sucesso(_token: String) -> void:
+	_atualizar_perfil()
 
 func _atualizar_perfil() -> void:
 	var db = get_node_or_null("/root/DatabaseManager")

@@ -82,13 +82,16 @@ func get_player_nick() -> String:
 	if not DatabaseManager.user_token.is_empty():
 		return DatabaseManager.user_nick
 	else:
-		return RankingManager.get_local_nick()
+		if RankingManager and RankingManager.has_method("get_local_nick"):
+			return RankingManager.get_local_nick()
+		return "Visitante"
 
 func get_player_score() -> int:
 	var nick = get_player_nick()
-	for item in RankingManager.ranking_geral:
-		if item["name"] == nick:
-			return item["score"]
+	if RankingManager and "ranking_geral" in RankingManager and RankingManager.ranking_geral is Array:
+		for item in RankingManager.ranking_geral:
+			if item is Dictionary and item.get("name") == nick:
+				return int(item.get("score", 0))
 	return 0
 
 func get_clan_info(clan_name: String) -> Dictionary:

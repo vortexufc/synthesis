@@ -1115,6 +1115,8 @@ func _confirmar_reset() -> void:
 		
 		ClanManager.clans_list.clear()
 		ClanManager.clan_list_updated.emit()
+		DatabaseManager.user_cla = "Nenhum"
+		DatabaseManager.atualizar_cla_usuario("Nenhum")
 		
 		_exibir_toast("Reset completo concluído com sucesso.")
 		popup_reset.queue_free()

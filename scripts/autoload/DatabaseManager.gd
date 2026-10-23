@@ -18,7 +18,7 @@ const SESSION_KEY := "synthesis_session"
 
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
-signal dados_recebidos(dados: Array)
+signal dados_recebidos(dados)
 signal perguntas_recebidas(perguntas: Array)
 
 # sinais para a tela de login e cadastro
@@ -619,6 +619,7 @@ func carregar_perguntas_locais(andar_id: int = 0) -> Array:
 func atualizar_cla_usuario(novo_cla: String) -> void:
 	print("tentando atualizar cla do usuario para: ", novo_cla)
 	user_cla = novo_cla
+	_salvar_sessao_web()
 	
 	if user_token.is_empty():
 		print("jogador offline. atualizado localmente.")

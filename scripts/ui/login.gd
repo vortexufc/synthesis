@@ -50,6 +50,16 @@ func _on_btn_login_pressed() -> void:
 	print("Tentando fazer login para: ", email)
 	
 	btn_login.disabled = true
+	btn_login.text = "Entrando..."
+	
+	# Timeout de segurança de 8 segundos para evitar travamento da interface
+	get_tree().create_timer(8.0).timeout.connect(func():
+		if is_inside_tree() and btn_login and btn_login.disabled:
+			btn_login.disabled = false
+			btn_login.text = "Entrar"
+			_show_error_popup("O servidor demorou para responder. Verifique sua conexão e tente novamente.")
+	)
+	
 	# Chama o banco!
 	DatabaseManager.fazer_login(email, password)
 
@@ -57,6 +67,7 @@ func _on_auth_sucesso(token: String) -> void:
 	print("usuario logou com sucesso!")
 	print("Logado com sucesso! Token Recebido:\n", token)
 	btn_login.disabled = false
+	btn_login.text = "Entrar"
 	# Ir para o menu principal
 	if TransitionScreen:
 		TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
@@ -66,6 +77,7 @@ func _on_auth_sucesso(token: String) -> void:
 func _on_auth_erro(mensagem: String) -> void:
 	print("Erro ao fazer login: ", mensagem)
 	btn_login.disabled = false
+	btn_login.text = "Entrar"
 	var msg = mensagem
 	var msg_lower = mensagem.to_lower()
 	if "invalid login credentials" in msg_lower:
