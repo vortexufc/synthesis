@@ -12,6 +12,12 @@ func _ready() -> void:
 		await check_membership_sync()
 	)
 	
+	# Sincroniza o clã do jogador imediatamente ao fazer login ou restaurar sessão
+	DatabaseManager.auth_sucesso.connect(func(_tok):
+		await load_clans()
+		await check_membership_sync()
+	)
+	
 	# Sincroniza o clã do jogador local com a lista de clãs global após um breve delay 
 	# para garantir que os outros autoloads (DatabaseManager, RankingManager) estejam prontos.
 	await get_tree().create_timer(0.2).timeout
@@ -177,13 +183,20 @@ func check_membership_sync() -> void:
 		for m in data:
 			var c_nome = m.get("cla_nome", "")
 			var info = get_clan_info(c_nome)
-			var c_esc = info.get("escola_id", "geral") if not info.is_empty() else "geral"
-			if esc_ativa == "todas" or (esc_ativa == "geral" and (c_esc == "geral" or c_esc.is_empty())) or c_esc == esc_ativa:
-				cla_encontrado = c_nome
-				break
+			if not info.is_empty():
+				var c_esc = info.get("escola_id", "geral")
+				if esc_ativa == "todas" or (esc_ativa == "geral" and (c_esc == "geral" or c_esc.is_empty())) or c_esc == esc_ativa:
+					cla_encontrado = c_nome
+					break
 				
+	# Se o clã encontrado não existe mais na lista global (resetado/apagado), força Nenhum
+	if cla_encontrado != "Nenhum" and get_clan_info(cla_encontrado).is_empty():
+		cla_encontrado = "Nenhum"
+		
 	if DatabaseManager.user_cla != cla_encontrado:
+		print("[ClanManager] Sincronizando clã do usuário: '%s' -> '%s'" % [DatabaseManager.user_cla, cla_encontrado])
 		DatabaseManager.atualizar_cla_usuario(cla_encontrado)
+		clan_updated.emit()
 
 func create_clan(clan_name: String, tag: String, description: String) -> Dictionary:
 	var name_clean: String = clan_name.strip_edges()

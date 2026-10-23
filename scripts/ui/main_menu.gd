@@ -221,7 +221,13 @@ func _atualizar_perfil() -> void:
 		return
 	var cla_texto = ""
 	if not db.user_cla.is_empty() and db.user_cla != "Nenhum":
-		cla_texto = " [" + db.user_cla.to_upper() + "]"
+		var cm = get_node_or_null("/root/ClanManager")
+		if cm and not cm.get_clan_info(db.user_cla).is_empty():
+			cla_texto = " [" + db.user_cla.to_upper() + "]"
+		else:
+			# O clã não existe mais no servidor (foi resetado ou excluído)
+			cla_texto = ""
+			db.atualizar_cla_usuario("Nenhum")
 	_lbl_nome.text = db.user_nick.to_upper() + cla_texto
 	_lbl_nome.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
 	
