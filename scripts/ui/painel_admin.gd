@@ -1826,8 +1826,22 @@ func _exportar_csv() -> void:
 			f_questoes.store_line(";".join(linha))
 		f_questoes.close()
 
-	OS.shell_open(ProjectSettings.globalize_path(dir_relatorios))
-	_exibir_toast("Planilhas CSV exportadas (Microdados de Alunos e Matriz das 150 Questões)!")
+	if OS.has_feature("web"):
+		var baixou = false
+		if ClassDB.class_exists("JavaScriptBridge"):
+			var bytes_alunos = FileAccess.get_file_as_bytes(path_alunos)
+			var bytes_questoes = FileAccess.get_file_as_bytes(path_questoes)
+			JavaScriptBridge.download_buffer(bytes_alunos, fn_alunos, "text/csv;charset=utf-8")
+			await get_tree().create_timer(0.4).timeout
+			JavaScriptBridge.download_buffer(bytes_questoes, fn_questoes, "text/csv;charset=utf-8")
+			baixou = true
+		if baixou:
+			_exibir_toast("Download das planilhas CSV iniciado no navegador!")
+		else:
+			_exibir_toast("Erro ao iniciar download na plataforma Web.")
+	else:
+		OS.shell_open(ProjectSettings.globalize_path(dir_relatorios))
+		_exibir_toast("Planilhas CSV exportadas (Microdados de Alunos e Matriz das 150 Questões)!")
 
 # --- EXPORTAÇÃO DE RELATÓRIO PEDAGÓGICO (IMPRESSÃO / PDF) ---
 
@@ -2179,8 +2193,13 @@ func _exportar_pdf_relatorio() -> void:
 </head>
 <body>
 <div class="container">
-	<div class="banner-print">
-		<b>Dica para gerar PDF:</b> Pressione <b>Ctrl + P</b> no seu teclado, escolha a impressora <b>"Salvar como PDF"</b> e clique em Salvar!
+	<div class="banner-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+		<div>
+			<b>Dica para gerar PDF:</b> Pressione <b>Ctrl + P</b> no seu teclado ou clique no botão ao lado, escolha a impressora <b>"Salvar como PDF"</b> e clique em Salvar!
+		</div>
+		<button onclick="window.print()" style="background: #2563eb; color: #ffffff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; box-shadow: 0 2px 4px rgba(37,99,235,0.25);">
+			🖨️ Imprimir / Salvar em PDF
+		</button>
 	</div>
 	
 	<div class="header">
@@ -2349,7 +2368,26 @@ func _exportar_pdf_relatorio() -> void:
 	file.store_string(html)
 	file.close()
 	
-	var caminho_global = ProjectSettings.globalize_path(path_html)
-	OS.shell_open(caminho_global)
-	_exibir_toast("Relatório aberto no navegador! Pressione Ctrl + P para salvar como PDF.")
+	if OS.has_feature("web"):
+		var aberto = false
+		if ClassDB.class_exists("JavaScriptBridge"):
+			var js_win = JavaScriptBridge.get_interface("window")
+			if js_win:
+				# Tenta abrir o relatório em nova aba via Blob URL (sem 404 de servidor)
+				var res = js_win.synthesisOpenReportHtml(html, filename)
+				if str(res) == "opened":
+					aberto = true
+					_exibir_toast("Relatório aberto em nova aba! Pressione Ctrl + P para salvar como PDF.")
+				elif str(res) == "downloaded":
+					aberto = true
+					_exibir_toast("Relatório HTML baixado! (Bloqueador de popups impediu nova aba).")
+		
+		if not aberto and ClassDB.class_exists("JavaScriptBridge"):
+			var bytes_html = FileAccess.get_file_as_bytes(path_html)
+			JavaScriptBridge.download_buffer(bytes_html, filename, "text/html;charset=utf-8")
+			_exibir_toast("Relatório HTML baixado! Abra-o para imprimir ou salvar em PDF.")
+	else:
+		var caminho_global = ProjectSettings.globalize_path(path_html)
+		OS.shell_open(caminho_global)
+		_exibir_toast("Relatório aberto no navegador! Pressione Ctrl + P para salvar como PDF.")
 
