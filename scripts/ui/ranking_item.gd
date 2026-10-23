@@ -179,7 +179,7 @@ func _atualizar_insignias(nome: String, dados_extras: Dictionary) -> void:
 		container_insignias.add_child(badge)
 
 func _obter_insignias_player(nome_player: String, dados: Dictionary) -> Array:
-	# 1. Se for o jogador local atual, usa a lista real de vinhetas/insígnias desbloqueadas
+	# 1. Se for o jogador local atual, usa a lista real de vinhetas/insígnias salvas no PlayerStats
 	var nick_local = ""
 	if get_node_or_null("/root/DatabaseManager") and not DatabaseManager.user_nick.is_empty():
 		nick_local = DatabaseManager.user_nick
@@ -189,22 +189,12 @@ func _obter_insignias_player(nome_player: String, dados: Dictionary) -> Array:
 	if (nome_player == nick_local or nome_player == "Você") and get_node_or_null("/root/PlayerStats"):
 		return PlayerStats.vinhetas_desbloqueadas.duplicate()
 		
-	# 2. Se veio lista explícita no dicionário de dados da API
+	# 2. Se veio lista explícita no dicionário de dados da API (conquistas reais salvas no banco)
 	if dados.has("insignias") and dados["insignias"] is Array and not dados["insignias"].is_empty():
-		return dados["insignias"]
+		var arr: Array = []
+		for x in dados["insignias"]:
+			arr.append(int(x))
+		return arr
 		
-	# 3. Caso contrário, infere a partir dos scores dos andares ou pontuação total
-	var ins: Array = []
-	var s_d = int(dados.get("score_diario", 0))   # Química
-	var s_s = int(dados.get("score_semanal", 0))  # Física
-	var s_m = int(dados.get("score_mensal", 0))   # Biologia
-	var total = int(dados.get("score", 0))
-	
-	if s_d > 0 or total >= 1000:
-		ins.append(1) # Química
-	if s_s > 0 or total >= 5000:
-		ins.append(2) # Física
-	if s_m > 0 or total >= 15000:
-		ins.append(3) # Biologia
-		
-	return ins
+	# Não inferir insígnias a partir de pontos de monstros — a insígnia só é dada ao completar a vinheta do andar
+	return []

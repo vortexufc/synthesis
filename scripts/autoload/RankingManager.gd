@@ -74,27 +74,8 @@ func load_ranking() -> void:
 		_carregar_local()
 
 # busca rankings por periodo
-func _calcular_pts_andar(row: Dictionary, periodo: String, coluna: String) -> int:
-	var pts_especifico = int(row.get(coluna, 0))
-	if pts_especifico > 0:
-		return pts_especifico
-		
-	# Fallback para contas que acumularam pontos antes da separação individual dos 3 andares
-	var total = int(row.get("score", 0))
-	if total <= 0:
-		return 0
-		
-	match periodo:
-		"quimica":
-			return total # 1º Andar (Química)
-		"fisica":
-			# 2º Andar (Física)
-			return int(total * 0.82)
-		"biologia":
-			# 3º Andar (Biologia)
-			return int(total * 0.68)
-		_:
-			return total
+func _calcular_pts_andar(row: Dictionary, _periodo: String, coluna: String) -> int:
+	return int(row.get(coluna, 0))
 
 # busca rankings por periodo
 func load_ranking_periodo(periodo: String) -> void:
@@ -106,11 +87,11 @@ func load_ranking_periodo(periodo: String) -> void:
 		_: return
 	
 	var esc_id = DatabaseManager.escola_ativa_id
-	var endpoint = "/rest/v1/rankinggeral?select=*&order=%s.desc,score.desc&limit=20" % coluna
+	var endpoint = "/rest/v1/rankinggeral?%s=gt.0&select=*&order=%s.desc,score.desc&limit=20" % [coluna, coluna]
 	if esc_id == "geral":
-		endpoint = "/rest/v1/rankinggeral?or=(escola_id.eq.geral,escola_id.is.null)&select=*&order=%s.desc,score.desc&limit=20" % coluna
+		endpoint = "/rest/v1/rankinggeral?%s=gt.0&or=(escola_id.eq.geral,escola_id.is.null)&select=*&order=%s.desc,score.desc&limit=20" % [coluna, coluna]
 	elif esc_id != "todas" and not esc_id.is_empty():
-		endpoint = "/rest/v1/rankinggeral?escola_id=eq." + esc_id.uri_encode() + "&select=*&order=%s.desc,score.desc&limit=20" % coluna
+		endpoint = "/rest/v1/rankinggeral?%s=gt.0&escola_id=eq.%s&select=*&order=%s.desc,score.desc&limit=20" % [coluna, esc_id.uri_encode(), coluna]
 		
 	var res = await DatabaseManager.request_async(endpoint, HTTPClient.METHOD_GET)
 	if not res.get("success", false) and res.get("code", 0) == 400:
@@ -132,27 +113,25 @@ func load_ranking_periodo(periodo: String) -> void:
 				"insignias": row.get("insignias", [])
 			})
 	
-	# Injeta o visitante local caso não esteja logado e tenha pontuação registrada
+	# Injeta o visitante local caso não esteja logado e tenha pontuação registrada neste andar
 	var nick_guest = get_local_nick()
 	if not nick_guest.is_empty() and DatabaseManager.user_token.is_empty():
-		var score_guest = _ler_score_guest_local(nick_guest)
+		var score_guest = _ler_score_guest_local(nick_guest, coluna)
 		if score_guest > 0:
-			var pts_guest = _calcular_pts_andar({"score": score_guest}, periodo, coluna)
-			if pts_guest > 0:
-				var ja_tem = false
-				for item in lista:
-					if item["name"] == nick_guest:
-						ja_tem = true
-						break
-				if not ja_tem:
-					lista.append({
-						"name": nick_guest,
-						"score": pts_guest,
-						"score_diario": int(score_guest if periodo == "quimica" else 0),
-						"score_semanal": int(score_guest if periodo == "fisica" else 0),
-						"score_mensal": int(score_guest if periodo == "biologia" else 0),
-						"insignias": []
-					})
+			var ja_tem = false
+			for item in lista:
+				if item["name"] == nick_guest:
+					ja_tem = true
+					break
+			if not ja_tem:
+				lista.append({
+					"name": nick_guest,
+					"score": score_guest,
+					"score_diario": int(score_guest if periodo == "quimica" else 0),
+					"score_semanal": int(score_guest if periodo == "fisica" else 0),
+					"score_mensal": int(score_guest if periodo == "biologia" else 0),
+					"insignias": []
+				})
 
 	lista.sort_custom(func(a, b): return int(a.get("score", 0)) > int(b.get("score", 0)))
 	
@@ -167,16 +146,10 @@ func load_ranking_periodo(periodo: String) -> void:
 func get_ranking_por_periodo(periodo: String) -> Array:
 	match periodo:
 		"quimica":
-			if ranking_diario.is_empty():
-				return ranking_geral
 			return ranking_diario
 		"fisica":
-			if ranking_semanal.is_empty():
-				return ranking_geral
 			return ranking_semanal
 		"biologia":
-			if ranking_mensal.is_empty():
-				return ranking_geral
 			return ranking_mensal
 		_:
 			return ranking_geral
@@ -232,20 +205,33 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		existe = true
 
 	var subj = ""
-	if "active_dungeon" in DatabaseManager:
-		subj = DatabaseManager.active_dungeon
+	if "active_dungeon" in DatabaseManager and DatabaseManager.active_dungeon != null:
+		subj = str(DatabaseManager.active_dungeon).to_lower()
 		
+	var eh_quimica = ("quim" in subj) or ("alquim" in subj)
+	var eh_fisica = ("fis" in subj) or ("fís" in subj)
+	var eh_biologia = ("bio" in subj) or ("estufa" in subj)
+	
+	if not eh_quimica and not eh_fisica and not eh_biologia:
+		var qm = get_node_or_null("/root/QuizManager")
+		if qm and "_andar_atual" in qm:
+			if qm._andar_atual == 1: eh_quimica = true
+			elif qm._andar_atual == 2: eh_fisica = true
+			elif qm._andar_atual == 3: eh_biologia = true
+			
 	var novo_score:         int = score_atual + pontos_novos
-	var novo_score_diario:  int = score_diario_atual + (pontos_novos if subj == "Química" else 0)
-	var novo_score_semanal: int = score_semanal_atual + (pontos_novos if subj == "Física" else 0)
-	var novo_score_mensal:  int = score_mensal_atual + (pontos_novos if subj == "Biologia" else 0)
-	var res_update: Dictionary
+	var novo_score_diario:  int = score_diario_atual + (pontos_novos if eh_quimica else 0)
+	var novo_score_semanal: int = score_semanal_atual + (pontos_novos if eh_fisica else 0)
+	var novo_score_mensal:  int = score_mensal_atual + (pontos_novos if eh_biologia else 0)
+	var ps = get_node_or_null("/root/PlayerStats")
+	var ins_atuais: Array = ps.vinhetas_desbloqueadas.duplicate() if ps else []
 
 	var payload_update: Dictionary = {
 		"score": novo_score,
 		"score_diario": novo_score_diario,
 		"score_semanal": novo_score_semanal,
 		"score_mensal": novo_score_mensal,
+		"insignias": ins_atuais,
 		"updated_at": "now()"
 	}
 	var payload_insert: Dictionary = {
@@ -253,7 +239,8 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		"score": novo_score,
 		"score_diario": novo_score_diario,
 		"score_semanal": novo_score_semanal,
-		"score_mensal": novo_score_mensal
+		"score_mensal": novo_score_mensal,
+		"insignias": ins_atuais
 	}
 	var esc_id = DatabaseManager.escola_ativa_id
 	if esc_id != "geral" and not esc_id.is_empty():
@@ -267,13 +254,21 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 			HTTPClient.METHOD_PATCH,
 			payload_update
 		)
-		if not res_update.get("success", false) and res_update.get("code", 0) == 400 and payload_update.has("escola_id"):
-			payload_update.erase("escola_id")
+		if not res_update.get("success", false) and res_update.get("code", 0) == 400:
+			if payload_update.has("insignias"):
+				payload_update.erase("insignias")
 			res_update = await DatabaseManager.request_async(
 				"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
 				HTTPClient.METHOD_PATCH,
 				payload_update
 			)
+			if not res_update.get("success", false) and res_update.get("code", 0) == 400 and payload_update.has("escola_id"):
+				payload_update.erase("escola_id")
+				res_update = await DatabaseManager.request_async(
+					"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
+					HTTPClient.METHOD_PATCH,
+					payload_update
+				)
 	else:
 		# senao cria novo registro
 		res_update = await DatabaseManager.request_async(
@@ -281,13 +276,21 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 			HTTPClient.METHOD_POST,
 			payload_insert
 		)
-		if not res_update.get("success", false) and res_update.get("code", 0) == 400 and payload_insert.has("escola_id"):
-			payload_insert.erase("escola_id")
+		if not res_update.get("success", false) and res_update.get("code", 0) == 400:
+			if payload_insert.has("insignias"):
+				payload_insert.erase("insignias")
 			res_update = await DatabaseManager.request_async(
 				"/rest/v1/rankinggeral",
 				HTTPClient.METHOD_POST,
 				payload_insert
 			)
+			if not res_update.get("success", false) and res_update.get("code", 0) == 400 and payload_insert.has("escola_id"):
+				payload_insert.erase("escola_id")
+				res_update = await DatabaseManager.request_async(
+					"/rest/v1/rankinggeral",
+					HTTPClient.METHOD_POST,
+					payload_insert
+				)
 
 	if res_update["success"]:
 		print("[RankingManager] Score online de '%s' atualizado para %d." % [player_name, novo_score])
@@ -295,6 +298,27 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 	else:
 		print("[RankingManager] Erro ao salvar score online de %s." % player_name)
 		return false
+
+func sincronizar_insignias_online() -> void:
+	if DatabaseManager.user_token.is_empty():
+		return
+	var nick = DatabaseManager.user_nick
+	if nick.is_empty():
+		return
+	var ps = get_node_or_null("/root/PlayerStats")
+	var ins_atuais: Array = ps.vinhetas_desbloqueadas.duplicate() if ps else []
+	
+	var payload = {
+		"insignias": ins_atuais,
+		"updated_at": "now()"
+	}
+	var res = await DatabaseManager.request_async(
+		"/rest/v1/rankinggeral?player_name=eq." + nick.uri_encode(),
+		HTTPClient.METHOD_PATCH,
+		payload
+	)
+	if res.get("success", false):
+		print("[RankingManager] Insígnias online de '%s' sincronizadas: %s" % [nick, str(ins_atuais)])
 
 # funcoes de cache local
 func _add_score_local(player_name: String, pontos: int) -> void:
@@ -308,6 +332,19 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 		if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
 			local_data = json.data
 
+	var subj = ""
+	if "active_dungeon" in DatabaseManager and DatabaseManager.active_dungeon != null:
+		subj = str(DatabaseManager.active_dungeon).to_lower()
+	var eh_quimica = ("quim" in subj) or ("alquim" in subj)
+	var eh_fisica = ("fis" in subj) or ("fís" in subj)
+	var eh_biologia = ("bio" in subj) or ("estufa" in subj)
+	if not eh_quimica and not eh_fisica and not eh_biologia:
+		var qm = get_node_or_null("/root/QuizManager")
+		if qm and "_andar_atual" in qm:
+			if qm._andar_atual == 1: eh_quimica = true
+			elif qm._andar_atual == 2: eh_fisica = true
+			elif qm._andar_atual == 3: eh_biologia = true
+
 	# acha o player e atualiza os pontos
 	var list_geral = local_data.get("geral", [])
 	var score_atual = 0
@@ -316,10 +353,19 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 		if item.get("name", "") == player_name:
 			score_atual = int(item.get("score", 0))
 			item["score"] = score_atual + pontos
+			item["score_diario"] = int(item.get("score_diario", 0)) + (pontos if eh_quimica else 0)
+			item["score_semanal"] = int(item.get("score_semanal", 0)) + (pontos if eh_fisica else 0)
+			item["score_mensal"] = int(item.get("score_mensal", 0)) + (pontos if eh_biologia else 0)
 			achou_no_arquivo = true
 			break
 	if not achou_no_arquivo:
-		list_geral.append({"name": player_name, "score": pontos})
+		list_geral.append({
+			"name": player_name,
+			"score": pontos,
+			"score_diario": pontos if eh_quimica else 0,
+			"score_semanal": pontos if eh_fisica else 0,
+			"score_mensal": pontos if eh_biologia else 0
+		})
 
 	local_data["geral"] = list_geral
 
@@ -343,7 +389,7 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 	ranking_geral.sort_custom(func(a, b): return a["score"] > b["score"])
 	ranking_atualizado.emit()
 
-func _ler_score_guest_local(player_name: String) -> int:
+func _ler_score_guest_local(player_name: String, coluna: String = "") -> int:
 	if not FileAccess.file_exists(RANKING_FILE):
 		return 0
 	var file = FileAccess.open(RANKING_FILE, FileAccess.READ)
@@ -353,6 +399,8 @@ func _ler_score_guest_local(player_name: String) -> int:
 	if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
 		for item in json.data.get("geral", []):
 			if item.get("name", "") == player_name:
+				if not coluna.is_empty():
+					return int(item.get(coluna, 0))
 				return int(item.get("score", 0))
 	return 0
 
@@ -395,7 +443,16 @@ func _injetar_guest_no_ranking() -> void:
 		if item["name"] == nick_guest:
 			return # já está
 	
-	ranking_geral.append({"name": nick_guest, "score": score_guest})
+	var ps = get_node_or_null("/root/PlayerStats")
+	var ins = ps.vinhetas_desbloqueadas.duplicate() if ps else []
+	ranking_geral.append({
+		"name": nick_guest,
+		"score": score_guest,
+		"score_diario": _ler_score_guest_local(nick_guest, "score_diario"),
+		"score_semanal": _ler_score_guest_local(nick_guest, "score_semanal"),
+		"score_mensal": _ler_score_guest_local(nick_guest, "score_mensal"),
+		"insignias": ins
+	})
 	ranking_geral.sort_custom(func(a, b): return a["score"] > b["score"])
 
 func _salvar_local() -> void:

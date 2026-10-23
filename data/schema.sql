@@ -108,7 +108,11 @@ VALUES ('geral', 'Geral (Padrão)', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Suporte a escola no ranking geral:
--- ALTER TABLE RankingGeral ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';
+-- ALTER TABLE "RankingGeral" ADD COLUMN IF NOT EXISTS "escola_id" VARCHAR(100) DEFAULT 'geral';
+-- ALTER TABLE "RankingGeral" ADD COLUMN IF NOT EXISTS "score_diario" INT DEFAULT 0;
+-- ALTER TABLE "RankingGeral" ADD COLUMN IF NOT EXISTS "score_semanal" INT DEFAULT 0;
+-- ALTER TABLE "RankingGeral" ADD COLUMN IF NOT EXISTS "score_mensal" INT DEFAULT 0;
+-- ALTER TABLE "RankingGeral" ADD COLUMN IF NOT EXISTS "insignias" JSONB DEFAULT '[]'::jsonb;
 
 -- Suporte a escola nos clãs e membros:
 -- ALTER TABLE Clas ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';

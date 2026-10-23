@@ -102,6 +102,10 @@ func _inicializar_dados_padrao():
 	# itens iniciais pra testar (apenas pocoes, grimorio comeca totalmente vazio)
 	pocoes.append({"nome": "Poção Grande", "qtd": 2, "cura": 50, "desc": "Cura 50 HP"})
 	salvar(true)
+	insignias_atualizadas.emit()
+	var rm = get_node_or_null("/root/RankingManager")
+	if rm and rm.has_method("sincronizar_insignias_online"):
+		rm.sincronizar_insignias_online()
 
 func salvar(ignorar_posicao_em_jogo: bool = false):
 	_normalizar_itens()
@@ -362,6 +366,9 @@ func desbloquear_vinheta(andar_id: int) -> void:
 		salvar()
 		insignias_atualizadas.emit()
 		print("[PlayerStats] Nova Vinheta/Insígnia Desbloqueada para o Andar %d!" % andar_id)
+		var rm = get_node_or_null("/root/RankingManager")
+		if rm and rm.has_method("sincronizar_insignias_online"):
+			rm.sincronizar_insignias_online()
 
 func tem_insignia(andar_id: int) -> bool:
 	return vinhetas_desbloqueadas.has(andar_id)
@@ -371,6 +378,9 @@ func resetar_insignias() -> void:
 	salvar()
 	insignias_atualizadas.emit()
 	print("[PlayerStats] Insígnias resetadas!")
+	var rm = get_node_or_null("/root/RankingManager")
+	if rm and rm.has_method("sincronizar_insignias_online"):
+		rm.sincronizar_insignias_online()
 
 func desbloquear_todas_insignias() -> void:
 	for i in [1, 2, 3]:
@@ -379,6 +389,9 @@ func desbloquear_todas_insignias() -> void:
 	salvar()
 	insignias_atualizadas.emit()
 	print("[PlayerStats] Todas as insígnias foram desbloqueadas!")
+	var rm = get_node_or_null("/root/RankingManager")
+	if rm and rm.has_method("sincronizar_insignias_online"):
+		rm.sincronizar_insignias_online()
 
 
 # limpa os pergaminhos lidos

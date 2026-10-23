@@ -628,14 +628,73 @@ var _leaderboard_panel: PanelContainer = null
 var _lbl_title: Label = null
 var _btn_prev: Button = null
 var _btn_next: Button = null
+var _btn_refresh: Button = null
 
 func _inicializar_leaderboard() -> void:
 	_leaderboard_panel = get_node_or_null("LeaderboardPanel")
 	if _leaderboard_panel == null:
 		return
+		
+	# Ajusta a altura superior para acomodar confortavelmente o botão de atualizar embaixo das setas
+	_leaderboard_panel.offset_top = -272.0
+	
 	_lbl_title = _leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/HeaderHBox/LabelTitle")
-	_btn_prev  = _leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/HeaderHBox/HBoxDots/BtnPrev")
-	_btn_next  = _leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/HeaderHBox/HBoxDots/BtnNext")
+	var hbox_dots = _leaderboard_panel.get_node_or_null("MarginContainer/VBoxContainer/HeaderHBox/HBoxDots")
+	if hbox_dots:
+		_btn_prev = hbox_dots.get_node_or_null("BtnPrev")
+		_btn_next = hbox_dots.get_node_or_null("BtnNext")
+		
+		# Agrupa as setas e o botão de atualizar em uma coluna vertical
+		if not _leaderboard_panel.has_node("MarginContainer/VBoxContainer/HeaderHBox/VBoxControles"):
+			var parent_header = hbox_dots.get_parent()
+			var idx_pos = hbox_dots.get_index()
+			
+			var vbox_ctrl = VBoxContainer.new()
+			vbox_ctrl.name = "VBoxControles"
+			vbox_ctrl.alignment = BoxContainer.ALIGNMENT_CENTER
+			vbox_ctrl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			vbox_ctrl.add_theme_constant_override("separation", 2)
+			
+			parent_header.remove_child(hbox_dots)
+			vbox_ctrl.add_child(hbox_dots)
+			
+			_btn_refresh = Button.new()
+			_btn_refresh.name = "BtnAtualizarRank"
+			_btn_refresh.text = "Atualizar"
+			_btn_refresh.tooltip_text = "Atualizar ranking do servidor em tempo real"
+			_btn_refresh.custom_minimum_size = Vector2(58, 18)
+			_btn_refresh.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			
+			var font_pixel: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+			if font_pixel:
+				_btn_refresh.add_theme_font_override("font", font_pixel)
+			_btn_refresh.add_theme_font_size_override("font_size", 10)
+			_btn_refresh.add_theme_color_override("font_color", Color(0.85, 0.90, 1.0, 0.85))
+			_btn_refresh.add_theme_color_override("font_hover_color", Color(1.0, 0.88, 0.45, 1.0))
+			_btn_refresh.add_theme_color_override("font_pressed_color", Color(1.0, 1.0, 1.0, 0.5))
+			
+			var sb_norm = StyleBoxFlat.new()
+			sb_norm.bg_color = Color(0.08, 0.12, 0.22, 0.75)
+			sb_norm.border_color = Color(0.3, 0.5, 0.8, 0.5)
+			sb_norm.set_border_width_all(1)
+			sb_norm.set_corner_radius_all(3)
+			sb_norm.content_margin_left = 4
+			sb_norm.content_margin_right = 4
+			sb_norm.content_margin_top = 1
+			sb_norm.content_margin_bottom = 1
+			_btn_refresh.add_theme_stylebox_override("normal", sb_norm)
+			_btn_refresh.add_theme_stylebox_override("focus", sb_norm)
+			
+			var sb_hov = sb_norm.duplicate()
+			sb_hov.bg_color = Color(0.14, 0.22, 0.38, 0.95)
+			sb_hov.border_color = Color(1.0, 0.85, 0.35, 0.9)
+			_btn_refresh.add_theme_stylebox_override("hover", sb_hov)
+			
+			vbox_ctrl.add_child(_btn_refresh)
+			parent_header.add_child(vbox_ctrl)
+			parent_header.move_child(vbox_ctrl, idx_pos)
+			
+			_btn_refresh.pressed.connect(_on_btn_atualizar_rank_pressed)
 	
 	# volta periodo
 	if _btn_prev:
@@ -651,6 +710,30 @@ func _inicializar_leaderboard() -> void:
 		)
 	
 	_atualizar_leaderboard()
+
+func _on_btn_atualizar_rank_pressed() -> void:
+	_tocar_sfx("ui-1")
+	if _btn_refresh:
+		_btn_refresh.text = "..."
+		_btn_refresh.disabled = true
+		
+	var rm = get_node_or_null("/root/RankingManager")
+	if rm:
+		await rm.load_ranking()
+		await rm.load_ranking_periodo("quimica")
+		await rm.load_ranking_periodo("fisica")
+		await rm.load_ranking_periodo("biologia")
+		
+	var cm = get_node_or_null("/root/ClanManager")
+	if cm:
+		await cm.load_clans()
+		
+	_atualizar_leaderboard()
+	_atualizar_perfil()
+	
+	if _btn_refresh:
+		_btn_refresh.text = "Atualizar"
+		_btn_refresh.disabled = false
 
 var _lb_tween: Tween = null
 
