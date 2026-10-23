@@ -315,15 +315,24 @@ func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
 		
 	var res = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, payload_servidor)
 	
-	# Se falhar com erro 400 (ex: colunas extras ainda não criadas no Supabase), faz fallback para as 4 colunas padrão
+	# Se falhar com erro 400 (ex: colunas extras ainda não criadas no Supabase), tenta com as colunas conhecidas incluindo escola_id
 	if not res.get("success", false) and res.get("code", 0) == 400:
-		var baseline = {
+		var baseline_com_escola = {
 			"pergunta_id": data_resp_completo.get("pergunta_id", 0),
 			"acertou": data_resp_completo.get("acertou", false),
 			"andar_id": data_resp_completo.get("andar_id", 1),
-			"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+			"aluno_nick": data_resp_completo.get("aluno_nick", "Mago"),
+			"escola_id": data_resp_completo.get("escola_id", escola_ativa_id)
 		}
-		await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline)
+		var res2 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_com_escola)
+		if not res2.get("success", false) and res2.get("code", 0) == 400:
+			var baseline_minimo = {
+				"pergunta_id": data_resp_completo.get("pergunta_id", 0),
+				"acertou": data_resp_completo.get("acertou", false),
+				"andar_id": data_resp_completo.get("andar_id", 1),
+				"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+			}
+			await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_minimo)
 
 
 # monta o header e envia requisicao pro supabase

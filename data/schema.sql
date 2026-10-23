@@ -110,4 +110,9 @@ ON CONFLICT (id) DO NOTHING;
 -- Suporte a escola no ranking geral:
 -- ALTER TABLE RankingGeral ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';
 
+-- Suporte a escola nos clãs e membros:
+-- ALTER TABLE Clas ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';
+-- ALTER TABLE MembrosCla ADD COLUMN IF NOT EXISTS escola_id VARCHAR(100) DEFAULT 'geral';
+
+
 
