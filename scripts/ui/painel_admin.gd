@@ -410,6 +410,16 @@ func _on_busca_alterada(novo_texto: String) -> void:
 
 # CARREGAMENTO E PROCESSAMENTO DE DADOS
 
+func _obter_sessao_selecionada_id() -> String:
+	if opt_sessao_escola and opt_sessao_escola.selected >= 0 and opt_sessao_escola.selected < sessoes_carregadas.size():
+		return str(sessoes_carregadas[opt_sessao_escola.selected].get("id", DatabaseManager.escola_ativa_id))
+	return DatabaseManager.escola_ativa_id
+
+func _obter_sessao_selecionada_nome() -> String:
+	if opt_sessao_escola and opt_sessao_escola.selected >= 0 and opt_sessao_escola.selected < sessoes_carregadas.size():
+		return str(sessoes_carregadas[opt_sessao_escola.selected].get("nome", DatabaseManager.escola_ativa_nome))
+	return DatabaseManager.escola_ativa_nome
+
 func _carregar_dados() -> void:
 	lbl_total_questoes_val.text = "..."
 	lbl_taxa_acerto_val.text = "..."
@@ -418,53 +428,63 @@ func _carregar_dados() -> void:
 	
 	_mostrar_mensagem_tabela("Carregando perguntas e estatísticas...", COLOR_TEXT_MUTED)
 	
-	# 1. Total de jogadores no ranking geral
-	var res_jogadores = await DatabaseManager.request_async("/rest/v1/rankinggeral?select=player_name", HTTPClient.METHOD_GET)
+	var id_escola = _obter_sessao_selecionada_id()
+	
+	# 1. Total de jogadores no ranking para a sessão selecionada
+	var query_jog = "/rest/v1/rankinggeral?select=player_name"
+	if id_escola == "geral":
+		query_jog += "&or=(escola_id.eq.geral,escola_id.is.null)"
+	elif id_escola != "todas":
+		query_jog += "&escola_id=eq." + id_escola.uri_encode()
+		
+	var res_jogadores = await DatabaseManager.request_async(query_jog, HTTPClient.METHOD_GET)
 	if res_jogadores.get("success", false) and res_jogadores.get("data") is Array:
 		total_jogadores_count = res_jogadores["data"].size()
 		lbl_total_jogadores_val.text = "%d Magos" % total_jogadores_count
-		lbl_total_jogadores_sub.text = "Cadastrados no servidor"
+		if id_escola == "geral":
+			lbl_total_jogadores_sub.text = "Cadastrados (Geral)"
+		else:
+			lbl_total_jogadores_sub.text = "Cadastrados nesta escola"
 	else:
 		total_jogadores_count = 0
-		lbl_total_jogadores_val.text = "Offline"
-		lbl_total_jogadores_sub.text = "Dados locais"
+		lbl_total_jogadores_val.text = "0 Magos"
+		lbl_total_jogadores_sub.text = "Nenhum aluno cadastrado"
 	
-	# 2. Respostas registradas para a disciplina atual
+	# 2. Respostas registradas para a disciplina atual e sessão selecionada
 	var id_andar = disciplinas[disciplina_atual_idx]["andar_id"]
-	var id_escola = DatabaseManager.escola_ativa_id
-	var res_resp = await DatabaseManager.request_async("/rest/v1/respostas?select=pergunta_id,acertou&andar_id=eq." + str(id_andar), HTTPClient.METHOD_GET)
+	var query_resp = "/rest/v1/respostas?select=pergunta_id,acertou&andar_id=eq." + str(id_andar)
+	if id_escola == "geral":
+		query_resp += "&or=(escola_id.eq.geral,escola_id.is.null)"
+	elif id_escola != "todas":
+		query_resp += "&escola_id=eq." + id_escola.uri_encode()
+		
+	var res_resp = await DatabaseManager.request_async(query_resp, HTTPClient.METHOD_GET)
 	
 	mapa_respostas.clear()
 	var soma_acertos_geral: int = 0
 	var soma_erros_geral: int = 0
 	
-	if res_resp.get("success", false) and res_resp.get("data") is Array and res_resp["data"].size() > 0:
-		for r in res_resp["data"]:
-			var p_id = int(r.get("pergunta_id", -1))
-			if not mapa_respostas.has(p_id):
-				mapa_respostas[p_id] = {"acertos": 0, "erros": 0}
-			
-			if r.get("acertou", false):
-				mapa_respostas[p_id]["acertos"] += 1
-				soma_acertos_geral += 1
-			else:
-				mapa_respostas[p_id]["erros"] += 1
-				soma_erros_geral += 1
+	var lista_respostas: Array = []
+	if res_resp.get("success", false) and res_resp.get("data") is Array:
+		lista_respostas = res_resp["data"]
 	else:
-		# Consolida com as respostas analíticas salvas localmente para esta escola
+		# Fallback local se estiver offline
 		var locais = DatabaseManager.obter_respostas_analytics(id_escola)
 		for r in locais:
 			if int(r.get("andar_id", 1)) == id_andar:
-				var p_id = int(r.get("pergunta_id", -1))
-				if not mapa_respostas.has(p_id):
-					mapa_respostas[p_id] = {"acertos": 0, "erros": 0}
+				lista_respostas.append(r)
 				
-				if r.get("acertou", false):
-					mapa_respostas[p_id]["acertos"] += 1
-					soma_acertos_geral += 1
-				else:
-					mapa_respostas[p_id]["erros"] += 1
-					soma_erros_geral += 1
+	for r in lista_respostas:
+		var p_id = int(r.get("pergunta_id", -1))
+		if not mapa_respostas.has(p_id):
+			mapa_respostas[p_id] = {"acertos": 0, "erros": 0}
+		
+		if r.get("acertou", false):
+			mapa_respostas[p_id]["acertos"] += 1
+			soma_acertos_geral += 1
+		else:
+			mapa_respostas[p_id]["erros"] += 1
+			soma_erros_geral += 1
 	
 	# 3. Perguntas da disciplina atual
 	var query = "/rest/v1/perguntas?select=*&andar_id=eq." + str(id_andar)
@@ -1298,6 +1318,7 @@ func _on_sessao_selecionada(idx: int) -> void:
 		else:
 			if btn_ativar_sessao:
 				btn_ativar_sessao.text = "Ativar Esta Sessão"
+		_carregar_dados()
 
 func _on_btn_ativar_sessao_pressed() -> void:
 	var idx = opt_sessao_escola.selected if opt_sessao_escola else 0
@@ -1457,8 +1478,8 @@ func _abrir_popup_nova_sessao() -> void:
 # --- COLETA E ANÁLISE COMPLETA DAS 150 QUESTÕES E RESPOSTAS ---
 
 func _coletar_dados_completos_150() -> Dictionary:
-	var escola_id = DatabaseManager.escola_ativa_id
-	var escola_nome = DatabaseManager.escola_ativa_nome
+	var escola_id = _obter_sessao_selecionada_id()
+	var escola_nome = _obter_sessao_selecionada_nome()
 	
 	# 1. Carrega todas as 150 perguntas e cria mapa por ID
 	var todas_questoes: Array = DatabaseManager.carregar_perguntas_locais(0)
@@ -1473,9 +1494,15 @@ func _coletar_dados_completos_150() -> Dictionary:
 	for q in todas_questoes:
 		mapa_questoes_por_id[int(q.get("id", 0))] = q
 	
-	# 2. Busca lista de todos os alunos/jogadores cadastrados no ranking
+	# 2. Busca lista de todos os alunos/jogadores cadastrados no ranking desta sessão
 	var lista_jogadores_cadastrados = []
-	var res_jog = await DatabaseManager.request_async("/rest/v1/rankinggeral?select=*&order=score.desc", HTTPClient.METHOD_GET)
+	var query_jog = "/rest/v1/rankinggeral?select=*&order=score.desc"
+	if escola_id == "geral":
+		query_jog += "&or=(escola_id.eq.geral,escola_id.is.null)"
+	elif escola_id != "todas":
+		query_jog += "&escola_id=eq." + escola_id.uri_encode()
+		
+	var res_jog = await DatabaseManager.request_async(query_jog, HTTPClient.METHOD_GET)
 	if res_jog.get("success", false) and res_jog.get("data") is Array and res_jog["data"].size() > 0:
 		lista_jogadores_cadastrados = res_jog["data"]
 	else:
@@ -1491,8 +1518,10 @@ func _coletar_dados_completos_150() -> Dictionary:
 	
 	# Se Supabase estiver conectado, tenta mesclar respostas adicionais sem duplicatas
 	var query_supa = "/rest/v1/respostas?select=*"
-	if escola_id != "geral":
-		query_supa += "&escola_id=eq." + escola_id
+	if escola_id == "geral":
+		query_supa += "&or=(escola_id.eq.geral,escola_id.is.null)"
+	elif escola_id != "todas":
+		query_supa += "&escola_id=eq." + escola_id.uri_encode()
 	var res_supa = await DatabaseManager.request_async(query_supa, HTTPClient.METHOD_GET)
 	if res_supa.get("success", false) and res_supa.get("data") is Array:
 		var chaves_existentes = {}

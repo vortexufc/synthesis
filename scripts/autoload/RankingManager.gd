@@ -36,7 +36,9 @@ func load_ranking() -> void:
 	print("[RankingManager] Buscando ranking online...")
 	var esc_id = DatabaseManager.escola_ativa_id
 	var endpoint = "/rest/v1/rankinggeral?select=*&order=score.desc&limit=20"
-	if esc_id != "geral" and not esc_id.is_empty():
+	if esc_id == "geral":
+		endpoint = "/rest/v1/rankinggeral?or=(escola_id.eq.geral,escola_id.is.null)&select=*&order=score.desc&limit=20"
+	elif esc_id != "todas" and not esc_id.is_empty():
 		endpoint = "/rest/v1/rankinggeral?escola_id=eq." + esc_id.uri_encode() + "&select=*&order=score.desc&limit=20"
 		
 	var res = await DatabaseManager.request_async(endpoint, HTTPClient.METHOD_GET)
@@ -105,7 +107,9 @@ func load_ranking_periodo(periodo: String) -> void:
 	
 	var esc_id = DatabaseManager.escola_ativa_id
 	var endpoint = "/rest/v1/rankinggeral?select=*&order=%s.desc,score.desc&limit=20" % coluna
-	if esc_id != "geral" and not esc_id.is_empty():
+	if esc_id == "geral":
+		endpoint = "/rest/v1/rankinggeral?or=(escola_id.eq.geral,escola_id.is.null)&select=*&order=%s.desc,score.desc&limit=20" % coluna
+	elif esc_id != "todas" and not esc_id.is_empty():
 		endpoint = "/rest/v1/rankinggeral?escola_id=eq." + esc_id.uri_encode() + "&select=*&order=%s.desc,score.desc&limit=20" % coluna
 		
 	var res = await DatabaseManager.request_async(endpoint, HTTPClient.METHOD_GET)

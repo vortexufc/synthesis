@@ -6,6 +6,12 @@ signal clan_list_updated
 var clans_list: Array = []
 
 func _ready() -> void:
+	# Conecta para recarregar e ajustar clãs sempre que a sessão/escola mudar
+	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
+		await load_clans()
+		await check_membership_sync()
+	)
+	
 	# Sincroniza o clã do jogador local com a lista de clãs global após um breve delay 
 	# para garantir que os outros autoloads (DatabaseManager, RankingManager) estejam prontos.
 	await get_tree().create_timer(0.2).timeout
@@ -43,12 +49,26 @@ func load_clans() -> bool:
 			return a["score"] > b["score"]
 		)
 		
+		var raw_desc: String = str(c.get("descricao", ""))
+		var esc_id: String = str(c.get("escola_id", "")).strip_edges()
+		var clean_desc: String = raw_desc
+		
+		# Identifica a escola pelo campo escola_id ou pela tag embutida na descrição
+		if esc_id.is_empty():
+			if raw_desc.begins_with("[escola:") and raw_desc.contains("]"):
+				var end_tag = raw_desc.find("]")
+				esc_id = raw_desc.substr(8, end_tag - 8).strip_edges()
+				clean_desc = raw_desc.substr(end_tag + 1).strip_edges()
+			else:
+				esc_id = "geral"
+		
 		parsed_list.append({
 			"name": c.get("nome", ""),
 			"tag": c.get("tag", ""),
-			"description": c.get("descricao", ""),
+			"description": clean_desc,
 			"leader": c.get("lider", ""),
 			"score": int(c.get("score", 0)),
+			"escola_id": esc_id,
 			"members": members_list
 		})
 		
@@ -77,19 +97,38 @@ func get_clan_info(clan_name: String) -> Dictionary:
 			return c
 	return {}
 
-# lista de clas por score pro ranking
+# retorna os clãs pertencentes à escola atual ou especificada
+func get_clans_filtrados(filtro_escola: String = "") -> Array:
+	var esc: String = filtro_escola
+	if esc.is_empty():
+		esc = DatabaseManager.escola_ativa_id
+	if esc == "todas":
+		return clans_list.duplicate(true)
+	var filtrados: Array = []
+	for c in clans_list:
+		var c_esc = str(c.get("escola_id", "geral")).strip_edges()
+		if esc == "geral":
+			if c_esc == "geral" or c_esc.is_empty():
+				filtrados.append(c.duplicate(true))
+		else:
+			if c_esc == esc:
+				filtrados.append(c.duplicate(true))
+	return filtrados
+
+# lista de clas por score pro ranking (filtrado pela sessão ativa)
 func get_top_clans() -> Array:
-	var list: Array = clans_list.duplicate(true)
+	var list: Array = get_clans_filtrados()
 	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["score"] > b["score"])
 	return list
 
-# sugestoes de clas embaralhadas pra tela de clas
+# sugestoes de clas embaralhadas pra tela de clas (apenas da sessão ativa)
 func get_sugestoes_clas() -> Array:
 	var disponiveis: Array = []
 	var meu_cla: String = DatabaseManager.user_cla
+	var lista_esc: Array = get_clans_filtrados()
 	
 	# so mostra clas que o player nao esta
-	for c in clans_list:
+	for c in lista_esc:
 		if c["name"] != meu_cla:
 			disponiveis.append(c.duplicate(true))
 			
@@ -103,14 +142,15 @@ func get_sugestoes_clas() -> Array:
 		
 	return disponiveis
 
-# procura por nome ou tag
+# procura por nome ou tag dentro da sessão ativa
 func search_clans(query: String) -> Array:
 	var q: String = query.strip_edges().to_lower()
 	if q.is_empty():
 		return get_sugestoes_clas()
 		
 	var filtered: Array = []
-	for c in clans_list:
+	var lista_esc: Array = get_clans_filtrados()
+	for c in lista_esc:
 		if c["name"].to_lower().contains(q) or c["tag"].to_lower().contains(q):
 			filtered.append(c)
 	return filtered
@@ -128,15 +168,19 @@ func check_membership_sync() -> void:
 		return
 		
 	var data = res["data"]
+	var cla_encontrado: String = "Nenhum"
 	if data is Array and data.size() > 0:
-		var member_info = data[0]
-		var cla_nome = member_info.get("cla_nome", "Nenhum")
-		if DatabaseManager.user_cla != cla_nome:
-			DatabaseManager.atualizar_cla_usuario(cla_nome)
-	else:
-		# se nao achou nada ta sem cla
-		if DatabaseManager.user_cla != "Nenhum":
-			DatabaseManager.atualizar_cla_usuario("Nenhum")
+		var esc_ativa = DatabaseManager.escola_ativa_id
+		for m in data:
+			var c_nome = m.get("cla_nome", "")
+			var info = get_clan_info(c_nome)
+			var c_esc = info.get("escola_id", "geral") if not info.is_empty() else "geral"
+			if esc_ativa == "todas" or (esc_ativa == "geral" and (c_esc == "geral" or c_esc.is_empty())) or c_esc == esc_ativa:
+				cla_encontrado = c_nome
+				break
+				
+	if DatabaseManager.user_cla != cla_encontrado:
+		DatabaseManager.atualizar_cla_usuario(cla_encontrado)
 
 func create_clan(clan_name: String, tag: String, description: String) -> Dictionary:
 	var name_clean: String = clan_name.strip_edges()
@@ -157,17 +201,26 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 		return {"success": false, "message": "Você precisa estar logado para criar um clã!"}
 		
 	var score: int = get_player_score()
+	var esc_atual = DatabaseManager.escola_ativa_id
+	var desc_com_tag = description
+	if esc_atual != "geral":
+		desc_com_tag = "[escola:%s] %s" % [esc_atual, description]
 	
 	# tenta criar o cla no banco
 	var clan_data = {
 		"nome": name_clean,
 		"tag": tag_clean,
-		"descricao": description,
+		"descricao": desc_com_tag,
 		"lider": nick,
-		"score": score
+		"score": score,
+		"escola_id": esc_atual
 	}
 	
 	var res_clan = await DatabaseManager.request_async("/rest/v1/Clas", HTTPClient.METHOD_POST, clan_data)
+	if not res_clan["success"] and res_clan.get("code", 0) == 400:
+		clan_data.erase("escola_id")
+		res_clan = await DatabaseManager.request_async("/rest/v1/Clas", HTTPClient.METHOD_POST, clan_data)
+		
 	if not res_clan["success"]:
 		var msg = res_clan["message"]
 		if msg.contains("duplicate key") or msg.contains("already exists"):
@@ -179,9 +232,14 @@ func create_clan(clan_name: String, tag: String, description: String) -> Diction
 		"player_name": nick,
 		"cla_nome": name_clean,
 		"cargo": "Líder",
-		"score_individual": score
+		"score_individual": score,
+		"escola_id": esc_atual
 	}
 	var res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
+	if not res_member["success"] and res_member.get("code", 0) == 400:
+		member_data.erase("escola_id")
+		res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
+		
 	if not res_member["success"]:
 		# se der erro ao criar lider apaga o cla
 		await DatabaseManager.request_async("/rest/v1/Clas?nome=eq." + name_clean.uri_encode(), HTTPClient.METHOD_DELETE)
@@ -205,15 +263,21 @@ func join_clan(clan_name: String) -> Dictionary:
 		return {"success": false, "message": "Você já faz parte de um clã!"}
 		
 	var score: int = get_player_score()
+	var esc_atual = DatabaseManager.escola_ativa_id
 	var member_data = {
 		"player_name": nick,
 		"cla_nome": clan_name,
 		"cargo": "Membro",
-		"score_individual": score
+		"score_individual": score,
+		"escola_id": esc_atual
 	}
 	
 	# adiciona o player na tabela de membros
 	var res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
+	if not res_member["success"] and res_member.get("code", 0) == 400:
+		member_data.erase("escola_id")
+		res_member = await DatabaseManager.request_async("/rest/v1/MembrosCla", HTTPClient.METHOD_POST, member_data)
+		
 	if not res_member["success"]:
 		return {"success": false, "message": "Erro ao se juntar ao clã: " + res_member["message"]}
 		
