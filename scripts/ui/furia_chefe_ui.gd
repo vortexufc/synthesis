@@ -599,6 +599,11 @@ func _responder(escolha_verdadeiro: bool) -> void:
 	
 	var item = _perguntas_ativas[_indice_pergunta]
 	var acertou = (escolha_verdadeiro == item["correta"])
+	var tempo_usado = max(0.1, TEMPO_POR_AFIRMACAO - _tempo_restante)
+	
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("salvar_resposta_vf"):
+		db.salvar_resposta_vf(str(item.get("texto", "")), escolha_verdadeiro, bool(item.get("correta", false)), acertou, tempo_usado, _andar_atual)
 	
 	if acertou:
 		_combo_atual += 1

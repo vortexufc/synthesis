@@ -738,6 +738,8 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			print("[Combate] Você venceu o quiz!")
 		else:
 			print("[Combate] Mago derrotado por falta de HP (HP zerado)!")
+			if PlayerStats.has_method("registrar_morte"):
+				PlayerStats.registrar_morte(_andar_atual)
 			
 		_processando_resposta = false
 		em_batalha = false

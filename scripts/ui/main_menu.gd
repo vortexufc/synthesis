@@ -55,11 +55,13 @@ func _ready() -> void:
 	if btn_creditos:
 		btn_creditos.pressed.connect(_on_btn_creditos_pressed)
 	_configurar_card_instagram()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("sincronizar_telemetria_pendente_async"):
+		db.sincronizar_telemetria_pendente_async()
 	
 	# Se já jogou antes, exibe CONTINUAR e NOVO JOGO. Se for primeira vez, exibe NOVO JOGO.
 	var ps = get_node_or_null("/root/PlayerStats")
 	var ja_jogou = ps and ps.tem_progresso_salvo()
-	var db = get_node_or_null("/root/DatabaseManager")
 	var eh_admin = db and db.is_admin
 	
 	# Calibra altura e espaçamento quando há 7 botões (admin + continuar) para garantir folga elegante com o rodapé
@@ -194,10 +196,13 @@ func _ready() -> void:
 		cm.clan_updated.connect(_atualizar_perfil)
 	if rm:
 		rm.ranking_atualizado.connect(_atualizar_leaderboard)
-	# Atualiza perfil quando sessão é restaurada do localStorage (ex: reload da página)
+	# Atualiza perfil quando sessão é restaurada do localStorage ou nick é alterado
 	var db_sig = get_node_or_null("/root/DatabaseManager")
-	if db_sig and not db_sig.auth_sucesso.is_connected(_on_db_auth_sucesso):
-		db_sig.auth_sucesso.connect(_on_db_auth_sucesso)
+	if db_sig:
+		if not db_sig.auth_sucesso.is_connected(_on_db_auth_sucesso):
+			db_sig.auth_sucesso.connect(_on_db_auth_sucesso)
+		if db_sig.has_signal("nick_alterado") and not db_sig.nick_alterado.is_connected(_on_nick_alterado):
+			db_sig.nick_alterado.connect(_on_nick_alterado)
 
 func _exit_tree() -> void:
 	var cm = get_node_or_null("/root/ClanManager")
@@ -209,10 +214,16 @@ func _exit_tree() -> void:
 		rm.ranking_atualizado.disconnect(_atualizar_leaderboard)
 	if cm and cm.clan_updated.is_connected(_atualizar_perfil):
 		cm.clan_updated.disconnect(_atualizar_perfil)
-	if db_sig and db_sig.auth_sucesso.is_connected(_on_db_auth_sucesso):
-		db_sig.auth_sucesso.disconnect(_on_db_auth_sucesso)
+	if db_sig:
+		if db_sig.auth_sucesso.is_connected(_on_db_auth_sucesso):
+			db_sig.auth_sucesso.disconnect(_on_db_auth_sucesso)
+		if db_sig.has_signal("nick_alterado") and db_sig.nick_alterado.is_connected(_on_nick_alterado):
+			db_sig.nick_alterado.disconnect(_on_nick_alterado)
 
 func _on_db_auth_sucesso(_token: String) -> void:
+	_atualizar_perfil()
+
+func _on_nick_alterado(_novo_nick: String) -> void:
 	_atualizar_perfil()
 
 func _atualizar_perfil() -> void:

@@ -185,6 +185,19 @@ func _criar_cabecalho(parent: Control) -> void:
 	btn_reset.pressed.connect(_abrir_popup_reset)
 	hbox.add_child(btn_reset)
 	
+	# Botão Tirar Admin do Ranking
+	var btn_admin_rank = _criar_botao_acao("Tirar Admin do Ranking", Color(0.85, 0.45, 0.20))
+	btn_admin_rank.pressed.connect(func():
+		btn_admin_rank.disabled = true
+		btn_admin_rank.text = "Removendo..."
+		await RankingManager.remover_admin_do_ranking()
+		btn_admin_rank.disabled = false
+		btn_admin_rank.text = "Tirar Admin do Ranking"
+		_exibir_toast("Conta 'Admin' removida do ranking online e local com sucesso!")
+		_carregar_dados()
+	)
+	hbox.add_child(btn_admin_rank)
+	
 	# Botão Voltar ao Jogo
 	var btn_voltar = _criar_botao_acao("Voltar ao Jogo", Color(0.45, 0.50, 0.62))
 	btn_voltar.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn"))
@@ -430,7 +443,8 @@ func _carregar_dados() -> void:
 	
 	var id_escola = _obter_sessao_selecionada_id()
 	
-	# 1. Total de jogadores no ranking para a sessão selecionada
+	# 1. Total de alunos/jogadores para a sessão selecionada (excluindo conta admin)
+	var conjunto_alunos: Dictionary = {}
 	var query_jog = "/rest/v1/rankinggeral?select=player_name"
 	if id_escola == "geral":
 		query_jog += "&or=(escola_id.eq.geral,escola_id.is.null)"
@@ -439,20 +453,33 @@ func _carregar_dados() -> void:
 		
 	var res_jogadores = await DatabaseManager.request_async(query_jog, HTTPClient.METHOD_GET)
 	if res_jogadores.get("success", false) and res_jogadores.get("data") is Array:
-		total_jogadores_count = res_jogadores["data"].size()
-		lbl_total_jogadores_val.text = "%d Magos" % total_jogadores_count
-		if id_escola == "geral":
-			lbl_total_jogadores_sub.text = "Cadastrados (Geral)"
-		else:
-			lbl_total_jogadores_sub.text = "Cadastrados nesta escola"
+		for row in res_jogadores["data"]:
+			var p_name = str(row.get("player_name", "")).strip_edges()
+			if not p_name.is_empty() and p_name.to_lower() != "admin":
+				conjunto_alunos[p_name] = true
 	else:
-		total_jogadores_count = 0
-		lbl_total_jogadores_val.text = "0 Magos"
-		lbl_total_jogadores_sub.text = "Nenhum aluno cadastrado"
+		for rk in RankingManager.ranking_geral:
+			var p_name = str(rk.get("name", "")).strip_edges()
+			if not p_name.is_empty() and p_name.to_lower() != "admin":
+				conjunto_alunos[p_name] = true
+
+	# Alunos que responderam questões nesta sessão (analytics local + online)
+	var resp_locais = DatabaseManager.obter_respostas_analytics(id_escola)
+	for r in resp_locais:
+		var p_name = str(r.get("aluno_nick", "")).strip_edges()
+		if not p_name.is_empty() and p_name.to_lower() != "admin":
+			conjunto_alunos[p_name] = true
+
+	total_jogadores_count = conjunto_alunos.size()
+	lbl_total_jogadores_val.text = "%d Magos" % total_jogadores_count
+	if id_escola == "geral":
+		lbl_total_jogadores_sub.text = "Cadastrados (Geral)" if total_jogadores_count > 0 else "Nenhum aluno cadastrado"
+	else:
+		lbl_total_jogadores_sub.text = "Cadastrados nesta escola" if total_jogadores_count > 0 else "Nenhum aluno cadastrado"
 	
 	# 2. Respostas registradas para a disciplina atual e sessão selecionada
 	var id_andar = disciplinas[disciplina_atual_idx]["andar_id"]
-	var query_resp = "/rest/v1/respostas?select=pergunta_id,acertou&andar_id=eq." + str(id_andar)
+	var query_resp = "/rest/v1/respostas?select=pergunta_id,acertou,aluno_nick&andar_id=eq." + str(id_andar)
 	if id_escola == "geral":
 		query_resp += "&or=(escola_id.eq.geral,escola_id.is.null)"
 	elif id_escola != "todas":
@@ -475,6 +502,9 @@ func _carregar_dados() -> void:
 				lista_respostas.append(r)
 				
 	for r in lista_respostas:
+		var nick_r = str(r.get("aluno_nick", "")).strip_edges()
+		if nick_r.to_lower() == "admin":
+			continue # Ignora respostas de teste do admin!
 		var p_id = int(r.get("pergunta_id", -1))
 		if not mapa_respostas.has(p_id):
 			mapa_respostas[p_id] = {"acertos": 0, "erros": 0}
@@ -591,7 +621,8 @@ func _carregar_dados() -> void:
 		lbl_taxa_acerto_sub.text = "Aguardando tentativas"
 		
 	lbl_total_respostas_val.text = "%d Respostas" % total_tentativas_geral
-	lbl_total_respostas_sub.text = "%d Acertos  |  %d Erros" % [soma_acertos_geral, soma_erros_geral]
+	var disc_nome_card = disciplinas[disciplina_atual_idx]["nome"]
+	lbl_total_respostas_sub.text = "%d Acertos  |  %d Erros (%s)" % [soma_acertos_geral, soma_erros_geral, disc_nome_card]
 	
 	_atualizar_rotulos_botoes_filtro(cont_facil, cont_medio, cont_dificil, lista_questoes_processadas.size())
 	_renderizar_lista()
@@ -1052,8 +1083,11 @@ func _abrir_popup_reset() -> void:
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	panel.add_child(vbox)
 	
+	var id_escola = _obter_sessao_selecionada_id()
+	var nome_escola = _obter_sessao_selecionada_nome()
+	
 	var lbl = Label.new()
-	lbl.text = "ATENÇÃO: Reset Geral de Dados\nEsta ação apagará todos os jogadores, clãs, histórico e rankings.\nDigite a senha de administrador para prosseguir:"
+	lbl.text = "ATENÇÃO: Reset dos Dados da Sessão\nSessão selecionada: %s\nEsta ação apagará respostas, rankings e progresso desta sessão.\nOutras escolas e turmas NÃO serão afetadas.\nDigite a senha de administrador para prosseguir:" % nome_escola
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_color_override("font_color", COLOR_DIFICIL)
 	lbl.add_theme_font_size_override("font_size", 12)
@@ -1087,38 +1121,54 @@ func _abrir_popup_reset() -> void:
 
 func _confirmar_reset() -> void:
 	if line_edit_senha.text == "2026Vortex@ufc":
-		print("[PainelAdmin] Iniciando wipe geral do servidor...")
+		var id_escola = _obter_sessao_selecionada_id()
+		var nome_escola = _obter_sessao_selecionada_nome()
+		print("[PainelAdmin] Iniciando reset da sessão: %s (%s)..." % [nome_escola, id_escola])
 		for child in line_edit_senha.get_parent().get_children():
 			if child is HBoxContainer or child is LineEdit:
 				child.visible = false
 			elif child is Label:
-				child.text = "Limpando banco de dados e caches locais, aguarde..."
+				child.text = "Limpando dados da sessão '%s', aguarde..." % nome_escola
 				child.add_theme_color_override("font_color", COLOR_MEDIO)
 				
-		await DatabaseManager.request_async("/rest/v1/MembrosCla?player_name=not.is.null", HTTPClient.METHOD_DELETE)
-		await DatabaseManager.request_async("/rest/v1/Clas?nome=not.is.null", HTTPClient.METHOD_DELETE)
-		await DatabaseManager.request_async("/rest/v1/rankinggeral?player_name=not.is.null", HTTPClient.METHOD_DELETE)
-		await DatabaseManager.request_async("/rest/v1/respostas?pergunta_id=not.is.null", HTTPClient.METHOD_DELETE)
+		var query_filtro = ""
+		if id_escola == "geral":
+			query_filtro = "or=(escola_id.eq.geral,escola_id.is.null)"
+		elif id_escola != "todas":
+			query_filtro = "escola_id=eq." + id_escola.uri_encode()
+		else:
+			query_filtro = "id=not.is.null"
+
+		# Remove registros da sessão no Supabase (sem afetar outras escolas)
+		await DatabaseManager.request_async("/rest/v1/rankinggeral?" + query_filtro, HTTPClient.METHOD_DELETE)
+		await DatabaseManager.request_async("/rest/v1/respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
+		await DatabaseManager.request_async("/rest/v1/minigames_respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
+		await DatabaseManager.request_async("/rest/v1/gameplay_telemetria?" + query_filtro, HTTPClient.METHOD_DELETE)
 		
+		# Limpa arquivos analíticos locais desta sessão
+		DatabaseManager.resetar_analytics_sessao(id_escola)
+		
+		# Reseta completamente o progresso local de masmorra do jogador
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.has_method("resetar_salvamento_completo"):
+			ps.resetar_salvamento_completo()
+			
 		var dir = DirAccess.open("user://")
 		if dir:
-			dir.remove("ranking.json")
-			dir.remove("pending_sync.json")
-			dir.remove("guest_config.json")
+			dir.remove("save.json")
 			dir.remove("progresso.json")
+			dir.remove("guest_config.json")
+			dir.remove("pending_sync.json")
+			dir.remove("ranking.json")
 			
 		RankingManager.ranking_geral.clear()
 		RankingManager.ranking_diario.clear()
 		RankingManager.ranking_semanal.clear()
 		RankingManager.ranking_mensal.clear()
 		RankingManager.ranking_atualizado.emit()
+		await RankingManager.load_ranking()
 		
-		ClanManager.clans_list.clear()
-		ClanManager.clan_list_updated.emit()
-		DatabaseManager.user_cla = "Nenhum"
-		DatabaseManager.atualizar_cla_usuario("Nenhum")
-		
-		_exibir_toast("Reset completo concluído com sucesso.")
+		_exibir_toast("Sessão '%s' resetada com sucesso! O jogo voltará para 'Novo Jogo'." % nome_escola)
 		popup_reset.queue_free()
 		_carregar_dados()
 	else:
@@ -1540,7 +1590,7 @@ func _coletar_dados_completos_150() -> Dictionary:
 	var mapa_alunos = {}
 	for j in lista_jogadores_cadastrados:
 		var nick = str(j.get("player_name", j.get("name", ""))).strip_edges()
-		if not nick.is_empty():
+		if not nick.is_empty() and nick.to_lower() != "admin":
 			mapa_alunos[nick] = {
 				"nick": nick,
 				"cla": str(j.get("cla", "-")),
@@ -1575,11 +1625,14 @@ func _coletar_dados_completos_150() -> Dictionary:
 	var grimorio_total_global = 0
 	
 	for r in respostas_sessao:
+		var nick = str(r.get("aluno_nick", "Mago")).strip_edges()
+		if nick.to_lower() == "admin":
+			continue # Ignora respostas de teste do administrador/professor no relatório pedagógico dos alunos!
+			
 		var pid = int(r.get("pergunta_id", -1))
 		var acertou = bool(r.get("acertou", false))
 		var t_resp = float(r.get("tempo_resposta", 0.0))
 		var c_grim = int(r.get("consultas_grimorio", 0))
-		var nick = str(r.get("aluno_nick", "Mago")).strip_edges()
 		
 		# Agregação por Aluno
 		if not mapa_alunos.has(nick):
@@ -1702,12 +1755,23 @@ func _coletar_dados_completos_150() -> Dictionary:
 		if sdf["tempo_count"] > 0:
 			sdf["tempo_medio"] = snappedf(sdf["tempo_total"] / float(sdf["tempo_count"]), 0.1)
 
+	var minigames_sessao = DatabaseManager.obter_minigames_analytics(escola_id)
+	var telemetria_gameplay = DatabaseManager.obter_telemetria_gameplay(escola_id)
+	var telemetria_playerstats = {
+		"tempo_por_andar": PlayerStats.tempo_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {},
+		"mortes_por_andar": PlayerStats.mortes_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {},
+		"pocoes_por_andar": PlayerStats.pocoes_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {}
+	}
+
 	return {
 		"escola_id": escola_id,
 		"escola_nome": escola_nome,
 		"todas_questoes": todas_questoes,
 		"mapa_questoes_por_id": mapa_questoes_por_id,
 		"respostas_sessao": respostas_sessao,
+		"minigames_sessao": minigames_sessao,
+		"telemetria_gameplay": telemetria_gameplay,
+		"telemetria_playerstats": telemetria_playerstats,
 		"mapa_alunos": mapa_alunos,
 		"mapa_stats": mapa_stats,
 		"totais_globais": {
@@ -1857,22 +1921,56 @@ func _exportar_csv() -> void:
 			f_questoes.store_line(";".join(linha))
 		f_questoes.close()
 
+	# ARQUIVO 3: Telemetria de Minigames e Desempenho de Exploração
+	var fn_minigames = "synthesis_telemetria_minigames_%s_%s.csv" % [escola_id, timestamp_str]
+	var path_minigames = dir_relatorios + "/" + fn_minigames
+	var f_minigames = FileAccess.open(path_minigames, FileAccess.WRITE)
+	if f_minigames:
+		f_minigames.store_8(0xEF); f_minigames.store_8(0xBB); f_minigames.store_8(0xBF)
+		f_minigames.store_line("Sessao_Escola;Data_Hora;Aluno;Cla;Tipo_Atividade;Disciplina;Andar;Resultado;Tempo_Seg;Detalhes")
+		var mg_lista = dados.get("minigames_sessao", [])
+		if mg_lista.size() > 0:
+			for m in mg_lista:
+				var a_id = int(m.get("andar_id", 1))
+				var disc = "Química"
+				if a_id == 2: disc = "Física"
+				elif a_id == 3: disc = "Biologia"
+				var linha_m = [
+					str(escola_nome),
+					str(m.get("timestamp", "-")),
+					str(m.get("aluno_nick", "Mago")),
+					str(m.get("cla_aluno", "-")),
+					str(m.get("tipo_minigame", "-")),
+					disc,
+					str(a_id),
+					"Vitória/Sucesso" if m.get("vitoria", false) else "Tempo Esgotado/Falha",
+					str(m.get("tempo_gasto", 0.0)),
+					'"' + JSON.stringify(m.get("detalhes", {})).replace('"', '""') + '"'
+				]
+				f_minigames.store_line(";".join(linha_m))
+		else:
+			f_minigames.store_line("%s;%s;Sem registros de minigames ainda;-;-;-;-;-;-" % [escola_nome, Time.get_datetime_string_from_system()])
+		f_minigames.close()
+
 	if OS.has_feature("web"):
 		var baixou = false
 		if ClassDB.class_exists("JavaScriptBridge"):
 			var bytes_alunos = FileAccess.get_file_as_bytes(path_alunos)
 			var bytes_questoes = FileAccess.get_file_as_bytes(path_questoes)
+			var bytes_minigames = FileAccess.get_file_as_bytes(path_minigames)
 			JavaScriptBridge.download_buffer(bytes_alunos, fn_alunos, "text/csv;charset=utf-8")
 			await get_tree().create_timer(0.4).timeout
 			JavaScriptBridge.download_buffer(bytes_questoes, fn_questoes, "text/csv;charset=utf-8")
+			await get_tree().create_timer(0.4).timeout
+			JavaScriptBridge.download_buffer(bytes_minigames, fn_minigames, "text/csv;charset=utf-8")
 			baixou = true
 		if baixou:
-			_exibir_toast("Download das planilhas CSV iniciado no navegador!")
+			_exibir_toast("Download das 3 planilhas CSV iniciado no navegador!")
 		else:
 			_exibir_toast("Erro ao iniciar download na plataforma Web.")
 	else:
 		OS.shell_open(ProjectSettings.globalize_path(dir_relatorios))
-		_exibir_toast("Planilhas CSV exportadas (Microdados de Alunos e Matriz das 150 Questões)!")
+		_exibir_toast("Planilhas CSV exportadas (Microdados de Alunos, Matriz 150 Questões e Minigames)!")
 
 # --- EXPORTAÇÃO DE RELATÓRIO PEDAGÓGICO (IMPRESSÃO / PDF) ---
 
@@ -2162,6 +2260,193 @@ func _exportar_pdf_relatorio() -> void:
 			(str(tempo_m) + "s") if s["tempo_count"] > 0 else "-"
 		]
 
+	# Seção 5: Telemetria de Gameplay e Atividades Lúdicas (Minigames & Exploração)
+	var minigames_sessao = dados.get("minigames_sessao", [])
+	var telemetria_gameplay = dados.get("telemetria_gameplay", [])
+	var telemetria_playerstats = dados.get("telemetria_playerstats", {})
+
+	# Consolidação de Telemetria por Andar (Tempo Ativo, Mortes, Poções)
+	var stats_andares_telemetria = {
+		1: {"nome": "Química (Andar 1)", "tempo": 0.0, "mortes": 0, "pocoes": 0},
+		2: {"nome": "Física (Andar 2)", "tempo": 0.0, "mortes": 0, "pocoes": 0},
+		3: {"nome": "Biologia (Andar 3)", "tempo": 0.0, "mortes": 0, "pocoes": 0}
+	}
+	
+	var tempo_local = telemetria_playerstats.get("tempo_por_andar", {})
+	var mortes_local = telemetria_playerstats.get("mortes_por_andar", {})
+	var pocoes_local = telemetria_playerstats.get("pocoes_por_andar", {})
+	for a_id in [1, 2, 3]:
+		stats_andares_telemetria[a_id]["tempo"] += float(tempo_local.get(a_id, 0.0))
+		stats_andares_telemetria[a_id]["mortes"] += int(mortes_local.get(a_id, 0))
+		stats_andares_telemetria[a_id]["pocoes"] += int(pocoes_local.get(a_id, 0))
+		
+	for tg in telemetria_gameplay:
+		var a_id = int(tg.get("andar_id", 1))
+		if stats_andares_telemetria.has(a_id):
+			var tipo_ev = str(tg.get("tipo_evento", ""))
+			var val = float(tg.get("valor", 1.0))
+			if tipo_ev == "morte":
+				stats_andares_telemetria[a_id]["mortes"] += int(val)
+			elif tipo_ev == "pocao":
+				stats_andares_telemetria[a_id]["pocoes"] += int(val)
+			elif tipo_ev == "tempo_andar":
+				stats_andares_telemetria[a_id]["tempo"] += val
+
+	var cards_andares_html = ""
+	for a_id in [1, 2, 3]:
+		var st = stats_andares_telemetria[a_id]
+		var mins = int(st["tempo"] / 60.0)
+		var segs = int(st["tempo"]) % 60
+		var tempo_fmt = "%dm %02ds" % [mins, segs] if st["tempo"] > 0 else "0m 00s"
+		var cor_borda = "#a855f7" if a_id == 1 else ("#0284c7" if a_id == 2 else "#16a34a")
+		var cor_bg = "#faf5ff" if a_id == 1 else ("#f0f9ff" if a_id == 2 else "#f0fdf4")
+		cards_andares_html += """
+			<div style="background: %s; border: 1px solid %s; border-radius: 8px; padding: 12px 14px;">
+				<div style="font-weight: 700; color: #0f172a; margin-bottom: 6px; font-size: 13px;">%s</div>
+				<div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+					<span style="color: #64748b;">Tempo Ativo:</span>
+					<b style="color: #0f172a;">%s</b>
+				</div>
+				<div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+					<span style="color: #64748b;">Derrotas/Mortes:</span>
+					<b style="color: #dc2626;">%d</b>
+				</div>
+				<div style="display: flex; justify-content: space-between; font-size: 11px;">
+					<span style="color: #64748b;">Poções Usadas:</span>
+					<b style="color: #2563eb;">%d</b>
+				</div>
+			</div>
+		""" % [cor_bg, cor_borda, st["nome"], tempo_fmt, st["mortes"], st["pocoes"]]
+
+	var minigames_map = {
+		"jogo_memoria": {"nome": "Jogo da Memória (Baús Rúnicos)", "tentativas": 0, "sucessos": 0, "tempo_total": 0.0},
+		"ligar_pares": {"nome": "Conexão Rúnica (Ligar Pares / Campeões)", "tentativas": 0, "sucessos": 0, "tempo_total": 0.0},
+		"furia_boss_vf": {"nome": "Fúria do Chefe (Questões V ou F a 50% HP)", "tentativas": 0, "sucessos": 0, "tempo_total": 0.0},
+		"mural_formulas": {"nome": "Mural de Inscrições / Fórmulas (Leitura)", "tentativas": 0, "sucessos": 0, "tempo_total": 0.0}
+	}
+	
+	for mg in minigames_sessao:
+		var tipo = str(mg.get("tipo_minigame", ""))
+		if minigames_map.has(tipo):
+			minigames_map[tipo]["tentativas"] += 1
+			if mg.get("vitoria", false):
+				minigames_map[tipo]["sucessos"] += 1
+			minigames_map[tipo]["tempo_total"] += float(mg.get("tempo_gasto", 0.0))
+			
+	for r in respostas_sessao:
+		if str(r.get("tipo", "")) == "furia_boss_vf":
+			minigames_map["furia_boss_vf"]["tentativas"] += 1
+			if r.get("acertou", false):
+				minigames_map["furia_boss_vf"]["sucessos"] += 1
+			minigames_map["furia_boss_vf"]["tempo_total"] += float(r.get("tempo_resposta", 0.0))
+
+	var linhas_mini_html = ""
+	for m_chave in ["jogo_memoria", "ligar_pares", "furia_boss_vf", "mural_formulas"]:
+		var m_data = minigames_map[m_chave]
+		var tent = m_data["tentativas"]
+		var suc = m_data["sucessos"]
+		var taxa = int((float(suc) / float(tent)) * 100) if tent > 0 else 0
+		var tempo_m = snappedf(m_data["tempo_total"] / float(tent), 0.1) if tent > 0 else 0.0
+		var cor_taxa = "#16a34a" if taxa >= 60 else ("#d97706" if taxa >= 40 else "#dc2626")
+		if tent == 0:
+			cor_taxa = "#94a3b8"
+			
+		var desc_sucesso = str(suc) if m_chave != "mural_formulas" else "-"
+		var taxa_str = (str(taxa) + "%") if (tent > 0 and m_chave != "mural_formulas") else ("Leitura" if m_chave == "mural_formulas" and tent > 0 else "-")
+		var tempo_str = (str(tempo_m) + "s") if tent > 0 else "-"
+		
+		linhas_mini_html += """
+			<tr>
+				<td><b>%s</b></td>
+				<td style="text-align: center;">%d</td>
+				<td style="text-align: center; color: #16a34a; font-weight: 600;">%s</td>
+				<td style="text-align: center; font-weight: 700; color: %s;">%s</td>
+				<td style="text-align: center;">%s</td>
+			</tr>
+		""" % [m_data["nome"], tent, desc_sucesso, cor_taxa, taxa_str, tempo_str]
+
+	var linhas_amostra_mini_html = ""
+	var limite_amostra_mg = min(minigames_sessao.size(), 8)
+	for i in range(limite_amostra_mg):
+		var reg_mg = minigames_sessao[minigames_sessao.size() - 1 - i]
+		var tipo_str = str(reg_mg.get("tipo_minigame", ""))
+		var nome_amigavel = minigames_map.get(tipo_str, {}).get("nome", tipo_str)
+		var a_id = int(reg_mg.get("andar_id", 1))
+		var disc_txt = "Química" if a_id == 1 else ("Física" if a_id == 2 else "Biologia")
+		var vit = bool(reg_mg.get("vitoria", false))
+		var res_cls = "tag-acerto" if vit else "tag-erro"
+		var res_txt = "Sucesso" if vit else "Incompleto"
+		if tipo_str == "mural_formulas":
+			res_cls = "tag-alerta"
+			res_txt = "Consultado"
+			
+		var t_gasto = float(reg_mg.get("tempo_gasto", 0.0))
+		linhas_amostra_mini_html += """
+			<tr>
+				<td style="font-size: 11px; color: #64748b;">%s</td>
+				<td><b>%s</b></td>
+				<td>%s</td>
+				<td>%s</td>
+				<td class="%s">%s</td>
+				<td style="text-align: center;">%.1fs</td>
+			</tr>
+		""" % [
+			str(reg_mg.get("timestamp", "-")),
+			str(reg_mg.get("aluno_nick", "Mago")),
+			nome_amigavel,
+			disc_txt,
+			res_cls, res_txt,
+			t_gasto
+		]
+
+	var secao_telemetria_minigames_html = """
+		<div class="page-break"></div>
+		<h3>5. Telemetria de Gameplay e Atividades Lúdicas (Minigames & Exploração)</h3>
+		<p style="font-size: 12px; color: #64748b; margin-top: -6px; margin-bottom: 12px;">
+			Monitoramento de tempo ativo nos andares (fora de menus), retenção, consumo de recursos e desempenho em desafios rúnicos e de leitura.
+		</p>
+		
+		<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+			%s
+		</div>
+		
+		<h4 style="font-size: 13px; color: #334155; margin: 16px 0 8px 0; font-weight: 600;">Desempenho Geral por Modalidade de Minigame</h4>
+		<table>
+			<thead>
+				<tr>
+					<th>Atividade / Mecânica Cognitiva</th>
+					<th style="text-align: center; width: 100px;">Tentativas</th>
+					<th style="text-align: center; width: 100px;">Sucessos</th>
+					<th style="text-align: center; width: 110px;">Taxa Sucesso</th>
+					<th style="text-align: center; width: 110px;">Tempo Médio</th>
+				</tr>
+			</thead>
+			<tbody>
+				%s
+			</tbody>
+		</table>
+	""" % [cards_andares_html, linhas_mini_html]
+
+	if limite_amostra_mg > 0:
+		secao_telemetria_minigames_html += """
+			<h4 style="font-size: 13px; color: #334155; margin: 16px 0 8px 0; font-weight: 600;">Amostragem de Tentativas Recentes em Minigames</h4>
+			<table>
+				<thead>
+					<tr>
+						<th style="width: 120px;">Data/Hora</th>
+						<th style="width: 110px;">Aluno</th>
+						<th>Atividade</th>
+						<th style="width: 90px;">Andar</th>
+						<th style="width: 90px;">Resultado</th>
+						<th style="width: 80px; text-align: center;">Tempo</th>
+					</tr>
+				</thead>
+				<tbody>
+					%s
+				</tbody>
+			</table>
+		""" % linhas_amostra_mini_html
+
 	# Template Base do Relatório com Estilos Formais e Impressão Limpa
 	var template = """<!DOCTYPE html>
 <html lang="pt-BR">
@@ -2344,8 +2629,10 @@ func _exportar_pdf_relatorio() -> void:
 
 	{{SECAO_RESPOSTAS_AMOSTRAGEM}}
 
+	{{SECAO_TELEMETRIA_MINIGAMES}}
+
 	<div class="page-break"></div>
-	<h3>5. Catálogo Completo das 150 Questões do Jogo (Química, Física e Biologia)</h3>
+	<h3>6. Catálogo Completo das 150 Questões do Jogo (Química, Física e Biologia)</h3>
 	<p style="font-size: 12px; color: #64748b; margin-top: -6px; margin-bottom: 12px;">
 		Mapeamento integral de todas as 150 questões do jogo com identificação de nível TRI, taxa de acerto acumulada e tempo médio de resposta.
 	</p>
@@ -2394,6 +2681,7 @@ func _exportar_pdf_relatorio() -> void:
 	html = html.replace("{{TABELA_DIFICULDADES}}", linhas_dif_html)
 	html = html.replace("{{TABELA_ALUNOS_CONSOLIDADA}}", linhas_alunos_html)
 	html = html.replace("{{SECAO_RESPOSTAS_AMOSTRAGEM}}", secao_respostas_alunos_html)
+	html = html.replace("{{SECAO_TELEMETRIA_MINIGAMES}}", secao_telemetria_minigames_html)
 	html = html.replace("{{TABELA_150_QUESTOES}}", linhas_150_html)
 
 	file.store_string(html)

@@ -1093,7 +1093,13 @@ func _fechar_e_emitir(vitoria: bool, tempo_esgotado: bool = false) -> void:
 	tw.tween_property(painel_central, "modulate:a", 0.0, 0.2)
 	tw.tween_property(painel_central, "scale", Vector2(0.8, 0.8), 0.2)
 	tw.tween_property(backdrop, "modulate:a", 0.0, 0.2)
-	await tw.finished
+	var tempo_gasto = max(0.1, duracao_total - tempo_restante)
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("salvar_minigame_analytics"):
+		db.salvar_minigame_analytics("jogo_memoria", andar_id, vitoria, tempo_gasto, {
+			"pares_encontrados": pares_encontrados,
+			"tempo_esgotado": tempo_esgotado
+		})
 	
 	desafio_concluido.emit(vitoria, tempo_esgotado)
 	queue_free()

@@ -18,6 +18,11 @@ var chaves: int = 0
 var moedas: int = 0
 var vinhetas_desbloqueadas: Array = []
 
+# Telemetria acadêmica por andar (1: Química, 2: Física, 3: Biologia)
+var tempo_por_andar: Dictionary = {"1": 0.0, "2": 0.0, "3": 0.0}
+var mortes_por_andar: Dictionary = {"1": 0, "2": 0, "3": 0}
+var pocoes_por_andar: Dictionary = {"1": 0, "2": 0, "3": 0}
+
 # buff temporario de escudo
 var buff_escudo_salas_restantes: int = 0
 var bonus_vida_escudo: float = 10.0
@@ -78,6 +83,9 @@ func _inicializar_dados_padrao():
 	chaves = 0
 	moedas = 0
 	vinhetas_desbloqueadas.clear()
+	tempo_por_andar = {"1": 0.0, "2": 0.0, "3": 0.0}
+	mortes_por_andar = {"1": 0, "2": 0, "3": 0}
+	pocoes_por_andar = {"1": 0, "2": 0, "3": 0}
 	buff_escudo_salas_restantes = 0
 	tem_buff_escudo = false
 	quests_concluidas.clear()
@@ -159,7 +167,10 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		"tem_pos_salva": tem_pos_salva,
 		"percurso_salas_salvo": percurso_salas_salvo,
 		"indice_sala_salvo": indice_sala_salvo,
-		"cutscene_inicial_vista": cutscene_inicial_vista
+		"cutscene_inicial_vista": cutscene_inicial_vista,
+		"tempo_por_andar": tempo_por_andar,
+		"mortes_por_andar": mortes_por_andar,
+		"pocoes_por_andar": pocoes_por_andar
 	}
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -199,6 +210,9 @@ func carregar():
 			tem_pos_salva = bool(data.get("tem_pos_salva", false))
 			percurso_salas_salvo = data.get("percurso_salas_salvo", [])
 			indice_sala_salvo = int(data.get("indice_sala_salvo", 0))
+			tempo_por_andar = data.get("tempo_por_andar", {"1": 0.0, "2": 0.0, "3": 0.0})
+			mortes_por_andar = data.get("mortes_por_andar", {"1": 0, "2": 0, "3": 0})
+			pocoes_por_andar = data.get("pocoes_por_andar", {"1": 0, "2": 0, "3": 0})
 			
 			if data.has("cutscene_inicial_vista"):
 				cutscene_inicial_vista = bool(data.get("cutscene_inicial_vista", false))
@@ -326,6 +340,9 @@ func resetar_salvamento_completo() -> void:
 		qm.resetar_historico_perguntas()
 
 	_inicializar_dados_padrao()
+	
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
 	
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	quests_atualizadas.emit()
@@ -555,6 +572,60 @@ func sofrer_dano(valor: float) -> void:
 	salvar()
 
 	if vida_atual_jogador <= 0:
+		registrar_morte()
 		var gs = get_node_or_null("/root/GlobalSignals")
 		if gs:
 			gs.fim_de_jogo.emit(false, {"dano": valor, "causa": "Armadilha"})
+
+func _process(delta: float) -> void:
+	if not is_inside_tree() or get_tree().paused:
+		return
+	var a = obter_andar_atual_id()
+	if a > 0:
+		acumular_tempo_andar(a, delta)
+
+func obter_andar_atual_id() -> int:
+	if is_inside_tree() and get_tree() and get_tree().current_scene:
+		var path = get_tree().current_scene.scene_file_path.to_lower()
+		if _eh_cena_de_menu(path):
+			return 0
+		if "quim" in path or "alquim" in path or "sala01" in path or "sala02" in path or "corredor." in path:
+			return 1
+		elif "fis" in path:
+			return 2
+		elif "bio" in path or "estufa" in path:
+			return 3
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and "active_dungeon" in db and not str(db.active_dungeon).is_empty():
+		var d = str(db.active_dungeon).to_lower()
+		if "quim" in d or "alquim" in d: return 1
+		elif "fis" in d: return 2
+		elif "bio" in d or "estufa" in d: return 3
+	return 0
+
+func registrar_morte(p_andar_id: int = 0) -> void:
+	var a = p_andar_id if p_andar_id > 0 else obter_andar_atual_id()
+	if a > 0:
+		var k = str(a)
+		mortes_por_andar[k] = int(mortes_por_andar.get(k, 0)) + 1
+		salvar()
+		var db = get_node_or_null("/root/DatabaseManager")
+		if db and db.has_method("salvar_telemetria_gameplay"):
+			db.salvar_telemetria_gameplay("morte", a, 1.0)
+		print("[PlayerStats] Morte registrada no Andar %d. Total: %d" % [a, mortes_por_andar[k]])
+
+func registrar_uso_pocao(p_andar_id: int = 0) -> void:
+	var a = p_andar_id if p_andar_id > 0 else obter_andar_atual_id()
+	if a > 0:
+		var k = str(a)
+		pocoes_por_andar[k] = int(pocoes_por_andar.get(k, 0)) + 1
+		salvar()
+		var db = get_node_or_null("/root/DatabaseManager")
+		if db and db.has_method("salvar_telemetria_gameplay"):
+			db.salvar_telemetria_gameplay("pocao", a, 1.0)
+		print("[PlayerStats] Poção usada no Andar %d. Total: %d" % [a, pocoes_por_andar[k]])
+
+func acumular_tempo_andar(p_andar_id: int, delta: float) -> void:
+	if p_andar_id > 0 and delta > 0.0:
+		var k = str(p_andar_id)
+		tempo_por_andar[k] = float(tempo_por_andar.get(k, 0.0)) + delta
