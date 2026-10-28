@@ -40,6 +40,11 @@ func _on_btn_show_password_toggled(button_pressed: bool) -> void:
 		btn_show_password.text = " O "
 
 func _on_btn_login_pressed() -> void:
+	var tempo_bloqueio = DatabaseManager.tempo_restante_bloqueio_login()
+	if tempo_bloqueio > 0:
+		_show_error_popup("Muitas tentativas incorretas!\nAcesso temporariamente bloqueado por mais %d segundos." % tempo_bloqueio)
+		return
+
 	var email := email_input.text.strip_edges()
 	var password := password_input.text.strip_edges()
 	
@@ -80,7 +85,9 @@ func _on_auth_erro(mensagem: String) -> void:
 	btn_login.text = "Entrar"
 	var msg = mensagem
 	var msg_lower = mensagem.to_lower()
-	if "invalid login credentials" in msg_lower:
+	if "bloqueado por" in msg_lower or "tentativas restantes" in msg_lower:
+		msg = mensagem
+	elif "invalid login credentials" in msg_lower:
 		msg = "E-mail ou senha incorretos!\nVerifique as credenciais digitadas e tente novamente."
 	elif "email not confirmed" in msg_lower:
 		msg = "E-mail ainda não confirmado!\nVerifique sua caixa de entrada para ativar a conta."
@@ -180,7 +187,30 @@ func _abrir_modal_recuperar_senha() -> void:
 	btn_env.add_theme_stylebox_override("normal", sb_btn)
 	btn_env.add_theme_color_override("font_color", Color.WHITE)
 	
+	# Rotina de atualização do cooldown no botão
+	var _atualizar_cooldown_btn = func():
+		if not is_instance_valid(btn_env): return
+		var rest = DatabaseManager.tempo_restante_recuperacao()
+		if rest > 0:
+			btn_env.disabled = true
+			btn_env.text = "Aguarde (%ds)" % rest
+		else:
+			btn_env.disabled = false
+			btn_env.text = "Enviar E-mail"
+	
+	_atualizar_cooldown_btn.call()
+	
+	var timer_cooldown = Timer.new()
+	timer_cooldown.wait_time = 1.0
+	timer_cooldown.autostart = true
+	timer_cooldown.timeout.connect(_atualizar_cooldown_btn)
+	popup_recup_senha.add_child(timer_cooldown)
+	
 	btn_env.pressed.connect(func():
+		var rest_agora = DatabaseManager.tempo_restante_recuperacao()
+		if rest_agora > 0:
+			lbl_feedback.text = "Aguarde %d segundos antes de solicitar novamente!" % rest_agora
+			return
 		var em = input_recup.text.strip_edges()
 		if em.is_empty() or not ("@" in em and "." in em):
 			lbl_feedback.text = "Digite um e-mail válido!"

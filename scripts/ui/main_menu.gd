@@ -56,6 +56,8 @@ func _ready() -> void:
 		btn_creditos.pressed.connect(_on_btn_creditos_pressed)
 	_configurar_card_instagram()
 	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("sincronizar_telemetria_pendente_async"):
+		db.sincronizar_telemetria_pendente_async()
 	
 	# Se já jogou antes, exibe CONTINUAR e NOVO JOGO. Se for primeira vez, exibe NOVO JOGO.
 	var ps = get_node_or_null("/root/PlayerStats")

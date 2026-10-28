@@ -26,6 +26,17 @@ signal auth_sucesso(token: String)
 signal auth_erro(mensagem: String)
 signal reset_senha_enviado()
 signal nick_alterado(novo_nick: String)
+signal telemetria_sincronizada(total_itens: int)
+
+# Controle de taxa e tentativas (Rate limiting)
+const MAX_TENTATIVAS_LOGIN: int = 5
+const TEMPO_BLOQUEIO_LOGIN: int = 60 # segundos
+const COOLDOWN_RESET_SENHA: int = 60 # segundos
+
+var tentativas_login_falhas: int = 0
+var bloqueio_login_ate: int = 0
+var _ultimo_reset_senha_timestamp: int = 0
+var _sincronizando_offline: bool = false
 
 # no de requisicoes http
 var http_request: HTTPRequest
@@ -49,6 +60,15 @@ func _ready() -> void:
 	
 	# 3. Sincroniza sessão ativa global no Supabase (para clientes Desktop e Web)
 	sincronizar_sessao_global_supabase()
+	
+	# 4. Timer periódico para sincronização automática de telemetria pendente (buffer offline -> Supabase)
+	var timer_sync = Timer.new()
+	timer_sync.name = "TimerSyncOffline"
+	timer_sync.wait_time = 35.0
+	timer_sync.autostart = true
+	timer_sync.one_shot = false
+	timer_sync.timeout.connect(func(): sincronizar_telemetria_pendente_async())
+	add_child(timer_sync)
 
 # progresso salvo localmente
 const SAVE_FILE = "user://progresso.json"
@@ -56,6 +76,7 @@ const SESSOES_FILE = "user://sessoes_escolas.json"
 const ANALYTICS_FILE = "user://pesquisa_analytics.json"
 const MINIGAMES_ANALYTICS_FILE = "user://minigames_analytics.json"
 const GAMEPLAY_TELEMETRIA_FILE = "user://gameplay_telemetria.json"
+const OFFLINE_SYNC_QUEUE_FILE = "user://telemetria_sync_queue.json"
 
 var escola_ativa_id: String = "geral"
 var escola_ativa_nome: String = "Geral (Padrão)"
@@ -350,9 +371,13 @@ func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bo
 		f_write.store_string(JSON.stringify(lista, "\t"))
 		f_write.close()
 		
-	# Tenta sincronizar com o Supabase se tabela existir
+	# Tenta sincronizar com o Supabase ou enfileira no cache offline
 	if not user_token.is_empty():
-		request_async("/rest/v1/minigames_respostas", HTTPClient.METHOD_POST, reg)
+		var res_mini = await request_async("/rest/v1/minigames_respostas", HTTPClient.METHOD_POST, reg)
+		if not res_mini.get("success", false) and res_mini.get("code", 0) == 0:
+			enfileirar_sync_offline("/rest/v1/minigames_respostas", reg)
+	else:
+		enfileirar_sync_offline("/rest/v1/minigames_respostas", reg)
 	print("[Analytics] Minigame '%s' registrado: vitória=%s | tempo=%.1fs" % [tipo_minigame, str(vitoria), tempo_gasto])
 
 func obter_minigames_analytics(filtro_escola_id: String = "") -> Array:
@@ -399,6 +424,14 @@ func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float
 	if f_write:
 		f_write.store_string(JSON.stringify(lista, "\t"))
 		f_write.close()
+		
+	# Tenta sincronizar com o Supabase ou enfileira no cache offline
+	if not user_token.is_empty():
+		var res_tele = await request_async("/rest/v1/telemetria_gameplay", HTTPClient.METHOD_POST, reg)
+		if not res_tele.get("success", false) and res_tele.get("code", 0) == 0:
+			enfileirar_sync_offline("/rest/v1/telemetria_gameplay", reg)
+	else:
+		enfileirar_sync_offline("/rest/v1/telemetria_gameplay", reg)
 
 func obter_telemetria_gameplay(filtro_escola_id: String = "") -> Array:
 	if not FileAccess.file_exists(GAMEPLAY_TELEMETRIA_FILE):
@@ -464,24 +497,154 @@ func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
 		
 	var res = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, payload_servidor)
 	
-	# Se falhar com erro 400 (ex: colunas extras ainda não criadas no Supabase), tenta com as colunas conhecidas incluindo escola_id
-	if not res.get("success", false) and res.get("code", 0) == 400:
-		var baseline_com_escola = {
-			"pergunta_id": data_resp_completo.get("pergunta_id", 0),
-			"acertou": data_resp_completo.get("acertou", false),
-			"andar_id": data_resp_completo.get("andar_id", 1),
-			"aluno_nick": data_resp_completo.get("aluno_nick", "Mago"),
-			"escola_id": data_resp_completo.get("escola_id", escola_ativa_id)
-		}
-		var res2 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_com_escola)
-		if not res2.get("success", false) and res2.get("code", 0) == 400:
-			var baseline_minimo = {
+	if not res.get("success", false):
+		var code = res.get("code", 0)
+		if code == 0:
+			# Sem rede ou timeout: salva no buffer para sincronização posterior
+			enfileirar_sync_offline("/rest/v1/respostas", payload_servidor)
+		elif code == 400:
+			# Se falhar com erro 400 (ex: colunas extras ainda não criadas no Supabase), tenta baseline
+			var baseline_com_escola = {
 				"pergunta_id": data_resp_completo.get("pergunta_id", 0),
 				"acertou": data_resp_completo.get("acertou", false),
 				"andar_id": data_resp_completo.get("andar_id", 1),
-				"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+				"aluno_nick": data_resp_completo.get("aluno_nick", "Mago"),
+				"escola_id": data_resp_completo.get("escola_id", escola_ativa_id)
 			}
-			await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_minimo)
+			var res2 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_com_escola)
+			if not res2.get("success", false):
+				if res2.get("code", 0) == 0:
+					enfileirar_sync_offline("/rest/v1/respostas", baseline_com_escola)
+				elif res2.get("code", 0) == 400:
+					var baseline_minimo = {
+						"pergunta_id": data_resp_completo.get("pergunta_id", 0),
+						"acertou": data_resp_completo.get("acertou", false),
+						"andar_id": data_resp_completo.get("andar_id", 1),
+						"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+					}
+					var res3 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_minimo)
+					if not res3.get("success", false) and res3.get("code", 0) == 0:
+						enfileirar_sync_offline("/rest/v1/respostas", baseline_minimo)
+
+# --- SISTEMA DE FILA E CACHE OFFLINE (RESILIÊNCIA EM REDES INSTÁVEIS) ---
+
+func enfileirar_sync_offline(endpoint: String, payload: Dictionary) -> void:
+	var queue: Array = []
+	if FileAccess.file_exists(OFFLINE_SYNC_QUEUE_FILE):
+		var f_read = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.READ)
+		if f_read:
+			var json = JSON.new()
+			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+				queue = json.data
+			f_read.close()
+			
+	var item = {
+		"id": str(Time.get_unix_time_from_system()) + "_" + str(randi() % 10000),
+		"endpoint": endpoint,
+		"payload": payload,
+		"tentativas": 0,
+		"timestamp": Time.get_datetime_string_from_system()
+	}
+	# Limita a 500 registros para proteger o armazenamento do navegador/disco
+	if queue.size() >= 500:
+		queue.pop_front()
+	queue.append(item)
+	
+	var f_write = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.WRITE)
+	if f_write:
+		f_write.store_string(JSON.stringify(queue, "\t"))
+		f_write.close()
+	print("[Sync Offline] Evento enfileirado no buffer local: %s (Total pendente: %d)" % [endpoint, queue.size()])
+
+func obter_tamanho_fila_sync() -> int:
+	if not FileAccess.file_exists(OFFLINE_SYNC_QUEUE_FILE):
+		return 0
+	var f_read = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.READ)
+	if not f_read: return 0
+	var json = JSON.new()
+	var sz = 0
+	if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+		sz = json.data.size()
+	f_read.close()
+	return sz
+
+func sincronizar_telemetria_pendente_async() -> void:
+	if _sincronizando_offline:
+		return
+	if not FileAccess.file_exists(OFFLINE_SYNC_QUEUE_FILE):
+		return
+		
+	var f_read = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.READ)
+	if not f_read:
+		return
+	var json = JSON.new()
+	var queue: Array = []
+	if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+		queue = json.data
+	f_read.close()
+	
+	if queue.is_empty():
+		return
+		
+	_sincronizando_offline = true
+	var itens_restantes: Array = []
+	var sincronizados_com_sucesso = 0
+	var conexao_ativa = true
+	
+	for item in queue:
+		if not item is Dictionary:
+			continue
+		
+		# Se já sabemos que a conexão caiu nesta rodada, preserva o restante na fila
+		if not conexao_ativa:
+			itens_restantes.append(item)
+			continue
+			
+		var endpoint: String = item.get("endpoint", "")
+		var payload: Dictionary = item.get("payload", {})
+		var tentativas: int = int(item.get("tentativas", 0)) + 1
+		
+		var res = await request_async(endpoint, HTTPClient.METHOD_POST, payload)
+		if res.get("success", false):
+			sincronizados_com_sucesso += 1
+		else:
+			var code = res.get("code", 0)
+			if code == 0:
+				conexao_ativa = false
+				item["tentativas"] = tentativas
+				itens_restantes.append(item)
+			elif code == 400 and endpoint == "/rest/v1/respostas":
+				var baseline_minimo = {
+					"pergunta_id": payload.get("pergunta_id", 0),
+					"acertou": payload.get("acertou", false),
+					"andar_id": payload.get("andar_id", 1),
+					"aluno_nick": payload.get("aluno_nick", "Mago")
+				}
+				var res_fallback = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_minimo)
+				if res_fallback.get("success", false):
+					sincronizados_com_sucesso += 1
+				else:
+					if tentativas < 3:
+						item["tentativas"] = tentativas
+						itens_restantes.append(item)
+			elif code == 404:
+				# Tabela opcional não configurada no Supabase, descarta para não congestionar a fila
+				pass
+			else:
+				if tentativas < 3:
+					item["tentativas"] = tentativas
+					itens_restantes.append(item)
+					
+	var f_write = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.WRITE)
+	if f_write:
+		f_write.store_string(JSON.stringify(itens_restantes, "\t"))
+		f_write.close()
+		
+	_sincronizando_offline = false
+	
+	if sincronizados_com_sucesso > 0:
+		print("[Sync Offline] %d registros pendentes sincronizados com o Supabase! Restantes na fila: %d" % [sincronizados_com_sucesso, itens_restantes.size()])
+		telemetria_sincronizada.emit(sincronizados_com_sucesso)
 
 
 # monta o header e envia requisicao pro supabase
@@ -563,10 +726,17 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				if RankingManager.has_method("fundir_conta_guest"):
 					RankingManager.fundir_conta_guest(user_nick, user_cla)
 				
+			# Reseta contador de tentativas falhas de login
+			tentativas_login_falhas = 0
+			bloqueio_login_ate = 0
+			
 			# Persiste sessão no localStorage para sobreviver a recarregamentos
 			_salvar_sessao_web()
 			
 			auth_sucesso.emit(user_token)
+			
+			# Aciona sincronização de eventos que estavam guardados na fila offline
+			sincronizar_telemetria_pendente_async()
 		elif typeof(dados) == TYPE_DICTIONARY and (dados.has("user") or dados.has("email")):
 			print("usuario cadastrado ou atualizado com sucesso!")
 			var user_data = dados.get("user", dados)
@@ -599,6 +769,21 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 				msg_erro = dados["error_description"]
 			elif dados.has("msg"):
 				msg_erro = dados["msg"]
+			elif dados.has("message"):
+				msg_erro = dados["message"]
+		
+		# Limite de tentativas de login (Rate limiting)
+		var msg_lower = msg_erro.to_lower()
+		if "invalid login credentials" in msg_lower or "invalid credentials" in msg_lower:
+			tentativas_login_falhas += 1
+			if tentativas_login_falhas >= MAX_TENTATIVAS_LOGIN:
+				bloqueio_login_ate = int(Time.get_unix_time_from_system()) + TEMPO_BLOQUEIO_LOGIN
+				tentativas_login_falhas = 0
+				msg_erro = "Limite de tentativas incorretas excedido!\nAcesso temporariamente bloqueado por %d segundos." % TEMPO_BLOQUEIO_LOGIN
+			else:
+				var restam = MAX_TENTATIVAS_LOGIN - tentativas_login_falhas
+				msg_erro = "E-mail ou senha incorretos!\n(Tentativas restantes antes do bloqueio: %d)" % restam
+		
 		push_error("erro http: " + str(response_code) + " | " + msg_erro)
 		auth_erro.emit(msg_erro)
 
@@ -697,7 +882,25 @@ func cadastrar_usuario(email: String, senha: String, nick: String) -> void:
 	# rota pra criar conta
 	make_request("/auth/v1/signup", HTTPClient.METHOD_POST, data)
 
+func tempo_restante_bloqueio_login() -> int:
+	var agora = int(Time.get_unix_time_from_system())
+	if agora < bloqueio_login_ate:
+		return bloqueio_login_ate - agora
+	return 0
+
+func tempo_restante_recuperacao() -> int:
+	var agora = int(Time.get_unix_time_from_system())
+	var decorrido = agora - _ultimo_reset_senha_timestamp
+	if decorrido < COOLDOWN_RESET_SENHA:
+		return COOLDOWN_RESET_SENHA - decorrido
+	return 0
+
 func fazer_login(email: String, senha: String) -> void:
+	var resto = tempo_restante_bloqueio_login()
+	if resto > 0:
+		auth_erro.emit("Muitas tentativas incorretas!\nAcesso temporariamente bloqueado por mais %d segundos." % resto)
+		return
+		
 	print("tentando logar: ", email)
 	var data = {
 		"email": email,
@@ -707,6 +910,12 @@ func fazer_login(email: String, senha: String) -> void:
 	make_request("/auth/v1/token?grant_type=password", HTTPClient.METHOD_POST, data)
 
 func recuperar_senha(email: String) -> void:
+	var resto = tempo_restante_recuperacao()
+	if resto > 0:
+		auth_erro.emit("Aguarde %d segundos antes de solicitar um novo e-mail de recuperação." % resto)
+		return
+		
+	_ultimo_reset_senha_timestamp = int(Time.get_unix_time_from_system())
 	print("Pedindo reset de senha para: ", email)
 	var data = {
 		"email": email
