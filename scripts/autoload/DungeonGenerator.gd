@@ -685,4 +685,53 @@ func get_tier_da_sala(arquivo_cena: String = "") -> int:
 func get_tier_override(arquivo_cena: String = "") -> int:
 	return get_tier_da_sala(arquivo_cena)
 
+# Retorna a ordem da sala no percurso da run atual (1-based: Corredor=1, Sala01=2, ..., Boss=9)
+func get_ordem_visita_sala_atual(cena: String = "") -> int:
+	var cena_alvo = cena
+	if cena_alvo == "" and get_tree() and get_tree().current_scene:
+		cena_alvo = get_tree().current_scene.scene_file_path
+	if cena_alvo != "":
+		var idx = get_index_da_cena(cena_alvo)
+		if idx != -1:
+			return idx
+	return max(1, indice_atual)
+
+# Retorna a configuração de dificuldade dos minigames (Memória e Ligar Pares) baseado na ordem de visita da sala
+# Salas 1-3: Base (3 pares, Memória=15s, Ligar=20s)
+# Salas 4-7: Quantidade aumentada e tempo proporcional (4 pares, Memória=20s, Ligar=28s)
+# Salas 8+:  Quantidade ainda maior e tempo menor/difícil (5 pares, Memória=18s, Ligar=24s)
+func get_config_dificuldade_minigames(cena: String = "", ordem_forcada: int = -1) -> Dictionary:
+	var ordem = ordem_forcada
+	if ordem <= 0:
+		ordem = get_ordem_visita_sala_atual(cena)
+		
+	if ordem >= 8:
+		return {
+			"ordem": ordem,
+			"fase": "dificil",
+			"memoria_pares": 5,
+			"memoria_tempo": 18.0,
+			"ligar_pares": 5,
+			"ligar_tempo": 24.0
+		}
+	elif ordem >= 4:
+		return {
+			"ordem": ordem,
+			"fase": "medio",
+			"memoria_pares": 4,
+			"memoria_tempo": 20.0,
+			"ligar_pares": 4,
+			"ligar_tempo": 28.0
+		}
+	else:
+		return {
+			"ordem": ordem,
+			"fase": "inicial",
+			"memoria_pares": 3,
+			"memoria_tempo": 15.0,
+			"ligar_pares": 3,
+			"ligar_tempo": 20.0
+		}
+
+
 

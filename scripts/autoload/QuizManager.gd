@@ -557,7 +557,12 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 		if minigame_cena:
 			var minigame = minigame_cena.instantiate()
 			add_child(minigame)
-			minigame.iniciar_conexao(_andar_atual)
+			var ordem_sala = -1
+			var dg = get_node_or_null("/root/DungeonGenerator")
+			if dg and dg.has_method("get_ordem_visita_sala_atual"):
+				var scene_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else ""
+				ordem_sala = dg.get_ordem_visita_sala_atual(scene_path)
+			minigame.iniciar_conexao(_andar_atual, ordem_sala)
 			var quebrou = await minigame.conexao_concluida
 			if quebrou:
 				print("[QuizManager] Barreira Rúnica DESTRUÍDA! Golpe Crítico de 40 HP!")

@@ -301,7 +301,12 @@ func _iniciar_desafio_memoria() -> void:
 			_minigame_ativo = false
 			_minigame_instancia = null
 		)
-		minigame.iniciar_desafio(andar_id, player_ref)
+		var ordem_sala = -1
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg and dg.has_method("get_ordem_visita_sala_atual"):
+			var scene_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else ""
+			ordem_sala = dg.get_ordem_visita_sala_atual(scene_path)
+		minigame.iniciar_desafio(andar_id, player_ref, ordem_sala)
 
 func _on_desafio_memoria_concluido(vitoria: bool, tempo_esgotado: bool = false) -> void:
 	_minigame_ativo = false

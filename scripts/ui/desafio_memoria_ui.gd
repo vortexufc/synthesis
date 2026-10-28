@@ -9,6 +9,8 @@ var player_ref: Node2D = null
 
 # configuracoes do minigame
 var andar_id: int = 1
+var ordem_sala: int = 1
+var qtd_pares: int = 3
 var duracao_total: float = 15.0
 var tempo_restante: float = 15.0
 var jogo_ativo: bool = false
@@ -170,7 +172,7 @@ func _process(delta: float) -> void:
 		_finalizar_derrota()
 
 # inicia o minigame e trava o player
-func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
+func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null, p_ordem_sala: int = -1) -> void:
 	# Protege contra instâncias duplicadas na árvore
 	var outros = get_tree().get_nodes_in_group("desafio_memoria")
 	for outro in outros:
@@ -188,12 +190,59 @@ func iniciar_desafio(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 		player_ref.travado = true
 		player_ref.em_interacao = true
 
+	# Configura a dificuldade de acordo com a ordem da sala na run atual
+	var cfg = {
+		"ordem": 1,
+		"fase": "inicial",
+		"memoria_pares": 3,
+		"memoria_tempo": 15.0
+	}
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg and dg.has_method("get_config_dificuldade_minigames"):
+		var cena_path = ""
+		if get_tree() and get_tree().current_scene:
+			cena_path = get_tree().current_scene.scene_file_path
+		cfg = dg.get_config_dificuldade_minigames(cena_path, p_ordem_sala)
+	elif p_ordem_sala >= 8:
+		cfg["ordem"] = p_ordem_sala
+		cfg["fase"] = "dificil"
+		cfg["memoria_pares"] = 5
+		cfg["memoria_tempo"] = 18.0
+	elif p_ordem_sala >= 4:
+		cfg["ordem"] = p_ordem_sala
+		cfg["fase"] = "medio"
+		cfg["memoria_pares"] = 4
+		cfg["memoria_tempo"] = 20.0
+
+	ordem_sala = int(cfg.get("ordem", 1))
+	qtd_pares = int(cfg.get("memoria_pares", 3))
+	duracao_total = float(cfg.get("memoria_tempo", 15.0))
 	tempo_restante = duracao_total
 	pares_encontrados = 0
 	cartas_viradas.clear()
 	bloqueio_input = false
 	
+	print("[DesafioMemória] Configurado para Sala %d (Fase: %s) -> %d pares, tempo: %.1fs" % [ordem_sala, cfg.get("fase", "inicial"), qtd_pares, duracao_total])
+
+	# Ajusta o tamanho do painel central para comportar 3, 4 ou 5 colunas de cartas
+	if painel_central:
+		var larg_painel = 720.0
+		if qtd_pares == 4:
+			larg_painel = 840.0
+		elif qtd_pares >= 5:
+			larg_painel = 960.0
+		painel_central.custom_minimum_size = Vector2(larg_painel, 520.0)
+		painel_central.pivot_offset = Vector2(larg_painel * 0.5, 260.0)
+
+	if progress_timer:
+		progress_timer.max_value = duracao_total
+		progress_timer.value = duracao_total
+
+	if lbl_pares:
+		lbl_pares.text = "PARES: 0 / %d" % qtd_pares
+
 	_atualizar_textos_andar()
+	_atualizar_timer_ui()
 	_gerar_cartas()
 	
 	jogo_ativo = true
@@ -366,7 +415,7 @@ func _construir_interface() -> void:
 	hbox_status.add_child(progress_timer)
 	
 	lbl_pares = Label.new()
-	lbl_pares.text = "PARES: 0 / 3"
+	lbl_pares.text = "PARES: 0 / %d" % qtd_pares
 	lbl_pares.add_theme_font_override("font", font_titulo)
 	lbl_pares.add_theme_font_size_override("font_size", 16)
 	lbl_pares.add_theme_color_override("font_color", Color(0.95, 0.82, 0.35))
@@ -488,7 +537,7 @@ func _construir_interface() -> void:
 
 func _atualizar_textos_andar() -> void:
 	if lbl_subtitulo:
-		lbl_subtitulo.text = "Encontre os 3 pares correspondentes!"
+		lbl_subtitulo.text = "Encontre os %d pares correspondentes!" % qtd_pares
 
 func _gerar_cartas() -> void:
 	# limpa cartas antigas
@@ -496,13 +545,30 @@ func _gerar_cartas() -> void:
 		child.queue_free()
 	cartas_nodes.clear()
 	
-	# sorteia 3 pares do andar
+	# Configura o layout das colunas de acordo com a quantidade de pares (sempre 2 linhas)
+	grid_cartas.columns = qtd_pares
+	var h_sep = 16
+	var v_sep = 16
+	var tam_carta = Vector2(205, 115)
+	if qtd_pares == 4:
+		h_sep = 14
+		v_sep = 14
+		tam_carta = Vector2(180, 110)
+	elif qtd_pares >= 5:
+		h_sep = 12
+		v_sep = 12
+		tam_carta = Vector2(165, 105)
+		
+	grid_cartas.add_theme_constant_override("h_separation", h_sep)
+	grid_cartas.add_theme_constant_override("v_separation", v_sep)
+
+	# sorteia os pares do andar de acordo com a dificuldade da sala
 	var pool_pares: Array = PARES_POR_ANDAR.get(andar_id, PARES_POR_ANDAR[1]).duplicate()
 	pool_pares.shuffle()
 	
-	var pares_selecionados = pool_pares.slice(0, 3)
+	var pares_selecionados = pool_pares.slice(0, qtd_pares)
 	
-	# monta as 6 cartas
+	# monta as cartas
 	var lista_cartas = []
 	for i in range(pares_selecionados.size()):
 		var p = pares_selecionados[i]
@@ -525,8 +591,8 @@ func _gerar_cartas() -> void:
 	for idx in range(lista_cartas.size()):
 		var dados = lista_cartas[idx]
 		var btn = Button.new()
-		btn.custom_minimum_size = Vector2(205, 115)
-		btn.pivot_offset = Vector2(102.5, 57.5) # Centro para animação de rotação/flip
+		btn.custom_minimum_size = tam_carta
+		btn.pivot_offset = tam_carta * 0.5 # Centro para animação de rotação/flip
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if _font_card:
 			btn.add_theme_font_override("font", _font_card)
@@ -574,7 +640,10 @@ func _aplicar_estilo_verso(btn: Button) -> void:
 	btn.add_theme_stylebox_override("pressed", sb_hover)
 	
 	btn.text = "[ ? ]"
-	btn.add_theme_font_size_override("font_size", 18)
+	var sz_verso = 18
+	if qtd_pares >= 5:
+		sz_verso = 16
+	btn.add_theme_font_size_override("font_size", sz_verso)
 	btn.add_theme_color_override("font_color", Color(0.85, 0.75, 1.0))
 
 func _aplicar_estilo_frente(btn: Button, texto: String, cor_borda: Color = Color(0.3, 0.85, 1.0)) -> void:
@@ -598,7 +667,12 @@ func _aplicar_estilo_frente(btn: Button, texto: String, cor_borda: Color = Color
 	btn.add_theme_stylebox_override("disabled", sb)
 	
 	btn.text = texto
-	btn.add_theme_font_size_override("font_size", 15)
+	var sz_frente = 15
+	if qtd_pares == 4:
+		sz_frente = 14
+	elif qtd_pares >= 5:
+		sz_frente = 13
+	btn.add_theme_font_size_override("font_size", sz_frente)
 	btn.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 
 func _ao_clicar_carta(btn: Button, dados: Dictionary) -> void:
@@ -638,7 +712,7 @@ func _verificar_par() -> void:
 		c1["resolvida"] = true
 		c2["resolvida"] = true
 		pares_encontrados += 1
-		lbl_pares.text = "PARES: %d / 3" % pares_encontrados
+		lbl_pares.text = "PARES: %d / %d" % [pares_encontrados, qtd_pares]
 		
 		# som de acerto
 		if get_node_or_null("/root/AudioManager"):
@@ -659,7 +733,7 @@ func _verificar_par() -> void:
 		bloqueio_input = false
 		
 		# checa se achou todos os pares
-		if pares_encontrados >= 3:
+		if pares_encontrados >= qtd_pares:
 			_finalizar_vitoria()
 	else:
 		# errou o par
