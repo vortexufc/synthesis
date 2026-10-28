@@ -1002,36 +1002,32 @@ func atualizar_nick_usuario_async(novo_nick: String) -> Dictionary:
 	if not validacao["valido"]:
 		return validacao
 		
+	if user_token.is_empty():
+		return {"valido": false, "erro": "Crie ou acesse sua conta para personalizar seu nome de mago e disputar no ranking."}
+
+	if is_admin:
+		return {"valido": false, "erro": "A conta de Administrador possui nome exclusivo e fixo."}
+
 	var nick_antigo = user_nick
 	user_nick = novo_nick
 	
-	if not user_token.is_empty():
-		# 1. Atualiza user_metadata no Supabase Auth
-		var payload_auth = {
-			"data": {
-				"nick": novo_nick
-			}
+	# 1. Atualiza user_metadata no Supabase Auth
+	var payload_auth = {
+		"data": {
+			"nick": novo_nick
 		}
-		await request_async("/auth/v1/user", HTTPClient.METHOD_PUT, payload_auth)
-		
-		# 2. Atualiza tabela rankinggeral
-		var payload_rk = {"player_name": novo_nick}
-		await request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_rk)
-		
-		# 3. Atualiza tabela MembrosCla se tiver
-		var payload_cla = {"player_name": novo_nick}
-		await request_async("/rest/v1/MembrosCla?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_cla)
-		
-		_salvar_sessao_web()
-	else:
-		# Visitante: atualiza guest_config.json
-		var rm = get_node_or_null("/root/RankingManager")
-		if rm:
-			rm.local_guest_nick = novo_nick
-			var file = FileAccess.open("user://guest_config.json", FileAccess.WRITE)
-			if file:
-				file.store_string(JSON.stringify({"guest_nick": novo_nick}))
-				file.close()
+	}
+	await request_async("/auth/v1/user", HTTPClient.METHOD_PUT, payload_auth)
+	
+	# 2. Atualiza tabela rankinggeral
+	var payload_rk = {"player_name": novo_nick}
+	await request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_rk)
+	
+	# 3. Atualiza tabela MembrosCla se tiver
+	var payload_cla = {"player_name": novo_nick}
+	await request_async("/rest/v1/MembrosCla?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_cla)
+	
+	_salvar_sessao_web()
 
 	print("[DatabaseManager] Nick alterado de '%s' para '%s' com sucesso!" % [nick_antigo, novo_nick])
 	nick_alterado.emit(novo_nick)

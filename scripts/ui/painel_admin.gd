@@ -185,19 +185,6 @@ func _criar_cabecalho(parent: Control) -> void:
 	btn_reset.pressed.connect(_abrir_popup_reset)
 	hbox.add_child(btn_reset)
 	
-	# Botão Tirar Admin do Ranking
-	var btn_admin_rank = _criar_botao_acao("Tirar Admin do Ranking", Color(0.85, 0.45, 0.20))
-	btn_admin_rank.pressed.connect(func():
-		btn_admin_rank.disabled = true
-		btn_admin_rank.text = "Removendo..."
-		await RankingManager.remover_admin_do_ranking()
-		btn_admin_rank.disabled = false
-		btn_admin_rank.text = "Tirar Admin do Ranking"
-		_exibir_toast("Conta 'Admin' removida do ranking online e local com sucesso!")
-		_carregar_dados()
-	)
-	hbox.add_child(btn_admin_rank)
-	
 	# Botão Voltar ao Jogo
 	var btn_voltar = _criar_botao_acao("Voltar ao Jogo", Color(0.45, 0.50, 0.62))
 	btn_voltar.pressed.connect(func(): TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn"))
