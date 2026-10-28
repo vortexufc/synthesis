@@ -504,7 +504,7 @@ func _abrir_modal_alterar_nick() -> void:
 	vbox.add_child(lbl_tit)
 	
 	var lbl_desc = Label.new()
-	lbl_desc.text = "Escolha seu novo nome (3 a 16 caracteres):\n(Nomes impróprios ou ofensivos serão bloqueados)"
+	lbl_desc.text = "Escolha seu novo nome (3 a 16 caracteres):"
 	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl_desc.add_theme_color_override("font_color", Color(0.85, 0.90, 0.96))
 	lbl_desc.add_theme_font_size_override("font_size", 12)
