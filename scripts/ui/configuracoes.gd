@@ -19,8 +19,14 @@ extends Control
 var modo_in_game: bool = false
 var _acao_confirmacao: String = "" # "menu_principal" ou "deslogar"
 
+var lbl_nick_val: Label
+var btn_alterar_nick: Button
+var popup_alterar_nick: Control
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	_criar_linha_alterar_nick()
 	
 	if slider_music:
 		slider_music.value_changed.connect(_on_music_value_changed)
@@ -257,6 +263,15 @@ func _atualizar_status_conta() -> void:
 		btn_deslogar.disabled = false
 		btn_deslogar.text = "DESCONECTAR"
 		btn_deslogar.modulate = Color(1.0, 0.3, 0.3)
+		
+	if lbl_nick_val:
+		var n = ""
+		if db and not db.user_nick.is_empty():
+			n = db.user_nick
+		else:
+			var rm = get_node_or_null("/root/RankingManager")
+			if rm: n = rm.get_local_nick()
+		lbl_nick_val.text = n if not n.is_empty() else "Mago Desconhecido"
 
 func _atualizar_sliders() -> void:
 	var bus_m = AudioServer.get_bus_index("Music")
@@ -403,3 +418,154 @@ func _slider_to_db(value: float) -> float:
 	if value <= 0.01:
 		return -80.0
 	return linear_to_db(value)
+
+func _criar_linha_alterar_nick() -> void:
+	var vbox = find_child("VBoxContainer", true, false) as VBoxContainer
+	var hbox_conta = find_child("HBoxConta", true, false) as HBoxContainer
+	if not vbox or not hbox_conta:
+		return
+		
+	var hbox_nick = HBoxContainer.new()
+	hbox_nick.name = "HBoxNick"
+	hbox_nick.add_theme_constant_override("separation", 14)
+	
+	var lbl_tit = Label.new()
+	lbl_tit.custom_minimum_size = Vector2(180, 0)
+	lbl_tit.text = "MAGO"
+	var font_press = load("res://assets/fonts/PressStart2P-Regular.ttf") as Font
+	if font_press:
+		lbl_tit.add_theme_font_override("font", font_press)
+		lbl_tit.add_theme_font_size_override("font_size", 14)
+	lbl_tit.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox_nick.add_child(lbl_tit)
+	
+	lbl_nick_val = Label.new()
+	lbl_nick_val.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl_nick_val.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl_nick_val.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	if font_pixel:
+		lbl_nick_val.add_theme_font_override("font", font_pixel)
+		lbl_nick_val.add_theme_font_size_override("font_size", 18)
+	hbox_nick.add_child(lbl_nick_val)
+	
+	btn_alterar_nick = Button.new()
+	btn_alterar_nick.text = "ALTERAR"
+	btn_alterar_nick.custom_minimum_size = Vector2(120, 36)
+	var sb_btn = StyleBoxFlat.new()
+	sb_btn.bg_color = Color(0.18, 0.55, 0.85, 0.95)
+	sb_btn.set_corner_radius_all(6)
+	btn_alterar_nick.add_theme_stylebox_override("normal", sb_btn)
+	btn_alterar_nick.add_theme_color_override("font_color", Color.WHITE)
+	btn_alterar_nick.pressed.connect(_abrir_modal_alterar_nick)
+	hbox_nick.add_child(btn_alterar_nick)
+	
+	vbox.add_child(hbox_nick)
+	var idx = hbox_conta.get_index()
+	vbox.move_child(hbox_nick, idx)
+
+func _abrir_modal_alterar_nick() -> void:
+	if popup_alterar_nick != null and is_instance_valid(popup_alterar_nick):
+		popup_alterar_nick.queue_free()
+		
+	popup_alterar_nick = ColorRect.new()
+	popup_alterar_nick.color = Color(0, 0, 0, 0.85)
+	popup_alterar_nick.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(popup_alterar_nick)
+	
+	var panel = PanelContainer.new()
+	panel.custom_minimum_size = Vector2(460, 230)
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.08, 0.10, 0.18, 0.98)
+	sb.border_color = Color(0.95, 0.65, 0.22, 0.95)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(10)
+	sb.content_margin_left = 24
+	sb.content_margin_right = 24
+	sb.content_margin_top = 20
+	sb.content_margin_bottom = 20
+	panel.add_theme_stylebox_override("panel", sb)
+	popup_alterar_nick.add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	panel.add_child(vbox)
+	
+	var lbl_tit = Label.new()
+	lbl_tit.text = "✦ ALTERAR NICK DO MAGO ✦"
+	lbl_tit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_tit.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
+	lbl_tit.add_theme_font_size_override("font_size", 14)
+	vbox.add_child(lbl_tit)
+	
+	var lbl_desc = Label.new()
+	lbl_desc.text = "Escolha seu novo nome (3 a 16 caracteres):\n(Nomes impróprios ou ofensivos serão bloqueados)"
+	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_desc.add_theme_color_override("font_color", Color(0.85, 0.90, 0.96))
+	lbl_desc.add_theme_font_size_override("font_size", 12)
+	vbox.add_child(lbl_desc)
+	
+	var input_nick = LineEdit.new()
+	input_nick.max_length = 16
+	var n_atual = ""
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and not db.user_nick.is_empty(): n_atual = db.user_nick
+	else:
+		var rm = get_node_or_null("/root/RankingManager")
+		if rm: n_atual = rm.get_local_nick()
+	input_nick.text = n_atual
+	input_nick.placeholder_text = "Novo nome de mago..."
+	input_nick.custom_minimum_size = Vector2(300, 36)
+	vbox.add_child(input_nick)
+	
+	var lbl_erro = Label.new()
+	lbl_erro.text = ""
+	lbl_erro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_erro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl_erro.add_theme_color_override("font_color", Color(0.95, 0.35, 0.35))
+	lbl_erro.add_theme_font_size_override("font_size", 11)
+	vbox.add_child(lbl_erro)
+	
+	var hbox_btns = HBoxContainer.new()
+	hbox_btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox_btns.add_theme_constant_override("separation", 14)
+	vbox.add_child(hbox_btns)
+	
+	var btn_canc = Button.new()
+	btn_canc.text = "Cancelar"
+	btn_canc.custom_minimum_size = Vector2(100, 34)
+	btn_canc.pressed.connect(func(): popup_alterar_nick.queue_free())
+	hbox_btns.add_child(btn_canc)
+	
+	var btn_salvar = Button.new()
+	btn_salvar.text = "Salvar Nome"
+	btn_salvar.custom_minimum_size = Vector2(130, 34)
+	var sb_salvar = StyleBoxFlat.new()
+	sb_salvar.bg_color = Color(0.15, 0.65, 0.35)
+	sb_salvar.set_corner_radius_all(6)
+	btn_salvar.add_theme_stylebox_override("normal", sb_salvar)
+	btn_salvar.add_theme_color_override("font_color", Color.WHITE)
+	
+	btn_salvar.pressed.connect(func():
+		var novo_n = input_nick.text.strip_edges()
+		btn_salvar.disabled = true
+		btn_salvar.text = "Salvando..."
+		var res = await DatabaseManager.atualizar_nick_usuario_async(novo_n)
+		if not res["valido"]:
+			lbl_erro.text = res["erro"]
+			btn_salvar.disabled = false
+			btn_salvar.text = "Salvar Nome"
+			return
+		
+		_atualizar_status_conta()
+		popup_alterar_nick.queue_free()
+		if get_node_or_null("/root/AudioManager"):
+			AudioManager.play_sfx("ui-1")
+	)
+	input_nick.text_submitted.connect(func(_t): btn_salvar.emit_signal("pressed"))
+	hbox_btns.add_child(btn_salvar)

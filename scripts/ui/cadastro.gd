@@ -39,7 +39,11 @@ func _on_btn_create_pressed() -> void:
 	
 	if player_name.is_empty() or email.is_empty() or password.is_empty():
 		_show_error_popup("Preencha todos os campos!")
-		# Aqui você pode mostrar um Label de erro na UI
+		return
+		
+	var validacao = DatabaseManager.validar_nick(player_name)
+	if not validacao["valido"]:
+		_show_error_popup(validacao["erro"])
 		return
 		
 	print("Tentando criar conta para: ", player_name, " / ", email)
@@ -60,19 +64,18 @@ func _on_auth_sucesso(token: String) -> void:
 	style.corner_radius_bottom_left = 12
 	style.corner_radius_bottom_right = 12
 	panel.add_theme_stylebox_override("panel", style)
-	panel.custom_minimum_size = Vector2(350, 80)
+	panel.custom_minimum_size = Vector2(380, 80)
 	
 	var label = Label.new()
-	label.text = "VERIFIQUE SEU E-MAIL!"
+	label.text = "CONTA CRIADA COM SUCESSO!"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.set_anchors_preset(Control.PRESET_FULL_RECT) # centraliza total no panel
 	
-	# usar a mesma fonte do resto da UI (opcional, mas legal para polimento)
 	var font = load("res://assets/fonts/PressStart2P-Regular.ttf")
 	if font:
 		label.add_theme_font_override("font", font)
-		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_font_size_override("font_size", 11)
 		
 	panel.add_child(label)
 	
@@ -80,12 +83,10 @@ func _on_auth_sucesso(token: String) -> void:
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	add_child(panel)
 	
-	# Efeito Fade Out de 5 segundos
 	var tween = create_tween()
-	tween.tween_property(panel, "modulate:a", 0.0, 5.0)
+	tween.tween_property(panel, "modulate:a", 0.0, 2.0)
 	
-	# Espera 5 segundos cravados e joga pra tela de Login
-	await get_tree().create_timer(5.0).timeout
+	await get_tree().create_timer(1.8).timeout
 	TransitionScreen.change_scene("res://scenes/ui/login.tscn")
 
 func _on_auth_erro(mensagem: String) -> void:

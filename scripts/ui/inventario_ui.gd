@@ -1191,6 +1191,8 @@ func _on_btn_acao_pressionado() -> void:
 			if am:
 				am.play_sfx("pocao_cura")
 			ps.curar_vida(po["cura"])
+			if ps.has_method("registrar_uso_pocao"):
+				ps.registrar_uso_pocao()
 			po["qtd"] -= 1
 			if po["qtd"] <= 0:
 				ps.pocoes.remove_at(idx)

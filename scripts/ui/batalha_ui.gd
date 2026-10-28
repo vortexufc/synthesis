@@ -447,6 +447,8 @@ func _usar_pocao_combate() -> void:
 		
 		var cura = float(po.get("cura", 40.0))
 		ps.curar_vida(cura)
+		if ps.has_method("registrar_uso_pocao"):
+			ps.registrar_uso_pocao()
 		
 		po["qtd"] = int(po.get("qtd", 1)) - 1
 		if po["qtd"] <= 0:

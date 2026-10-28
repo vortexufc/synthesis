@@ -311,7 +311,7 @@ func _criar_card_alternativas(parent: Control) -> void:
 	vbox.add_theme_constant_override("separation", 12)
 	card.add_child(vbox)
 	
-	_criar_cabecalho_secao(vbox, "3. Alternativas de Resposta & Gabarito Oficial", "Preencha as 5 opções (máx. %d caracteres cada) e indique qual delas é a correta." % MAX_CHARS_ALTERNATIVA)
+	_criar_cabecalho_secao(vbox, "3. Alternativas de Resposta & Gabarito Oficial", "Preencha as 4 opções (A a D, máx. %d caracteres cada)." % MAX_CHARS_ALTERNATIVA)
 	
 	inputs_alternativas.clear()
 	containers_linhas_alt.clear()
@@ -319,8 +319,8 @@ func _criar_card_alternativas(parent: Control) -> void:
 	labels_letras_alt.clear()
 	botoes_marcar_correta.clear()
 	
-	var letras = ["A", "B", "C", "D", "E"]
-	for i in range(5):
+	var letras = ["A", "B", "C", "D"]
+	for i in range(4):
 		var letra = letras[i]
 		
 		var hbox_linha = HBoxContainer.new()
@@ -379,7 +379,6 @@ func _criar_card_alternativas(parent: Control) -> void:
 	opt_correta.add_item("Alternativa B (Correta)", 1)
 	opt_correta.add_item("Alternativa C (Correta)", 2)
 	opt_correta.add_item("Alternativa D (Correta)", 3)
-	opt_correta.add_item("Alternativa E (Correta)", 4)
 	_estilizar_option_button(opt_correta, COLOR_FACIL)
 	opt_correta.item_selected.connect(func(_idx): _atualizar_destaque_gabarito())
 	hbox_gabarito.add_child(opt_correta)
@@ -470,9 +469,9 @@ func _atualizar_badges_preview() -> void:
 
 func _atualizar_destaque_gabarito() -> void:
 	var idx_correto = opt_correta.get_selected_id()
-	var letras = ["A", "B", "C", "D", "E"]
+	var letras = ["A", "B", "C", "D"]
 	
-	for i in range(5):
+	for i in range(inputs_alternativas.size()):
 		var eh_correta = (i == idx_correto)
 		var letra = letras[i]
 		var badge = badges_letras_alt[i]
@@ -520,9 +519,9 @@ func _on_salvar_pressed() -> void:
 		_mostrar_erro("O enunciado da questão não pode ficar vazio!")
 		return
 		
+	var letras = ["A", "B", "C", "D"]
 	for i in range(inputs_alternativas.size()):
 		if inputs_alternativas[i].text.strip_edges().is_empty():
-			var letras = ["A", "B", "C", "D", "E"]
 			_mostrar_erro("Preencha o texto da Alternativa %s!" % letras[i])
 			return
 			
@@ -533,8 +532,7 @@ func _on_salvar_pressed() -> void:
 		inputs_alternativas[0].text.strip_edges(),
 		inputs_alternativas[1].text.strip_edges(),
 		inputs_alternativas[2].text.strip_edges(),
-		inputs_alternativas[3].text.strip_edges(),
-		inputs_alternativas[4].text.strip_edges()
+		inputs_alternativas[3].text.strip_edges()
 	]
 	
 	var andar_escolhido = opt_disciplina.get_selected_id()

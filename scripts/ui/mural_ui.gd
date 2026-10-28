@@ -6,6 +6,7 @@ signal mural_fechado()
 
 var andar_id: int = 1
 var player_ref: Node2D = null
+var _tempo_abertura_mural: float = 0.0
 
 # referencias da interface
 var backdrop: ColorRect
@@ -70,6 +71,7 @@ func abrir_mural(p_andar_id: int = 1, p_player: Node2D = null) -> void:
 
 	_tocar_som("ui_5")
 
+	_tempo_abertura_mural = Time.get_ticks_msec() / 1000.0
 	_montar_conteudo_andar(andar_id)
 	
 	add_to_group("mural_ui")
@@ -86,6 +88,13 @@ func fechar_mural() -> void:
 	if not visible:
 		return
 	_tocar_som("ui-1")
+	
+	var tempo_leitura = 0.0
+	if _tempo_abertura_mural > 0.0:
+		tempo_leitura = max(0.5, (Time.get_ticks_msec() / 1000.0) - _tempo_abertura_mural)
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("salvar_minigame_analytics"):
+		db.salvar_minigame_analytics("mural_formulas", andar_id, true, tempo_leitura, {"mural_lido": true})
 		
 	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN).set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tw.tween_property(painel_central, "modulate:a", 0.0, 0.2)

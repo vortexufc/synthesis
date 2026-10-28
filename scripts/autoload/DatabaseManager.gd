@@ -25,6 +25,7 @@ signal perguntas_recebidas(perguntas: Array)
 signal auth_sucesso(token: String)
 signal auth_erro(mensagem: String)
 signal reset_senha_enviado()
+signal nick_alterado(novo_nick: String)
 
 # no de requisicoes http
 var http_request: HTTPRequest
@@ -53,6 +54,8 @@ func _ready() -> void:
 const SAVE_FILE = "user://progresso.json"
 const SESSOES_FILE = "user://sessoes_escolas.json"
 const ANALYTICS_FILE = "user://pesquisa_analytics.json"
+const MINIGAMES_ANALYTICS_FILE = "user://minigames_analytics.json"
+const GAMEPLAY_TELEMETRIA_FILE = "user://gameplay_telemetria.json"
 
 var escola_ativa_id: String = "geral"
 var escola_ativa_nome: String = "Geral (Padrão)"
@@ -291,6 +294,152 @@ func obter_respostas_analytics(filtro_escola_id: String = "") -> Array:
 					arr.append(r)
 	f.close()
 	return arr
+
+func resetar_analytics_sessao(filtro_escola_id: String) -> void:
+	print("[DatabaseManager] Resetando analytics locais da sessão: ", filtro_escola_id)
+	var arquivos = [ANALYTICS_FILE, MINIGAMES_ANALYTICS_FILE, GAMEPLAY_TELEMETRIA_FILE]
+	for arq in arquivos:
+		if FileAccess.file_exists(arq):
+			var f_read = FileAccess.open(arq, FileAccess.READ)
+			if f_read:
+				var json = JSON.new()
+				var mantidos: Array = []
+				if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+					for item in json.data:
+						if item is Dictionary:
+							var esc = item.get("escola_id", "geral")
+							if filtro_escola_id != "todas" and esc == filtro_escola_id:
+								continue # Descarta registros da escola resetada
+							elif filtro_escola_id == "todas":
+								continue # Limpa todos se for todas
+							mantidos.append(item)
+				f_read.close()
+				var f_write = FileAccess.open(arq, FileAccess.WRITE)
+				if f_write:
+					f_write.store_string(JSON.stringify(mantidos, "\t"))
+					f_write.close()
+
+# --- ANALYTICS DE MINIGAMES (MEMÓRIA, LIGAR PARES, MURAL) ---
+
+func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bool, tempo_gasto: float, detalhes: Dictionary = {}) -> void:
+	var nick = user_nick if not user_nick.is_empty() else "Mago"
+	var reg = {
+		"aluno_nick": nick,
+		"escola_id": escola_ativa_id,
+		"andar_id": andar_id,
+		"tipo_minigame": tipo_minigame, # "jogo_memoria", "ligar_pares", "mural_formulas"
+		"vitoria": vitoria,
+		"tempo_gasto": snapped(tempo_gasto, 0.1),
+		"detalhes": detalhes,
+		"cla_aluno": user_cla,
+		"timestamp": Time.get_datetime_string_from_system()
+	}
+	
+	var lista: Array = []
+	if FileAccess.file_exists(MINIGAMES_ANALYTICS_FILE):
+		var f_read = FileAccess.open(MINIGAMES_ANALYTICS_FILE, FileAccess.READ)
+		if f_read:
+			var json = JSON.new()
+			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+				lista = json.data
+			f_read.close()
+			
+	lista.append(reg)
+	var f_write = FileAccess.open(MINIGAMES_ANALYTICS_FILE, FileAccess.WRITE)
+	if f_write:
+		f_write.store_string(JSON.stringify(lista, "\t"))
+		f_write.close()
+		
+	# Tenta sincronizar com o Supabase se tabela existir
+	if not user_token.is_empty():
+		request_async("/rest/v1/minigames_respostas", HTTPClient.METHOD_POST, reg)
+	print("[Analytics] Minigame '%s' registrado: vitória=%s | tempo=%.1fs" % [tipo_minigame, str(vitoria), tempo_gasto])
+
+func obter_minigames_analytics(filtro_escola_id: String = "") -> Array:
+	if not FileAccess.file_exists(MINIGAMES_ANALYTICS_FILE):
+		return []
+	var f = FileAccess.open(MINIGAMES_ANALYTICS_FILE, FileAccess.READ)
+	if not f: return []
+	var json = JSON.new()
+	var arr: Array = []
+	if json.parse(f.get_as_text()) == OK and json.data is Array:
+		var todas: Array = json.data
+		if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
+			arr = todas
+		else:
+			for r in todas:
+				if r is Dictionary and r.get("escola_id", "geral") == filtro_escola_id:
+					arr.append(r)
+	f.close()
+	return arr
+
+# --- TELEMETRIA DE GAMEPLAY (MORTES, POÇÕES, TEMPO POR ANDAR) ---
+
+func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float = 1.0) -> void:
+	var nick = user_nick if not user_nick.is_empty() else "Mago"
+	var reg = {
+		"aluno_nick": nick,
+		"escola_id": escola_ativa_id,
+		"andar_id": andar_id,
+		"tipo_evento": tipo_evento, # "morte", "pocao", "tempo_andar"
+		"valor": valor,
+		"timestamp": Time.get_datetime_string_from_system()
+	}
+	var lista: Array = []
+	if FileAccess.file_exists(GAMEPLAY_TELEMETRIA_FILE):
+		var f_read = FileAccess.open(GAMEPLAY_TELEMETRIA_FILE, FileAccess.READ)
+		if f_read:
+			var json = JSON.new()
+			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
+				lista = json.data
+			f_read.close()
+			
+	lista.append(reg)
+	var f_write = FileAccess.open(GAMEPLAY_TELEMETRIA_FILE, FileAccess.WRITE)
+	if f_write:
+		f_write.store_string(JSON.stringify(lista, "\t"))
+		f_write.close()
+
+func obter_telemetria_gameplay(filtro_escola_id: String = "") -> Array:
+	if not FileAccess.file_exists(GAMEPLAY_TELEMETRIA_FILE):
+		return []
+	var f = FileAccess.open(GAMEPLAY_TELEMETRIA_FILE, FileAccess.READ)
+	if not f: return []
+	var json = JSON.new()
+	var arr: Array = []
+	if json.parse(f.get_as_text()) == OK and json.data is Array:
+		var todas: Array = json.data
+		if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
+			arr = todas
+		else:
+			for r in todas:
+				if r is Dictionary and r.get("escola_id", "geral") == filtro_escola_id:
+					arr.append(r)
+	f.close()
+	return arr
+
+# --- RESPOSTAS DE V OU F (FÚRIA DO CHEFE) ---
+
+func salvar_resposta_vf(afirmacao_texto: String, resposta_aluno: bool, resposta_correta: bool, acertou: bool, tempo_resposta: float, andar_id: int) -> void:
+	var nick = user_nick if not user_nick.is_empty() else "Mago"
+	var data_resp = {
+		"pergunta_id": 9000 + (andar_id * 100),
+		"acertou": acertou,
+		"andar_id": andar_id,
+		"aluno_nick": nick,
+		"escola_id": escola_ativa_id,
+		"tempo_resposta": snapped(tempo_resposta, 0.1),
+		"alternativa_marcada": "V" if resposta_aluno else "F",
+		"alternativa_correta": "V" if resposta_correta else "F",
+		"cla_aluno": user_cla,
+		"consultas_grimorio": 0,
+		"tipo": "furia_boss_vf",
+		"enunciado": afirmacao_texto,
+		"timestamp": Time.get_datetime_string_from_system()
+	}
+	registrar_resposta_analytics(data_resp)
+	enviar_resposta_supabase(data_resp)
+	print("[Analytics] Resposta V/F do Boss gravada: %s (Acertou: %s)" % [afirmacao_texto.substr(0, 30), str(acertou)])
 
 func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
 	# Envia payload enriquecido para o Supabase
@@ -564,6 +713,120 @@ func recuperar_senha(email: String) -> void:
 	}
 	# rota pra recuperar senha
 	make_request("/auth/v1/recover", HTTPClient.METHOD_POST, data)
+
+# --- VALIDAÇÃO DE NICK E FILTRO DE TERMOS INAPROPRIADOS (+18) ---
+
+const TERMOS_PROIBIDOS_SUBSTRING: Array[String] = [
+	"puta", "puto", "putaria", "porra", "caralho", "caralh", "cacete",
+	"arrombado", "arrombada", "buceta", "boceta", "bucet", "pica", "piroca",
+	"penis", "pauzao", "vagina", "viado", "veado", "viadinho", "merda", "bosta",
+	"vadia", "foder", "foda", "fude", "transar", "punheta", "siririca",
+	"boquete", "orgasmo", "pedofilo", "pedofilia", "estupro", "nazista", "hitler",
+	"prostituta", "prostituto", "cocaina", "maconha", "fuck", "bitch",
+	"cunt", "nigger", "dick", "pussy", "asshole", "blowjob", "hentai", "porn"
+]
+
+const TERMOS_PROIBIDOS_EXATOS: Array[String] = [
+	"cu", "krl", "vtnc", "fdp", "sexo", "anus", "nude", "rola"
+]
+
+func normalizar_texto_seguro(texto: String) -> String:
+	var s = texto.to_lower().strip_edges()
+	var acentos = {
+		"á": "a", "à": "a", "ã": "a", "â": "a", "ä": "a",
+		"é": "e", "è": "e", "ê": "e", "ë": "e",
+		"í": "i", "ì": "i", "î": "i", "ï": "i",
+		"ó": "o", "ò": "o", "õ": "o", "ô": "o", "ö": "o",
+		"ú": "u", "ù": "u", "û": "u", "ü": "u",
+		"ç": "c"
+	}
+	for k in acentos.keys():
+		s = s.replace(k, acentos[k])
+		
+	var leet = {
+		"@": "a", "4": "a", "3": "e", "1": "i", "!": "i",
+		"0": "o", "5": "s", "$": "s", "7": "t", "+": "t",
+		"8": "b"
+	}
+	for k in leet.keys():
+		s = s.replace(k, leet[k])
+		
+	return s
+
+func validar_nick(nick: String) -> Dictionary:
+	var limpo = nick.strip_edges()
+	if limpo.is_empty():
+		return {"valido": false, "erro": "O nome não pode estar vazio!"}
+		
+	if limpo.length() < 3:
+		return {"valido": false, "erro": "O nome deve ter no mínimo 3 caracteres."}
+		
+	if limpo.length() > 16:
+		return {"valido": false, "erro": "O nome deve ter no máximo 16 caracteres."}
+		
+	var regex = RegEx.new()
+	regex.compile("^[a-zA-Z0-9_ ]+$")
+	if not regex.search(limpo):
+		return {"valido": false, "erro": "O nome pode conter apenas letras, números e espaços."}
+		
+	if limpo.to_lower() == "admin":
+		return {"valido": false, "erro": "O nome 'Admin' é reservado ao sistema."}
+
+	var norm = normalizar_texto_seguro(limpo)
+	var sem_separadores = norm.replace(" ", "").replace("_", "").replace(".", "").replace("-", "")
+	
+	for termo in TERMOS_PROIBIDOS_SUBSTRING:
+		if sem_separadores.find(termo) != -1 or norm.find(termo) != -1:
+			return {"valido": false, "erro": "O nome contém termos inapropriados para ambiente escolar."}
+			
+	var palavras = norm.replace("_", " ").split(" ", false)
+	for p in palavras:
+		var p_limpa = p.strip_edges()
+		for termo_exato in TERMOS_PROIBIDOS_EXATOS:
+			if p_limpa == termo_exato:
+				return {"valido": false, "erro": "O nome contém termos inapropriados para ambiente escolar."}
+				
+	return {"valido": true, "erro": ""}
+
+func atualizar_nick_usuario_async(novo_nick: String) -> Dictionary:
+	var validacao = validar_nick(novo_nick)
+	if not validacao["valido"]:
+		return validacao
+		
+	var nick_antigo = user_nick
+	user_nick = novo_nick
+	
+	if not user_token.is_empty():
+		# 1. Atualiza user_metadata no Supabase Auth
+		var payload_auth = {
+			"data": {
+				"nick": novo_nick
+			}
+		}
+		await request_async("/auth/v1/user", HTTPClient.METHOD_PUT, payload_auth)
+		
+		# 2. Atualiza tabela rankinggeral
+		var payload_rk = {"player_name": novo_nick}
+		await request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_rk)
+		
+		# 3. Atualiza tabela MembrosCla se tiver
+		var payload_cla = {"player_name": novo_nick}
+		await request_async("/rest/v1/MembrosCla?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_cla)
+		
+		_salvar_sessao_web()
+	else:
+		# Visitante: atualiza guest_config.json
+		var rm = get_node_or_null("/root/RankingManager")
+		if rm:
+			rm.local_guest_nick = novo_nick
+			var file = FileAccess.open("user://guest_config.json", FileAccess.WRITE)
+			if file:
+				file.store_string(JSON.stringify({"guest_nick": novo_nick}))
+				file.close()
+
+	print("[DatabaseManager] Nick alterado de '%s' para '%s' com sucesso!" % [nick_antigo, novo_nick])
+	nick_alterado.emit(novo_nick)
+	return {"valido": true, "erro": ""}
 
 # busca perguntas do jogo
 

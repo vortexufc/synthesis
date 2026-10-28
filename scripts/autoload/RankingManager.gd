@@ -54,8 +54,11 @@ func load_ranking() -> void:
 			
 		ranking_geral = []
 		for row in res["data"]:
+			var p_name = str(row.get("player_name", "?")).strip_edges()
+			if p_name.to_lower() == "admin":
+				continue
 			ranking_geral.append({
-				"name": row.get("player_name", "?"),
+				"name": p_name,
 				"score": int(row.get("score", 0)),
 				"score_diario": int(row.get("score_diario", 0)),
 				"score_semanal": int(row.get("score_semanal", 0)),
@@ -101,11 +104,14 @@ func load_ranking_periodo(periodo: String) -> void:
 	
 	var lista: Array = []
 	for row in res["data"]:
+		var p_name = str(row.get("player_name", "?")).strip_edges()
+		if p_name.to_lower() == "admin":
+			continue
 		var pts = _calcular_pts_andar(row, periodo, coluna)
 			
 		if pts > 0:
 			lista.append({
-				"name": row.get("player_name", "?"),
+				"name": p_name,
 				"score": pts,
 				"score_diario": int(row.get("score_diario", 0)),
 				"score_semanal": int(row.get("score_semanal", 0)),
@@ -156,7 +162,7 @@ func get_ranking_por_periodo(periodo: String) -> Array:
 
 # salva ou atualiza a pontuacao
 func add_score(player_name: String, cla: String, pontos: int) -> void:
-	if player_name.is_empty():
+	if player_name.is_empty() or player_name.strip_edges().to_lower() == "admin" or DatabaseManager.is_admin:
 		return
 
 	# salva no banco se tiver logado
@@ -185,6 +191,8 @@ func add_score(player_name: String, cla: String, pontos: int) -> void:
 	await load_ranking_periodo("biologia")
 
 func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
+	if player_name.strip_edges().to_lower() == "admin" or DatabaseManager.is_admin:
+		return false
 	# ve quanto o player ja tem no banco
 	var end_player = "/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode() + "&select=*"
 	var res = await DatabaseManager.request_async(end_player, HTTPClient.METHOD_GET)
@@ -477,10 +485,46 @@ func _carregar_local() -> void:
 
 	var json = JSON.new()
 	if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
-		ranking_geral = json.data.get("geral", [])
+		var raw_geral = json.data.get("geral", [])
+		ranking_geral = []
+		for item in raw_geral:
+			var n = str(item.get("name", "")).strip_edges()
+			if not n.is_empty() and n.to_lower() != "admin":
+				ranking_geral.append(item)
 	else:
 		ranking_geral = []
 
+	ranking_atualizado.emit()
+
+func remover_admin_do_ranking() -> void:
+	print("[RankingManager] Removendo conta de Admin do ranking online e local...")
+	await DatabaseManager.request_async("/rest/v1/rankinggeral?player_name=ilike.admin", HTTPClient.METHOD_DELETE)
+	
+	var novo_geral: Array = []
+	for r in ranking_geral:
+		if str(r.get("name", "")).strip_edges().to_lower() != "admin":
+			novo_geral.append(r)
+	ranking_geral = novo_geral
+	
+	var novo_diario: Array = []
+	for r in ranking_diario:
+		if str(r.get("name", "")).strip_edges().to_lower() != "admin":
+			novo_diario.append(r)
+	ranking_diario = novo_diario
+	
+	var novo_semanal: Array = []
+	for r in ranking_semanal:
+		if str(r.get("name", "")).strip_edges().to_lower() != "admin":
+			novo_semanal.append(r)
+	ranking_semanal = novo_semanal
+	
+	var novo_mensal: Array = []
+	for r in ranking_mensal:
+		if str(r.get("name", "")).strip_edges().to_lower() != "admin":
+			novo_mensal.append(r)
+	ranking_mensal = novo_mensal
+	
+	_salvar_local()
 	ranking_atualizado.emit()
 
 # fila de pontuacoes pendentes pra sincronizar
