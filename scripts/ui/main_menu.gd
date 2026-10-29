@@ -134,6 +134,8 @@ func _ready() -> void:
 	_btn_avatar = TextureButton.new()
 	var tex = load("res://assets/sprites/ui/ranking/icone_mago.png") as Texture2D
 	if tex == null:
+		tex = load("res://assets/branding/avatar.png") as Texture2D
+	if tex == null:
 		tex = load("res://assets/branding/avatar.png.png") as Texture2D
 	_btn_avatar.texture_normal = tex
 	_btn_avatar.ignore_texture_size = true
@@ -681,7 +683,6 @@ func _inicializar_leaderboard() -> void:
 			_btn_refresh = Button.new()
 			_btn_refresh.name = "BtnAtualizarRank"
 			_btn_refresh.text = "Atualizar"
-			_btn_refresh.tooltip_text = "Atualizar ranking do servidor em tempo real"
 			_btn_refresh.custom_minimum_size = Vector2(58, 18)
 			_btn_refresh.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 			

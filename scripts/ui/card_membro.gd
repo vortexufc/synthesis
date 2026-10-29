@@ -31,7 +31,11 @@ func _aplicar_visual() -> void:
 	btn_expulsar.add_theme_font_size_override("font_size", 14)
 		
 	# Avatar loading
-	var tex: Texture2D = load("res://assets/branding/avatar.png.png") as Texture2D
+	var tex: Texture2D = load("res://assets/sprites/ui/ranking/icone_mago.png") as Texture2D
+	if tex == null:
+		tex = load("res://assets/branding/avatar.png") as Texture2D
+	if tex == null:
+		tex = load("res://assets/branding/avatar.png.png") as Texture2D
 	if tex:
 		img_avatar.texture = tex
 		

@@ -248,8 +248,12 @@ func _obter_textura_fundo_andar(andar_id: int) -> Texture2D:
 			]
 		3:
 			caminhos = [
+				"res://assets/sprites/Backgrounds/tela_final_biologia.jpeg",
+				"res://assets/sprites/tela_final_biologia.jpeg",
 				"res://assets/sprites/Backgrounds/tela_final_biologia.png",
 				"res://assets/sprites/tela_final_biologia.png",
+				"res://assets/sprites/Backgrounds/fundo historia de biologia.jpeg",
+				"res://fundo historia de biologia.jpeg",
 				"res://assets/sprites/Backgrounds/Batalha/fundo_batalha_biologia.png",
 				"res://assets/sprites/fundo_laboratorio_mago.png"
 			]
