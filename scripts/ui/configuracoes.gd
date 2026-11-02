@@ -3,6 +3,7 @@ extends Control
 @onready var slider_music = find_child("HSliderMusic", true, false) as HSlider
 @onready var slider_sfx = find_child("HSliderSfx", true, false) as HSlider
 @onready var btn_deslogar = find_child("BtnDeslogar", true, false) as Button
+@onready var toggle_desempenho = find_child("CheckDesempenho", true, false) as CheckButton
 @onready var toggle_joystick = find_child("CheckJoystick", true, false) as CheckButton
 @onready var hbox_tipo_controle = find_child("HBoxTipoControle", true, false) as HBoxContainer
 @onready var btn_modo_analogico = find_child("BtnModoAnalogico", true, false) as Button
@@ -22,9 +23,14 @@ var _acao_confirmacao: String = "" # "menu_principal" ou "deslogar"
 var lbl_nick_val: Label
 var btn_alterar_nick: Button
 var popup_alterar_nick: Control
+var _original_blur_material: Material = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	var blur_overlay_init = find_child("BlurOverlay", true, false) as ColorRect
+	if blur_overlay_init:
+		_original_blur_material = blur_overlay_init.material
 	
 	_criar_linha_alterar_nick()
 	
@@ -35,6 +41,19 @@ func _ready() -> void:
 		
 	if btn_deslogar:
 		btn_deslogar.pressed.connect(_on_deslogar_pressed)
+	if toggle_desempenho:
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.has_method("is_modo_desempenho"):
+			toggle_desempenho.set_pressed_no_signal(ps.is_modo_desempenho())
+			_aplicar_modo_desempenho_visual(ps.is_modo_desempenho())
+			if ps.has_signal("modo_desempenho_alterado"):
+				ps.modo_desempenho_alterado.connect(func(ativo: bool):
+					if toggle_desempenho and is_instance_valid(toggle_desempenho):
+						toggle_desempenho.set_pressed_no_signal(ativo)
+					_aplicar_modo_desempenho_visual(ativo)
+				)
+		toggle_desempenho.toggled.connect(_on_desempenho_toggled)
+		
 	if toggle_joystick:
 		var mcm = get_node_or_null("/root/MobileControlsManager")
 		if mcm:
@@ -69,6 +88,7 @@ func _ready() -> void:
 	_fechar_confirmacao()
 	_atualizar_status_conta()
 	_atualizar_sliders()
+	_atualizar_switch_desempenho()
 	_atualizar_switch_joystick()
 	_atualizar_botoes_modo_controle()
 	_configurar_estilo_controles()
@@ -85,6 +105,7 @@ func _ready() -> void:
 		if visible:
 			_atualizar_status_conta()
 			_atualizar_sliders()
+			_atualizar_switch_desempenho()
 			_atualizar_switch_joystick()
 			_atualizar_botoes_modo_controle()
 			_configurar_estilo_controles()
@@ -98,7 +119,7 @@ func _configurar_estilo_controles() -> void:
 	var lbl_controles = find_child("LabelControles", true, false) as Label
 	if lbl_controles:
 		lbl_controles.text = "CONTROLES (MOBILE / TOUCH)" if eh_mobile else "CONTROLES (TECLADO)"
-		lbl_controles.add_theme_font_size_override("font_size", 14)
+		lbl_controles.add_theme_font_size_override("font_size", 12)
 	
 	var font_desc = SystemFont.new()
 	font_desc.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
@@ -117,7 +138,7 @@ func _configurar_estilo_controles() -> void:
 		if lbl:
 			lbl.text = mapa_desc[node_name]
 			lbl.add_theme_font_override("font", font_desc)
-			lbl.add_theme_font_size_override("font_size", 14)
+			lbl.add_theme_font_size_override("font_size", 13)
 			lbl.add_theme_color_override("font_color", Color(0.9, 0.93, 0.98, 0.95))
 			
 	var font_keys = SystemFont.new()
@@ -137,7 +158,7 @@ func _configurar_estilo_controles() -> void:
 		if lbl:
 			lbl.text = mapa_keys[node_name]
 			lbl.add_theme_font_override("font", font_keys)
-			lbl.add_theme_font_size_override("font_size", 14)
+			lbl.add_theme_font_size_override("font_size", 13)
 			lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.35, 1)) # Amarelo/Dourado arcano
 
 func configurar_modo_in_game(ativo: bool) -> void:
@@ -155,9 +176,37 @@ func configurar_modo_in_game(ativo: bool) -> void:
 		
 	_atualizar_status_conta()
 	_atualizar_sliders()
+	_atualizar_switch_desempenho()
 	_atualizar_switch_joystick()
 	_atualizar_botoes_modo_controle()
 	_configurar_estilo_controles()
+
+func _atualizar_switch_desempenho() -> void:
+	if toggle_desempenho:
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.has_method("is_modo_desempenho"):
+			toggle_desempenho.set_pressed_no_signal(ps.is_modo_desempenho())
+			_aplicar_modo_desempenho_visual(ps.is_modo_desempenho())
+
+func _on_desempenho_toggled(ativo: bool) -> void:
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui-1")
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.has_method("set_modo_desempenho"):
+		ps.set_modo_desempenho(ativo)
+	_aplicar_modo_desempenho_visual(ativo)
+
+func _aplicar_modo_desempenho_visual(ativo: bool) -> void:
+	var blur_overlay = find_child("BlurOverlay", true, false) as ColorRect
+	if blur_overlay:
+		if ativo:
+			# Desativa o shader de blur com hint_screen_texture para economizar cópia de framebuffer no WebGL
+			blur_overlay.material = null
+			blur_overlay.color = Color(0.05, 0.06, 0.10, 0.75)
+		else:
+			blur_overlay.color = Color.WHITE
+			blur_overlay.material = _original_blur_material
 
 func _atualizar_switch_joystick() -> void:
 	if toggle_joystick:
@@ -166,8 +215,9 @@ func _atualizar_switch_joystick() -> void:
 			toggle_joystick.set_pressed_no_signal(mcm.joystick_habilitado)
 
 func _on_modo_analogico_pressed() -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui-1")
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm and mcm.has_method("set_tipo_controle"):
 		mcm.set_tipo_controle("analogico")
@@ -175,8 +225,9 @@ func _on_modo_analogico_pressed() -> void:
 	_configurar_estilo_controles()
 
 func _on_modo_dpad_pressed() -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui-1")
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm and mcm.has_method("set_tipo_controle"):
 		mcm.set_tipo_controle("dpad")
@@ -201,13 +252,14 @@ func _atualizar_botoes_modo_controle() -> void:
 func _aplicar_estilo_modo(btn: Button, selecionado: bool) -> void:
 	if btn == null or not is_instance_valid(btn):
 		return
+	btn.add_theme_font_size_override("font_size", 14)
 	if selecionado:
 		btn.add_theme_color_override("font_color", Color(1, 0.92, 0.6, 1))
 		var sb = StyleBoxFlat.new()
-		sb.content_margin_left = 12.0
-		sb.content_margin_top = 8.0
-		sb.content_margin_right = 12.0
-		sb.content_margin_bottom = 8.0
+		sb.content_margin_left = 10.0
+		sb.content_margin_top = 4.0
+		sb.content_margin_right = 10.0
+		sb.content_margin_bottom = 4.0
 		sb.bg_color = Color(0.18, 0.42, 0.78, 0.95)
 		sb.border_width_left = 2
 		sb.border_width_top = 2
@@ -219,7 +271,7 @@ func _aplicar_estilo_modo(btn: Button, selecionado: bool) -> void:
 		sb.corner_radius_bottom_right = 4
 		sb.corner_radius_bottom_left = 4
 		sb.shadow_color = Color(0.1, 0.5, 0.9, 0.45)
-		sb.shadow_size = 6
+		sb.shadow_size = 4
 		btn.add_theme_stylebox_override("normal", sb)
 		btn.add_theme_stylebox_override("hover", sb)
 		btn.add_theme_stylebox_override("pressed", sb)
@@ -227,10 +279,10 @@ func _aplicar_estilo_modo(btn: Button, selecionado: bool) -> void:
 	else:
 		btn.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9, 0.7))
 		var sb = StyleBoxFlat.new()
-		sb.content_margin_left = 12.0
-		sb.content_margin_top = 8.0
-		sb.content_margin_right = 12.0
-		sb.content_margin_bottom = 8.0
+		sb.content_margin_left = 10.0
+		sb.content_margin_top = 4.0
+		sb.content_margin_right = 10.0
+		sb.content_margin_bottom = 4.0
 		sb.bg_color = Color(0.08, 0.12, 0.22, 0.7)
 		sb.border_width_left = 1
 		sb.border_width_top = 1
@@ -302,24 +354,31 @@ func _on_joystick_toggled(button_pressed: bool) -> void:
 	var mcm = get_node_or_null("/root/MobileControlsManager")
 	if mcm:
 		mcm.set_joystick_habilitado(button_pressed, true)
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui-1")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui-1")
 	_atualizar_botoes_modo_controle()
 
 
 func _on_voltar_pressed() -> void:
 	print("Botão VOLTAR pressionado")
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_5")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_5")
 	
 	if modo_in_game:
-		if get_node_or_null("/root/MenuPausaManager"):
-			MenuPausaManager.fechar_menu()
+		var mpm = get_node_or_null("/root/MenuPausaManager")
+		if mpm and mpm.has_method("fechar_menu"):
+			mpm.fechar_menu()
 		else:
 			visible = false
 			get_tree().paused = false
 	else:
-		TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+		var ts = get_node_or_null("/root/TransitionScreen")
+		if ts and ts.has_method("change_scene"):
+			ts.change_scene("res://scenes/ui/main_menu.tscn")
+		else:
+			get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _on_menu_principal_pressed() -> void:
 	if modo_in_game:
@@ -329,7 +388,11 @@ func _on_menu_principal_pressed() -> void:
 			"Tem certeza que deseja sair para o Menu Inicial?\nO progresso não salvo nesta sala será perdido."
 		)
 	else:
-		TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+		var ts = get_node_or_null("/root/TransitionScreen")
+		if ts and ts.has_method("change_scene"):
+			ts.change_scene("res://scenes/ui/main_menu.tscn")
+		else:
+			get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _on_deslogar_pressed() -> void:
 	if modo_in_game:
@@ -347,8 +410,9 @@ func _abrir_confirmacao(acao: String, mensagem: String) -> void:
 		lbl_mensagem_confirm.text = mensagem
 	if popup_confirmacao:
 		popup_confirmacao.visible = true
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_5")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_5")
 
 func _fechar_confirmacao() -> void:
 	_acao_confirmacao = ""
@@ -356,31 +420,40 @@ func _fechar_confirmacao() -> void:
 		popup_confirmacao.visible = false
 
 func _on_cancelar_sair_pressed() -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_5")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_5")
 	_fechar_confirmacao()
 
 func _on_confirmar_sair_pressed() -> void:
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_4")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_4")
 		
 	if _acao_confirmacao == "deslogar":
 		_executar_deslogar()
 	else: # "menu_principal"
-		if get_node_or_null("/root/PlayerStats"):
-			PlayerStats.salvar()
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.has_method("salvar"):
+			ps.salvar()
 			
-		if get_node_or_null("/root/MenuPausaManager"):
-			MenuPausaManager.fechar_menu_sem_som()
+		var mpm = get_node_or_null("/root/MenuPausaManager")
+		if mpm and mpm.has_method("fechar_menu_sem_som"):
+			mpm.fechar_menu_sem_som()
 		else:
 			get_tree().paused = false
 			
-		TransitionScreen.change_scene("res://scenes/ui/main_menu.tscn")
+		var ts = get_node_or_null("/root/TransitionScreen")
+		if ts and ts.has_method("change_scene"):
+			ts.change_scene("res://scenes/ui/main_menu.tscn")
+		else:
+			get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _executar_deslogar() -> void:
 	print("Deslogando usuário...")
-	if get_node_or_null("/root/AudioManager"):
-		AudioManager.play_sfx("ui_4")
+	var am = get_node_or_null("/root/AudioManager")
+	if am and am.has_method("play_sfx"):
+		am.play_sfx("ui_4")
 	
 	var db = get_node_or_null("/root/DatabaseManager")
 	if db:
@@ -409,8 +482,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			# Se o modal de confirmação estiver aberto, ESC apenas fecha o modal sem sair do jogo
 			if popup_confirmacao and popup_confirmacao.visible:
 				_fechar_confirmacao()
-				if get_node_or_null("/root/AudioManager"):
-					AudioManager.play_sfx("ui_5")
+				var am = get_node_or_null("/root/AudioManager")
+				if am and am.has_method("play_sfx"):
+					am.play_sfx("ui_5")
 			else:
 				_on_voltar_pressed()
 
@@ -435,7 +509,7 @@ func _criar_linha_alterar_nick() -> void:
 	var font_press = load("res://assets/fonts/PressStart2P-Regular.ttf") as Font
 	if font_press:
 		lbl_tit.add_theme_font_override("font", font_press)
-		lbl_tit.add_theme_font_size_override("font_size", 14)
+		lbl_tit.add_theme_font_size_override("font_size", 12)
 	lbl_tit.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	hbox_nick.add_child(lbl_tit)
 	
@@ -446,16 +520,19 @@ func _criar_linha_alterar_nick() -> void:
 	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
 	if font_pixel:
 		lbl_nick_val.add_theme_font_override("font", font_pixel)
-		lbl_nick_val.add_theme_font_size_override("font_size", 18)
+		lbl_nick_val.add_theme_font_size_override("font_size", 16)
 	hbox_nick.add_child(lbl_nick_val)
 	
 	btn_alterar_nick = Button.new()
 	btn_alterar_nick.text = "ALTERAR"
-	btn_alterar_nick.custom_minimum_size = Vector2(120, 36)
+	btn_alterar_nick.custom_minimum_size = Vector2(100, 26)
 	var sb_btn = StyleBoxFlat.new()
 	sb_btn.bg_color = Color(0.18, 0.55, 0.85, 0.95)
-	sb_btn.set_corner_radius_all(6)
+	sb_btn.set_corner_radius_all(4)
+	sb_btn.content_margin_top = 4
+	sb_btn.content_margin_bottom = 4
 	btn_alterar_nick.add_theme_stylebox_override("normal", sb_btn)
+	btn_alterar_nick.add_theme_font_size_override("font_size", 14)
 	btn_alterar_nick.add_theme_color_override("font_color", Color.WHITE)
 	btn_alterar_nick.pressed.connect(_abrir_modal_alterar_nick)
 	hbox_nick.add_child(btn_alterar_nick)
@@ -573,8 +650,9 @@ func _abrir_modal_alterar_nick() -> void:
 		
 		_atualizar_status_conta()
 		popup_alterar_nick.queue_free()
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui-1")
+		var am = get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_sfx"):
+			am.play_sfx("ui-1")
 	)
 	input_nick.text_submitted.connect(func(_t): btn_salvar.emit_signal("pressed"))
 	hbox_btns.add_child(btn_salvar)
@@ -647,8 +725,9 @@ func _abrir_modal_aviso_login_nick() -> void:
 	btn_entrar.add_theme_color_override("font_color", Color.WHITE)
 	
 	btn_entrar.pressed.connect(func():
-		if get_node_or_null("/root/AudioManager"):
-			AudioManager.play_sfx("ui_5")
+		var am = get_node_or_null("/root/AudioManager")
+		if am and am.has_method("play_sfx"):
+			am.play_sfx("ui_5")
 		popup_alterar_nick.queue_free()
 		if modo_in_game:
 			if get_node_or_null("/root/PlayerStats"):

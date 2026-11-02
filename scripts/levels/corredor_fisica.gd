@@ -115,8 +115,12 @@ func _criar_luz_portal(nome_porta: String, cor_luz: Color) -> void:
 var _tempo_luz_tick: float = 0.0
 
 func _process(delta: float) -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
+		return
+
 	_tempo_luz_tick += delta
-	if _tempo_luz_tick < 0.033:
+	if _tempo_luz_tick < 0.066:
 		return
 	var dt = _tempo_luz_tick
 	_tempo_luz_tick = 0.0

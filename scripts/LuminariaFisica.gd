@@ -62,6 +62,19 @@ func _ready() -> void:
 	_offset = randf() * 50.0
 	_tempo_proximo_flicker = randf_range(3.0, 8.0)
 
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		if ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
+			if _faiscas:
+				_faiscas.emitting = false
+		if ps.has_signal("modo_desempenho_alterado"):
+			ps.modo_desempenho_alterado.connect(func(ativo: bool):
+				if _faiscas:
+					_faiscas.emitting = false
+				if _luz:
+					_luz.energy = energia_base
+			)
+
 func atualizar_orientacao(nova_orientacao) -> void:
 	var parsed: Orientacao = Orientacao.NORTE
 	if nova_orientacao is int:
@@ -129,23 +142,28 @@ func _process(delta: float) -> void:
 	if not _luz:
 		return
 		
-	# leve oscilação na luz
-	var zumbido = sin((_tempo + _offset) * 16.0) * 0.015 + sin((_tempo + _offset) * 32.0) * 0.008
-	var energia_alvo = energia_base + zumbido
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
 	
+	if eh_perf:
+		# Modo desempenho: luz estática na lâmpada, sem oscilações contínuas na GPU
+		if _luz.energy != energia_base:
+			_luz.energy = energia_base
+		return
+
 	# pisca de vez em quando dando impressão de falha elétrica
-	if habilitar_flicker:
-		if _duracao_flicker > 0.0:
-			_duracao_flicker -= delta
-			energia_alvo *= randf_range(0.35, 0.95)
-			if _sprite and randf() < 0.35:
-				_sprite.frame = randi() % 4
-			if _faiscas and randf() < 0.15:
-				_faiscas.emitting = true
-		else:
-			_tempo_proximo_flicker -= delta
-			if _tempo_proximo_flicker <= 0.0:
-				_tempo_proximo_flicker = randf_range(4.0, 10.0)
-				_duracao_flicker = randf_range(0.08, 0.22)
-				
-	_luz.energy = energia_alvo
+	if habilitar_flicker and _duracao_flicker > 0.0:
+		_duracao_flicker -= delta
+		var energia_alvo = energia_base * randf_range(0.35, 0.95)
+		if _sprite and randf() < 0.35:
+			_sprite.frame = randi() % 4
+		if _faiscas and randf() < 0.15:
+			_faiscas.emitting = true
+		_luz.energy = energia_alvo
+	elif habilitar_flicker:
+		_tempo_proximo_flicker -= delta
+		if _tempo_proximo_flicker <= 0.0:
+			_tempo_proximo_flicker = randf_range(5.0, 12.0)
+			_duracao_flicker = randf_range(0.08, 0.20)
+		elif _luz.energy != energia_base:
+			_luz.energy = energia_base

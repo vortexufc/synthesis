@@ -115,6 +115,18 @@ func _ready() -> void:
 	
 	_construir_geometria_sala()
 	
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
+	if eh_perf:
+		ativar_sombras_caixilhos = false
+		ativar_feixes_solares = false
+		ativar_reflexos_vidro = false
+		ativar_sombras_folhagens = false
+		ativar_sombras_moveis = false
+		ativar_sombras_inimigos = false
+		ativar_bioluminescencia = false
+		ativar_polen_solar = false
+	
 	if ativar_sombras_caixilhos:
 		_configurar_sombras_caixilhos()
 	if ativar_feixes_solares:
@@ -1559,11 +1571,15 @@ func _configurar_polen_solar() -> void:
 	add_child(part)
 
 func _process(delta: float) -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
+		return
+
 	if _feixes_solares.is_empty() and _reflexos_vidro.is_empty() and _sombras_folhagens.is_empty() and _luzes_bioluminescentes.is_empty():
 		return
 		
 	_tempo_iluminacao_tick += delta
-	if _tempo_iluminacao_tick < 0.033:
+	if _tempo_iluminacao_tick < 0.066:
 		return
 	var dt = _tempo_iluminacao_tick
 	_tempo_iluminacao_tick = 0.0

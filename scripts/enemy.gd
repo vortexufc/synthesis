@@ -239,9 +239,11 @@ func _criar_aura_runica() -> void:
 	tw.tween_property(aura_runica_sprite, "scale", Vector2(1.8, 0.95), 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 	# particulas saindo do chao
+	var ps_enemy = get_node_or_null("/root/PlayerStats")
+	var eh_perf_enemy = ps_enemy and ps_enemy.has_method("is_modo_desempenho") and ps_enemy.is_modo_desempenho()
 	particulas_runicas = CPUParticles2D.new()
 	particulas_runicas.name = "ParticulasAura"
-	particulas_runicas.amount = 10
+	particulas_runicas.amount = 4 if eh_perf_enemy else 8
 	particulas_runicas.lifetime = 1.1
 	particulas_runicas.speed_scale = 1.0
 	particulas_runicas.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
@@ -317,6 +319,12 @@ func _process(delta: float) -> void:
 
 func _animar_sombra(delta: float) -> void:
 	if not shadow or not is_instance_valid(shadow):
+		return
+	
+	var ps_e = get_node_or_null("/root/PlayerStats")
+	if ps_e and ps_e.has_method("is_modo_desempenho") and ps_e.is_modo_desempenho():
+		if shadow.scale != shadow_base_scale:
+			shadow.scale = shadow_base_scale
 		return
 	
 	tempo_anim_sombra += delta

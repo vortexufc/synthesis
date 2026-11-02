@@ -53,18 +53,55 @@ var indice_sala_salvo: int = 0
 var restaurando_posicao_save: bool = false
 var cutscene_inicial_vista: bool = false
 var fade_spawn_player: bool = false
-
+var modo_desempenho: bool = false
 
 signal vida_alterada(atual, maxima)
+signal modo_desempenho_alterado(ativo: bool)
 @warning_ignore("unused_signal")
 signal quests_atualizadas()
 signal insignias_atualizadas()
 
 const SAVE_PATH = "user://save.json"
+const PERF_PATH = "user://performance_pref.json"
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_carregar_config_desempenho()
 	carregar()
+
+func is_modo_desempenho() -> bool:
+	return modo_desempenho
+
+func set_modo_desempenho(ativo: bool) -> void:
+	if modo_desempenho == ativo:
+		return
+	modo_desempenho = ativo
+	_salvar_config_desempenho()
+	modo_desempenho_alterado.emit(ativo)
+	print("[PlayerStats] Modo Desempenho (PC Fraco): %s" % ("ATIVADO" if ativo else "DESATIVADO"))
+
+func _carregar_config_desempenho() -> void:
+	var eh_web = OS.has_feature("web") or OS.get_name().to_lower() == "web"
+	var hardware_modesto = OS.get_processor_count() > 0 and OS.get_processor_count() <= 4
+	# Padrão: ativado no Web/navegador ou em PCs com 4 núcleos ou menos (ex: i5 de 4a geração)
+	var padrao = eh_web or hardware_modesto
+	
+	if FileAccess.file_exists(PERF_PATH):
+		var f = FileAccess.open(PERF_PATH, FileAccess.READ)
+		if f:
+			var txt = f.get_as_text()
+			f.close()
+			var json = JSON.new()
+			if json.parse(txt) == OK and json.data is Dictionary:
+				modo_desempenho = bool(json.data.get("modo_desempenho", padrao))
+				return
+	modo_desempenho = padrao
+
+func _salvar_config_desempenho() -> void:
+	var f = FileAccess.open(PERF_PATH, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify({"modo_desempenho": modo_desempenho}))
+		f.close()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:

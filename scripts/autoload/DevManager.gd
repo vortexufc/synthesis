@@ -1,13 +1,13 @@
 extends Node
 
 # se mudar pra false desliga o dev menu
-var DEV_MODE_ENABLED: bool = true
+var DEV_MODE_ENABLED: bool = false
 
-# opcoes do menu dev
-var god_mode_resposta_a: bool = true      # resposta A sempre correta
-var invencivel: bool = true               # jogador nao toma dano
-var super_velocidade: bool = true         # acelera o boneco
-var multiplicador_velocidade: float = 2.5
+# opcoes do menu dev (iniciam desativados por seguranca)
+var god_mode_resposta_a: bool = false      # resposta A sempre correta
+var invencivel: bool = false               # jogador nao toma dano
+var super_velocidade: bool = false         # acelera o boneco
+var multiplicador_velocidade: float = 1.0
 var passar_portas_trancadas: bool = false # ignora chaves/selos nas salas
 var liberar_portas_hub: bool = false      # ignora bloqueio de andar no hub
 
@@ -59,9 +59,25 @@ var _salas_teleporte = [
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	
+	if OS.has_feature("sem_cheats"):
+		DEV_MODE_ENABLED = false
+		
 	if not DEV_MODE_ENABLED:
+		god_mode_resposta_a = false
+		invencivel = false
+		super_velocidade = false
+		multiplicador_velocidade = 1.0
+		passar_portas_trancadas = false
+		liberar_portas_hub = false
+		if _panel_container and is_instance_valid(_panel_container):
+			_panel_container.queue_free()
 		return
 		
+	# Em modo dev ativo, inicializa cheats padrão
+	god_mode_resposta_a = true
+	invencivel = true
+	super_velocidade = true
+	multiplicador_velocidade = 2.5
 	call_deferred("_criar_interface_dev")
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -412,14 +428,20 @@ func _criar_interface_dev() -> void:
 	_canvas_layer.add_child(_panel_container)
 
 func _toggle_menu() -> void:
+	if not DEV_MODE_ENABLED:
+		return
 	if _panel_container:
 		_panel_container.visible = not _panel_container.visible
 
 func _derrotar_monstro_atual() -> void:
+	if not DEV_MODE_ENABLED:
+		return
 	if get_node_or_null("/root/QuizManager"):
 		QuizManager.derrotar_inimigo_atual()
 
 func _limpar_inventario_e_moedas() -> void:
+	if not DEV_MODE_ENABLED:
+		return
 	if get_node_or_null("/root/PlayerStats"):
 		PlayerStats.limpar_inventario_e_moedas()
 		print("inventario e moedas zerados")

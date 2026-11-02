@@ -208,7 +208,9 @@ func _configurar_sistema_iluminacao() -> void:
 	tex_bolha.fill_to = Vector2(0.5, 0.0)
 	part_caldeirao.texture = tex_bolha
 	
-	part_caldeirao.amount = 18
+	var ps_hub = get_node_or_null("/root/PlayerStats")
+	var eh_perf_hub = ps_hub and ps_hub.has_method("is_modo_desempenho") and ps_hub.is_modo_desempenho()
+	part_caldeirao.amount = 4 if eh_perf_hub else 18
 	part_caldeirao.lifetime = 1.8
 	part_caldeirao.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	part_caldeirao.emission_rect_extents = Vector2(18, 6)
@@ -229,28 +231,29 @@ func _configurar_sistema_iluminacao() -> void:
 	part_caldeirao.color_ramp = grad_c
 	add_child(part_caldeirao)
 	
-	# luz nos frascos da mesa
-	frascos_pos.sort_custom(func(a, b): return a.x < b.x)
-	if frascos_pos.size() < 2:
-		frascos_pos = [Vector2(195, 665), Vector2(285, 665)]
-		
-	for i in range(frascos_pos.size()):
-		var pos_frasco = frascos_pos[i]
-		var luz_frasco = PointLight2D.new()
-		luz_frasco.name = "LuzFrascoCristal_%d" % (i + 1)
-		luz_frasco.texture = tex_luz
-		luz_frasco.color = Color(0.18, 0.88, 1.0, 1.0) # Ciano celestial bioluminescente (idêntico à Sala de Química)
-		luz_frasco.energy = 0.40
-		luz_frasco.texture_scale = 0.35 # Focado diretamente sobre o vidro do frasco
-		luz_frasco.global_position = pos_frasco
-		add_child(luz_frasco)
-		
-		_luzes_props.append({
-			"node": luz_frasco,
-			"base_energy": 0.40,
-			"speed": 1.8 + i * 0.3,
-			"offset": i * 1.5
-		})
+	# luz nos frascos da mesa (pula se modo desempenho)
+	if not eh_perf_hub:
+		frascos_pos.sort_custom(func(a, b): return a.x < b.x)
+		if frascos_pos.size() < 2:
+			frascos_pos = [Vector2(195, 665), Vector2(285, 665)]
+			
+		for i in range(frascos_pos.size()):
+			var pos_frasco = frascos_pos[i]
+			var luz_frasco = PointLight2D.new()
+			luz_frasco.name = "LuzFrascoCristal_%d" % (i + 1)
+			luz_frasco.texture = tex_luz
+			luz_frasco.color = Color(0.18, 0.88, 1.0, 1.0) # Ciano celestial bioluminescente (idêntico à Sala de Química)
+			luz_frasco.energy = 0.40
+			luz_frasco.texture_scale = 0.35 # Focado diretamente sobre o vidro do frasco
+			luz_frasco.global_position = pos_frasco
+			add_child(luz_frasco)
+			
+			_luzes_props.append({
+				"node": luz_frasco,
+				"base_energy": 0.40,
+				"speed": 1.8 + i * 0.3,
+				"offset": i * 1.5
+			})
 	
 	# luzes nos portais dos andares
 	_criar_luz_portal("PortaTransicao", Color(0.85, 0.38, 1.0, 1.0), Color(0.14, 0.06, 0.20))   # Alquimia - Roxo arcano
@@ -286,14 +289,20 @@ func _criar_luz_portal(nome_porta: String, cor_luz: Color, cor_fundo: Color) -> 
 var _tempo_luz_tick: float = 0.0
 
 func _process(delta: float) -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
+	
+	if eh_perf:
+		return
+
 	_tempo_luz_tick += delta
-	if _tempo_luz_tick < 0.033:
+	if _tempo_luz_tick < 0.066:
 		return
 	var dt = _tempo_luz_tick
 	_tempo_luz_tick = 0.0
 	_tempo_iluminacao += dt
 	
-	# efeito orgânico de chama nas tochas (três frequências harmônicas)
+	# efeito orgânico de chama nas tochas (energia apenas, texture_scale mantido constante)
 	for tocha in _luzes_tochas:
 		var node = tocha["node"] as PointLight2D
 		if not node or not is_instance_valid(node):
@@ -302,34 +311,30 @@ func _process(delta: float) -> void:
 		var spd = tocha["speed"]
 		var f1 = sin((_tempo_iluminacao + off) * spd) * 0.045
 		var f2 = sin((_tempo_iluminacao + off * 1.63) * (spd * 1.85)) * 0.024
-		var f3 = sin((_tempo_iluminacao + off * 2.41) * (spd * 3.1)) * 0.015
-		var flicker = f1 + f2 + f3
+		var flicker = f1 + f2
 		node.energy = maxf(0.25, tocha["base_energy"] + flicker)
-		node.texture_scale = 1.35 * (1.0 + flicker * 0.30)
 	
 	# pulso da luz do cajado
 	if _luz_cajado and is_instance_valid(_luz_cajado):
 		var pulso = sin(_tempo_iluminacao * 2.5) * 0.025
 		_luz_cajado.energy = 0.18 + pulso
-		_luz_cajado.texture_scale = 0.40 + (pulso * 0.4)
 	
 	# pulso de luz do player
 	if _luz_player and is_instance_valid(_luz_player):
 		var pulso_p = sin(_tempo_iluminacao * 2.0) * 0.025
 		_luz_player.energy = 0.34 + pulso_p
 	
-	# respiração cósmica e expansão de raio dos portais
+	# respiração cósmica dos portais
 	for portal_info in _luzes_portais:
 		var luz_p = portal_info["node"] as PointLight2D
 		if luz_p and is_instance_valid(luz_p):
 			var off_p = portal_info["offset"]
-			var pulso_portal = sin((_tempo_iluminacao + off_p) * 2.4) * 0.065 + sin((_tempo_iluminacao + off_p * 1.5) * 4.2) * 0.025
+			var pulso_portal = sin((_tempo_iluminacao + off_p) * 2.4) * 0.065
 			luz_p.energy = maxf(0.3, portal_info["base_energy"] + pulso_portal)
-			luz_p.texture_scale = 1.55 + (pulso_portal * 0.6)
 			
 	# bolhas no caldeirao
 	if _luz_caldeirao and is_instance_valid(_luz_caldeirao):
-		var borbulha = sin(_tempo_iluminacao * 5.5) * 0.06 + sin(_tempo_iluminacao * 9.2) * 0.03
+		var borbulha = sin(_tempo_iluminacao * 5.5) * 0.06
 		_luz_caldeirao.energy = 0.52 + borbulha
 		
 	# pisca a luz dos frascos

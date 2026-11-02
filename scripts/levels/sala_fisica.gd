@@ -228,6 +228,8 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 		return
 		
 	var tex_vapor = _obter_textura_vapor()
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
 	
 	for cell in decor.get_used_cells():
 		var atlas = decor.get_cell_atlas_coords(cell)
@@ -237,8 +239,8 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 		
 		# monitores e paineis
 		if src_id == 3:
-			# luz dos monitores
-			if atlas in [Vector2i(0, 0), Vector2i(10, 0), Vector2i(0, 11), Vector2i(10, 11), Vector2i(20, 14), Vector2i(30, 3), Vector2i(30, 14), Vector2i(80, 0), Vector2i(90, 0), Vector2i(100, 0), Vector2i(110, 0)]:
+			# luz dos monitores (pula se estiver em modo desempenho para economizar GPU)
+			if not eh_perf and atlas in [Vector2i(0, 0), Vector2i(10, 0), Vector2i(0, 11), Vector2i(10, 11), Vector2i(20, 14), Vector2i(30, 3), Vector2i(30, 14), Vector2i(80, 0), Vector2i(90, 0), Vector2i(100, 0), Vector2i(110, 0)]:
 				var luz_tela = PointLight2D.new()
 				luz_tela.name = "LuzMonitor_" + cell_id
 				luz_tela.texture = tex_luz
@@ -254,7 +256,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 					"offset": randf() * 10.0
 				})
 			# luz dos paineis eletricos
-			elif atlas in [Vector2i(44, 7), Vector2i(40, 7), Vector2i(76, 13), Vector2i(66, 6), Vector2i(72, 13), Vector2i(60, 17), Vector2i(65, 17)]:
+			elif not eh_perf and atlas in [Vector2i(44, 7), Vector2i(40, 7), Vector2i(76, 13), Vector2i(66, 6), Vector2i(72, 13), Vector2i(60, 17), Vector2i(65, 17)]:
 				var luz_painel = PointLight2D.new()
 				luz_painel.name = "LuzPainel_" + cell_id
 				luz_painel.texture = tex_luz
@@ -270,7 +272,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 					"offset": randf() * 10.0
 				})
 			# luz da luminaria da mesa de projetos (lampada + foco na mesa)
-			elif atlas in [Vector2i(70, 5), Vector2i(75, 5)]:
+			elif not eh_perf and atlas in [Vector2i(70, 5), Vector2i(75, 5)]:
 				var alt = decor.get_cell_alternative_tile(cell)
 				var is_flipped = bool(alt & TileSetAtlasSource.TRANSFORM_FLIP_H)
 				
@@ -317,7 +319,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 				})
 				
 		# ventiladores
-		elif src_id == 1:
+		elif not eh_perf and src_id == 1:
 			var part_vento = CPUParticles2D.new()
 			part_vento.name = "ExaustaoVentilador_" + cell_id
 			part_vento.position = cell_world + Vector2(0, 8)
@@ -336,7 +338,7 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 			add_child(part_vento)
 			
 		# canos de pressao
-		elif src_id == 2:
+		elif not eh_perf and src_id == 2:
 			# solta fumaca dos canos
 			if atlas in [Vector2i(7, 5), Vector2i(55, 14), Vector2i(145, 3), Vector2i(151, 3)]:
 				var part_vapor = CPUParticles2D.new()
@@ -357,6 +359,9 @@ func _configurar_props_fisica(tex_luz: Texture2D) -> void:
 				add_child(part_vapor)
 
 func _configurar_itens_e_entidades(tex_luz: Texture2D) -> void:
+	var ps_item = get_node_or_null("/root/PlayerStats")
+	if ps_item and ps_item.has_method("is_modo_desempenho") and ps_item.is_modo_desempenho():
+		return
 	# brilho nas baterias
 	for item in get_children():
 		if item.name.begins_with("ItemBateria") and not item.get_node_or_null("LuzBateria"):
@@ -545,8 +550,13 @@ func _garantir_luminarias_na_sala() -> void:
 var _tempo_luz_tick: float = 0.0
 
 func _process(delta: float) -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
+	if eh_perf:
+		return
+
 	_tempo_luz_tick += delta
-	if _tempo_luz_tick < 0.033:
+	if _tempo_luz_tick < 0.066:
 		return
 	var dt = _tempo_luz_tick
 	_tempo_luz_tick = 0.0

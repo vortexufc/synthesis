@@ -26,6 +26,7 @@ func _configurar_vinheta_vida_baixa() -> void:
 	_vinheta_vida_baixa.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_vinheta_vida_baixa.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_vinheta_vida_baixa.modulate.a = 0.0
+	_vinheta_vida_baixa.visible = false
 	
 	# Gradiente radial invertido: centro transparente, bordas em vermelho sangue escuro
 	var grad_tex = GradientTexture2D.new()
@@ -70,6 +71,7 @@ func _process_vinheta_vida_baixa(delta: float) -> void:
 	var hp_ratio = clampf(float(v_atual) / vida_max, 0.0, 1.0)
 	
 	if hp_ratio <= 0.30 and float(v_atual) > 0.0:
+		_vinheta_vida_baixa.visible = true
 		# Ritmo cardíaco duplo (lub-dub) acelerando conforme a vida diminui
 		var urgencia = 1.0 - (hp_ratio / 0.30) # 0.0 a 1.0
 		var freq_batimento = 4.5 + (urgencia * 3.5)
@@ -88,9 +90,11 @@ func _process_vinheta_vida_baixa(delta: float) -> void:
 	else:
 		# Vida confortável: desvanece suavemente
 		if _vinheta_vida_baixa.modulate.a > 0.001:
+			_vinheta_vida_baixa.visible = true
 			_vinheta_vida_baixa.modulate.a = lerpf(_vinheta_vida_baixa.modulate.a, 0.0, delta * 6.0)
 		else:
 			_vinheta_vida_baixa.modulate.a = 0.0
+			_vinheta_vida_baixa.visible = false
 
 func change_scene(target_scene: String, porta_de_retorno: bool = false, pular_corredor: bool = false) -> void:
 	if is_transitioning:

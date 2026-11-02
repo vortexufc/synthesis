@@ -240,7 +240,9 @@ func _adicionar_caldeirao(tex_luz: Texture2D, tex_bolha: Texture2D, pos: Vector2
 	part.material = mat
 	part.texture = tex_bolha
 	
-	part.amount = 18
+	var ps_caldeirao = get_node_or_null("/root/PlayerStats")
+	var eh_perf_c = ps_caldeirao and ps_caldeirao.has_method("is_modo_desempenho") and ps_caldeirao.is_modo_desempenho()
+	part.amount = 4 if eh_perf_c else 18
 	part.lifetime = 1.8
 	part.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	part.emission_rect_extents = extents_emissao
@@ -299,6 +301,8 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 		return
 		
 	var tex_bolha = _obter_textura_bolha()
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
 	
 	for cell in decor.get_used_cells():
 		var atlas = decor.get_cell_atlas_coords(cell)
@@ -311,8 +315,8 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 		var tex_name = src.texture.resource_path.get_file() if (src and src.texture) else ""
 		
 		# runas no chao
-		var is_circulo = (src and src.texture and ("círculo" in src.texture.resource_path or "circulo" in src.texture.resource_path.to_lower())) or ("c" in tex_name.to_lower() and "ulo" in tex_name.to_lower())
-		if is_circulo or (atlas.y == 0 and (atlas.x == 0 or atlas.x == 6 or atlas.x == 12) and ("OBJETOS" not in tex_name)):
+		var is_circulo = not eh_perf and ((src and src.texture and ("círculo" in src.texture.resource_path or "circulo" in src.texture.resource_path.to_lower())) or ("c" in tex_name.to_lower() and "ulo" in tex_name.to_lower()))
+		if is_circulo or (not eh_perf and atlas.y == 0 and (atlas.x == 0 or atlas.x == 6 or atlas.x == 12) and ("OBJETOS" not in tex_name)):
 			var cor_runa = Color(1.0, 1.0, 1.0, 1.0)
 			var pos_runa = cell_world
 			var id_runa = ""
@@ -437,7 +441,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 			# ignora madeira quebrada
 				
 		# frasco com cristais
-		elif atlas == Vector2i(40, 20):
+		elif not eh_perf and atlas == Vector2i(40, 20):
 			var luz_cristal = PointLight2D.new()
 			luz_cristal.name = "LuzFrascoCristal_" + cell_id
 			luz_cristal.texture = tex_luz
@@ -449,7 +453,7 @@ func _configurar_props_alquimia(tex_luz: Texture2D) -> void:
 			_luzes_props.append({"node": luz_cristal, "base_energy": 0.40, "speed": 1.9, "offset": randf() * 5.0})
 			
 		# frasco verde
-		elif atlas == Vector2i(40, 32):
+		elif not eh_perf and atlas == Vector2i(40, 32):
 			var luz_planta = PointLight2D.new()
 			luz_planta.name = "LuzFrascoPlanta_" + cell_id
 			luz_planta.texture = tex_luz
@@ -528,8 +532,13 @@ func _garantir_tochas_na_sala() -> void:
 var _tempo_luz_tick: float = 0.0
 
 func _process(delta: float) -> void:
+	var ps = get_node_or_null("/root/PlayerStats")
+	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
+	if eh_perf:
+		return
+
 	_tempo_luz_tick += delta
-	if _tempo_luz_tick < 0.033:
+	if _tempo_luz_tick < 0.066:
 		return
 	var dt = _tempo_luz_tick
 	_tempo_luz_tick = 0.0

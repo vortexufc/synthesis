@@ -47,6 +47,24 @@ func _ready() -> void:
 		_luz.energy = energia_base
 		_luz.texture_scale = escala_base
 
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		if ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
+			if _brasas:
+				_brasas.emitting = false
+				_brasas.visible = false
+		if ps.has_signal("modo_desempenho_alterado"):
+			ps.modo_desempenho_alterado.connect(_on_modo_desempenho_alterado)
+
+func _on_modo_desempenho_alterado(ativo: bool) -> void:
+	if _brasas:
+		_brasas.emitting = not ativo
+		_brasas.visible = not ativo
+	if _luz:
+		_luz.energy = energia_base
+
+var _luz_tick: float = 0.0
+
 func _process(delta: float) -> void:
 	_tempo += delta
 	_anim_timer += delta
@@ -57,20 +75,23 @@ func _process(delta: float) -> void:
 		_frame_offset = (_frame_offset + 1) % 7
 		_sprite.frame = (linha_frames * 7) + _frame_offset
 		
-	# Simulação orgânica de chama viva (três harmônicos + micro-ruído)
-	if _luz:
-		var f1 = sin((_tempo + _offset) * _velocidade) * 0.048
-		var f2 = sin((_tempo + _offset * 1.63) * (_velocidade * 1.85)) * 0.026
-		var f3 = sin((_tempo + _offset * 2.41) * (_velocidade * 3.2)) * 0.016
-		var micro_ruido = randf_range(-0.012, 0.012)
-		var flicker = f1 + f2 + f3 + micro_ruido
+	if not _luz:
+		return
 		
-		# Respiração da energia da luz
-		_luz.energy = maxf(0.25, energia_base + flicker)
-		
-		# Expansão e contração do raio da luz (respiração da chama)
-		_luz.texture_scale = escala_base * (1.0 + flicker * 0.35)
-		
-		# Modulação de temperatura de cor (tons mais ambarinos e vivos)
-		var fator_calor = clampf((flicker + 0.06) / 0.12, 0.0, 1.0)
-		_luz.color = cor_luz.lerp(Color(1.0, 0.58, 0.20, 1.0), 0.22 * (1.0 - fator_calor))
+	# Em modo desempenho, mantém a iluminação pontual estática (o sprite animado já dá o efeito visual de fogo)
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
+		if _luz.energy != energia_base:
+			_luz.energy = energia_base
+		return
+
+	_luz_tick += delta
+	if _luz_tick < 0.066: # Atualiza a ~15 Hz em vez de todo frame para economizar CPU/GPU
+		return
+	_luz_tick = 0.0
+	
+	# Simulação suave de chama (energia apenas, texture_scale mantido estático para não invalidar AABB no WebGL)
+	var f1 = sin((_tempo + _offset) * _velocidade) * 0.048
+	var f2 = sin((_tempo + _offset * 1.63) * (_velocidade * 1.85)) * 0.026
+	var flicker = f1 + f2
+	_luz.energy = maxf(0.25, energia_base + flicker)
