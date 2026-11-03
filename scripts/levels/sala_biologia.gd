@@ -119,7 +119,7 @@ func _ready() -> void:
 	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
 	if eh_perf:
 		ativar_sombras_caixilhos = false
-		ativar_feixes_solares = false
+		# Mantém feixes de luz solar volumétricos (God Rays) ativos mesmo no modo PC Fraco conforme diretriz visual
 		ativar_reflexos_vidro = false
 		ativar_sombras_folhagens = false
 		ativar_sombras_moveis = false
@@ -1571,10 +1571,6 @@ func _configurar_polen_solar() -> void:
 	add_child(part)
 
 func _process(delta: float) -> void:
-	var ps = get_node_or_null("/root/PlayerStats")
-	if ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
-		return
-
 	if _feixes_solares.is_empty() and _reflexos_vidro.is_empty() and _sombras_folhagens.is_empty() and _luzes_bioluminescentes.is_empty():
 		return
 		
@@ -1585,7 +1581,7 @@ func _process(delta: float) -> void:
 	_tempo_iluminacao_tick = 0.0
 	_tempo_animacao_solar += dt
 	
-	# Atualiza Feixes Solares (Item 1)
+	# Atualiza Feixes Solares (Item 1 - Leve e mantido ativo para preservar a estética)
 	for feixe in _feixes_solares:
 		var t = _tempo_animacao_solar + feixe["offset"]
 		var shimmer = sin(t * feixe["speed_shimmer"]) * 0.15 + sin(t * (feixe["speed_shimmer"] * 1.6)) * 0.07
@@ -1600,6 +1596,11 @@ func _process(delta: float) -> void:
 		var s_chao = feixe["chao"]
 		if s_chao and is_instance_valid(s_chao):
 			s_chao.modulate.a = alpha * 0.70
+
+	# Em modo PC Fraco, pula o restante das animações secundárias mais pesadas
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho():
+		return
 			
 	# Atualiza Reflexos Solares nos Vidros e Espelhos (Item 2)
 	for reflexo in _reflexos_vidro:

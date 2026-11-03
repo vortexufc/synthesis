@@ -1,5 +1,8 @@
 extends Area2D
 
+const SCRIPT_LOJA = preload("res://scripts/ui/loja_mercador.gd")
+const FONT_PIXEL = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+
 var player_perto: bool = false
 var ui_instancia = null
 
@@ -84,7 +87,7 @@ func _criar_balao_e_indicadores() -> void:
 	
 	var lbl = Label.new()
 	lbl.text = "💰 [ F ] Loja"
-	var font = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var font = FONT_PIXEL
 	if font: lbl.add_theme_font_override("font", font)
 	lbl.add_theme_font_size_override("font_size", 14)
 	lbl.add_theme_color_override("font_color", Color(1.0, 0.92, 0.5))
@@ -135,11 +138,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_fechar_loja()
 
 func _abrir_loja() -> void:
-	var script_loja = load("res://scripts/ui/loja_mercador.gd")
-	if not script_loja: return
+	if not SCRIPT_LOJA: return
 	
 	ui_instancia = CanvasLayer.new()
-	ui_instancia.set_script(script_loja)
+	ui_instancia.set_script(SCRIPT_LOJA)
 	add_child(ui_instancia)
 	_esconder_prompt()
 

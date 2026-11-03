@@ -44,11 +44,16 @@ func _limpar_interface_leitura(node: Node) -> void:
 		node.queue_free()
 
 func _input(event: InputEvent) -> void:
-	# Detecção em tempo de execução caso o primeiro toque aconteça após o carregamento inicial
+	# Se já está confirmado como PC (desktop ou navegador em computador), não ativa modo mobile por cliques ou emulação
+	if eh_pc:
+		return
+	# Detecção em tempo de execução caso o primeiro toque aconteça após o carregamento inicial em dispositivo móvel
 	if not eh_mobile and event is InputEventScreenTouch and event.pressed:
 		_marcar_como_mobile()
 
 func _marcar_como_mobile() -> void:
+	if eh_pc:
+		return
 	if not eh_mobile:
 		eh_mobile = true
 		eh_pc = false
@@ -66,24 +71,26 @@ func _detectar_dispositivo() -> void:
 		os_name in ["android", "ios"]
 		or OS.has_feature("android")
 		or OS.has_feature("ios")
-		or OS.has_feature("mobile")
 	)
 	
-	# 2. Touchscreen disponível no dispositivo
-	var tem_touchscreen = DisplayServer.is_touchscreen_available()
-	
-	# 3. Navegador Web rodando em aparelho mobile (Android, iPhone, iPad, etc)
+	# 2. Navegador Web rodando em aparelho mobile (Android, iPhone, iPad, etc)
 	var eh_mobile_web = false
 	if eh_web and JavaScriptBridge:
 		var js_code = """
 		(function() {
 			try {
+				if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
+					return navigator.userAgentData.mobile;
+				}
 				var ua = (navigator.userAgent || navigator.vendor || window.opera || '').toLowerCase();
-				var isMobileUA = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|webos|silk|kindle/.test(ua);
-				var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
-				var isCoarse = window.matchMedia && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(any-pointer: coarse)').matches);
-				var isSmallScreen = Math.min(window.screen.width, window.screen.height) <= 950;
-				return Boolean(isMobileUA || (hasTouch && (isCoarse || isSmallScreen)));
+				var isDesktop = /windows nt|macintosh|mac os x|x11|linux (x86_64|i686)/i.test(ua) && !/android|mobile|iphone|ipad|ipod/i.test(ua);
+				if (isDesktop) {
+					var isIPad = (navigator.platform === 'MacIntel' || /macintosh/i.test(ua)) && navigator.maxTouchPoints > 1;
+					if (isIPad) return true;
+					return false;
+				}
+				var isMobileUA = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|webos|silk|kindle/i.test(ua);
+				return Boolean(isMobileUA);
 			} catch(e) {
 				return false;
 			}
@@ -94,15 +101,20 @@ func _detectar_dispositivo() -> void:
 			eh_mobile_web = bool(res)
 			
 	# Decisão final de plataforma
-	if eh_mobile_nativo or eh_mobile_web:
+	if eh_mobile_nativo:
 		eh_mobile = true
 		eh_pc = false
-	elif (OS.has_feature("pc") or OS.has_feature("windows") or OS.has_feature("macos") or OS.has_feature("linux")) and not eh_web:
+	elif eh_web:
+		if eh_mobile_web:
+			eh_mobile = true
+			eh_pc = false
+		else:
+			# Navegador Web rodando em Computador / Desktop
+			eh_pc = true
+			eh_mobile = false
+	elif OS.has_feature("pc") or OS.has_feature("windows") or OS.has_feature("macos") or OS.has_feature("linux"):
 		eh_pc = true
 		eh_mobile = false
-	elif tem_touchscreen and not eh_pc:
-		eh_mobile = true
-		eh_pc = false
 	else:
 		# Padrão desktop / PC
 		eh_pc = true
@@ -110,7 +122,7 @@ func _detectar_dispositivo() -> void:
 		
 	# Configuração padrão do Joystick
 	# Em mobile, SEMPRE inicia ativado por padrão.
-	# Em PC nativo, inicia desativado para teclado/mouse.
+	# Em PC (nativo ou navegador), inicia desativado para teclado/mouse.
 	if eh_mobile:
 		joystick_habilitado = true
 	else:

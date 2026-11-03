@@ -11,8 +11,8 @@ var _btn_vender_gel: Button = null
 var _lbl_qtd_chip: Label = null
 var _btn_vender_chip: Button = null
 
-var _font_pixel: Font = null
-var _font_num: Font = null
+var _font_pixel: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
+var _font_num: Font = preload("res://assets/fonts/PixelifySans-VariableFont_wght.ttf")
 
 var tex_pocao = preload("res://assets/sprites/vida.png")
 var tex_pocao_menor = preload("res://assets/sprites/pocao_menor.png")
@@ -96,12 +96,6 @@ func _ready() -> void:
 	var am = get_node_or_null("/root/AudioManager")
 	if am:
 		am.play_sfx("ui_5")
-	
-	_font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
-	var sf = SystemFont.new()
-	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
-	sf.font_weight = 600
-	_font_num = sf
 	
 	var font_pixel = _font_pixel
 	var font_num = _font_num
