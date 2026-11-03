@@ -161,11 +161,12 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_aiw76"]
-radius = 51.0
-height = 114.0
+radius = 48.0
+height = 106.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_fbnk4"]
-radius = 54.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 38.0
+height = 96.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1698167466]
 script = ExtResource("3_enemy")
@@ -174,6 +175,7 @@ velocidade = 45.0
 dano = 16.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2003832849]
+z_index = 4
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_r6fmd")
 frame_progress = 0.19650756
@@ -184,12 +186,11 @@ id_inimigo = "cogumelo"
 andar_id = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1348016517]
-position = Vector2(1, 28)
-rotation = 1.5707964
+position = Vector2(0, 34)
 shape = SubResource("CapsuleShape2D_aiw76")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1148734232]
-position = Vector2(0, 37)
-shape = SubResource("CircleShape2D_fbnk4")
+position = Vector2(0, 34)
+shape = SubResource("CapsuleShape2D_body")
 
 [connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

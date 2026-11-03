@@ -164,7 +164,7 @@ region_rect = Rect2(16, 0, 96, 192)
 position = Vector2(2473, 658)
 
 [node name="CharacterBody2D2" parent="." unique_id=1993884800 instance=ExtResource("15_hafof")]
-position = Vector2(936, 555)
+position = Vector2(944, 848)
 
 [node name="CharacterBody2D3" parent="." unique_id=837519223 instance=ExtResource("16_7ec6k")]
 position = Vector2(2047, 834)

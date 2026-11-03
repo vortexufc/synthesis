@@ -85,6 +85,7 @@ tempo_max_direcao = 2.2
 chance_pausa = 0.2
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 4
 scale = Vector2(1.5, 1.5)
 sprite_frames = SubResource("SpriteFrames_lhd7t")
 autoplay = "default"

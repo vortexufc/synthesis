@@ -66,8 +66,11 @@ func _ready() -> void:
 		gs.batalha_encerrada.connect(_on_batalha_encerrada)
 
 	if sprite:
+		if sprite.z_index < 4:
+			sprite.z_index = 4
 		sprite.play("default")
 	
+	_calibrar_colisao_inimigo()
 	_criar_sombra()
 
 	# Campeão Rúnico: chance aleatória se não for boss
@@ -80,6 +83,50 @@ func _ready() -> void:
 		vida_maxima *= 1.25
 		vida_atual = vida_maxima
 		_criar_aura_runica()
+
+func _calibrar_colisao_inimigo() -> void:
+	var col_shape = get_node_or_null("CollisionShape2D")
+	if not col_shape or not (col_shape is CollisionShape2D):
+		return
+		
+	var nome_baixo = name.to_lower()
+	var enemy_id = ""
+	for child in get_children():
+		if child is Area2D and "id_inimigo" in child:
+			enemy_id = str(child.id_inimigo).to_lower()
+			break
+			
+	var eh_carnivora = ("carnivora" in nome_baixo) or ("carnivora" in enemy_id)
+	var eh_flor = ("flor" in nome_baixo) or ("flor" in enemy_id)
+	var eh_cogumelo = ("cogumelo" in nome_baixo) or ("cogumelo" in enemy_id)
+	var eh_wizard = ("wizard" in nome_baixo) or ("wizzard" in nome_baixo) or ("wizard" in enemy_id)
+	
+	var cap: CapsuleShape2D = col_shape.shape as CapsuleShape2D
+	if not cap:
+		cap = CapsuleShape2D.new()
+		col_shape.shape = cap
+	col_shape.rotation = 0.0
+	
+	if eh_carnivora:
+		cap.radius = 42.0
+		cap.height = 110.0
+		col_shape.position = Vector2(-16, 18)
+	elif eh_flor:
+		cap.radius = 38.0
+		cap.height = 96.0
+		col_shape.position = Vector2(0, 32)
+	elif eh_cogumelo:
+		cap.radius = 38.0
+		cap.height = 96.0
+		col_shape.position = Vector2(0, 34)
+	elif eh_wizard:
+		cap.radius = 30.0
+		cap.height = 90.0
+		col_shape.position = Vector2(0, 10)
+	elif not ("robo" in nome_baixo):
+		if cap.radius < 19.0 or cap.height < 50.0:
+			cap.radius = 19.0
+			cap.height = 66.0
 
 func _calibrar_balanceamento_inimigo() -> void:
 	var nome_baixo = name.to_lower()
@@ -144,8 +191,8 @@ func _criar_sombra() -> void:
 	shadow.texture = shadow_tex
 	shadow.z_index = 0
 	
-	if sprite and sprite.z_index == 0:
-		sprite.z_index = 1
+	if sprite and sprite.z_index < 4:
+		sprite.z_index = 4
 	
 	var nome_baixo = name.to_lower()
 	
@@ -256,7 +303,7 @@ func _criar_aura_runica() -> void:
 	particulas_runicas.scale_amount_max = 3.5
 	particulas_runicas.color = Color(0.4, 0.95, 1.0, 0.85)
 	particulas_runicas.position = Vector2(0, pos_y)
-	particulas_runicas.z_index = 2
+	particulas_runicas.z_index = 5 # Acima do sprite do inimigo (z_index = 4)
 	add_child(particulas_runicas)
 
 	# texto de runico em cima da cabeca
@@ -492,9 +539,28 @@ func _physics_process(delta: float) -> void:
 					trigger._on_body_entered(collider)
 					return
 
-	# se bateu na parede, sorteia outro rumo
-	if not no_alcance and velocity.length() < 1.0 and not _em_pausa:
-		_sortear_nova_direcao()
+	# se bateu na parede, sorteia outro rumo para longe da parede
+	if not no_alcance and not _em_pausa and (is_on_wall() or velocity.length() < 1.0):
+		_sortear_nova_direcao_parede()
+	elif no_alcance and is_on_wall():
+		var wall_norm = get_wall_normal()
+		if _direcao.dot(wall_norm) < -0.2:
+			var deslize = _direcao.slide(wall_norm).normalized()
+			if deslize.length_squared() > 0.05:
+				_direcao = deslize
+
+func _sortear_nova_direcao_parede() -> void:
+	if is_on_wall():
+		var wall_norm = get_wall_normal()
+		var dirs_validas: Array = []
+		for d in DIRECOES:
+			if d.dot(wall_norm) > 0.1:
+				dirs_validas.append(d)
+		if not dirs_validas.is_empty():
+			_direcao = dirs_validas[randi() % dirs_validas.size()]
+			_timer_direcao = randf_range(tempo_min_direcao, tempo_max_direcao)
+			return
+	_sortear_nova_direcao()
 
 # escolhe outra direcao e reseta o tempo
 func _sortear_nova_direcao() -> void:

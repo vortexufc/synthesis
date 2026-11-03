@@ -58,8 +58,8 @@ func _ready() -> void:
 	if _font_pixel and text_label:
 		text_label.add_theme_font_override("font", _font_pixel)
 		text_label.add_theme_font_size_override("font_size", 14)
-		text_label.add_theme_color_override("font_outline_color", Color(0.04, 0.04, 0.08, 0.95))
-		text_label.add_theme_constant_override("outline_size", 3)
+		text_label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
+		text_label.add_theme_constant_override("outline_size", 0)
 		
 	_criar_vinheta_critica()
 	_criar_particulas_cura()
@@ -116,11 +116,11 @@ func _atualizar_texto_vida_roll(val: float) -> void:
 
 func _on_roll_cura_finished() -> void:
 	if text_label and is_instance_valid(text_label):
-		text_label.remove_theme_color_override("font_color")
+		text_label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
 
 func _on_roll_dano_finished() -> void:
 	if text_label and is_instance_valid(text_label):
-		text_label.remove_theme_color_override("font_color")
+		text_label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
 	if fill and is_instance_valid(fill) and _target_w_cache <= 0.0:
 		fill.visible = false
 		if ghost and is_instance_valid(ghost):
@@ -585,9 +585,8 @@ func _criar_indicador_dash() -> void:
 	_dash_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_dash_label.custom_minimum_size = Vector2(130, 15)
 	_dash_label.add_theme_font_size_override("font_size", 10)
-	_dash_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.95))
-	_dash_label.add_theme_color_override("font_outline_color", Color(0.02, 0.04, 0.08, 0.95))
-	_dash_label.add_theme_constant_override("outline_size", 2)
+	_dash_label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
+	_dash_label.add_theme_constant_override("outline_size", 0)
 	if _font_pixel:
 		_dash_label.add_theme_font_override("font", _font_pixel)
 		
@@ -606,7 +605,7 @@ func _on_dash_executado(cooldown: float) -> void:
 	_dash_bar.value = 0.0
 	if _dash_label:
 		_dash_label.text = "RECARREGANDO..."
-		_dash_label.add_theme_color_override("font_color", Color(0.7, 0.85, 0.95, 0.75))
+		_dash_label.add_theme_color_override("font_color", Color(0, 0, 0, 0.65))
 		
 	var sb_fill = _dash_bar.get_theme_stylebox("fill") as StyleBoxFlat
 	if sb_fill:
@@ -617,7 +616,7 @@ func _on_dash_executado(cooldown: float) -> void:
 	_dash_tween.tween_callback(func():
 		if _dash_label and is_instance_valid(_dash_label):
 			_dash_label.text = "⚡ DASH [ESPAÇO]"
-			_dash_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.95))
+			_dash_label.add_theme_color_override("font_color", Color(0, 0, 0, 1))
 		var sb = _dash_bar.get_theme_stylebox("fill") as StyleBoxFlat
 		if sb:
 			sb.bg_color = Color(0.20, 0.95, 1.0, 0.95)

@@ -48,11 +48,12 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fykve"]
-radius = 27.0
-height = 54.0
+radius = 42.0
+height = 100.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_f4f4b"]
-radius = 28.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 38.0
+height = 96.0
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1993884800]
 script = ExtResource("3_enemy")
@@ -61,6 +62,7 @@ velocidade = 36.0
 dano = 12.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1474491736]
+z_index = 4
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_x02el")
 autoplay = "default"
@@ -71,12 +73,11 @@ id_inimigo = "flor_amarela"
 andar_id = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyTrigger" unique_id=1411535437]
-position = Vector2(-1, 15)
-rotation = 1.5707964
+position = Vector2(0, 32)
 shape = SubResource("CapsuleShape2D_fykve")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1874291168]
-position = Vector2(-1, 14)
-shape = SubResource("CircleShape2D_f4f4b")
+position = Vector2(0, 32)
+shape = SubResource("CapsuleShape2D_body")
 
 [connection signal="body_entered" from="EnemyTrigger" to="EnemyTrigger" method="_on_body_entered"]

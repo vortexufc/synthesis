@@ -1,15 +1,15 @@
 extends Node
 
 # se mudar pra false desliga o dev menu
-var DEV_MODE_ENABLED: bool = false
+var DEV_MODE_ENABLED: bool = true
 
 # opcoes do menu dev (iniciam desativados por seguranca)
-var god_mode_resposta_a: bool = false      # resposta A sempre correta
-var invencivel: bool = false               # jogador nao toma dano
-var super_velocidade: bool = false         # acelera o boneco
+var god_mode_resposta_a: bool = false # resposta A sempre correta
+var invencivel: bool = false # jogador nao toma dano
+var super_velocidade: bool = false # acelera o boneco
 var multiplicador_velocidade: float = 1.0
 var passar_portas_trancadas: bool = false # ignora chaves/selos nas salas
-var liberar_portas_hub: bool = false      # ignora bloqueio de andar no hub
+var liberar_portas_hub: bool = false # ignora bloqueio de andar no hub
 
 # referencias da ui
 var _canvas_layer: CanvasLayer = null
@@ -212,7 +212,7 @@ func _criar_interface_dev() -> void:
 	var chk_hub = CheckBox.new()
 	chk_hub.text = "🔓 Liberar Portas do Hub (Sem Bloqueio de Andar)"
 	chk_hub.button_pressed = liberar_portas_hub
-	chk_hub.toggled.connect(func(t): 
+	chk_hub.toggled.connect(func(t):
 		liberar_portas_hub = t
 		print("[DevManager] Liberar portas do Hub: ", t)
 	)

@@ -119,10 +119,9 @@ func _ready() -> void:
 	var eh_perf = ps and ps.has_method("is_modo_desempenho") and ps.is_modo_desempenho()
 	if eh_perf:
 		ativar_sombras_caixilhos = false
-		# Mantém feixes de luz solar volumétricos (God Rays) ativos mesmo no modo PC Fraco conforme diretriz visual
+		# Mantém feixes solares e sombras estáticas de móveis ativos no modo PC Fraco
 		ativar_reflexos_vidro = false
 		ativar_sombras_folhagens = false
-		ativar_sombras_moveis = false
 		ativar_sombras_inimigos = false
 		ativar_bioluminescencia = false
 		ativar_polen_solar = false
@@ -219,6 +218,7 @@ func _configurar_tier_dos_inimigos(tier: int) -> void:
 		if sprite_node and sprite_node is AnimatedSprite2D:
 			sprite_node.sprite_frames = sprite_frames
 			sprite_node.scale = sprite_scale
+			sprite_node.z_index = 4
 			if sprite_node.sprite_frames.has_animation("default"):
 				sprite_node.play("default")
 				
@@ -391,6 +391,42 @@ func _iniciar_sistema_inimigos_e_portas() -> void:
 					
 	monstros_na_sala = count
 	total_monstros_inicial = count
+
+	# Garante que todos os inimigos da sala renderizem na camada de entidades (z_index = 4)
+	# e possuam o formato de colisão vertical estilo Player (CapsuleShape2D)
+	for inimigo in get_tree().get_nodes_in_group("inimigos"):
+		if is_ancestor_of(inimigo) and is_instance_valid(inimigo) and not inimigo.is_queued_for_deletion():
+			var spr = inimigo.get_node_or_null("AnimatedSprite2D")
+			if spr and spr is CanvasItem and spr.z_index < 4:
+				spr.z_index = 4
+			if inimigo.has_method("_calibrar_colisao_inimigo"):
+				inimigo._calibrar_colisao_inimigo()
+			else:
+				var col = inimigo.get_node_or_null("CollisionShape2D")
+				if col and col is CollisionShape2D:
+					var nome_b = inimigo.name.to_lower()
+					var trig = inimigo.get_node_or_null("EnemyTrigger")
+					var eid = str(trig.get("id_inimigo")).to_lower() if trig else ""
+					var cap: CapsuleShape2D = col.shape as CapsuleShape2D
+					if not cap:
+						cap = CapsuleShape2D.new()
+						col.shape = cap
+					col.rotation = 0.0
+					if ("carnivora" in nome_b) or ("carnivora" in eid):
+						cap.radius = 42.0
+						cap.height = 110.0
+						col.position = Vector2(-16, 18)
+					elif ("flor" in nome_b) or ("flor" in eid):
+						cap.radius = 38.0
+						cap.height = 96.0
+						col.position = Vector2(0, 32)
+					elif ("cogumelo" in nome_b) or ("cogumelo" in eid):
+						cap.radius = 38.0
+						cap.height = 96.0
+						col.position = Vector2(0, 34)
+					else:
+						cap.radius = 19.0
+						cap.height = 66.0
 
 func _contar_monstros_restantes() -> int:
 	var count = 0
@@ -1260,7 +1296,7 @@ func _configurar_sombras_inimigos() -> void:
 		spr_e.name = "SombraPlanta"
 		spr_e.texture = tex_sombra
 		spr_e.centered = true
-		spr_e.z_index = -1 # No chão, atrás do sprite da planta
+		spr_e.z_index = 0 # No chão, atrás do sprite da planta (que fica no z_index = 4)
 		
 		if eh_boss:
 			# Chefe (Planta Carnívora Grande): sombra de raiz ampla na terra
@@ -1280,6 +1316,7 @@ func _configurar_sombras_inimigos() -> void:
 			spr_e.modulate = Color(1.0, 1.0, 1.0, intensidade_sombras_inimigos)
 			
 		inimigo.add_child(spr_e)
+		inimigo.move_child(spr_e, 0)
 
 # Item 5: Configura bioluminescência orgânica em flores raras, inimigos e cenário
 func _configurar_bioluminescencia() -> void:
