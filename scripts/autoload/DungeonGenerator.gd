@@ -160,9 +160,15 @@ var andar_vitoria_concluido: int = 1
 var inimigos_derrotados: Array = []
 # lista de portas destrancadas na run
 var portas_destrancadas: Array = []
+# lista de selos runicos resolvidos na run
+var selos_resolvidos: Array = []
 
 # salas que vão ter a mecânica da chave nesta run (2 por andar)
 var salas_com_chave: Array = []
+# salas que vão ter a mecânica do selo rúnico nesta run
+var salas_com_selo: Array = []
+# titulos de sequencias já resolvidas nesta run para evitar repetição
+var sequencias_resolvidas: Array = []
 
 # dicionario que mapeia caminho da sala -> tier desejado dos inimigos
 # tier 1 = azul, 2 = verde, 3 = vermelho/laranja
@@ -180,6 +186,10 @@ func _ready():
 		for p in ps.portas_destrancadas:
 			if not (p in portas_destrancadas):
 				portas_destrancadas.append(p)
+		if "selos_resolvidos" in ps and ps.selos_resolvidos != null:
+			for s in ps.selos_resolvidos:
+				if not (s in selos_resolvidos):
+					selos_resolvidos.append(s)
 		if ps.percurso_salas_salvo.size() > 0:
 			percurso_salas = ps.percurso_salas_salvo.duplicate()
 			indice_atual = ps.indice_sala_salvo
@@ -426,13 +436,58 @@ func registrar_porta_destrancada(key: String) -> void:
 			PlayerStats.portas_destrancadas.append(key)
 
 func is_porta_destrancada(key: String) -> bool:
-	if key in portas_destrancadas:
-		return true
-	if get_node_or_null("/root/PlayerStats") and (key in PlayerStats.portas_destrancadas):
-		if not (key in portas_destrancadas):
-			portas_destrancadas.append(key)
-		return true
+	var key_low = key.to_lower()
+	for p in portas_destrancadas:
+		if str(p).to_lower() == key_low:
+			return true
+	if get_node_or_null("/root/PlayerStats") and ("portas_destrancadas" in PlayerStats):
+		for p in PlayerStats.portas_destrancadas:
+			if str(p).to_lower() == key_low:
+				if not (key in portas_destrancadas):
+					portas_destrancadas.append(key)
+				return true
 	return false
+
+func registrar_selo_resolvido(key: String) -> void:
+	if not (key in selos_resolvidos):
+		selos_resolvidos.append(key)
+		print("[DungeonGenerator] Selo rúnico registrado como resolvido: ", key)
+	if get_node_or_null("/root/PlayerStats"):
+		if not (key in PlayerStats.selos_resolvidos):
+			PlayerStats.selos_resolvidos.append(key)
+
+func is_selo_resolvido(key: String) -> bool:
+	var key_low = key.to_lower()
+	for s in selos_resolvidos:
+		if str(s).to_lower() == key_low:
+			return true
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ("selos_resolvidos" in ps):
+		for s in ps.selos_resolvidos:
+			if str(s).to_lower() == key_low:
+				if not (key in selos_resolvidos):
+					selos_resolvidos.append(key)
+				return true
+	return false
+
+# retorna se a sala atual deve usar o minigame do selo rúnico
+func sala_usa_selo(arquivo_cena: String = "") -> bool:
+	var cena = arquivo_cena
+	if cena == "" and get_tree() and get_tree().current_scene:
+		cena = get_tree().current_scene.scene_file_path
+	if cena == "":
+		return false
+	var cena_lower = cena.to_lower()
+	var cena_file = cena_lower.get_file()
+	for s in salas_com_selo:
+		var s_lower = s.to_lower()
+		if s_lower == cena_lower or (cena_file != "" and s_lower.get_file() == cena_file):
+			return true
+	return false
+
+func registrar_sequencia_resolvida(titulo: String) -> void:
+	if not (titulo in sequencias_resolvidas):
+		sequencias_resolvidas.append(titulo)
 
 # retorna se a sala atual deve usar a mecânica de chave
 # chama essa funcao no _ready de cada sala para setar dropar_chave_no_ultimo_monstro
@@ -465,7 +520,10 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	percurso_salas.clear()
 	inimigos_derrotados.clear()
 	portas_destrancadas.clear()
+	selos_resolvidos.clear()
 	salas_com_chave.clear()
+	salas_com_selo.clear()
+	sequencias_resolvidas.clear()
 	tier_override.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
 	
@@ -529,6 +587,9 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		candidatas_chave.append_array(salas_intermediarias_escolhidas)
 		_sortear_salas_com_chave(candidatas_chave, 2)
 		
+		# Sorteia exatamente 2 salas para ter o selo rúnico (aleatórias nas intermediárias, nunca na primeira e nunca no boss)
+		_sortear_salas_com_selo(salas_intermediarias_escolhidas, 2)
+		
 		print("[DungeonGenerator] Masmorra de Física gerada com progressão dinâmica:")
 		print("  - Index 2..4 (3 salas): TIER 1 - Cianos (Fácil)")
 		print("  - Index 5..6 (2 salas): TIER 2 - Amarelos (Médio)")
@@ -536,6 +597,7 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		print("  - Index 9 (1 sala): BOSS - Robô Grande")
 		print("  - Percurso: ", percurso_salas)
 		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
+		print("  - Salas com Selo Rúnico (2 sorteadas): ", salas_com_selo)
 	elif active == "Química":
 		# andar de quimica com progressão ordenada e layout randômico:
 		# Index 0: Hub Geral (já adicionado)
@@ -578,6 +640,9 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		candidatas_chave.append_array(salas_intermediarias_escolhidas)
 		_sortear_salas_com_chave(candidatas_chave, 2)
 		
+		# Sorteia exatamente 2 salas para ter o selo rúnico (aleatórias nas intermediárias, nunca na primeira e nunca no boss)
+		_sortear_salas_com_selo(salas_intermediarias_escolhidas, 2)
+		
 		print("[DungeonGenerator] Masmorra de Química gerada com progressão dinâmica:")
 		print("  - Index 2..4 (3 salas): TIER 1 - Azuis")
 		print("  - Index 5..6 (2 salas): TIER 2 - Verdes")
@@ -585,6 +650,7 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		print("  - Index 9 (1 sala): BOSS - Roxo")
 		print("  - Percurso: ", percurso_salas)
 		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
+		print("  - Salas com Selo Rúnico (2 sorteadas): ", salas_com_selo)
 	elif active == "Biologia":
 		# andar de biologia com progressão ordenada e layout randômico:
 		# Index 0: Hub Geral (já adicionado)
@@ -627,6 +693,9 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		candidatas_bio.append_array(salas_bio_escolhidas)
 		_sortear_salas_com_chave(candidatas_bio, 2)
 		
+		# Sorteia exatamente 2 salas para ter o selo rúnico (aleatórias nas intermediárias, nunca na primeira e nunca no boss)
+		_sortear_salas_com_selo(salas_bio_escolhidas, 2)
+		
 		print("[DungeonGenerator] Masmorra de Biologia gerada com progressão dinâmica:")
 		print("  - Index 2..4 (3 salas): TIER 1 - Flor Amarela (Fácil)")
 		print("  - Index 5..6 (2 salas): TIER 2 - Flor Roxa (Médio)")
@@ -634,6 +703,7 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 		print("  - Index 9 (1 sala): BOSS - Planta Carnívora")
 		print("  - Percurso: ", percurso_salas)
 		print("  - Salas com Chave (2 sorteadas): ", salas_com_chave)
+		print("  - Salas com Selo Rúnico (2 sorteadas): ", salas_com_selo)
 	else:
 		print("[DungeonGenerator] Nenhuma expedição ativa (Aguardando escolha de porta no Hub).")
 
@@ -645,6 +715,19 @@ func _sortear_salas_com_chave(candidatas: Array, quantidade: int) -> void:
 	for i in range(qtd):
 		salas_com_chave.append(pool[i])
 	print("[DungeonGenerator] Salas sorteadas para mecânica de chave: ", salas_com_chave)
+
+# sorteia N salas de uma lista para terem a mecânica de selo rúnico
+# garante que não colide com salas que já possuem chave e que nenhuma sala seja duplicada
+func _sortear_salas_com_selo(candidatas: Array, quantidade: int) -> void:
+	var pool: Array = []
+	for c in candidatas:
+		if not (c in salas_com_chave) and not (c in salas_com_selo):
+			pool.append(c)
+	pool.shuffle()
+	var qtd = min(quantidade, pool.size())
+	for i in range(qtd):
+		salas_com_selo.append(pool[i])
+	print("[DungeonGenerator] Salas sorteadas para mecânica de selo rúnico (2 por andar): ", salas_com_selo)
 
 # retorna o tier desejado para a sala de química
 # 1 = azul, 2 = verde, 3 = vermelho/laranja, 0 = sem alteração (boss/corredor/outros)

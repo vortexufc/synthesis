@@ -420,6 +420,10 @@ func _executar_continuar() -> void:
 			for p in ps.portas_destrancadas:
 				if not (p in dg.portas_destrancadas):
 					dg.portas_destrancadas.append(p)
+			if "selos_resolvidos" in ps and "selos_resolvidos" in dg:
+				for s in ps.selos_resolvidos:
+					if not (s in dg.selos_resolvidos):
+						dg.selos_resolvidos.append(s)
 			
 		_mudar_cena(ps.cena_salva, false, true)
 		return

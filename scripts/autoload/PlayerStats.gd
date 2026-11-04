@@ -41,6 +41,7 @@ var pergaminhos_coletados: Dictionary = {}
 var itens_coletados: Dictionary = {}
 var spawners_sorteados: Dictionary = {}
 var portas_destrancadas: Array = []
+var selos_resolvidos: Array = []
 var inimigos_derrotados: Array = []
 
 # Localizacao do jogador e percurso para continuar jogo
@@ -133,6 +134,7 @@ func _inicializar_dados_padrao():
 	itens_coletados.clear()
 	spawners_sorteados.clear()
 	portas_destrancadas.clear()
+	selos_resolvidos.clear()
 	inimigos_derrotados.clear()
 	cena_salva = ""
 	pos_salva_x = 0.0
@@ -173,6 +175,10 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		for p in dg.portas_destrancadas:
 			if not (p in portas_destrancadas):
 				portas_destrancadas.append(p)
+		if "selos_resolvidos" in dg and dg.selos_resolvidos != null:
+			for s in dg.selos_resolvidos:
+				if not (s in selos_resolvidos):
+					selos_resolvidos.append(s)
 		for i in dg.inimigos_derrotados:
 			if not (i in inimigos_derrotados):
 				inimigos_derrotados.append(i)
@@ -197,6 +203,7 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		"itens_coletados": itens_coletados,
 		"spawners_sorteados": spawners_sorteados,
 		"portas_destrancadas": portas_destrancadas,
+		"selos_resolvidos": selos_resolvidos,
 		"inimigos_derrotados": inimigos_derrotados,
 		"cena_salva": cena_salva,
 		"pos_salva_x": pos_salva_x,
@@ -240,6 +247,7 @@ func carregar():
 			itens_coletados = data.get("itens_coletados", {})
 			spawners_sorteados = data.get("spawners_sorteados", {})
 			portas_destrancadas = data.get("portas_destrancadas", [])
+			selos_resolvidos = data.get("selos_resolvidos", [])
 			inimigos_derrotados = data.get("inimigos_derrotados", [])
 			cena_salva = data.get("cena_salva", "")
 			pos_salva_x = float(data.get("pos_salva_x", 0.0))
@@ -265,6 +273,10 @@ func carregar():
 					for p in portas_destrancadas:
 						if not (p in dg_load.portas_destrancadas):
 							dg_load.portas_destrancadas.append(p)
+				if "selos_resolvidos" in dg_load and dg_load.selos_resolvidos != null:
+					for s in selos_resolvidos:
+						if not (s in dg_load.selos_resolvidos):
+							dg_load.selos_resolvidos.append(s)
 				if "inimigos_derrotados" in dg_load and dg_load.inimigos_derrotados != null:
 					for i in inimigos_derrotados:
 						if not (i in dg_load.inimigos_derrotados):
@@ -338,10 +350,13 @@ func resetar_progresso_mundo() -> void:
 	itens_coletados.clear()
 	spawners_sorteados.clear()
 	portas_destrancadas.clear()
+	selos_resolvidos.clear()
 	inimigos_derrotados.clear()
 	var dg = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
 	if dg:
 		dg.portas_destrancadas.clear()
+		if "selos_resolvidos" in dg:
+			dg.selos_resolvidos.clear()
 		dg.inimigos_derrotados.clear()
 	salvar()
 	print("[PlayerStats] Progresso de salas e mundo resetado!")
@@ -358,9 +373,14 @@ func limpar_posicao_salva() -> void:
 	print("[PlayerStats] Posição salva do jogador foi limpa!")
 
 func resetar_salvamento_completo() -> void:
+	portas_destrancadas.clear()
+	selos_resolvidos.clear()
+	inimigos_derrotados.clear()
 	var dg = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
 	if dg:
 		dg.portas_destrancadas.clear()
+		if "selos_resolvidos" in dg:
+			dg.selos_resolvidos.clear()
 		dg.inimigos_derrotados.clear()
 		dg.percurso_salas.clear()
 		dg.indice_atual = 0

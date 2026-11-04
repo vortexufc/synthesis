@@ -100,6 +100,53 @@ const SEQUENCIAS = {
 			]
 		}
 	],
+	"biologia": [
+		{
+			"titulo": "Fotossíntese Vegetal",
+			"descricao": "Ordene as etapas da conversão de luz em energia química nas plantas:",
+			"passos": [
+				{"id": 1, "texto": "Absorção de fótons solares pela clorofila e captação de água e CO₂.", "icone": "☀️"},
+				{"id": 2, "texto": "Fase clara: quebra da água (fotólise) nos tilacoides liberando gás oxigênio (O₂).", "icone": "💧"},
+				{"id": 3, "texto": "Fase escura (Ciclo de Calvin): fixação de carbono no estroma gerando glicose.", "icone": "🌿"}
+			]
+		},
+		{
+			"titulo": "Síntese Proteica (Dogma Central)",
+			"descricao": "Ordene o fluxo da informação genética do núcleo à proteína celular:",
+			"passos": [
+				{"id": 1, "texto": "Transcrição do DNA no núcleo celular sintetizando o RNA mensageiro (mRNA).", "icone": "🧬"},
+				{"id": 2, "texto": "Migração do mRNA para o citoplasma acoplando-se aos ribossomos.", "icone": "🔬"},
+				{"id": 3, "texto": "Tradução dos códons pelo tRNA encadeando aminoácidos na proteína funcional.", "icone": "✨"}
+			]
+		},
+		{
+			"titulo": "Mitose Celular (Divisão Somática)",
+			"descricao": "Ordene as etapas fundamentais da multiplicação celular eucariótica:",
+			"passos": [
+				{"id": 1, "texto": "Prófase: condensação da cromatina e desintegração do envelope nuclear.", "icone": "🧪"},
+				{"id": 2, "texto": "Metáfase: alinhamento dos cromossomos duplicados na placa equatorial.", "icone": "📐"},
+				{"id": 3, "texto": "Anáfase e Telófase: separação das cromátides-irmãs e citocinese final.", "icone": "🌱"}
+			]
+		},
+		{
+			"titulo": "Fluxo de Energia na Cadeia Trófica",
+			"descricao": "Ordene a transferência de biomassa e energia através dos níveis tróficos:",
+			"passos": [
+				{"id": 1, "texto": "Produtores autotróficos fixam luz solar gerando biomassa orgânica primária.", "icone": "🌱"},
+				{"id": 2, "texto": "Consumidores primários e secundários transferem matéria e energia por nutrição.", "icone": "🐛"},
+				{"id": 3, "texto": "Decompositores reciclam matéria orgânica morta devolvendo minerais ao solo.", "icone": "🍄"}
+			]
+		},
+		{
+			"titulo": "Circulação Sanguínea Humana",
+			"descricao": "Ordene o trajeto do sangue pelo coração e a oxigenação nos pulmões:",
+			"passos": [
+				{"id": 1, "texto": "Sangue venoso pobre em oxigênio chega pelas veias cavas ao átrio direito.", "icone": "💙"},
+				{"id": 2, "texto": "Pequena circulação: ventrículo direito impulsiona o sangue aos alvéolos pulmonares.", "icone": "🫁"},
+				{"id": 3, "texto": "Grande circulação: sangue oxigenado volta ao átrio esquerdo e a aorta irriga o corpo.", "icone": "❤️"}
+			]
+		}
+	],
 	"geral": [
 		{
 			"titulo": "Ciclo da Fotossíntese",
@@ -176,7 +223,17 @@ func iniciar_minigame(tema: String = "auto") -> void:
 	_tema_atual = tema
 	
 	var lista = SEQUENCIAS[_tema_atual]
-	_sequencia_atual = lista[randi() % lista.size()]
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	var sequencias_vistas = dg.sequencias_resolvidas if (dg and "sequencias_resolvidas" in dg) else []
+	var disponiveis = []
+	for s in lista:
+		if not (s.get("titulo", "") in sequencias_vistas):
+			disponiveis.append(s)
+			
+	if disponiveis.size() > 0:
+		_sequencia_atual = disponiveis[randi() % disponiveis.size()]
+	else:
+		_sequencia_atual = lista[randi() % lista.size()]
 	
 	# embaralha os passos
 	var passos = _sequencia_atual["passos"].duplicate(true)
@@ -550,6 +607,10 @@ func _executar_vitoria() -> void:
 	
 	if get_node_or_null("/root/AudioManager"):
 		AudioManager.play_sfx("win")
+		
+	var dg = get_node_or_null("/root/DungeonGenerator")
+	if dg and dg.has_method("registrar_sequencia_resolvida") and _sequencia_atual.has("titulo"):
+		dg.registrar_sequencia_resolvida(_sequencia_atual["titulo"])
 		
 	# Dispara rajada de confetes coloridos comemorativos (Item 3)
 	var vp_size = get_viewport().get_visible_rect().size

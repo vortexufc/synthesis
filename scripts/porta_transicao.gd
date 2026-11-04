@@ -20,7 +20,7 @@ extends Area2D
 
 @export_category("Selo Rúnico")
 @export var tem_selo_runico: bool = false # minigame de ordenar sequencia
-@export_enum("auto", "quimica", "fisica", "geral") var selo_tema: String = "auto"
+@export_enum("auto", "quimica", "fisica", "biologia", "geral") var selo_tema: String = "auto"
 
 var _sprite_porta: Sprite2D = null
 var _aguardando_confirmacao: bool = false
@@ -56,11 +56,27 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	
-	var porta_key = _obter_porta_id()
 	var dg = get_node_or_null("/root/DungeonGenerator")
-	if dg and dg.is_porta_destrancada(porta_key):
-		_chave_usada = true
-		_porta_aberta = true
+	var cena_caminho = _obter_caminho_cena()
+	
+	# Verifica se esta porta deve ter selo rúnico sorteado pelo DungeonGenerator
+	if dg and dg.has_method("sala_usa_selo") and dg.sala_usa_selo(cena_caminho) and not porta_de_retorno:
+		tem_selo_runico = true
+		if selo_tema == "auto" or selo_tema == "":
+			var andar = _obter_andar_atual()
+			selo_tema = "quimica" if andar == 1 else ("fisica" if andar == 2 else ("biologia" if andar == 3 else "geral"))
+			
+	var porta_key = _obter_porta_id()
+	if dg:
+		if dg.has_method("is_selo_resolvido") and dg.is_selo_resolvido(porta_key):
+			_selo_resolvido = true
+			_selo_ativo = false
+			_porta_aberta = true
+			_tinha_inimigos_inicialmente = true
+		if dg.is_porta_destrancada(porta_key):
+			_chave_usada = true
+			_porta_aberta = true
+			_tinha_inimigos_inicialmente = true
 	
 	_sprite_porta = get_node_or_null("SpritePorta")
 	if _sprite_porta and _sprite_porta.region_enabled:
@@ -71,7 +87,7 @@ func _ready() -> void:
 		_sprite_porta.texture = textura_porta
 		if textura_porta.get_width() > 100:
 			_sprite_porta.hframes = int(float(textura_porta.get_width()) / 32.0)
-			_sprite_porta.frame = 0 # Porta fechada
+			_sprite_porta.frame = (_sprite_porta.hframes - 1) if _porta_aberta else 0
 		# Posiciona o sprite ajustando para o centro da colisão
 		_sprite_porta.position = Vector2(0, -16) 
 		_sprite_porta.scale = Vector2(3, 3) # As texturas do hub costumam ser ampliadas
@@ -81,8 +97,11 @@ func _ready() -> void:
 		_configurar_sprite_porta_automatico()
 	else:
 		_limpar_tiles_porta_no_wall()
-		if _porta_aberta and _sprite_porta.region_enabled and frames_animacao > 1 and stride_animacao > 0:
-			_sprite_porta.region_rect.position.x = _base_region_rect.position.x + ((frames_animacao - 1) * stride_animacao)
+		if _porta_aberta:
+			if _sprite_porta.region_enabled and frames_animacao > 1 and stride_animacao > 0:
+				_sprite_porta.region_rect.position.x = _base_region_rect.position.x + ((frames_animacao - 1) * stride_animacao)
+			elif _sprite_porta.hframes > 1:
+				_sprite_porta.frame = _sprite_porta.hframes - 1
 
 	# Se a sala já possui monstros vivos no início, marca imediatamente como combate
 	if _tem_inimigos_vivos():
@@ -126,11 +145,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.keycode == KEY_F or event.physical_keycode == KEY_F or event.key_label == KEY_F:
 			pressionou_f = true
 	if pressionou_f or event.is_action_pressed("interagir"):
+		var dev_mgr = get_node_or_null("/root/DevManager")
+		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
+		
 		if _sala_requer_chave() and not _chave_usada:
 			get_viewport().set_input_as_handled()
 			_tentar_abrir_com_chave_f()
 		elif tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
 			get_viewport().set_input_as_handled()
+			if _tem_inimigos_vivos() and not ignorar_bloqueio:
+				_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
+				return
 			_abrir_minigame_selo_runico()
 
 func _process(delta: float) -> void:
@@ -209,8 +234,20 @@ func _sala_requer_chave() -> bool:
 		
 	return false
 
+func _obter_caminho_cena() -> String:
+	if owner and owner.scene_file_path != "":
+		return owner.scene_file_path
+	if get_tree() and get_tree().current_scene and get_tree().current_scene.scene_file_path != "":
+		return get_tree().current_scene.scene_file_path
+	var root_node: Node = self
+	while root_node.get_parent() and root_node.get_parent() != get_tree().root:
+		root_node = root_node.get_parent()
+	if root_node and root_node.scene_file_path != "":
+		return root_node.scene_file_path
+	return ""
+
 func _obter_porta_id() -> String:
-	var cena_path = get_tree().current_scene.scene_file_path if (get_tree() and get_tree().current_scene) else ""
+	var cena_path = _obter_caminho_cena()
 	return cena_path + "::" + name
 
 # mostra o prompt na tela igual a porta trancada
@@ -449,7 +486,7 @@ func _abrir_minigame_selo_runico() -> void:
 	var tema = selo_tema
 	if tema == "auto" or tema == "":
 		var andar = _obter_andar_atual()
-		tema = "quimica" if andar == 1 else ("fisica" if andar == 2 else "geral")
+		tema = "quimica" if andar == 1 else ("fisica" if andar == 2 else ("biologia" if andar == 3 else "geral"))
 		
 	minigame.iniciar_minigame(tema)
 
@@ -458,18 +495,31 @@ func _on_selo_sequencia_concluido(sucesso: bool) -> void:
 	if sucesso:
 		_selo_ativo = false
 		_selo_resolvido = true
+		_tinha_inimigos_inicialmente = true
 		_remover_indicador_selo()
+		
+		var porta_key = _obter_porta_id()
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg:
+			if dg.has_method("registrar_selo_resolvido"):
+				dg.registrar_selo_resolvido(porta_key)
+			if not _sala_requer_chave():
+				dg.registrar_porta_destrancada(porta_key)
+		var ps = get_node_or_null("/root/PlayerStats")
+		if ps and ps.has_method("salvar"):
+			ps.salvar()
+			
 		_mostrar_feedback_hub("✦ Selo Rúnico Rompido! O portão se abriu! ✦", Color(1.0, 0.85, 0.25, 0.95))
 		
 		# se apos romper o selo ainda requerer chave
 		if _sala_requer_chave() and not _chave_usada:
-			if _player_no_alcance:
+			if _player_esta_na_porta():
 				_exibir_prompt_tranca()
 			return
 			
 		_porta_aberta = true
 		await _abrir_porta_animacao()
-		if _player_no_alcance:
+		if _player_esta_na_porta():
 			_transacionar_porta()
 
 func _tem_inimigos_vivos() -> bool:
