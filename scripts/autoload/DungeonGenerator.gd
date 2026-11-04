@@ -162,6 +162,8 @@ var inimigos_derrotados: Array = []
 var portas_destrancadas: Array = []
 # lista de selos runicos resolvidos na run
 var selos_resolvidos: Array = []
+# lista de salas concluidas (sem monstros vivos restantes ou já limpas)
+var salas_concluidas: Array = []
 
 # salas que vão ter a mecânica da chave nesta run (2 por andar)
 var salas_com_chave: Array = []
@@ -190,6 +192,10 @@ func _ready():
 			for s in ps.selos_resolvidos:
 				if not (s in selos_resolvidos):
 					selos_resolvidos.append(s)
+		if "salas_concluidas" in ps and ps.salas_concluidas != null:
+			for sc in ps.salas_concluidas:
+				if not (sc in salas_concluidas):
+					salas_concluidas.append(sc)
 		if ps.percurso_salas_salvo.size() > 0:
 			percurso_salas = ps.percurso_salas_salvo.duplicate()
 			indice_atual = ps.indice_sala_salvo
@@ -431,9 +437,11 @@ func registrar_porta_destrancada(key: String) -> void:
 	if not (key in portas_destrancadas):
 		portas_destrancadas.append(key)
 		print("[DungeonGenerator] Porta registrada como destrancada: ", key)
-	if get_node_or_null("/root/PlayerStats"):
-		if not (key in PlayerStats.portas_destrancadas):
-			PlayerStats.portas_destrancadas.append(key)
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		if not (key in ps.portas_destrancadas):
+			ps.portas_destrancadas.append(key)
+		ps.salvar()
 
 func is_porta_destrancada(key: String) -> bool:
 	var key_low = key.to_lower()
@@ -445,6 +453,40 @@ func is_porta_destrancada(key: String) -> bool:
 			if str(p).to_lower() == key_low:
 				if not (key in portas_destrancadas):
 					portas_destrancadas.append(key)
+				return true
+	return false
+
+func registrar_sala_concluida(caminho_cena: String) -> void:
+	if caminho_cena == "":
+		return
+	var c_low = caminho_cena.to_lower()
+	if not (c_low in salas_concluidas):
+		salas_concluidas.append(c_low)
+		print("[DungeonGenerator] Sala registrada como concluída: ", c_low)
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and "salas_concluidas" in ps:
+		if not (c_low in ps.salas_concluidas):
+			ps.salas_concluidas.append(c_low)
+		ps.salvar()
+	# Também registra a porta de transição desta sala como destrancada
+	registrar_porta_destrancada(caminho_cena + "::PortaTransicao")
+
+func is_sala_concluida(caminho_cena: String) -> bool:
+	if caminho_cena == "":
+		return false
+	var key_low = caminho_cena.to_lower()
+	var file_low = key_low.get_file()
+	for s in salas_concluidas:
+		var s_low = str(s).to_lower()
+		if s_low == key_low or (file_low != "" and s_low.get_file() == file_low):
+			return true
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps and ("salas_concluidas" in ps):
+		for s in ps.salas_concluidas:
+			var s_low = str(s).to_lower()
+			if s_low == key_low or (file_low != "" and s_low.get_file() == file_low):
+				if not (key_low in salas_concluidas):
+					salas_concluidas.append(key_low)
 				return true
 	return false
 
@@ -497,6 +539,9 @@ func sala_usa_chave(arquivo_cena: String = "") -> bool:
 		cena = get_tree().current_scene.scene_file_path
 	if cena == "":
 		return false
+	# Se a sala já foi concluída, nunca deve usar chave!
+	if is_sala_concluida(cena):
+		return false
 	var cena_lower = cena.to_lower()
 	var cena_file = cena_lower.get_file()
 	# busca exata no array de salas com chave
@@ -521,11 +566,30 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 	inimigos_derrotados.clear()
 	portas_destrancadas.clear()
 	selos_resolvidos.clear()
+	salas_concluidas.clear()
 	salas_com_chave.clear()
 	salas_com_selo.clear()
 	sequencias_resolvidas.clear()
 	tier_override.clear()
 	indice_atual = 0 # Reinicia o ponteiro do progresso
+	
+	# Restaura dados persistidos do PlayerStats para manter o progresso já conquistado
+	var ps = get_node_or_null("/root/PlayerStats")
+	if ps:
+		for i in ps.inimigos_derrotados:
+			if not (i in inimigos_derrotados):
+				inimigos_derrotados.append(i)
+		for p in ps.portas_destrancadas:
+			if not (p in portas_destrancadas):
+				portas_destrancadas.append(p)
+		if "selos_resolvidos" in ps and ps.selos_resolvidos != null:
+			for s in ps.selos_resolvidos:
+				if not (s in selos_resolvidos):
+					selos_resolvidos.append(s)
+		if "salas_concluidas" in ps and ps.salas_concluidas != null:
+			for sc in ps.salas_concluidas:
+				if not (sc in salas_concluidas):
+					salas_concluidas.append(sc)
 	
 	var active = ""
 	if forcar_dungeon != "":
@@ -709,7 +773,13 @@ func resetar_masmorra(forcar_dungeon: String = "") -> void:
 
 # sorteia N salas de uma lista para terem a mecânica de chave
 func _sortear_salas_com_chave(candidatas: Array, quantidade: int) -> void:
-	var pool = candidatas.duplicate()
+	var pool: Array = []
+	for c in candidatas:
+		if not is_sala_concluida(c):
+			pool.append(c)
+	if pool.is_empty():
+		print("[DungeonGenerator] Todas as salas candidatas já foram concluídas. Nenhuma chave necessária.")
+		return
 	pool.shuffle()
 	var qtd = min(quantidade, pool.size())
 	for i in range(qtd):
@@ -721,8 +791,11 @@ func _sortear_salas_com_chave(candidatas: Array, quantidade: int) -> void:
 func _sortear_salas_com_selo(candidatas: Array, quantidade: int) -> void:
 	var pool: Array = []
 	for c in candidatas:
-		if not (c in salas_com_chave) and not (c in salas_com_selo):
+		if not (c in salas_com_chave) and not (c in salas_com_selo) and not is_sala_concluida(c):
 			pool.append(c)
+	if pool.is_empty():
+		print("[DungeonGenerator] Nenhuma sala não-concluída disponível para selo rúnico.")
+		return
 	pool.shuffle()
 	var qtd = min(quantidade, pool.size())
 	for i in range(qtd):

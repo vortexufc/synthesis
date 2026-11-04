@@ -1,6 +1,7 @@
 extends Control
 
 const INSTAGRAM_URL: String = "https://www.instagram.com/vortexufc/"
+const PLAYTEST_URL: String = "https://docs.google.com/forms/d/e/1FAIpQLSdfr7dq5ekSpAahJE4dfNzXsGOlB-4ei675db4kAKOPaOml1w/viewform?usp=sharing&ouid=106105521230490048252"
 
 @onready var btn_jogar = $MarginContainer/VBoxButtons/BtnJogar
 @onready var btn_ranking = $MarginContainer/VBoxButtons/BtnRanking
@@ -13,6 +14,8 @@ const INSTAGRAM_URL: String = "https://www.instagram.com/vortexufc/"
 @onready var vbox_buttons = find_child("VBoxButtons", true, false) as VBoxContainer
 @onready var leaderboard_panel_node = find_child("LeaderboardPanel", true, false) as PanelContainer
 @onready var btn_instagram_node = find_child("BtnInstagram", true, false) as Button
+@onready var playtest_card_node = find_child("PlaytestCard", true, false) as PanelContainer
+@onready var btn_playtest_node = find_child("BtnPlaytest", true, false) as Button
 
 # referencias dos nos da tela
 var _lbl_nome: Label = null
@@ -55,6 +58,7 @@ func _ready() -> void:
 	if btn_creditos:
 		btn_creditos.pressed.connect(_on_btn_creditos_pressed)
 	_configurar_card_instagram()
+	_configurar_card_playtest()
 	var db = get_node_or_null("/root/DatabaseManager")
 	if db and db.has_method("sincronizar_telemetria_pendente_async"):
 		db.sincronizar_telemetria_pendente_async()
@@ -424,6 +428,10 @@ func _executar_continuar() -> void:
 				for s in ps.selos_resolvidos:
 					if not (s in dg.selos_resolvidos):
 						dg.selos_resolvidos.append(s)
+			if "salas_concluidas" in ps and "salas_concluidas" in dg:
+				for sc in ps.salas_concluidas:
+					if not (sc in dg.salas_concluidas):
+						dg.salas_concluidas.append(sc)
 			
 		_mudar_cena(ps.cena_salva, false, true)
 		return
@@ -644,6 +652,42 @@ func _abrir_modal_instagram() -> void:
 	if modal_cena:
 		var modal = modal_cena.instantiate()
 		add_child(modal)
+
+func _configurar_card_playtest() -> void:
+	if btn_playtest_node:
+		btn_playtest_node.pressed.connect(_abrir_formulario_playtest)
+		btn_playtest_node.mouse_entered.connect(func():
+			_tocar_sfx("ui-1")
+			var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tw.tween_property(btn_playtest_node, "scale", Vector2(1.04, 1.04), 0.15)
+		)
+		btn_playtest_node.mouse_exited.connect(func():
+			var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			tw.tween_property(btn_playtest_node, "scale", Vector2.ONE, 0.15)
+		)
+		btn_playtest_node.pivot_offset = Vector2(85, 16)
+	
+	if playtest_card_node:
+		var qr_tex = playtest_card_node.find_child("TextureQR", true, false) as Control
+		if qr_tex:
+			qr_tex.pivot_offset = Vector2(52, 52)
+			qr_tex.gui_input.connect(func(event: InputEvent):
+				if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+					_abrir_formulario_playtest()
+			)
+			qr_tex.mouse_entered.connect(func():
+				_tocar_sfx("ui-1")
+				var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				tw.tween_property(qr_tex, "scale", Vector2(1.06, 1.06), 0.15)
+			)
+			qr_tex.mouse_exited.connect(func():
+				var tw = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+				tw.tween_property(qr_tex, "scale", Vector2.ONE, 0.15)
+			)
+
+func _abrir_formulario_playtest() -> void:
+	_tocar_sfx("ui_5")
+	OS.shell_open(PLAYTEST_URL)
 
 # leaderboard com filtro de periodo
 var _periodo_atual: String = "quimica"
@@ -949,6 +993,15 @@ func _animar_entrada_menu() -> void:
 		var tw_insta = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		tw_insta.tween_property(btn_instagram_node, "modulate:a", 1.0, 0.40).set_delay(0.08)
 		tw_insta.tween_property(btn_instagram_node, "position:x", base_x_insta, 0.40).set_delay(0.08)
+
+	# animacao de entrada do card do playtest
+	if playtest_card_node:
+		var base_x_pt = playtest_card_node.position.x
+		playtest_card_node.modulate.a = 0.0
+		playtest_card_node.position.x = base_x_pt + 25.0
+		var tw_pt = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tw_pt.tween_property(playtest_card_node, "modulate:a", 1.0, 0.45).set_delay(0.12)
+		tw_pt.tween_property(playtest_card_node, "position:x", base_x_pt, 0.45).set_delay(0.12)
 
 func _criar_textura_particula() -> Texture2D:
 	var grad_tex = GradientTexture2D.new()

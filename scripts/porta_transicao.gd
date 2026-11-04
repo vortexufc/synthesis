@@ -73,10 +73,11 @@ func _ready() -> void:
 			_selo_ativo = false
 			_porta_aberta = true
 			_tinha_inimigos_inicialmente = true
-		if dg.is_porta_destrancada(porta_key):
+		if dg.is_porta_destrancada(porta_key) or (dg.has_method("is_sala_concluida") and dg.is_sala_concluida(cena_caminho)):
 			_chave_usada = true
 			_porta_aberta = true
 			_tinha_inimigos_inicialmente = true
+			esta_trancada = false
 	
 	_sprite_porta = get_node_or_null("SpritePorta")
 	if _sprite_porta and _sprite_porta.region_enabled:
@@ -215,21 +216,30 @@ func _sala_requer_chave() -> bool:
 	if _chave_usada:
 		return false
 	var dg = get_node_or_null("/root/DungeonGenerator")
-	if dg and dg.is_porta_destrancada(_obter_porta_id()):
-		return false
+	var cena_path = _obter_caminho_cena()
+	if dg:
+		if dg.is_porta_destrancada(_obter_porta_id()):
+			return false
+		if dg.has_method("is_sala_concluida") and dg.is_sala_concluida(cena_path):
+			return false
 	if precisa_de_chave:
 		return true
 		
 	var cena = get_tree().current_scene
-	if cena and cena.get("dropar_chave_no_ultimo_monstro") == true:
-		return true
-		
 	var pai = get_parent()
-	if pai and pai.get("dropar_chave_no_ultimo_monstro") == true:
-		return true
-		
 	var dono = owner
-	if dono and dono.get("dropar_chave_no_ultimo_monstro") == true:
+	var quer_chave = false
+	if cena and cena.get("dropar_chave_no_ultimo_monstro") == true:
+		quer_chave = true
+	elif pai and pai.get("dropar_chave_no_ultimo_monstro") == true:
+		quer_chave = true
+	elif dono and dono.get("dropar_chave_no_ultimo_monstro") == true:
+		quer_chave = true
+		
+	if quer_chave:
+		# Se a sala já não possui monstros vivos, a chave de drop não pode bloquear a porta!
+		if not _tem_inimigos_vivos():
+			return false
 		return true
 		
 	return false
@@ -344,6 +354,8 @@ func _tentar_abrir_com_chave_f() -> void:
 	var dg = get_node_or_null("/root/DungeonGenerator")
 	if dg:
 		dg.registrar_porta_destrancada(_obter_porta_id())
+		if dg.has_method("registrar_sala_concluida"):
+			dg.registrar_sala_concluida(_obter_caminho_cena())
 		
 	_remover_prompt_tranca()
 	

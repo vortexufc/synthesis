@@ -7,6 +7,7 @@
 [ext_resource type="FontFile" uid="uid://cmf1h1hrvl201" path="res://assets/fonts/PixelifySans-VariableFont_wght.ttf" id="4_x2yvf"]
 [ext_resource type="Texture2D" path="res://assets/branding/instagram_icon.png" id="5_insta"]
 [ext_resource type="Texture2D" path="res://assets/branding/qrcode_instagram.png" id="6_qr"]
+[ext_resource type="Texture2D" path="res://assets/branding/qrcode_playtest.png" id="7_qr_playtest"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
 content_margin_left = 16.0
@@ -155,6 +156,77 @@ corner_radius_bottom_right = 17
 corner_radius_bottom_left = 17
 shadow_color = Color(0.88, 0.35, 0.65, 0.35)
 shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PanelPlaytest"]
+bg_color = Color(0.04, 0.07, 0.15, 0.78)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.65, 0.95, 0.75)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_QRFramePlaytest"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnPlaytest"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.1, 0.35, 0.65, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.85, 1, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnPlaytest_Hover"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.18, 0.5, 0.85, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.65, 0.95, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.2, 0.7, 1, 0.35)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BtnPlaytest_Pressed"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.25, 0.5, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.25, 0.7, 0.9, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 
 [node name="MainMenu" type="Control" unique_id=1947850292]
@@ -490,15 +562,15 @@ theme_override_font_sizes/font_size = 11
 text = "PONTOS: 0"
 
 [node name="BtnInstagram" type="Button" parent="." unique_id=314159265]
-custom_minimum_size = Vector2(145, 34)
+custom_minimum_size = Vector2(170, 34)
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -170.0
-offset_top = 20.0
+offset_left = -195.0
+offset_top = 18.0
 offset_right = -25.0
-offset_bottom = 54.0
+offset_bottom = 52.0
 grow_horizontal = 0
 mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_BtnInstaPill")
@@ -531,6 +603,84 @@ theme_override_fonts/font = ExtResource("4_x2yvf")
 theme_override_font_sizes/font_size = 15
 text = "@vortexufc"
 vertical_alignment = 1
+
+[node name="PlaytestCard" type="PanelContainer" parent="." unique_id=749182301]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -195.0
+offset_top = 58.0
+offset_right = -25.0
+offset_bottom = 276.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_PanelPlaytest")
+
+[node name="Margin" type="MarginContainer" parent="PlaytestCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="PlaytestCard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="LabelTitle" type="Label" parent="PlaytestCard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.85, 1, 1)
+theme_override_fonts/font = ExtResource("4_x2yvf")
+theme_override_font_sizes/font_size = 15
+text = "PLAYTEST"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LabelSub" type="Label" parent="PlaytestCard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.9, 0.98, 0.85)
+theme_override_fonts/font = ExtResource("4_x2yvf")
+theme_override_font_sizes/font_size = 12
+text = "Avalie o jogo!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="QRFrame" type="PanelContainer" parent="PlaytestCard/Margin/VBox"]
+custom_minimum_size = Vector2(110, 110)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_QRFramePlaytest")
+
+[node name="Margin" type="MarginContainer" parent="PlaytestCard/Margin/VBox/QRFrame"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="TextureQR" type="TextureRect" parent="PlaytestCard/Margin/VBox/QRFrame/Margin"]
+custom_minimum_size = Vector2(102, 102)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture = ExtResource("7_qr_playtest")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BtnPlaytest" type="Button" parent="PlaytestCard/Margin/VBox"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(0.75, 0.95, 1, 1)
+theme_override_fonts/font = ExtResource("4_x2yvf")
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_BtnPlaytest")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_BtnPlaytest_Pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BtnPlaytest_Hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_BtnPlaytest_Hover")
+text = "ABRIR FORMULÁRIO"
 
 [node name="VersionLabel" type="Label" parent="." unique_id=1556552453]
 layout_mode = 1

@@ -43,6 +43,7 @@ var spawners_sorteados: Dictionary = {}
 var portas_destrancadas: Array = []
 var selos_resolvidos: Array = []
 var inimigos_derrotados: Array = []
+var salas_concluidas: Array = []
 
 # Localizacao do jogador e percurso para continuar jogo
 var cena_salva: String = ""
@@ -136,6 +137,7 @@ func _inicializar_dados_padrao():
 	portas_destrancadas.clear()
 	selos_resolvidos.clear()
 	inimigos_derrotados.clear()
+	salas_concluidas.clear()
 	cena_salva = ""
 	pos_salva_x = 0.0
 	pos_salva_y = 0.0
@@ -182,6 +184,10 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		for i in dg.inimigos_derrotados:
 			if not (i in inimigos_derrotados):
 				inimigos_derrotados.append(i)
+		if "salas_concluidas" in dg and dg.salas_concluidas != null:
+			for sc in dg.salas_concluidas:
+				if not (sc in salas_concluidas):
+					salas_concluidas.append(sc)
 		if dg.percurso_salas.size() > 0:
 			percurso_salas_salvo = dg.percurso_salas.duplicate()
 			indice_sala_salvo = dg.indice_atual
@@ -205,6 +211,7 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		"portas_destrancadas": portas_destrancadas,
 		"selos_resolvidos": selos_resolvidos,
 		"inimigos_derrotados": inimigos_derrotados,
+		"salas_concluidas": salas_concluidas,
 		"cena_salva": cena_salva,
 		"pos_salva_x": pos_salva_x,
 		"pos_salva_y": pos_salva_y,
@@ -249,6 +256,7 @@ func carregar():
 			portas_destrancadas = data.get("portas_destrancadas", [])
 			selos_resolvidos = data.get("selos_resolvidos", [])
 			inimigos_derrotados = data.get("inimigos_derrotados", [])
+			salas_concluidas = data.get("salas_concluidas", [])
 			cena_salva = data.get("cena_salva", "")
 			pos_salva_x = float(data.get("pos_salva_x", 0.0))
 			pos_salva_y = float(data.get("pos_salva_y", 0.0))
@@ -281,6 +289,10 @@ func carregar():
 					for i in inimigos_derrotados:
 						if not (i in dg_load.inimigos_derrotados):
 							dg_load.inimigos_derrotados.append(i)
+				if "salas_concluidas" in dg_load and dg_load.salas_concluidas != null:
+					for sc in salas_concluidas:
+						if not (sc in dg_load.salas_concluidas):
+							dg_load.salas_concluidas.append(sc)
 			
 			_normalizar_itens()
 			vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
@@ -352,12 +364,15 @@ func resetar_progresso_mundo() -> void:
 	portas_destrancadas.clear()
 	selos_resolvidos.clear()
 	inimigos_derrotados.clear()
+	salas_concluidas.clear()
 	var dg = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
 	if dg:
 		dg.portas_destrancadas.clear()
 		if "selos_resolvidos" in dg:
 			dg.selos_resolvidos.clear()
 		dg.inimigos_derrotados.clear()
+		if "salas_concluidas" in dg:
+			dg.salas_concluidas.clear()
 	salvar()
 	print("[PlayerStats] Progresso de salas e mundo resetado!")
 
@@ -376,12 +391,15 @@ func resetar_salvamento_completo() -> void:
 	portas_destrancadas.clear()
 	selos_resolvidos.clear()
 	inimigos_derrotados.clear()
+	salas_concluidas.clear()
 	var dg = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
 	if dg:
 		dg.portas_destrancadas.clear()
 		if "selos_resolvidos" in dg:
 			dg.selos_resolvidos.clear()
 		dg.inimigos_derrotados.clear()
+		if "salas_concluidas" in dg:
+			dg.salas_concluidas.clear()
 		dg.percurso_salas.clear()
 		dg.indice_atual = 0
 		dg.tocar_cutscene_inicial = true

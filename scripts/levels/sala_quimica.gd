@@ -598,6 +598,11 @@ func _iniciar_sistema_inimigos_e_portas() -> void:
 					
 	monstros_na_sala = count
 	total_monstros_inicial = count
+	if count == 0:
+		dropar_chave_no_ultimo_monstro = false
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg and dg.has_method("registrar_sala_concluida"):
+			dg.registrar_sala_concluida(scene_file_path)
 
 func _contar_monstros_restantes() -> int:
 	var count = 0
@@ -613,6 +618,10 @@ func _on_inimigo_derrotado(pos: Vector2) -> void:
 	if not _chave_dropada and (monstros_na_sala <= 0 or vivos_restantes <= 1) and _deve_dropar_chave():
 		_chave_dropada = true
 		_dropar_chave(pos)
+	if monstros_na_sala <= 0 or vivos_restantes <= 0:
+		var dg = get_node_or_null("/root/DungeonGenerator")
+		if dg and dg.has_method("registrar_sala_concluida"):
+			dg.registrar_sala_concluida(scene_file_path)
 
 func _deve_dropar_chave() -> bool:
 	if dropar_chave_no_ultimo_monstro:
