@@ -7,6 +7,7 @@ var supabase_key: String = ProjectSettings.get_setting("application/config/supab
 
 # dados do jogador logado
 var user_token: String = ""
+var user_refresh_token: String = ""
 var user_nick: String = ""
 var user_cla: String = "Nenhum"
 var user_id: String = ""
@@ -24,6 +25,7 @@ signal perguntas_recebidas(perguntas: Array)
 # sinais para a tela de login e cadastro
 signal auth_sucesso(token: String)
 signal auth_erro(mensagem: String)
+signal sessao_encerrada()
 signal reset_senha_enviado()
 signal nick_alterado(novo_nick: String)
 signal telemetria_sincronizada(total_itens: int)
@@ -747,6 +749,7 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 			
 			# Salvando os dados locais do player na memoria
 			user_token = dados.access_token
+			user_refresh_token = str(dados.get("refresh_token", user_refresh_token))
 			
 			if dados.has("user") and dados.user is Dictionary:
 				var u = dados.user
@@ -838,6 +841,7 @@ func _salvar_sessao_web() -> void:
 		return
 	var dados_sessao = JSON.stringify({
 		"token": user_token,
+		"refresh_token": user_refresh_token,
 		"nick": user_nick,
 		"cla": user_cla,
 		"user_id": user_id,
@@ -866,6 +870,7 @@ func _restaurar_sessao_web() -> void:
 		_limpar_sessao_web()
 		return
 	user_token = str(d.get("token", ""))
+	user_refresh_token = str(d.get("refresh_token", ""))
 	user_nick  = str(d.get("nick",  "Mago Desconhecido"))
 	user_cla   = str(d.get("cla",   "Nenhum"))
 	user_id    = str(d.get("user_id", ""))
@@ -873,6 +878,30 @@ func _restaurar_sessao_web() -> void:
 	print("[DatabaseManager] Sessão restaurada do localStorage para: ", user_nick)
 	# Verifica silenciosamente se o token ainda é válido no Supabase
 	_verificar_token_restaurado()
+
+func renovar_sessao_async() -> bool:
+	if user_refresh_token.is_empty():
+		return false
+	print("[DatabaseManager] Solicitando novo access_token com refresh_token...")
+	var res = await request_async("/auth/v1/token?grant_type=refresh_token", HTTPClient.METHOD_POST, {
+		"refresh_token": user_refresh_token
+	})
+	if res.get("success", false) and res.get("data") is Dictionary:
+		var dados = res["data"]
+		if dados.has("access_token"):
+			user_token = dados["access_token"]
+			user_refresh_token = str(dados.get("refresh_token", user_refresh_token))
+			if dados.has("user") and dados["user"] is Dictionary:
+				var u = dados["user"]
+				user_id = str(u.get("id", user_id))
+				if u.has("user_metadata") and u["user_metadata"] is Dictionary:
+					user_nick = u["user_metadata"].get("nick", user_nick)
+					user_cla  = u["user_metadata"].get("cla",  user_cla)
+			_salvar_sessao_web()
+			print("[DatabaseManager] Sessão renovada com sucesso! Nick: ", user_nick)
+			return true
+	print("[DatabaseManager] Falha ao renovar sessão com refresh_token.")
+	return false
 
 func _verificar_token_restaurado() -> void:
 	var res = await request_async("/auth/v1/user", HTTPClient.METHOD_GET)
@@ -889,8 +918,15 @@ func _verificar_token_restaurado() -> void:
 		print("[DatabaseManager] Token restaurado validado com sucesso.")
 		auth_sucesso.emit(user_token)
 	else:
-		# Token expirado ou inválido — limpa a sessão
-		print("[DatabaseManager] Token restaurado expirado. Fazendo logout.")
+		# Se o access_token expirou, tenta renovar silenciosamente usando o refresh_token
+		if not user_refresh_token.is_empty():
+			print("[DatabaseManager] Token expirado. Tentando renovar com refresh_token...")
+			var renovou = await renovar_sessao_async()
+			if renovou:
+				auth_sucesso.emit(user_token)
+				return
+		# Se não foi possível renovar, encerra a sessão
+		print("[DatabaseManager] Token restaurado expirado sem renovação possível. Fazendo logout.")
 		logout()
 
 func _limpar_sessao_web() -> void:
@@ -902,11 +938,13 @@ func _limpar_sessao_web() -> void:
 
 func logout() -> void:
 	user_token = ""
+	user_refresh_token = ""
 	user_nick  = ""
 	user_cla   = "Nenhum"
 	user_id    = ""
 	is_admin   = false
 	_limpar_sessao_web()
+	sessao_encerrada.emit()
 	print("[DatabaseManager] Logout realizado. Sessão encerrada.")
 
 # funcoes de login e cadastro
