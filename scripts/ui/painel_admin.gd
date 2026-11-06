@@ -1299,8 +1299,13 @@ func _criar_barra_sessao_escola(parent: Control) -> void:
 	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
 		_recarregar_opcoes_sessoes_async()
 	)
-	DatabaseManager.sessao_escola_removida.connect(func(_id):
-		_recarregar_opcoes_sessoes_async()
+	DatabaseManager.sessao_escola_removida.connect(func(id_removido):
+		if _obter_sessao_selecionada_id() == id_removido:
+			if opt_sessao_escola:
+				opt_sessao_escola.selected = 0
+		_recarregar_opcoes_sessoes()
+		await _recarregar_opcoes_sessoes_async()
+		_carregar_dados()
 	)
 	hbox.add_child(opt_sessao_escola)
 	
@@ -1329,6 +1334,7 @@ func _criar_barra_sessao_escola(parent: Control) -> void:
 
 func _recarregar_opcoes_sessoes() -> void:
 	if not opt_sessao_escola: return
+	var id_anterior = _obter_sessao_selecionada_id()
 	opt_sessao_escola.clear()
 	sessoes_carregadas = DatabaseManager.carregar_sessoes_escolas()
 	var selected_idx = 0
@@ -1339,14 +1345,18 @@ func _recarregar_opcoes_sessoes() -> void:
 		var display_text = nome_s
 		if id_s == DatabaseManager.escola_ativa_id:
 			display_text += " [ATIVA]"
-			selected_idx = i
 		opt_sessao_escola.add_item(display_text, i)
+		if id_s == id_anterior:
+			selected_idx = i
+		elif selected_idx == 0 and id_s == DatabaseManager.escola_ativa_id:
+			selected_idx = i
 	opt_sessao_escola.selected = selected_idx
 	_atualizar_label_sessao_status()
 	_atualizar_botoes_sessao()
 
 func _recarregar_opcoes_sessoes_async() -> void:
 	if not opt_sessao_escola: return
+	var id_anterior = _obter_sessao_selecionada_id()
 	sessoes_carregadas = await DatabaseManager.carregar_sessoes_escolas_async()
 	opt_sessao_escola.clear()
 	var selected_idx = 0
@@ -1357,8 +1367,11 @@ func _recarregar_opcoes_sessoes_async() -> void:
 		var display_text = nome_s
 		if id_s == DatabaseManager.escola_ativa_id:
 			display_text += " [ATIVA]"
-			selected_idx = i
 		opt_sessao_escola.add_item(display_text, i)
+		if id_s == id_anterior:
+			selected_idx = i
+		elif selected_idx == 0 and id_s == DatabaseManager.escola_ativa_id:
+			selected_idx = i
 	opt_sessao_escola.selected = selected_idx
 	_atualizar_label_sessao_status()
 	_atualizar_botoes_sessao()
@@ -1478,6 +1491,9 @@ func _abrir_popup_excluir_sessao(id_alvo: String, nome_alvo: String) -> void:
 		btn_conf.text = "Excluindo..."
 		var sucesso = await DatabaseManager.remover_sessao_escola_async(id_alvo)
 		popup_excluir_sessao.queue_free()
+		if opt_sessao_escola:
+			opt_sessao_escola.selected = 0
+		_recarregar_opcoes_sessoes()
 		await _recarregar_opcoes_sessoes_async()
 		_carregar_dados()
 		if sucesso:

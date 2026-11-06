@@ -75,6 +75,7 @@ func _ready() -> void:
 # progresso salvo localmente
 const SAVE_FILE = "user://progresso.json"
 const SESSOES_FILE = "user://sessoes_escolas.json"
+const SESSOES_EXCLUIDAS_FILE = "user://sessoes_excluidas.json"
 const ANALYTICS_FILE = "user://pesquisa_analytics.json"
 const MINIGAMES_ANALYTICS_FILE = "user://minigames_analytics.json"
 const GAMEPLAY_TELEMETRIA_FILE = "user://gameplay_telemetria.json"
@@ -140,6 +141,43 @@ func _verificar_parametro_url_web() -> void:
 						print("[DatabaseManager] Sessão forçada via URL Web: %s (%s)" % [escola_ativa_nome, escola_ativa_id])
 						return
 
+func carregar_sessoes_excluidas() -> Dictionary:
+	var excluidos: Dictionary = {}
+	if not FileAccess.file_exists(SESSOES_EXCLUIDAS_FILE):
+		return excluidos
+	var f = FileAccess.open(SESSOES_EXCLUIDAS_FILE, FileAccess.READ)
+	if f:
+		var json = JSON.new()
+		if json.parse(f.get_as_text()) == OK:
+			if json.data is Dictionary:
+				excluidos = json.data
+			elif json.data is Array:
+				for id_item in json.data:
+					excluidos[str(id_item)] = true
+		f.close()
+	return excluidos
+
+func salvar_sessoes_excluidas_dict(excluidos: Dictionary) -> void:
+	var f = FileAccess.open(SESSOES_EXCLUIDAS_FILE, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(excluidos, "\t"))
+		f.close()
+
+func registrar_sessao_excluida(id_codigo: String) -> void:
+	var clean_id = id_codigo.strip_edges()
+	if clean_id.is_empty() or clean_id == "geral":
+		return
+	var excluidos = carregar_sessoes_excluidas()
+	excluidos[clean_id] = true
+	salvar_sessoes_excluidas_dict(excluidos)
+
+func desregistrar_sessao_excluida(id_codigo: String) -> void:
+	var clean_id = id_codigo.strip_edges()
+	var excluidos = carregar_sessoes_excluidas()
+	if excluidos.has(clean_id):
+		excluidos.erase(clean_id)
+		salvar_sessoes_excluidas_dict(excluidos)
+
 func sincronizar_sessao_global_supabase() -> void:
 	if has_meta("escola_fixada_por_url"):
 		return
@@ -148,6 +186,14 @@ func sincronizar_sessao_global_supabase() -> void:
 		var row = res["data"][0]
 		var s_id = str(row.get("id", "geral")).strip_edges()
 		var s_nome = str(row.get("nome", "Geral")).strip_edges()
+		var excluidos = carregar_sessoes_excluidas()
+		if excluidos.has(s_id) or s_nome.begins_with("[EXCLUID") or s_nome.begins_with("[DELETAD"):
+			if escola_ativa_id != "geral":
+				escola_ativa_id = "geral"
+				escola_ativa_nome = "Geral (Padrão / Lançamento)"
+				salvar_progresso()
+				sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+			return
 		if not s_id.is_empty() and (s_id != escola_ativa_id or s_nome != escola_ativa_nome):
 			escola_ativa_id = s_id
 			escola_ativa_nome = s_nome
@@ -156,6 +202,7 @@ func sincronizar_sessao_global_supabase() -> void:
 			print("[DatabaseManager] Sessão global sincronizada do Supabase: %s (%s)" % [escola_ativa_nome, escola_ativa_id])
 
 func carregar_sessoes_escolas() -> Array[Dictionary]:
+	var excluidos = carregar_sessoes_excluidas()
 	var lista: Array[Dictionary] = [
 		{"id": "geral", "nome": "Geral (Padrão / Lançamento)", "data_criacao": "2026-01-01"}
 	]
@@ -169,13 +216,18 @@ func carregar_sessoes_escolas() -> Array[Dictionary]:
 			var ids_existentes = {"geral": true}
 			for item in carregadas:
 				if item is Dictionary and item.has("id") and item.has("nome"):
-					if not ids_existentes.has(item["id"]):
+					var sid = str(item["id"]).strip_edges()
+					var snome = str(item["nome"]).strip_edges()
+					if excluidos.has(sid) or snome.begins_with("[EXCLUID") or snome.begins_with("[DELETAD"):
+						continue
+					if not ids_existentes.has(sid):
 						lista.append(item)
-						ids_existentes[item["id"]] = true
+						ids_existentes[sid] = true
 		f.close()
 	return lista
 
 func carregar_sessoes_escolas_async() -> Array[Dictionary]:
+	var excluidos = carregar_sessoes_excluidas()
 	var lista_local = carregar_sessoes_escolas()
 	var res = await request_async("/rest/v1/sessoes_escolas?select=*&order=data_criacao.asc.nullslast", HTTPClient.METHOD_GET)
 	if not res.get("success", false) or not (res.get("data") is Array):
@@ -185,12 +237,21 @@ func carregar_sessoes_escolas_async() -> Array[Dictionary]:
 	if res.get("success", false) and res.get("data") is Array:
 		var lista: Array[Dictionary] = []
 		var ids_existentes = {}
+		var excluidos_alterados = false
 		
-		# 1. Popula a lista com todas as sessões registradas no Supabase (fonte de verdade)
+		# 1. Popula a lista com todas as sessões registradas no Supabase (filtrando excluídas)
 		for item in res["data"]:
 			if item is Dictionary and item.has("id") and item.has("nome"):
 				var sid = str(item["id"]).strip_edges()
 				var snome = str(item["nome"]).strip_edges()
+				
+				# Se no Supabase a sessão tiver marcação de excluída ou estiver no registro de excluídas
+				if excluidos.has(sid) or snome.begins_with("[EXCLUID") or snome.begins_with("[DELETAD"):
+					if not excluidos.has(sid):
+						excluidos[sid] = true
+						excluidos_alterados = true
+					continue
+					
 				if ids_existentes.has(sid):
 					continue
 				ids_existentes[sid] = true
@@ -208,6 +269,9 @@ func carregar_sessoes_escolas_async() -> Array[Dictionary]:
 						salvar_progresso()
 						sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
 		
+		if excluidos_alterados:
+			salvar_sessoes_excluidas_dict(excluidos)
+			
 		# 2. Garante que 'geral' sempre conste como opção base
 		if not ids_existentes.has("geral"):
 			lista.insert(0, {
@@ -225,10 +289,13 @@ func carregar_sessoes_escolas_async() -> Array[Dictionary]:
 			salvar_progresso()
 			sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
 			
-		# 3. Preserva sessões criadas localmente que ainda não subiram à nuvem
+		# 3. Preserva sessões criadas localmente que ainda não subiram à nuvem (e não excluídas)
 		for item_local in lista_local:
 			if item_local is Dictionary and item_local.has("id"):
 				var lid = str(item_local["id"]).strip_edges()
+				var lnome = str(item_local.get("nome", "")).strip_edges()
+				if excluidos.has(lid) or lnome.begins_with("[EXCLUID") or lnome.begins_with("[DELETAD"):
+					continue
 				if not ids_existentes.has(lid):
 					lista.append(item_local)
 					ids_existentes[lid] = true
@@ -245,11 +312,12 @@ func salvar_sessoes_escolas(sessoes: Array) -> void:
 		f.close()
 
 func adicionar_sessao_escola(nome: String, id_codigo: String = "") -> Dictionary:
-	var sessoes = carregar_sessoes_escolas()
 	var clean_id = id_codigo.strip_edges().to_lower().replace(" ", "_")
 	if clean_id.is_empty():
 		clean_id = "escola_" + str(Time.get_unix_time_from_system())
 		
+	desregistrar_sessao_excluida(clean_id)
+	var sessoes = carregar_sessoes_escolas()
 	for s in sessoes:
 		if s["id"] == clean_id:
 			return s # Já existe
@@ -267,11 +335,12 @@ func adicionar_sessao_escola(nome: String, id_codigo: String = "") -> Dictionary
 	return nova
 
 func adicionar_sessao_escola_async(nome: String, id_codigo: String = "") -> Dictionary:
-	var sessoes = carregar_sessoes_escolas()
 	var clean_id = id_codigo.strip_edges().to_lower().replace(" ", "_")
 	if clean_id.is_empty():
 		clean_id = "escola_" + str(Time.get_unix_time_from_system())
 		
+	desregistrar_sessao_excluida(clean_id)
+	var sessoes = carregar_sessoes_escolas()
 	for s in sessoes:
 		if s["id"] == clean_id:
 			return s # Já existe
@@ -336,10 +405,13 @@ func remover_sessao_escola(id_codigo: String) -> bool:
 	var clean_id = id_codigo.strip_edges()
 	if clean_id.is_empty() or clean_id == "geral":
 		return false
+	registrar_sessao_excluida(clean_id)
 	var sessoes = carregar_sessoes_escolas()
 	var removido = false
+	var nome_sessao = ""
 	for i in range(sessoes.size() - 1, -1, -1):
 		if str(sessoes[i].get("id", "")).strip_edges() == clean_id:
+			nome_sessao = str(sessoes[i].get("nome", ""))
 			sessoes.remove_at(i)
 			removido = true
 	if removido:
@@ -355,28 +427,41 @@ func remover_sessao_escola_async(id_codigo: String) -> bool:
 	if clean_id.is_empty() or clean_id == "geral":
 		return false
 		
-	# 1. Remove da lista local e persiste no arquivo
+	# 1. Registra localmente como excluída para impedir qualquer re-sincronização
+	registrar_sessao_excluida(clean_id)
+	
+	# 2. Remove da lista local e persiste no arquivo
 	var sessoes = carregar_sessoes_escolas()
 	var removido_local = false
+	var nome_sessao = ""
 	for i in range(sessoes.size() - 1, -1, -1):
 		if str(sessoes[i].get("id", "")).strip_edges() == clean_id:
+			nome_sessao = str(sessoes[i].get("nome", ""))
 			sessoes.remove_at(i)
 			removido_local = true
 	if removido_local:
 		salvar_sessoes_escolas(sessoes)
 		
-	# 2. Se a sessão excluída for a ativa, reverte imediatamente para Geral
+	# 3. Se a sessão excluída for a ativa, reverte imediatamente para Geral
 	if escola_ativa_id == clean_id:
 		await definir_sessao_ativa_async("geral", "Geral (Padrão / Lançamento)")
 		
-	# 3. Limpa registros analíticos locais vinculados a esta sessão
+	# 4. Limpa registros analíticos locais vinculados a esta sessão
 	resetar_analytics_sessao(clean_id)
 	
-	# 4. Remove do Supabase
-	var res = await request_async("/rest/v1/sessoes_escolas?id=eq." + clean_id.uri_encode(), HTTPClient.METHOD_DELETE)
-	var sucesso_nuvem = res.get("success", false) or res.get("code", 0) == 200 or res.get("code", 0) == 204
+	# 5. Soft-delete na nuvem via PATCH: marca nome como [EXCLUIDA] e desativa
+	# Como o Supabase restringe HTTP DELETE por padrão quando há RLS sem política de DELETE,
+	# o PATCH garante que outros painéis e clientes ignorem esta sessão imediatamente
+	var nome_marcado = "[EXCLUIDA] " + (nome_sessao if not nome_sessao.is_empty() else clean_id)
+	var res_patch = await request_async("/rest/v1/sessoes_escolas?id=eq." + clean_id.uri_encode(), HTTPClient.METHOD_PATCH, {
+		"nome": nome_marcado,
+		"ativa": false
+	})
 	
-	# 5. Remove rankings e respostas vinculadas a esta escola no Supabase
+	# 6. Tenta DELETE hard no Supabase (funciona caso a política DELETE esteja configurada)
+	var res_delete = await request_async("/rest/v1/sessoes_escolas?id=eq." + clean_id.uri_encode(), HTTPClient.METHOD_DELETE)
+	
+	# 7. Remove rankings e respostas vinculadas a esta escola no Supabase
 	var query_filtro = "escola_id=eq." + clean_id.uri_encode()
 	await request_async("/rest/v1/rankinggeral?" + query_filtro, HTTPClient.METHOD_DELETE)
 	await request_async("/rest/v1/respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
@@ -384,8 +469,10 @@ func remover_sessao_escola_async(id_codigo: String) -> bool:
 	await request_async("/rest/v1/gameplay_telemetria?" + query_filtro, HTTPClient.METHOD_DELETE)
 	
 	sessao_escola_removida.emit(clean_id)
-	print("[DatabaseManager] Sessão '%s' removida. Local: %s, Nuvem: %s" % [clean_id, str(removido_local), str(sucesso_nuvem)])
-	return removido_local or sucesso_nuvem
+	print("[DatabaseManager] Sessão '%s' removida. Local: %s, Patch: %s, Delete: %s" % [
+		clean_id, str(removido_local), str(res_patch.get("success", false)), str(res_delete.get("success", false))
+	])
+	return true
 
 # --- ARMAZENAMENTO E CONSULTA DE ANALYTICS EDUCACIONAIS ---
 
