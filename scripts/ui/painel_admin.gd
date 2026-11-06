@@ -65,10 +65,12 @@ var line_edit_senha: LineEdit
 # Gestão de Sessões / Escolas (Avaliação Pedagógica)
 var opt_sessao_escola: OptionButton
 var btn_ativar_sessao: Button
+var btn_excluir_sessao: Button
 var lbl_sessao_status: Label
 var sessoes_carregadas: Array[Dictionary] = []
 var popup_nova_sessao: Control
 var popup_ativar_sessao: Control
+var popup_excluir_sessao: Control
 
 func _ready() -> void:
 	# Fundo geral sofisticado
@@ -1252,10 +1254,16 @@ func _criar_botao_acao(texto: String, cor: Color) -> Button:
 	var style_hover = style.duplicate()
 	style_hover.bg_color = cor * 0.40
 	
+	var style_disabled = style.duplicate()
+	style_disabled.bg_color = Color(0.10, 0.12, 0.16, 0.6)
+	style_disabled.border_color = Color(0.20, 0.24, 0.30, 0.4)
+	
 	btn.add_theme_stylebox_override("normal", style)
 	btn.add_theme_stylebox_override("hover", style_hover)
 	btn.add_theme_stylebox_override("pressed", style)
+	btn.add_theme_stylebox_override("disabled", style_disabled)
 	btn.add_theme_color_override("font_color", Color.WHITE)
+	btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.50, 0.58, 0.6))
 	btn.add_theme_font_size_override("font_size", 12)
 	return btn
 
@@ -1291,6 +1299,9 @@ func _criar_barra_sessao_escola(parent: Control) -> void:
 	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
 		_recarregar_opcoes_sessoes_async()
 	)
+	DatabaseManager.sessao_escola_removida.connect(func(_id):
+		_recarregar_opcoes_sessoes_async()
+	)
 	hbox.add_child(opt_sessao_escola)
 	
 	lbl_sessao_status = Label.new()
@@ -1310,6 +1321,12 @@ func _criar_barra_sessao_escola(parent: Control) -> void:
 	btn_nova.pressed.connect(_abrir_popup_nova_sessao)
 	hbox.add_child(btn_nova)
 
+	btn_excluir_sessao = _criar_botao_acao("Excluir Escola", COLOR_DIFICIL)
+	btn_excluir_sessao.pressed.connect(_on_btn_excluir_sessao_pressed)
+	hbox.add_child(btn_excluir_sessao)
+	
+	_atualizar_botoes_sessao()
+
 func _recarregar_opcoes_sessoes() -> void:
 	if not opt_sessao_escola: return
 	opt_sessao_escola.clear()
@@ -1326,6 +1343,7 @@ func _recarregar_opcoes_sessoes() -> void:
 		opt_sessao_escola.add_item(display_text, i)
 	opt_sessao_escola.selected = selected_idx
 	_atualizar_label_sessao_status()
+	_atualizar_botoes_sessao()
 
 func _recarregar_opcoes_sessoes_async() -> void:
 	if not opt_sessao_escola: return
@@ -1343,24 +1361,36 @@ func _recarregar_opcoes_sessoes_async() -> void:
 		opt_sessao_escola.add_item(display_text, i)
 	opt_sessao_escola.selected = selected_idx
 	_atualizar_label_sessao_status()
+	_atualizar_botoes_sessao()
 
 func _atualizar_label_sessao_status() -> void:
 	if not lbl_sessao_status: return
 	lbl_sessao_status.text = "Ativa no Jogo: %s" % DatabaseManager.escola_ativa_nome
 	lbl_sessao_status.add_theme_color_override("font_color", COLOR_FACIL)
 
-func _on_sessao_selecionada(idx: int) -> void:
-	if idx >= 0 and idx < sessoes_carregadas.size():
-		var s = sessoes_carregadas[idx]
-		var id_s = s.get("id", "geral")
-		var nome_s = s.get("nome", "Geral")
+func _atualizar_botoes_sessao() -> void:
+	var id_s = _obter_sessao_selecionada_id()
+	var nome_s = _obter_sessao_selecionada_nome()
+	
+	if btn_ativar_sessao:
 		if id_s != DatabaseManager.escola_ativa_id:
-			if btn_ativar_sessao:
-				btn_ativar_sessao.text = "Ativar '%s'" % nome_s.substr(0, 18)
+			btn_ativar_sessao.text = "Ativar '%s'" % nome_s.substr(0, 16)
+			btn_ativar_sessao.disabled = false
 		else:
-			if btn_ativar_sessao:
-				btn_ativar_sessao.text = "Ativar Esta Sessão"
-		_carregar_dados()
+			btn_ativar_sessao.text = "Sessão Ativa"
+			btn_ativar_sessao.disabled = true
+			
+	if btn_excluir_sessao:
+		var eh_geral = (id_s == "geral")
+		btn_excluir_sessao.disabled = eh_geral
+		if eh_geral:
+			btn_excluir_sessao.tooltip_text = "A sessão padrão 'Geral' não pode ser excluída."
+		else:
+			btn_excluir_sessao.tooltip_text = "Excluir permanentemente a escola/sessão '%s'." % nome_s
+
+func _on_sessao_selecionada(idx: int) -> void:
+	_atualizar_botoes_sessao()
+	_carregar_dados()
 
 func _on_btn_ativar_sessao_pressed() -> void:
 	var idx = opt_sessao_escola.selected if opt_sessao_escola else 0
@@ -1369,6 +1399,93 @@ func _on_btn_ativar_sessao_pressed() -> void:
 		var id_s = s.get("id", "geral")
 		var nome_s = s.get("nome", "Geral")
 		_abrir_popup_ativar_sessao(id_s, nome_s)
+
+func _on_btn_excluir_sessao_pressed() -> void:
+	var idx = opt_sessao_escola.selected if opt_sessao_escola else 0
+	if idx >= 0 and idx < sessoes_carregadas.size():
+		var s = sessoes_carregadas[idx]
+		var id_s = s.get("id", "geral")
+		var nome_s = s.get("nome", "Geral")
+		_abrir_popup_excluir_sessao(id_s, nome_s)
+
+func _abrir_popup_excluir_sessao(id_alvo: String, nome_alvo: String) -> void:
+	if id_alvo == "geral":
+		_exibir_toast("A sessão padrão 'Geral' não pode ser excluída.")
+		return
+		
+	if popup_excluir_sessao and is_instance_valid(popup_excluir_sessao):
+		popup_excluir_sessao.queue_free()
+		
+	popup_excluir_sessao = Control.new()
+	popup_excluir_sessao.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(popup_excluir_sessao)
+	
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.78)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	popup_excluir_sessao.add_child(overlay)
+	
+	var center = CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	popup_excluir_sessao.add_child(center)
+	
+	var panel = PanelContainer.new()
+	var style = _criar_stylebox(COLOR_HEADER_BG, COLOR_DIFICIL, 12, 2)
+	style.content_margin_left = 28
+	style.content_margin_right = 28
+	style.content_margin_top = 22
+	style.content_margin_bottom = 22
+	panel.add_theme_stylebox_override("panel", style)
+	center.add_child(panel)
+	
+	var vbox = VBoxContainer.new()
+	vbox.custom_minimum_size = Vector2(500, 0)
+	vbox.add_theme_constant_override("separation", 14)
+	panel.add_child(vbox)
+	
+	var lbl_tit = Label.new()
+	lbl_tit.text = "Excluir Sessão / Escola"
+	lbl_tit.add_theme_font_size_override("font_size", 18)
+	lbl_tit.add_theme_color_override("font_color", COLOR_DIFICIL)
+	vbox.add_child(lbl_tit)
+	
+	var eh_ativa = (id_alvo == DatabaseManager.escola_ativa_id)
+	var texto_msg = "Tem certeza que deseja excluir esta escola/sessão?\n\n• Nome: %s\n• Código/ID: %s\n\n" % [nome_alvo, id_alvo]
+	if eh_ativa:
+		texto_msg += "ATENÇÃO: Esta é a sessão ATIVA atualmente no jogo! Ao excluí-la, o jogo retornará automaticamente para a sessão 'Geral (Padrão)'.\n\n"
+	texto_msg += "Esta ação removerá a escola da lista e do banco de dados (Supabase).\nOs dados locais e respostas vinculadas a esta sessão serão limpos."
+	
+	var lbl_msg = Label.new()
+	lbl_msg.text = texto_msg
+	lbl_msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lbl_msg.add_theme_font_size_override("font_size", 13)
+	lbl_msg.add_theme_color_override("font_color", COLOR_TEXT_BRIGHT)
+	vbox.add_child(lbl_msg)
+	
+	var hbox_btn = HBoxContainer.new()
+	hbox_btn.alignment = BoxContainer.ALIGNMENT_END
+	hbox_btn.add_theme_constant_override("separation", 12)
+	vbox.add_child(hbox_btn)
+	
+	var btn_canc = _criar_botao_acao("Cancelar", Color(0.45, 0.50, 0.62))
+	btn_canc.pressed.connect(func(): popup_excluir_sessao.queue_free())
+	hbox_btn.add_child(btn_canc)
+	
+	var btn_conf = _criar_botao_acao("Sim, Excluir Escola", COLOR_DIFICIL)
+	btn_conf.pressed.connect(func():
+		btn_conf.disabled = true
+		btn_canc.disabled = true
+		btn_conf.text = "Excluindo..."
+		var sucesso = await DatabaseManager.remover_sessao_escola_async(id_alvo)
+		popup_excluir_sessao.queue_free()
+		await _recarregar_opcoes_sessoes_async()
+		_carregar_dados()
+		if sucesso:
+			_exibir_toast("Sessão '%s' excluída com sucesso!" % nome_alvo)
+		else:
+			_exibir_toast("Sessão '%s' removida." % nome_alvo)
+	)
+	hbox_btn.add_child(btn_conf)
 
 func _abrir_popup_ativar_sessao(id_alvo: String, nome_alvo: String) -> void:
 	if popup_ativar_sessao and is_instance_valid(popup_ativar_sessao):

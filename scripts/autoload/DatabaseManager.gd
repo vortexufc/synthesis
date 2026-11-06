@@ -84,6 +84,7 @@ var escola_ativa_id: String = "geral"
 var escola_ativa_nome: String = "Geral (Padrão)"
 
 signal sessao_escola_alterada(id_escola: String, nome_escola: String)
+signal sessao_escola_removida(id_escola: String)
 
 func salvar_progresso() -> void:
 	var file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
@@ -217,6 +218,13 @@ func carregar_sessoes_escolas_async() -> Array[Dictionary]:
 			})
 			ids_existentes["geral"] = true
 			
+		# Se a escola_ativa_id atual não existe mais nas opções, reverte com segurança para geral
+		if not ids_existentes.has(escola_ativa_id) and not has_meta("escola_fixada_por_url"):
+			escola_ativa_id = "geral"
+			escola_ativa_nome = "Geral (Padrão / Lançamento)"
+			salvar_progresso()
+			sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
+			
 		# 3. Preserva sessões criadas localmente que ainda não subiram à nuvem
 		for item_local in lista_local:
 			if item_local is Dictionary and item_local.has("id"):
@@ -323,6 +331,61 @@ func _propagar_ativacao_sessao_supabase(id_codigo: String, nome: String) -> void
 			"data_ativacao": Time.get_datetime_string_from_system()
 		})
 	print("[DatabaseManager] Sessão global propagada no Supabase: %s (%s)" % [nome, id_codigo])
+
+func remover_sessao_escola(id_codigo: String) -> bool:
+	var clean_id = id_codigo.strip_edges()
+	if clean_id.is_empty() or clean_id == "geral":
+		return false
+	var sessoes = carregar_sessoes_escolas()
+	var removido = false
+	for i in range(sessoes.size() - 1, -1, -1):
+		if str(sessoes[i].get("id", "")).strip_edges() == clean_id:
+			sessoes.remove_at(i)
+			removido = true
+	if removido:
+		salvar_sessoes_escolas(sessoes)
+		resetar_analytics_sessao(clean_id)
+		if escola_ativa_id == clean_id:
+			definir_sessao_ativa("geral", "Geral (Padrão / Lançamento)")
+		sessao_escola_removida.emit(clean_id)
+	return removido
+
+func remover_sessao_escola_async(id_codigo: String) -> bool:
+	var clean_id = id_codigo.strip_edges()
+	if clean_id.is_empty() or clean_id == "geral":
+		return false
+		
+	# 1. Remove da lista local e persiste no arquivo
+	var sessoes = carregar_sessoes_escolas()
+	var removido_local = false
+	for i in range(sessoes.size() - 1, -1, -1):
+		if str(sessoes[i].get("id", "")).strip_edges() == clean_id:
+			sessoes.remove_at(i)
+			removido_local = true
+	if removido_local:
+		salvar_sessoes_escolas(sessoes)
+		
+	# 2. Se a sessão excluída for a ativa, reverte imediatamente para Geral
+	if escola_ativa_id == clean_id:
+		await definir_sessao_ativa_async("geral", "Geral (Padrão / Lançamento)")
+		
+	# 3. Limpa registros analíticos locais vinculados a esta sessão
+	resetar_analytics_sessao(clean_id)
+	
+	# 4. Remove do Supabase
+	var res = await request_async("/rest/v1/sessoes_escolas?id=eq." + clean_id.uri_encode(), HTTPClient.METHOD_DELETE)
+	var sucesso_nuvem = res.get("success", false) or res.get("code", 0) == 200 or res.get("code", 0) == 204
+	
+	# 5. Remove rankings e respostas vinculadas a esta escola no Supabase
+	var query_filtro = "escola_id=eq." + clean_id.uri_encode()
+	await request_async("/rest/v1/rankinggeral?" + query_filtro, HTTPClient.METHOD_DELETE)
+	await request_async("/rest/v1/respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
+	await request_async("/rest/v1/minigames_respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
+	await request_async("/rest/v1/gameplay_telemetria?" + query_filtro, HTTPClient.METHOD_DELETE)
+	
+	sessao_escola_removida.emit(clean_id)
+	print("[DatabaseManager] Sessão '%s' removida. Local: %s, Nuvem: %s" % [clean_id, str(removido_local), str(sucesso_nuvem)])
+	return removido_local or sucesso_nuvem
 
 # --- ARMAZENAMENTO E CONSULTA DE ANALYTICS EDUCACIONAIS ---
 
