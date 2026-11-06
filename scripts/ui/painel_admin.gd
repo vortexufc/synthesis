@@ -177,7 +177,10 @@ func _criar_cabecalho(parent: Control) -> void:
 	
 	# Botão Atualizar
 	var btn_reload = _criar_botao_acao("Atualizar", Color(0.20, 0.65, 0.90))
-	btn_reload.pressed.connect(_carregar_dados)
+	btn_reload.pressed.connect(func():
+		await _recarregar_opcoes_sessoes_async()
+		_carregar_dados()
+	)
 	hbox.add_child(btn_reload)
 	
 	# Botão Resetar Dados
@@ -1286,7 +1289,7 @@ func _criar_barra_sessao_escola(parent: Control) -> void:
 	_recarregar_opcoes_sessoes_async()
 	opt_sessao_escola.item_selected.connect(_on_sessao_selecionada)
 	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
-		_recarregar_opcoes_sessoes()
+		_recarregar_opcoes_sessoes_async()
 	)
 	hbox.add_child(opt_sessao_escola)
 	

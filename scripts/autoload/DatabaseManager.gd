@@ -173,35 +173,60 @@ func carregar_sessoes_escolas() -> Array[Dictionary]:
 	return lista
 
 func carregar_sessoes_escolas_async() -> Array[Dictionary]:
-	var lista = carregar_sessoes_escolas()
-	var res = await request_async("/rest/v1/sessoes_escolas?select=*&order=created_at.asc", HTTPClient.METHOD_GET)
+	var lista_local = carregar_sessoes_escolas()
+	var res = await request_async("/rest/v1/sessoes_escolas?select=*&order=data_criacao.asc.nullslast", HTTPClient.METHOD_GET)
+	if not res.get("success", false) or not (res.get("data") is Array):
+		# Fallback se a ordenação der algum erro de parâmetro: tenta sem order
+		res = await request_async("/rest/v1/sessoes_escolas?select=*", HTTPClient.METHOD_GET)
+	
 	if res.get("success", false) and res.get("data") is Array:
+		var lista: Array[Dictionary] = []
 		var ids_existentes = {}
-		for item in lista:
-			ids_existentes[item["id"]] = true
-		var mudou = false
+		
+		# 1. Popula a lista com todas as sessões registradas no Supabase (fonte de verdade)
 		for item in res["data"]:
 			if item is Dictionary and item.has("id") and item.has("nome"):
 				var sid = str(item["id"]).strip_edges()
 				var snome = str(item["nome"]).strip_edges()
-				if not ids_existentes.has(sid):
-					lista.append({
-						"id": sid,
-						"nome": snome,
-						"data_criacao": str(item.get("data_criacao", item.get("created_at", ""))),
-						"ativa": bool(item.get("ativa", false))
-					})
-					ids_existentes[sid] = true
-					mudou = true
-				if bool(item.get("ativa", false)) and not has_meta("escola_fixada_por_url"):
-					if sid != escola_ativa_id:
+				if ids_existentes.has(sid):
+					continue
+				ids_existentes[sid] = true
+				var eh_ativa = bool(item.get("ativa", false))
+				lista.append({
+					"id": sid,
+					"nome": snome,
+					"data_criacao": str(item.get("data_criacao", "")),
+					"ativa": eh_ativa
+				})
+				if eh_ativa and not has_meta("escola_fixada_por_url"):
+					if sid != escola_ativa_id or snome != escola_ativa_nome:
 						escola_ativa_id = sid
 						escola_ativa_nome = snome
 						salvar_progresso()
 						sessao_escola_alterada.emit(escola_ativa_id, escola_ativa_nome)
-		if mudou:
-			salvar_sessoes_escolas(lista)
-	return lista
+		
+		# 2. Garante que 'geral' sempre conste como opção base
+		if not ids_existentes.has("geral"):
+			lista.insert(0, {
+				"id": "geral",
+				"nome": "Geral (Padrão / Lançamento)",
+				"data_criacao": "2026-01-01",
+				"ativa": (escola_ativa_id == "geral")
+			})
+			ids_existentes["geral"] = true
+			
+		# 3. Preserva sessões criadas localmente que ainda não subiram à nuvem
+		for item_local in lista_local:
+			if item_local is Dictionary and item_local.has("id"):
+				var lid = str(item_local["id"]).strip_edges()
+				if not ids_existentes.has(lid):
+					lista.append(item_local)
+					ids_existentes[lid] = true
+					_enviar_nova_sessao_supabase(item_local)
+					
+		salvar_sessoes_escolas(lista)
+		return lista
+	return lista_local
 
 func salvar_sessoes_escolas(sessoes: Array) -> void:
 	var f = FileAccess.open(SESSOES_FILE, FileAccess.WRITE)
@@ -232,7 +257,23 @@ func adicionar_sessao_escola(nome: String, id_codigo: String = "") -> Dictionary
 	return nova
 
 func adicionar_sessao_escola_async(nome: String, id_codigo: String = "") -> Dictionary:
-	var nova = adicionar_sessao_escola(nome, id_codigo)
+	var sessoes = carregar_sessoes_escolas()
+	var clean_id = id_codigo.strip_edges().to_lower().replace(" ", "_")
+	if clean_id.is_empty():
+		clean_id = "escola_" + str(Time.get_unix_time_from_system())
+		
+	for s in sessoes:
+		if s["id"] == clean_id:
+			return s # Já existe
+			
+	var nova = {
+		"id": clean_id,
+		"nome": nome.strip_edges(),
+		"data_criacao": Time.get_datetime_string_from_system()
+	}
+	sessoes.append(nova)
+	salvar_sessoes_escolas(sessoes)
+	
 	await _enviar_nova_sessao_supabase(nova)
 	return nova
 
@@ -240,7 +281,8 @@ func _enviar_nova_sessao_supabase(nova_sessao: Dictionary) -> void:
 	await request_async("/rest/v1/sessoes_escolas", HTTPClient.METHOD_POST, {
 		"id": nova_sessao["id"],
 		"nome": nova_sessao["nome"],
-		"ativa": false
+		"ativa": false,
+		"data_criacao": nova_sessao.get("data_criacao", Time.get_datetime_string_from_system())
 	})
 
 func definir_sessao_ativa(id_codigo: String, nome: String) -> void:
