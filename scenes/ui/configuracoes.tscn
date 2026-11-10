@@ -289,7 +289,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 12
-text = "MODO PC FRACO"
+text = "MODO DESEMPENHO"
 vertical_alignment = 1
 
 [node name="CheckDesempenho" type="CheckButton" parent="CenterContainer/Panel/VBoxContainer/HBoxDesempenho" unique_id=942994874]
