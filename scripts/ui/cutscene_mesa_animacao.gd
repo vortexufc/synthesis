@@ -92,9 +92,5 @@ func pular() -> void:
 	animacao_concluida.emit()
 	queue_free()
 
-func _unhandled_input(event: InputEvent) -> void:
-	# Permite pular se for executado isoladamente no F6
-	if get_parent() == get_tree().root:
-		if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
-			get_viewport().set_input_as_handled()
-			pular()
+# A cutscene inicial não pode ser pulada pelo jogador.
+# A função pular() existe apenas para uso interno (ex: encerramento programático).

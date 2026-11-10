@@ -347,6 +347,9 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not _cutscene_em_andamento:
 		return
+	# Só permite pular a cutscene de RETORNO (não a inicial)
+	if _cutscene_tipo != "retorno_vitoria":
+		return
 		
 	# Teclado / PC: ESPAÇO ou ui_select pula direto
 	if event.is_action_pressed("ui_select") or (event is InputEventKey and event.pressed and event.keycode == KEY_SPACE):
@@ -523,7 +526,7 @@ func _executar_cutscene_inicial() -> void:
 	_cutscene_em_andamento = true
 	_cutscene_tipo = "inicial"
 	_ultimo_toque_cutscene_ms = 0
-	_criar_ui_pular_cutscene()
+	# Cutscene inicial não pode ser pulada — é parte da narrativa do jogo
 
 	# Marca que a historinha inicial já foi iniciada/vista para nunca mais repetir em Novos Jogos
 	if get_node_or_null("/root/PlayerStats"):
