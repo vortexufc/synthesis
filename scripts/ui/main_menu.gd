@@ -603,8 +603,228 @@ func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
 		modal.continuar_como_visitante.connect(func():
 			_aviso_visitante_visto = true
 			if acao_apos.is_valid():
-				acao_apos.call()
+				_mostrar_pergaminho_nick(acao_apos)
 		)
+
+## Exibe um pergaminho para visitantes definirem seu nick antes de iniciar.
+## Chama [acao_apos] ao confirmar ou pular.
+func _mostrar_pergaminho_nick(acao_apos: Callable = Callable()) -> void:
+	var rm = get_node_or_null("/root/RankingManager")
+	var db = get_node_or_null("/root/DatabaseManager")
+
+	# Se já tem nick personalizado (não gerado), vai direto
+	var nick_atual := ""
+	if rm and rm.has_method("get_local_nick"):
+		nick_atual = rm.get_local_nick()
+	if not nick_atual.begins_with("Mago_") and nick_atual.length() >= 3:
+		if acao_apos.is_valid():
+			acao_apos.call()
+		return
+
+	# Fonte pixel da interface
+	var font_pixel = load("res://assets/fonts/PixelifySans-VariableFont_wght.ttf") as Font
+	var sf = SystemFont.new()
+	sf.font_names = PackedStringArray(["Segoe UI", "Arial", "Roboto", "Noto Sans", "sans-serif"])
+	sf.font_weight = 400
+
+	# Overlay escuro semitransparente
+	var canvas = CanvasLayer.new()
+	canvas.layer = 110
+	add_child(canvas)
+
+	var bg_overlay = ColorRect.new()
+	bg_overlay.color = Color(0.0, 0.0, 0.0, 0.80)
+	bg_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	canvas.add_child(bg_overlay)
+
+	# Painel central — estilo pergaminho/grimório
+	var panel = PanelContainer.new()
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.09, 0.07, 0.04, 0.97)
+	sb.border_color = Color(0.90, 0.72, 0.28, 1.0)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(12)
+	sb.shadow_color = Color(0.90, 0.72, 0.28, 0.35)
+	sb.shadow_size = 18
+	sb.content_margin_left = 32
+	sb.content_margin_right = 32
+	sb.content_margin_top = 28
+	sb.content_margin_bottom = 28
+	panel.add_theme_stylebox_override("panel", sb)
+	panel.custom_minimum_size = Vector2(460, 310)
+	canvas.add_child(panel)
+
+	# Animação de entrada suave
+	panel.scale = Vector2(0.85, 0.85)
+	panel.modulate.a = 0.0
+	var tw = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.25)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.20)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 14)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	panel.add_child(vbox)
+
+	# Título do pergaminho
+	var lbl_titulo = Label.new()
+	lbl_titulo.text = "✦  INSCRIÇÃO NO GRIMÓRIO  ✦"
+	if font_pixel:
+		lbl_titulo.add_theme_font_override("font", font_pixel)
+	lbl_titulo.add_theme_font_size_override("font_size", 19)
+	lbl_titulo.add_theme_color_override("font_color", Color(1.0, 0.85, 0.30))
+	lbl_titulo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(lbl_titulo)
+
+	# Separador dourado
+	var sep = HSeparator.new()
+	var sb_sep = StyleBoxFlat.new()
+	sb_sep.bg_color = Color(0.90, 0.72, 0.28, 0.6)
+	sb_sep.content_margin_top = 1
+	sb_sep.content_margin_bottom = 1
+	sep.add_theme_stylebox_override("separator", sb_sep)
+	vbox.add_child(sep)
+
+	# Texto descritivo
+	var lbl_desc = Label.new()
+	lbl_desc.text = "Jovem mago, antes de cruzar as portas da\nMasmorra Arcana, inscreva seu nome\nno Grimório da Academia!"
+	lbl_desc.add_theme_font_override("font", sf)
+	lbl_desc.add_theme_font_size_override("font_size", 13)
+	lbl_desc.add_theme_color_override("font_color", Color(0.85, 0.80, 0.68))
+	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(lbl_desc)
+
+	# Campo de texto para o nick
+	var input = LineEdit.new()
+	input.placeholder_text = "Seu nome de mago..."
+	input.max_length = 16
+	input.custom_minimum_size = Vector2(320, 42)
+	input.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	input.add_theme_font_override("font", sf)
+	input.add_theme_font_size_override("font_size", 15)
+	# Estilo do campo
+	var sb_input = StyleBoxFlat.new()
+	sb_input.bg_color = Color(0.04, 0.03, 0.02, 0.95)
+	sb_input.border_color = Color(0.90, 0.72, 0.28, 0.75)
+	sb_input.set_border_width_all(1)
+	sb_input.set_corner_radius_all(6)
+	sb_input.content_margin_left = 10
+	sb_input.content_margin_right = 10
+	sb_input.content_margin_top = 6
+	sb_input.content_margin_bottom = 6
+	input.add_theme_stylebox_override("normal", sb_input)
+	var sb_input_focus = sb_input.duplicate() as StyleBoxFlat
+	sb_input_focus.border_color = Color(1.0, 0.88, 0.40, 1.0)
+	sb_input_focus.shadow_color = Color(1.0, 0.85, 0.30, 0.3)
+	sb_input_focus.shadow_size = 6
+	input.add_theme_stylebox_override("focus", sb_input_focus)
+	vbox.add_child(input)
+
+	# Label de validação inline (aparece ao errar)
+	var lbl_erro = Label.new()
+	lbl_erro.text = "3 a 16 caracteres · apenas letras, números e espaços"
+	lbl_erro.add_theme_font_override("font", sf)
+	lbl_erro.add_theme_font_size_override("font_size", 10)
+	lbl_erro.add_theme_color_override("font_color", Color(0.6, 0.57, 0.50))
+	lbl_erro.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_erro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(lbl_erro)
+
+	# Botões
+	var hbox_btns = HBoxContainer.new()
+	hbox_btns.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox_btns.add_theme_constant_override("separation", 16)
+	vbox.add_child(hbox_btns)
+
+	# Botão Pular
+	var btn_pular = Button.new()
+	btn_pular.text = "Pular"
+	btn_pular.custom_minimum_size = Vector2(100, 38)
+	btn_pular.add_theme_font_override("font", sf)
+	btn_pular.add_theme_font_size_override("font_size", 13)
+	var sb_pular = StyleBoxFlat.new()
+	sb_pular.bg_color = Color(0.12, 0.10, 0.07, 0.85)
+	sb_pular.border_color = Color(0.4, 0.38, 0.30, 0.6)
+	sb_pular.set_border_width_all(1)
+	sb_pular.set_corner_radius_all(6)
+	btn_pular.add_theme_stylebox_override("normal", sb_pular)
+	var sb_pular_hov = sb_pular.duplicate() as StyleBoxFlat
+	sb_pular_hov.border_color = Color(0.6, 0.57, 0.45, 0.9)
+	btn_pular.add_theme_stylebox_override("hover", sb_pular_hov)
+	btn_pular.add_theme_stylebox_override("pressed", sb_pular_hov)
+	btn_pular.add_theme_color_override("font_color", Color(0.75, 0.72, 0.65))
+	btn_pular.pressed.connect(func():
+		_tocar_sfx("ui-1")
+		canvas.queue_free()
+		if acao_apos.is_valid():
+			acao_apos.call()
+	)
+	hbox_btns.add_child(btn_pular)
+
+	# Botão Salvar e Entrar
+	var btn_salvar = Button.new()
+	btn_salvar.text = "✦  Salvar e Entrar"
+	btn_salvar.custom_minimum_size = Vector2(170, 38)
+	btn_salvar.add_theme_font_override("font", sf)
+	btn_salvar.add_theme_font_size_override("font_size", 13)
+	var sb_salvar = StyleBoxFlat.new()
+	sb_salvar.bg_color = Color(0.18, 0.13, 0.04, 0.95)
+	sb_salvar.border_color = Color(0.90, 0.72, 0.28, 0.9)
+	sb_salvar.set_border_width_all(1)
+	sb_salvar.set_corner_radius_all(6)
+	btn_salvar.add_theme_stylebox_override("normal", sb_salvar)
+	var sb_salvar_hov = sb_salvar.duplicate() as StyleBoxFlat
+	sb_salvar_hov.bg_color = Color(0.28, 0.20, 0.06, 1.0)
+	sb_salvar_hov.border_color = Color(1.0, 0.88, 0.40, 1.0)
+	btn_salvar.add_theme_stylebox_override("hover", sb_salvar_hov)
+	btn_salvar.add_theme_stylebox_override("pressed", sb_salvar_hov)
+	btn_salvar.add_theme_color_override("font_color", Color(1.0, 0.90, 0.50))
+	btn_salvar.add_theme_color_override("font_hover_color", Color(1.0, 1.0, 0.75))
+
+	# Lógica de salvar (reutilizada no botão e no Enter)
+	var _fazer_salvar := func():
+		var novo_nick: String = input.text.strip_edges()
+		# Valida com DatabaseManager se disponível
+		if db and db.has_method("validar_nick"):
+			var resultado: Dictionary = db.validar_nick(novo_nick)
+			if not resultado.get("valido", false):
+				lbl_erro.text = resultado.get("erro", "Nome inválido.")
+				lbl_erro.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
+				return
+		elif novo_nick.length() < 3:
+			lbl_erro.text = "O nome deve ter pelo menos 3 caracteres."
+			lbl_erro.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
+			return
+
+		# Salva o nick no arquivo de visitante
+		if rm:
+			rm.local_guest_nick = novo_nick
+		var f = FileAccess.open("user://guest_config.json", FileAccess.WRITE)
+		if f:
+			f.store_string(JSON.stringify({"guest_nick": novo_nick}))
+			f.close()
+
+		_tocar_sfx("ui_5")
+		canvas.queue_free()
+		if acao_apos.is_valid():
+			acao_apos.call()
+
+	btn_salvar.pressed.connect(_fazer_salvar)
+	hbox_btns.add_child(btn_salvar)
+
+	# Enter no campo também confirma
+	input.text_submitted.connect(func(_t: String):
+		_fazer_salvar.call()
+	)
+
+	# Centraliza o painel após montar
+	panel.reset_size()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+
+	# Foca o campo de texto automaticamente
+	await get_tree().process_frame
+	input.grab_focus()
 
 func _iniciar_novo_jogo() -> void:
 	print("[MainMenu] Iniciando Novo Jogo - resetando salvamento antigo!")
