@@ -14,6 +14,16 @@ var user_id: String = ""
 var active_dungeon: String = "" # Registra a masmorra escolhida no hub
 var is_admin: bool = false # Define se a conta atual é um professor/pesquisador
 
+func get_active_nick() -> String:
+	var n = user_nick.strip_edges()
+	if not n.is_empty() and n != "Mago" and n != "Mago Desconhecido" and not n.to_lower().contains("anonimo") and not n.to_lower().contains("anônimo"):
+		return n
+	if RankingManager and RankingManager.has_method("get_local_nick"):
+		var lg = RankingManager.get_local_nick().strip_edges()
+		if not lg.is_empty():
+			return lg
+	return "Mago_" + str(randi() % 9000 + 1000)
+
 # chave usada para salvar sessao no localStorage (web)
 const SESSION_KEY := "synthesis_session"
 
@@ -477,6 +487,10 @@ func remover_sessao_escola_async(id_codigo: String) -> bool:
 # --- ARMAZENAMENTO E CONSULTA DE ANALYTICS EDUCACIONAIS ---
 
 func registrar_resposta_analytics(dados: Dictionary) -> void:
+	var n_aluno = str(dados.get("aluno_nick", "")).strip_edges()
+	if n_aluno.is_empty() or n_aluno == "Mago" or n_aluno == "Mago Desconhecido" or n_aluno == "Visitante" or n_aluno.to_lower().contains("anonimo") or n_aluno.to_lower().contains("anônimo"):
+		dados["aluno_nick"] = get_active_nick()
+		
 	var respostas: Array = []
 	if FileAccess.file_exists(ANALYTICS_FILE):
 		var f_read = FileAccess.open(ANALYTICS_FILE, FileAccess.READ)
@@ -537,13 +551,7 @@ func resetar_analytics_sessao(filtro_escola_id: String) -> void:
 # --- ANALYTICS DE MINIGAMES (MEMÓRIA, LIGAR PARES, MURAL) ---
 
 func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bool, tempo_gasto: float, detalhes: Dictionary = {}) -> void:
-	var nick: String
-	if not user_nick.is_empty():
-		nick = user_nick
-	elif RankingManager and RankingManager.has_method("get_local_nick"):
-		nick = RankingManager.get_local_nick()
-	else:
-		nick = "Mago_" + str(randi() % 9000 + 1000)
+	var nick: String = get_active_nick()
 	var reg = {
 		"aluno_nick": nick,
 		"escola_id": escola_ativa_id,
@@ -598,14 +606,7 @@ func obter_minigames_analytics(filtro_escola_id: String = "") -> Array:
 # --- TELEMETRIA DE GAMEPLAY (MORTES, POÇÕES, TEMPO POR ANDAR) ---
 
 func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float = 1.0) -> void:
-	# Usa nick do jogador logado, ou o nick local do visitante (nunca "Mago" generico)
-	var nick: String
-	if not user_nick.is_empty():
-		nick = user_nick
-	elif RankingManager and RankingManager.has_method("get_local_nick"):
-		nick = RankingManager.get_local_nick()
-	else:
-		nick = "Mago_" + str(randi() % 9000 + 1000)
+	var nick: String = get_active_nick()
 	var reg = {
 		"aluno_nick": nick,
 		"escola_id": escola_ativa_id,
@@ -655,13 +656,7 @@ func obter_telemetria_gameplay(filtro_escola_id: String = "") -> Array:
 # --- RESPOSTAS DE V OU F (FÚRIA DO CHEFE) ---
 
 func salvar_resposta_vf(afirmacao_texto: String, resposta_aluno: bool, resposta_correta: bool, acertou: bool, tempo_resposta: float, andar_id: int) -> void:
-	var nick: String
-	if not user_nick.is_empty():
-		nick = user_nick
-	elif RankingManager and RankingManager.has_method("get_local_nick"):
-		nick = RankingManager.get_local_nick()
-	else:
-		nick = "Mago_" + str(randi() % 9000 + 1000)
+	var nick: String = get_active_nick()
 	var data_resp = {
 		"pergunta_id": 9000 + (andar_id * 100),
 		"acertou": acertou,
@@ -675,22 +670,18 @@ func salvar_resposta_vf(afirmacao_texto: String, resposta_aluno: bool, resposta_
 		"consultas_grimorio": 0,
 		"tipo": "furia_boss_vf",
 		"enunciado": afirmacao_texto,
-		"timestamp": Time.get_datetime_string_from_system()
+		"timestamp": Time.get_datetime_string_from_system(true) + "Z"
 	}
 	registrar_resposta_analytics(data_resp)
 	enviar_resposta_supabase(data_resp)
 	print("[Analytics] Resposta V/F do Boss gravada: %s (Acertou: %s)" % [afirmacao_texto.substr(0, 30), str(acertou)])
 
 func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
-	# Garante nick unico para visitantes - nunca sobrescreve "Mago" generico
-	var nick_final: String = data_resp_completo.get("aluno_nick", "")
-	if nick_final.is_empty() or nick_final == "Mago Anonimo":
-		if not user_nick.is_empty():
-			nick_final = user_nick
-		elif RankingManager and RankingManager.has_method("get_local_nick"):
-			nick_final = RankingManager.get_local_nick()
-		else:
-			nick_final = "Visitante"
+	# Garante nick unico para visitantes - nunca sobrescreve "Mago" generico nem "Mago Anonimo"
+	var nick_final: String = str(data_resp_completo.get("aluno_nick", "")).strip_edges()
+	if nick_final.is_empty() or nick_final == "Mago" or nick_final == "Mago Desconhecido" or nick_final == "Visitante" or nick_final.to_lower().contains("anonimo") or nick_final.to_lower().contains("anônimo"):
+		nick_final = get_active_nick()
+		data_resp_completo["aluno_nick"] = nick_final
 	
 	# Payload completo - todas as colunas que existem no banco
 	var payload_servidor = {
@@ -829,7 +820,7 @@ func sincronizar_telemetria_pendente_async() -> void:
 					"pergunta_id": payload.get("pergunta_id", 0),
 					"acertou": payload.get("acertou", false),
 					"andar_id": payload.get("andar_id", 1),
-					"aluno_nick": payload.get("aluno_nick", "Mago")
+					"aluno_nick": payload.get("aluno_nick", get_active_nick())
 				}
 				var res_fallback = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_minimo)
 				if res_fallback.get("success", false):

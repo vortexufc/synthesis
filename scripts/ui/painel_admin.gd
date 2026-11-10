@@ -459,8 +459,17 @@ func _carregar_dados() -> void:
 	var resp_locais = DatabaseManager.obter_respostas_analytics(id_escola)
 	for r in resp_locais:
 		var p_name = str(r.get("aluno_nick", "")).strip_edges()
-		if not p_name.is_empty() and p_name.to_lower() != "admin":
-			conjunto_alunos[p_name] = true
+		if p_name.is_empty() or p_name.to_lower() == "admin":
+			continue
+		if p_name.to_lower().contains("anonimo") or p_name.to_lower().contains("anônimo") or p_name == "Mago" or p_name == "Visitante":
+			var ja_tem_guest = false
+			for ca in conjunto_alunos.keys():
+				if str(ca).begins_with("Mago_"):
+					ja_tem_guest = true
+					break
+			if ja_tem_guest:
+				continue
+		conjunto_alunos[p_name] = true
 
 	total_jogadores_count = conjunto_alunos.size()
 	lbl_total_jogadores_val.text = "%d Magos" % total_jogadores_count
@@ -1752,6 +1761,21 @@ func _coletar_dados_completos_150() -> Dictionary:
 		if nick.to_lower() == "admin":
 			continue # Ignora respostas de teste do administrador/professor no relatório pedagógico dos alunos!
 			
+		# Normalização de nicks legados / genéricos (evita duplicar "Mago Anônimo" no relatório)
+		if nick.is_empty() or nick == "Mago" or nick == "Mago Desconhecido" or nick == "Visitante" or nick.to_lower().contains("anonimo") or nick.to_lower().contains("anônimo"):
+			var guests_no_mapa: Array = []
+			for knick in mapa_alunos.keys():
+				if str(knick).begins_with("Mago_"):
+					guests_no_mapa.append(knick)
+			if guests_no_mapa.size() == 1:
+				nick = str(guests_no_mapa[0])
+			elif not DatabaseManager.user_nick.is_empty():
+				nick = DatabaseManager.user_nick
+			elif RankingManager and RankingManager.has_method("get_local_nick"):
+				nick = RankingManager.get_local_nick()
+			else:
+				nick = "Mago Convidado"
+			
 		var pid = int(r.get("pergunta_id", -1))
 		var acertou = bool(r.get("acertou", false))
 		var t_resp = float(r.get("tempo_resposta", 0.0))
@@ -1998,11 +2022,17 @@ func _exportar_csv() -> void:
 				elif n_tri == 3: dif_str = "Nível 3 (Difícil)"
 				
 				var enunciado = str(r.get("enunciado", q_obj.get("question", "")))
+				var nick_csv = str(r.get("aluno_nick", "Mago")).strip_edges()
+				if nick_csv.is_empty() or nick_csv == "Mago" or nick_csv.to_lower().contains("anonimo") or nick_csv.to_lower().contains("anônimo"):
+					for knick in mapa_alunos.keys():
+						if str(knick).begins_with("Mago_"):
+							nick_csv = str(knick)
+							break
 				
 				var linha = [
 					str(r.get("escola_nome", escola_nome)),
 					str(r.get("timestamp", "-")),
-					str(r.get("aluno_nick", "Mago")),
+					nick_csv,
 					str(r.get("cla_aluno", "-")),
 					disc,
 					str(a_id),
@@ -2308,6 +2338,13 @@ func _exportar_pdf_relatorio() -> void:
 			var c_grim_num = int(r.get("consultas_grimorio", 0))
 			var c_grim_str = str(c_grim_num) if c_grim_num > 0 else "-"
 			
+			var nick_html = str(r.get("aluno_nick", "Mago")).strip_edges()
+			if nick_html.is_empty() or nick_html == "Mago" or nick_html.to_lower().contains("anonimo") or nick_html.to_lower().contains("anônimo"):
+				for knick in mapa_alunos.keys():
+					if str(knick).begins_with("Mago_"):
+						nick_html = str(knick)
+						break
+
 			linhas_resp_html += """
 				<tr>
 					<td style="font-size: 11px; color: #64748b;">%s</td>
@@ -2322,7 +2359,7 @@ func _exportar_pdf_relatorio() -> void:
 				</tr>
 			""" % [
 				str(r.get("timestamp", "-")),
-				str(r.get("aluno_nick", "Mago")),
+				nick_html,
 				d_nome,
 				str(pid),
 				marcada.xml_escape(),

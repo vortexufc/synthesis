@@ -643,12 +643,13 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 	
 	# manda a resposta pro painel admin e salva no analytics de pesquisa
 	if pergunta_atual.has("id"):
+		var nick_aluno: String = DatabaseManager.get_active_nick() if DatabaseManager.has_method("get_active_nick") else (DatabaseManager.user_nick if not DatabaseManager.user_nick.is_empty() else (RankingManager.get_local_nick() if RankingManager and RankingManager.has_method("get_local_nick") else "Mago_Visitante"))
 		var data_resp_completo = {
 			"pergunta_id": int(pergunta_atual["id"]),
 			"enunciado": str(pergunta_atual.get("question", "")),
 			"acertou": acertou,
 			"andar_id": int(pergunta_atual.get("andar_id", 1)),
-			"aluno_nick": DatabaseManager.user_nick if DatabaseManager.user_nick != "" else "Mago Anônimo",
+			"aluno_nick": nick_aluno,
 			"cla_aluno": cla_aluno,
 			"escola_id": escola_id,
 			"escola_nome": escola_nome,
@@ -657,7 +658,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 			"alternativa_correta": letra_correta,
 			"texto_marcado": texto_opcao_marcada,
 			"consultas_grimorio": consultas,
-			"timestamp": Time.get_datetime_string_from_system()
+			"timestamp": Time.get_datetime_string_from_system(true) + "Z"
 		}
 		
 		# 1. Registro analítico local (garante persistência de dados mesmo offline)
