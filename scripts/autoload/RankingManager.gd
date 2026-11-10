@@ -165,18 +165,16 @@ func add_score(player_name: String, cla: String, pontos: int) -> void:
 	if player_name.is_empty() or player_name.strip_edges().to_lower() == "admin" or DatabaseManager.is_admin:
 		return
 
-	# salva no banco se tiver logado
-	if not DatabaseManager.user_token.is_empty():
-		var success = await _upsert_score_online(player_name, pontos)
-		if success:
-			# se enviou, tenta mandar os pendentes
+	# Sempre tenta salvar online (anon key + RLS aberto permite INSERT sem login)
+	# Visitantes tambem tem seus pontos enviados ao Supabase com seu nick local unico
+	var success = await _upsert_score_online(player_name, pontos)
+	if success:
+		# se enviou, tenta mandar os pendentes
+		if not DatabaseManager.user_token.is_empty():
 			await sync_pending_scores()
-		else:
-			# se der erro salva local e poe na fila
-			_add_pending_score(player_name, pontos)
-			_add_score_local(player_name, pontos)
 	else:
-		# offline: salva so no arquivo local
+		# se der erro salva local e poe na fila para reenvio posterior
+		_add_pending_score(player_name, pontos)
 		_add_score_local(player_name, pontos)
 
 	# atualiza os pontos do cla
@@ -243,7 +241,7 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 		"score_semanal": novo_score_semanal,
 		"score_mensal": novo_score_mensal,
 		"insignias": ins_atuais,
-		"updated_at": "now()"
+		"updated_at": Time.get_datetime_string_from_system(true) + "Z"
 	}
 	var payload_insert: Dictionary = {
 		"player_name": player_name,
@@ -281,6 +279,12 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 					HTTPClient.METHOD_PATCH,
 					payload_update
 				)
+			if not res_update.get("success", false) and res_update.get("code", 0) == 400:
+				res_update = await DatabaseManager.request_async(
+					"/rest/v1/rankinggeral?player_name=eq." + player_name.uri_encode(),
+					HTTPClient.METHOD_PATCH,
+					{"score": novo_score}
+				)
 	else:
 		# senao cria novo registro
 		res_update = await DatabaseManager.request_async(
@@ -303,6 +307,12 @@ func _upsert_score_online(player_name: String, pontos_novos: int) -> bool:
 					HTTPClient.METHOD_POST,
 					payload_insert
 				)
+			if not res_update.get("success", false) and res_update.get("code", 0) == 400:
+				res_update = await DatabaseManager.request_async(
+					"/rest/v1/rankinggeral",
+					HTTPClient.METHOD_POST,
+					{"player_name": player_name, "score": novo_score}
+				)
 
 	if res_update["success"]:
 		print("[RankingManager] Score online de '%s' atualizado para %d." % [player_name, novo_score])
@@ -322,7 +332,7 @@ func sincronizar_insignias_online() -> void:
 	
 	var payload = {
 		"insignias": ins_atuais,
-		"updated_at": "now()"
+		"updated_at": Time.get_datetime_string_from_system(true) + "Z"
 	}
 	var res = await DatabaseManager.request_async(
 		"/rest/v1/rankinggeral?player_name=eq." + nick.uri_encode(),

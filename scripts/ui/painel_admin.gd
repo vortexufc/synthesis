@@ -471,7 +471,7 @@ func _carregar_dados() -> void:
 	
 	# 2. Respostas registradas para a disciplina atual e sessão selecionada
 	var id_andar = disciplinas[disciplina_atual_idx]["andar_id"]
-	var query_resp = "/rest/v1/respostas?select=pergunta_id,acertou,aluno_nick&andar_id=eq." + str(id_andar)
+	var query_resp = "/rest/v1/respostas?select=pergunta_id,acertou,aluno_nick,tempo_resposta,cla_aluno&andar_id=eq." + str(id_andar)
 	if id_escola == "geral":
 		query_resp += "&or=(escola_id.eq.geral,escola_id.is.null)"
 	elif id_escola != "todas":

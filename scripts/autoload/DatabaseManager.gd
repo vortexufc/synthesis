@@ -537,7 +537,13 @@ func resetar_analytics_sessao(filtro_escola_id: String) -> void:
 # --- ANALYTICS DE MINIGAMES (MEMÓRIA, LIGAR PARES, MURAL) ---
 
 func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bool, tempo_gasto: float, detalhes: Dictionary = {}) -> void:
-	var nick = user_nick if not user_nick.is_empty() else "Mago"
+	var nick: String
+	if not user_nick.is_empty():
+		nick = user_nick
+	elif RankingManager and RankingManager.has_method("get_local_nick"):
+		nick = RankingManager.get_local_nick()
+	else:
+		nick = "Mago_" + str(randi() % 9000 + 1000)
 	var reg = {
 		"aluno_nick": nick,
 		"escola_id": escola_ativa_id,
@@ -546,8 +552,8 @@ func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bo
 		"vitoria": vitoria,
 		"tempo_gasto": snapped(tempo_gasto, 0.1),
 		"detalhes": detalhes,
-		"cla_aluno": user_cla,
-		"timestamp": Time.get_datetime_string_from_system()
+		"cla_aluno": user_cla if not user_cla.is_empty() else "Nenhum",
+		"timestamp": Time.get_datetime_string_from_system(true) + "Z"
 	}
 	
 	var lista: Array = []
@@ -565,12 +571,9 @@ func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bo
 		f_write.store_string(JSON.stringify(lista, "\t"))
 		f_write.close()
 		
-	# Tenta sincronizar com o Supabase ou enfileira no cache offline
-	if not user_token.is_empty():
-		var res_mini = await request_async("/rest/v1/minigames_respostas", HTTPClient.METHOD_POST, reg)
-		if not res_mini.get("success", false) and res_mini.get("code", 0) == 0:
-			enfileirar_sync_offline("/rest/v1/minigames_respostas", reg)
-	else:
+	# Envia para o Supabase sempre (anon key + RLS aberto = funciona sem login)
+	var res_mini = await request_async("/rest/v1/minigames_respostas", HTTPClient.METHOD_POST, reg)
+	if not res_mini.get("success", false):
 		enfileirar_sync_offline("/rest/v1/minigames_respostas", reg)
 	print("[Analytics] Minigame '%s' registrado: vitória=%s | tempo=%.1fs" % [tipo_minigame, str(vitoria), tempo_gasto])
 
@@ -595,14 +598,21 @@ func obter_minigames_analytics(filtro_escola_id: String = "") -> Array:
 # --- TELEMETRIA DE GAMEPLAY (MORTES, POÇÕES, TEMPO POR ANDAR) ---
 
 func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float = 1.0) -> void:
-	var nick = user_nick if not user_nick.is_empty() else "Mago"
+	# Usa nick do jogador logado, ou o nick local do visitante (nunca "Mago" generico)
+	var nick: String
+	if not user_nick.is_empty():
+		nick = user_nick
+	elif RankingManager and RankingManager.has_method("get_local_nick"):
+		nick = RankingManager.get_local_nick()
+	else:
+		nick = "Mago_" + str(randi() % 9000 + 1000)
 	var reg = {
 		"aluno_nick": nick,
 		"escola_id": escola_ativa_id,
 		"andar_id": andar_id,
 		"tipo_evento": tipo_evento, # "morte", "pocao", "tempo_andar"
 		"valor": valor,
-		"timestamp": Time.get_datetime_string_from_system()
+		"timestamp": Time.get_datetime_string_from_system(true) + "Z"
 	}
 	var lista: Array = []
 	if FileAccess.file_exists(GAMEPLAY_TELEMETRIA_FILE):
@@ -619,12 +629,9 @@ func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float
 		f_write.store_string(JSON.stringify(lista, "\t"))
 		f_write.close()
 		
-	# Tenta sincronizar com o Supabase ou enfileira no cache offline
-	if not user_token.is_empty():
-		var res_tele = await request_async("/rest/v1/telemetria_gameplay", HTTPClient.METHOD_POST, reg)
-		if not res_tele.get("success", false) and res_tele.get("code", 0) == 0:
-			enfileirar_sync_offline("/rest/v1/telemetria_gameplay", reg)
-	else:
+	# Envia para o Supabase sempre (anon key funciona para INSERT com RLS aberto)
+	var res_tele = await request_async("/rest/v1/telemetria_gameplay", HTTPClient.METHOD_POST, reg)
+	if not res_tele.get("success", false):
 		enfileirar_sync_offline("/rest/v1/telemetria_gameplay", reg)
 
 func obter_telemetria_gameplay(filtro_escola_id: String = "") -> Array:
@@ -648,7 +655,13 @@ func obter_telemetria_gameplay(filtro_escola_id: String = "") -> Array:
 # --- RESPOSTAS DE V OU F (FÚRIA DO CHEFE) ---
 
 func salvar_resposta_vf(afirmacao_texto: String, resposta_aluno: bool, resposta_correta: bool, acertou: bool, tempo_resposta: float, andar_id: int) -> void:
-	var nick = user_nick if not user_nick.is_empty() else "Mago"
+	var nick: String
+	if not user_nick.is_empty():
+		nick = user_nick
+	elif RankingManager and RankingManager.has_method("get_local_nick"):
+		nick = RankingManager.get_local_nick()
+	else:
+		nick = "Mago_" + str(randi() % 9000 + 1000)
 	var data_resp = {
 		"pergunta_id": 9000 + (andar_id * 100),
 		"acertou": acertou,
@@ -669,56 +682,60 @@ func salvar_resposta_vf(afirmacao_texto: String, resposta_aluno: bool, resposta_
 	print("[Analytics] Resposta V/F do Boss gravada: %s (Acertou: %s)" % [afirmacao_texto.substr(0, 30), str(acertou)])
 
 func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
-	# Envia payload enriquecido para o Supabase
+	# Garante nick unico para visitantes - nunca sobrescreve "Mago" generico
+	var nick_final: String = data_resp_completo.get("aluno_nick", "")
+	if nick_final.is_empty() or nick_final == "Mago Anonimo":
+		if not user_nick.is_empty():
+			nick_final = user_nick
+		elif RankingManager and RankingManager.has_method("get_local_nick"):
+			nick_final = RankingManager.get_local_nick()
+		else:
+			nick_final = "Visitante"
+	
+	# Payload completo - todas as colunas que existem no banco
 	var payload_servidor = {
 		"pergunta_id": data_resp_completo.get("pergunta_id", 0),
 		"acertou": data_resp_completo.get("acertou", false),
 		"andar_id": data_resp_completo.get("andar_id", 1),
-		"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
+		"aluno_nick": nick_final,
+		"escola_id": data_resp_completo.get("escola_id", escola_ativa_id),
+		"tempo_resposta": data_resp_completo.get("tempo_resposta", 0.0),
+		"alternativa_marcada": data_resp_completo.get("alternativa_marcada", ""),
+		"cla_aluno": data_resp_completo.get("cla_aluno", user_cla if not user_cla.is_empty() else "Nenhum"),
+		"consultas_grimorio": data_resp_completo.get("consultas_grimorio", 0)
 	}
 	
-	# Se a tabela tiver colunas extras adicionadas via migração SQL
-	if data_resp_completo.has("tempo_resposta"):
-		payload_servidor["tempo_resposta"] = data_resp_completo["tempo_resposta"]
-	if data_resp_completo.has("escola_id"):
-		payload_servidor["escola_id"] = data_resp_completo["escola_id"]
-	if data_resp_completo.has("alternativa_marcada"):
-		payload_servidor["alternativa_marcada"] = data_resp_completo["alternativa_marcada"]
-	if data_resp_completo.has("cla_aluno"):
-		payload_servidor["cla_aluno"] = data_resp_completo["cla_aluno"]
-	if data_resp_completo.has("consultas_grimorio"):
-		payload_servidor["consultas_grimorio"] = data_resp_completo["consultas_grimorio"]
-		
+	# Envia para o Supabase sempre (anon key + RLS aberto = funciona sem login)
 	var res = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, payload_servidor)
 	
-	if not res.get("success", false):
-		var code = res.get("code", 0)
-		if code == 0:
-			# Sem rede ou timeout: salva no buffer para sincronização posterior
-			enfileirar_sync_offline("/rest/v1/respostas", payload_servidor)
-		elif code == 400:
-			# Se falhar com erro 400 (ex: colunas extras ainda não criadas no Supabase), tenta baseline
-			var baseline_com_escola = {
-				"pergunta_id": data_resp_completo.get("pergunta_id", 0),
-				"acertou": data_resp_completo.get("acertou", false),
-				"andar_id": data_resp_completo.get("andar_id", 1),
-				"aluno_nick": data_resp_completo.get("aluno_nick", "Mago"),
-				"escola_id": data_resp_completo.get("escola_id", escola_ativa_id)
-			}
-			var res2 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_com_escola)
-			if not res2.get("success", false):
-				if res2.get("code", 0) == 0:
-					enfileirar_sync_offline("/rest/v1/respostas", baseline_com_escola)
-				elif res2.get("code", 0) == 400:
-					var baseline_minimo = {
-						"pergunta_id": data_resp_completo.get("pergunta_id", 0),
-						"acertou": data_resp_completo.get("acertou", false),
-						"andar_id": data_resp_completo.get("andar_id", 1),
-						"aluno_nick": data_resp_completo.get("aluno_nick", "Mago")
-					}
-					var res3 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, baseline_minimo)
-					if not res3.get("success", false) and res3.get("code", 0) == 0:
-						enfileirar_sync_offline("/rest/v1/respostas", baseline_minimo)
+	if res.get("success", false):
+		return # Enviado com sucesso!
+		
+	var code = res.get("code", 0)
+	if code == 0:
+		# Sem rede / timeout - enfileira para reenvio posterior
+		enfileirar_sync_offline("/rest/v1/respostas", payload_servidor)
+		return
+		
+	if code == 400:
+		# Alguma coluna pode nao existir ainda (banco antigo). Tenta versao reduzida.
+		push_warning("[DatabaseManager] Erro 400 ao enviar resposta. Msg: " + res.get("message", "?") + " - tentando payload reduzido.")
+		var payload_minimo = {
+			"pergunta_id": payload_servidor["pergunta_id"],
+			"acertou": payload_servidor["acertou"],
+			"andar_id": payload_servidor["andar_id"],
+			"aluno_nick": payload_servidor["aluno_nick"],
+			"escola_id": payload_servidor["escola_id"]
+		}
+		var res2 = await request_async("/rest/v1/respostas", HTTPClient.METHOD_POST, payload_minimo)
+		if res2.get("success", false):
+			return
+		# Ainda falhou - enfileira para reenvio com payload completo
+		enfileirar_sync_offline("/rest/v1/respostas", payload_servidor)
+		return
+	
+	# Qualquer outro erro (401, 500...) - enfileira para reenvio
+	enfileirar_sync_offline("/rest/v1/respostas", payload_servidor)
 
 # --- SISTEMA DE FILA E CACHE OFFLINE (RESILIÊNCIA EM REDES INSTÁVEIS) ---
 
