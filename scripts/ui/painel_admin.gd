@@ -1980,6 +1980,7 @@ func _exportar_csv() -> void:
 	var dt = Time.get_datetime_dict_from_system()
 	var timestamp_str = "%04d%02d%02d_%02d%02d" % [dt.year, dt.month, dt.day, dt.hour, dt.minute]
 	var mapa_q = dados["mapa_questoes_por_id"]
+	var mapa_alunos = dados.get("mapa_alunos", {})
 	
 	# ARQUIVO 1: Microdados / Respostas Individuais dos Alunos
 	var fn_alunos = "synthesis_respostas_alunos_%s_%s.csv" % [escola_id, timestamp_str]

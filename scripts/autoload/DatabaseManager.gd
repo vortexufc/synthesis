@@ -57,7 +57,7 @@ func _ready() -> void:
 	# cria o no http
 	http_request = HTTPRequest.new()
 	http_request.accept_gzip = false
-	http_request.timeout = 5.0
+	http_request.timeout = 10.0
 	add_child(http_request)
 	http_request.request_completed.connect(_on_request_completed)
 	
@@ -1343,7 +1343,7 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 	var url: String = supabase_url + endpoint
 	var http: HTTPRequest = HTTPRequest.new()
 	http.accept_gzip = false
-	http.timeout = 5.0
+	http.timeout = 10.0
 	add_child(http)
 	
 	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key

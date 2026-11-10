@@ -20,15 +20,20 @@ func _ready() -> void:
 	
 	# Sincroniza o clã do jogador local com a lista de clãs global após um breve delay 
 	# para garantir que os outros autoloads (DatabaseManager, RankingManager) estejam prontos.
-	await get_tree().create_timer(0.2).timeout
+	await get_tree().create_timer(0.8).timeout
 	await load_clans()
 	await check_membership_sync()
 
 # requisicoes de cla no supabase
 func load_clans() -> bool:
 	var res = await DatabaseManager.request_async("/rest/v1/Clas?select=*,MembrosCla(*)", HTTPClient.METHOD_GET)
-	if not res["success"]:
-		push_error("Erro ao carregar clãs do Supabase: " + res["message"])
+	if not res.get("success", false):
+		# Nova tentativa com breve intervalo para contornar concorrência de inicialização
+		await get_tree().create_timer(1.0).timeout
+		res = await DatabaseManager.request_async("/rest/v1/Clas?select=*,MembrosCla(*)", HTTPClient.METHOD_GET)
+		
+	if not res.get("success", false):
+		push_warning("[ClanManager] Clãs online temporariamente indisponíveis: " + str(res.get("message", "")))
 		return false
 		
 	var api_clans = res["data"]
