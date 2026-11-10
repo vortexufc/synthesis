@@ -1084,7 +1084,6 @@ func _abrir_popup_reset() -> void:
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	panel.add_child(vbox)
 	
-	var id_escola = _obter_sessao_selecionada_id()
 	var nome_escola = _obter_sessao_selecionada_nome()
 	
 	var lbl = Label.new()
@@ -1410,7 +1409,7 @@ func _atualizar_botoes_sessao() -> void:
 		else:
 			btn_excluir_sessao.tooltip_text = "Excluir permanentemente a escola/sessão '%s'." % nome_s
 
-func _on_sessao_selecionada(idx: int) -> void:
+func _on_sessao_selecionada(_idx: int) -> void:
 	_atualizar_botoes_sessao()
 	_carregar_dados()
 

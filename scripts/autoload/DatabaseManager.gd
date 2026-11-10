@@ -418,10 +418,8 @@ func remover_sessao_escola(id_codigo: String) -> bool:
 	registrar_sessao_excluida(clean_id)
 	var sessoes = carregar_sessoes_escolas()
 	var removido = false
-	var nome_sessao = ""
 	for i in range(sessoes.size() - 1, -1, -1):
 		if str(sessoes[i].get("id", "")).strip_edges() == clean_id:
-			nome_sessao = str(sessoes[i].get("nome", ""))
 			sessoes.remove_at(i)
 			removido = true
 	if removido:
