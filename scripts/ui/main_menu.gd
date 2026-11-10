@@ -898,11 +898,10 @@ func _atualizar_leaderboard() -> void:
 			var item_nome = str(lista[idx].get("name", "---"))
 			var item_score = int(lista[idx].get("score", 0))
 			
+			name_lbl.text = item_nome.to_upper()
 			if (item_nome == nick_local or item_nome == "Você") and not nick_local.is_empty():
-				name_lbl.text = "VOCÊ"
 				name_lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
 			else:
-				name_lbl.text = item_nome.to_upper()
 				name_lbl.remove_theme_color_override("font_color")
 				
 			pts_lbl.text = "PONTOS: " + str(item_score)

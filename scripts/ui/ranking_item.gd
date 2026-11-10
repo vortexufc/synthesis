@@ -81,7 +81,6 @@ func set_info(posicao: int, nome: String, score: int, eh_cla: bool = false, dado
 			if get_node_or_null("/root/RankingManager"):
 				guest_nick = RankingManager.get_local_nick()
 			if nome == guest_nick or (nome.begins_with("Mago_") and nome == guest_nick):
-				nome_exibido = "Você"
 				label_nome.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
 		elif nome == nick_local:
 			label_nome.add_theme_color_override("font_color", Color(1.0, 0.88, 0.3))
