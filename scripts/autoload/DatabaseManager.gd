@@ -466,7 +466,7 @@ func remover_sessao_escola_async(id_codigo: String) -> bool:
 	await request_async("/rest/v1/rankinggeral?" + query_filtro, HTTPClient.METHOD_DELETE)
 	await request_async("/rest/v1/respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
 	await request_async("/rest/v1/minigames_respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
-	await request_async("/rest/v1/gameplay_telemetria?" + query_filtro, HTTPClient.METHOD_DELETE)
+	await request_async("/rest/v1/telemetria_gameplay?" + query_filtro, HTTPClient.METHOD_DELETE)
 	
 	sessao_escola_removida.emit(clean_id)
 	print("[DatabaseManager] Sessão '%s' removida. Local: %s, Patch: %s, Delete: %s" % [

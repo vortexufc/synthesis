@@ -1135,7 +1135,7 @@ func _confirmar_reset() -> void:
 		await DatabaseManager.request_async("/rest/v1/rankinggeral?" + query_filtro, HTTPClient.METHOD_DELETE)
 		await DatabaseManager.request_async("/rest/v1/respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
 		await DatabaseManager.request_async("/rest/v1/minigames_respostas?" + query_filtro, HTTPClient.METHOD_DELETE)
-		await DatabaseManager.request_async("/rest/v1/gameplay_telemetria?" + query_filtro, HTTPClient.METHOD_DELETE)
+		await DatabaseManager.request_async("/rest/v1/telemetria_gameplay?" + query_filtro, HTTPClient.METHOD_DELETE)
 		
 		# Limpa arquivos analíticos locais desta sessão
 		DatabaseManager.resetar_analytics_sessao(id_escola)
@@ -1878,8 +1878,41 @@ func _coletar_dados_completos_150() -> Dictionary:
 		if sdf["tempo_count"] > 0:
 			sdf["tempo_medio"] = snappedf(sdf["tempo_total"] / float(sdf["tempo_count"]), 0.1)
 
-	var minigames_sessao = DatabaseManager.obter_minigames_analytics(escola_id)
-	var telemetria_gameplay = DatabaseManager.obter_telemetria_gameplay(escola_id)
+	# Carrega minigames locais e mescla com nuvem (Supabase) se disponível
+	var minigames_sessao: Array = DatabaseManager.obter_minigames_analytics(escola_id)
+	var query_mini = "/rest/v1/minigames_respostas?select=*"
+	if escola_id == "geral":
+		query_mini += "&or=(escola_id.eq.geral,escola_id.is.null)"
+	elif escola_id != "todas":
+		query_mini += "&escola_id=eq." + escola_id.uri_encode()
+	var res_mini = await DatabaseManager.request_async(query_mini, HTTPClient.METHOD_GET)
+	if res_mini.get("success", false) and res_mini.get("data") is Array:
+		var chaves_mini = {}
+		for m in minigames_sessao:
+			var k = str(m.get("aluno_nick", "")) + "_" + str(m.get("tipo_minigame", "")) + "_" + str(m.get("timestamp", ""))
+			chaves_mini[k] = true
+		for sm in res_mini["data"]:
+			var k = str(sm.get("aluno_nick", "")) + "_" + str(sm.get("tipo_minigame", "")) + "_" + str(sm.get("timestamp", ""))
+			if not chaves_mini.has(k):
+				minigames_sessao.append(sm)
+
+	# Carrega telemetria local e mescla com nuvem (Supabase) se disponível
+	var telemetria_gameplay: Array = DatabaseManager.obter_telemetria_gameplay(escola_id)
+	var query_tele = "/rest/v1/telemetria_gameplay?select=*"
+	if escola_id == "geral":
+		query_tele += "&or=(escola_id.eq.geral,escola_id.is.null)"
+	elif escola_id != "todas":
+		query_tele += "&escola_id=eq." + escola_id.uri_encode()
+	var res_tele = await DatabaseManager.request_async(query_tele, HTTPClient.METHOD_GET)
+	if res_tele.get("success", false) and res_tele.get("data") is Array:
+		var chaves_tele = {}
+		for t in telemetria_gameplay:
+			var k = str(t.get("aluno_nick", "")) + "_" + str(t.get("tipo_evento", "")) + "_" + str(t.get("timestamp", ""))
+			chaves_tele[k] = true
+		for st in res_tele["data"]:
+			var k = str(st.get("aluno_nick", "")) + "_" + str(st.get("tipo_evento", "")) + "_" + str(st.get("timestamp", ""))
+			if not chaves_tele.has(k):
+				telemetria_gameplay.append(st)
 	var telemetria_playerstats = {
 		"tempo_por_andar": PlayerStats.tempo_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {},
 		"mortes_por_andar": PlayerStats.mortes_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {},
