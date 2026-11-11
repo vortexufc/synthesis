@@ -1160,7 +1160,10 @@ func _confirmar_reset() -> void:
 			dir.remove("guest_config.json")
 			dir.remove("pending_sync.json")
 			dir.remove("ranking.json")
+		for web_key in ["synthesis_save_data", "synthesis_progresso_data", "synthesis_guest_config", "synthesis_ranking_local", "synthesis_pending_sync"]:
+			DatabaseManager.web_storage_remove(web_key)
 			
+		RankingManager.local_guest_nick = ""
 		RankingManager.ranking_geral.clear()
 		RankingManager.ranking_diario.clear()
 		RankingManager.ranking_semanal.clear()

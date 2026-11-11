@@ -24,8 +24,12 @@ func get_active_nick() -> String:
 			return lg
 	return "Mago_" + str(randi() % 9000 + 1000)
 
-# chave usada para salvar sessao no localStorage (web)
+# chave usada para salvar sessao no localStorage (web) e fallback desktop
 const SESSION_KEY := "synthesis_session"
+const SESSION_FILE := "user://session.json"
+const PROGRESSO_STORAGE_KEY := "synthesis_progresso_data"
+
+var _ultimo_refresh_rejeitado: bool = false
 
 
 # sinal pra avisar outras partes do jogo q a resposta chegou
@@ -54,6 +58,7 @@ var _sincronizando_offline: bool = false
 var http_request: HTTPRequest
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	# cria o no http
 	http_request = HTTPRequest.new()
 	http_request.accept_gzip = false
@@ -97,28 +102,93 @@ var escola_ativa_nome: String = "Geral (Padrão)"
 signal sessao_escola_alterada(id_escola: String, nome_escola: String)
 signal sessao_escola_removida(id_escola: String)
 
+## Helpers seguros para persistência síncrona no localStorage (Web) usando Base64 UTF-8.
+func web_storage_set(key: String, value_str: String) -> void:
+	if not OS.has_feature("web") or not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	var b64 := Marshalls.utf8_to_base64(value_str)
+	var js := """
+	(function(k, b64) {
+		try {
+			var bin = atob(b64);
+			var bytes = new Uint8Array(bin.length);
+			for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+			localStorage.setItem(k, new TextDecoder('utf-8').decode(bytes));
+		} catch (e) {}
+	})('%s', '%s');
+	""" % [key.replace("'", ""), b64]
+	JavaScriptBridge.eval(js)
+
+func web_storage_get(key: String) -> String:
+	if not OS.has_feature("web") or not ClassDB.class_exists("JavaScriptBridge"):
+		return ""
+	var raw = JavaScriptBridge.eval("(function(k){ try { return localStorage.getItem(k) || ''; } catch(e) { return ''; } })('%s');" % key.replace("'", ""))
+	if raw == null:
+		return ""
+	var s := str(raw)
+	if s == "null" or s == "undefined":
+		return ""
+	return s
+
+func web_storage_remove(key: String) -> void:
+	if not OS.has_feature("web") or not ClassDB.class_exists("JavaScriptBridge"):
+		return
+	JavaScriptBridge.eval("(function(k){ try { localStorage.removeItem(k); } catch(e) {} })('%s');" % key.replace("'", ""))
+
 func salvar_progresso() -> void:
-	var file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
 	var data = {
 		"active_dungeon": active_dungeon,
 		"escola_ativa_id": escola_ativa_id,
-		"escola_ativa_nome": escola_ativa_nome
+		"escola_ativa_nome": escola_ativa_nome,
+		"_saved_at_ms": int(Time.get_unix_time_from_system() * 1000.0)
 	}
-	file.store_string(JSON.stringify(data))
-	file.close()
+	var json_str := JSON.stringify(data)
+	var file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(json_str)
+		file.close()
+	web_storage_set(PROGRESSO_STORAGE_KEY, json_str)
 
 func carregar_progresso() -> void:
-	if not FileAccess.file_exists(SAVE_FILE):
+	var data_file: Dictionary = {}
+	if FileAccess.file_exists(SAVE_FILE):
+		var file = FileAccess.open(SAVE_FILE, FileAccess.READ)
+		if file:
+			var json = JSON.new()
+			if json.parse(file.get_as_text()) == OK and json.data is Dictionary:
+				data_file = json.data
+			file.close()
+
+	var data_web: Dictionary = {}
+	var raw_web := web_storage_get(PROGRESSO_STORAGE_KEY)
+	if not raw_web.is_empty():
+		var json_w = JSON.new()
+		if json_w.parse(raw_web) == OK and json_w.data is Dictionary:
+			data_web = json_w.data
+
+	var data: Dictionary = {}
+	if not data_web.is_empty() and data_file.is_empty():
+		data = data_web
+	elif not data_file.is_empty() and data_web.is_empty():
+		data = data_file
+	elif not data_web.is_empty() and not data_file.is_empty():
+		var ts_file: int = int(data_file.get("_saved_at_ms", 0))
+		var ts_web: int = int(data_web.get("_saved_at_ms", 0))
+		data = data_web if ts_web >= ts_file else data_file
+
+	if data.is_empty():
 		return
-	var file = FileAccess.open(SAVE_FILE, FileAccess.READ)
-	var json = JSON.new()
-	if json.parse(file.get_as_text()) == OK:
-		var data = json.data
-		if data is Dictionary:
-			active_dungeon = data.get("active_dungeon", "")
-			escola_ativa_id = data.get("escola_ativa_id", "geral")
-			escola_ativa_nome = data.get("escola_ativa_nome", "Geral (Padrão)")
-	file.close()
+
+	active_dungeon = data.get("active_dungeon", "")
+	escola_ativa_id = data.get("escola_ativa_id", "geral")
+	escola_ativa_nome = data.get("escola_ativa_nome", "Geral (Padrão)")
+
+	# Mantém arquivo e web sincronizados após recuperação
+	if not FileAccess.file_exists(SAVE_FILE) and not data_web.is_empty():
+		var f_sync = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
+		if f_sync:
+			f_sync.store_string(JSON.stringify(data))
+			f_sync.close()
 
 func resetar_expedicao_ativa() -> void:
 	active_dungeon = ""
@@ -988,13 +1058,9 @@ func _on_request_completed(_result: int, response_code: int, _headers: PackedStr
 		push_error("erro http: " + str(response_code) + " | " + msg_erro)
 		auth_erro.emit(msg_erro)
 
-# --- PERSISTÊNCIA DE SESSÃO WEB (localStorage) ---
+# --- PERSISTÊNCIA DE SESSÃO (localStorage Web + arquivo local Desktop) ---
 
 func _salvar_sessao_web() -> void:
-	if not OS.has_feature("web"):
-		return
-	if not ClassDB.class_exists("JavaScriptBridge"):
-		return
 	var dados_sessao = JSON.stringify({
 		"token": user_token,
 		"refresh_token": user_refresh_token,
@@ -1003,20 +1069,25 @@ func _salvar_sessao_web() -> void:
 		"user_id": user_id,
 		"is_admin": is_admin
 	})
-	JavaScriptBridge.eval("localStorage.setItem('%s', '%s');" % [SESSION_KEY, dados_sessao.replace("'", "\\'")])
-	print("[DatabaseManager] Sessão salva no localStorage.")
+	web_storage_set(SESSION_KEY, dados_sessao)
+	var f = FileAccess.open(SESSION_FILE, FileAccess.WRITE)
+	if f:
+		f.store_string(dados_sessao)
+		f.close()
+	print("[DatabaseManager] Sessão salva localmente para: ", user_nick)
 
 func _restaurar_sessao_web() -> void:
-	if not OS.has_feature("web"):
-		return
-	if not ClassDB.class_exists("JavaScriptBridge"):
-		return
-	var raw = JavaScriptBridge.eval("localStorage.getItem('%s');" % SESSION_KEY)
-	if raw == null or str(raw) == "" or str(raw) == "null":
+	var raw: String = web_storage_get(SESSION_KEY)
+	if raw.is_empty() and FileAccess.file_exists(SESSION_FILE):
+		var f = FileAccess.open(SESSION_FILE, FileAccess.READ)
+		if f:
+			raw = f.get_as_text()
+			f.close()
+	if raw.is_empty():
 		print("[DatabaseManager] Nenhuma sessão salva encontrada.")
 		return
 	var json = JSON.new()
-	if json.parse(str(raw)) != OK:
+	if json.parse(raw) != OK:
 		print("[DatabaseManager] Sessão salva corrompida. Ignorando.")
 		_limpar_sessao_web()
 		return
@@ -1031,12 +1102,14 @@ func _restaurar_sessao_web() -> void:
 	user_cla   = str(d.get("cla",   "Nenhum"))
 	user_id    = str(d.get("user_id", ""))
 	is_admin   = bool(d.get("is_admin", false))
-	print("[DatabaseManager] Sessão restaurada do localStorage para: ", user_nick)
+	print("[DatabaseManager] Sessão restaurada para: ", user_nick)
 	# Verifica silenciosamente se o token ainda é válido no Supabase
 	_verificar_token_restaurado()
 
 func renovar_sessao_async() -> bool:
+	_ultimo_refresh_rejeitado = false
 	if user_refresh_token.is_empty():
+		_ultimo_refresh_rejeitado = true
 		return false
 	print("[DatabaseManager] Solicitando novo access_token com refresh_token...")
 	var res = await request_async("/auth/v1/token?grant_type=refresh_token", HTTPClient.METHOD_POST, {
@@ -1056,7 +1129,10 @@ func renovar_sessao_async() -> bool:
 			_salvar_sessao_web()
 			print("[DatabaseManager] Sessão renovada com sucesso! Nick: ", user_nick)
 			return true
-	print("[DatabaseManager] Falha ao renovar sessão com refresh_token.")
+	var code: int = int(res.get("code", 0))
+	if code in [400, 401, 403]:
+		_ultimo_refresh_rejeitado = true
+	print("[DatabaseManager] Falha ao renovar sessão com refresh_token (code=%d)." % code)
 	return false
 
 func _verificar_token_restaurado() -> void:
@@ -1070,27 +1146,35 @@ func _verificar_token_restaurado() -> void:
 		if u.has("email") and u.email.to_lower() == "admin@synthesis.com":
 			is_admin = true
 		user_id = str(u.get("id", user_id))
-		_salvar_sessao_web() # Atualiza localStorage com dados frescos
+		_salvar_sessao_web() # Atualiza localStorage e arquivo local com dados frescos
 		print("[DatabaseManager] Token restaurado validado com sucesso.")
 		auth_sucesso.emit(user_token)
 	else:
-		# Se o access_token expirou, tenta renovar silenciosamente usando o refresh_token
+		var code: int = int(res.get("code", 0))
+		# Falha de rede/timeout (code == 0 ou 5xx): mantém a sessão restaurada localmente sem deslogar!
+		if code == 0 or code >= 500:
+			print("[DatabaseManager] Servidor inacessível no momento (code=%d). Mantendo sessão local de '%s'." % [code, user_nick])
+			auth_sucesso.emit(user_token)
+			return
+		# Se o access_token expirou (401/403), tenta renovar silenciosamente usando o refresh_token
 		if not user_refresh_token.is_empty():
 			print("[DatabaseManager] Token expirado. Tentando renovar com refresh_token...")
 			var renovou = await renovar_sessao_async()
 			if renovou:
 				auth_sucesso.emit(user_token)
 				return
-		# Se não foi possível renovar, encerra a sessão
-		print("[DatabaseManager] Token restaurado expirado sem renovação possível. Fazendo logout.")
+			if not _ultimo_refresh_rejeitado:
+				print("[DatabaseManager] Renovação falhou por conexão. Mantendo sessão local de '%s'." % user_nick)
+				auth_sucesso.emit(user_token)
+				return
+		# Apenas encerra sessão se o servidor explicitamente rejeitou o token e o refresh_token
+		print("[DatabaseManager] Token restaurado rejeitado pelo servidor. Fazendo logout.")
 		logout()
 
 func _limpar_sessao_web() -> void:
-	if not OS.has_feature("web"):
-		return
-	if not ClassDB.class_exists("JavaScriptBridge"):
-		return
-	JavaScriptBridge.eval("localStorage.removeItem('%s');" % SESSION_KEY)
+	web_storage_remove(SESSION_KEY)
+	if FileAccess.file_exists(SESSION_FILE):
+		DirAccess.remove_absolute(SESSION_FILE)
 
 func logout() -> void:
 	user_token = ""
@@ -1234,39 +1318,48 @@ func validar_nick(nick: String) -> Dictionary:
 	return {"valido": true, "erro": ""}
 
 func atualizar_nick_usuario_async(novo_nick: String) -> Dictionary:
-	var validacao = validar_nick(novo_nick)
+	var limpo: String = novo_nick.strip_edges()
+	var validacao = validar_nick(limpo)
 	if not validacao["valido"]:
 		return validacao
-		
-	if user_token.is_empty():
-		return {"valido": false, "erro": "Crie ou acesse sua conta para personalizar seu nome de mago e disputar no ranking."}
 
 	if is_admin:
 		return {"valido": false, "erro": "A conta de Administrador possui nome exclusivo e fixo."}
 
+	# Jogador visitante (sem conta): salva e migra nick local + ranking
+	if user_token.is_empty():
+		var rm = get_node_or_null("/root/RankingManager")
+		if rm and rm.has_method("renomear_guest_async"):
+			await rm.renomear_guest_async(limpo)
+		elif rm and rm.has_method("set_local_nick"):
+			rm.set_local_nick(limpo)
+		print("[DatabaseManager] Nick de visitante atualizado para '%s'!" % limpo)
+		nick_alterado.emit(limpo)
+		return {"valido": true, "erro": ""}
+
 	var nick_antigo = user_nick
-	user_nick = novo_nick
+	user_nick = limpo
 	
 	# 1. Atualiza user_metadata no Supabase Auth
 	var payload_auth = {
 		"data": {
-			"nick": novo_nick
+			"nick": limpo
 		}
 	}
 	await request_async("/auth/v1/user", HTTPClient.METHOD_PUT, payload_auth)
 	
 	# 2. Atualiza tabela rankinggeral
-	var payload_rk = {"player_name": novo_nick}
+	var payload_rk = {"player_name": limpo}
 	await request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_rk)
 	
 	# 3. Atualiza tabela MembrosCla se tiver
-	var payload_cla = {"player_name": novo_nick}
+	var payload_cla = {"player_name": limpo}
 	await request_async("/rest/v1/MembrosCla?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_cla)
 	
 	_salvar_sessao_web()
 
-	print("[DatabaseManager] Nick alterado de '%s' para '%s' com sucesso!" % [nick_antigo, novo_nick])
-	nick_alterado.emit(novo_nick)
+	print("[DatabaseManager] Nick alterado de '%s' para '%s' com sucesso!" % [nick_antigo, limpo])
+	nick_alterado.emit(limpo)
 	return {"valido": true, "erro": ""}
 
 # busca perguntas do jogo

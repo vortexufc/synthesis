@@ -298,6 +298,14 @@ func _reposicionar_na_porta_correta() -> void:
 					cam.reset_smoothing()
 				break
 
+	# Salva a sala e posição atual imediatamente ao entrar em uma sala da masmorra/hub
+	if PlayerStats and PlayerStats.vida_atual_jogador > 0:
+		var cena_atual_path := ""
+		if get_tree() and get_tree().current_scene:
+			cena_atual_path = str(get_tree().current_scene.scene_file_path).to_lower()
+		if PlayerStats.cutscene_inicial_vista or not ("hub_geral" in cena_atual_path):
+			PlayerStats.salvar()
+
 func _is_porta_norte(porta: Node2D, s_root: Node) -> bool:
 	var floor_node = null
 	if s_root:

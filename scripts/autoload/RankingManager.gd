@@ -13,12 +13,17 @@ var ranking_mensal: Array = []  # score_mensal
 # salva offline se tiver sem net
 const RANKING_FILE = "user://ranking.json"
 const PENDING_SYNC_FILE = "user://pending_sync.json"
+const RANKING_STORAGE_KEY = "synthesis_ranking_local"
+const PENDING_STORAGE_KEY = "synthesis_pending_sync"
 
 # dados de conta de visitante
 const GUEST_FILE = "user://guest_config.json"
+const GUEST_STORAGE_KEY = "synthesis_guest_config"
 var local_guest_nick: String = ""
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_local_nick()
 	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
 		load_ranking()
 		load_ranking_periodo("quimica")
@@ -30,6 +35,49 @@ func _ready() -> void:
 	await load_ranking_periodo("quimica")
 	await load_ranking_periodo("fisica")
 	await load_ranking_periodo("biologia")
+
+## Lê JSON de arquivo local com fallback síncrono do localStorage (Web).
+func _ler_json_persistente(file_path: String, web_key: String) -> Dictionary:
+	var data_file: Dictionary = {}
+	if FileAccess.file_exists(file_path):
+		var f = FileAccess.open(file_path, FileAccess.READ)
+		if f:
+			var json = JSON.new()
+			if json.parse(f.get_as_text()) == OK and typeof(json.data) == TYPE_DICTIONARY:
+				data_file = json.data
+			f.close()
+
+	var data_web: Dictionary = {}
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_get"):
+		var raw_web: String = db.web_storage_get(web_key)
+		if not raw_web.is_empty():
+			var json_w = JSON.new()
+			if json_w.parse(raw_web) == OK and typeof(json_w.data) == TYPE_DICTIONARY:
+				data_web = json_w.data
+
+	if not data_web.is_empty() and data_file.is_empty():
+		return data_web
+	if not data_file.is_empty() and data_web.is_empty():
+		return data_file
+	if not data_web.is_empty() and not data_file.is_empty():
+		var ts_file: int = int(data_file.get("_saved_at_ms", 0))
+		var ts_web: int = int(data_web.get("_saved_at_ms", 0))
+		return data_web if ts_web >= ts_file else data_file
+	return {}
+
+## Salva Dictionary em JSON no arquivo local e espelha no localStorage (Web).
+func _salvar_json_persistente(file_path: String, web_key: String, data: Dictionary) -> void:
+	var copy := data.duplicate()
+	copy["_saved_at_ms"] = int(Time.get_unix_time_from_system() * 1000.0)
+	var txt := JSON.stringify(copy, "\t")
+	var f = FileAccess.open(file_path, FileAccess.WRITE)
+	if f:
+		f.store_string(txt)
+		f.close()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_set"):
+		db.web_storage_set(web_key, JSON.stringify(copy))
 
 # busca o ranking no supabase
 func load_ranking() -> void:
@@ -49,8 +97,7 @@ func load_ranking() -> void:
 
 	if res["success"] and res["data"] is Array:
 		# se deu certo, aproveita pra mandar as pontuacoes pendentes
-		if not DatabaseManager.user_token.is_empty():
-			await sync_pending_scores()
+		await sync_pending_scores()
 			
 		ranking_geral = []
 		for row in res["data"]:
@@ -344,15 +391,10 @@ func sincronizar_insignias_online() -> void:
 
 # funcoes de cache local
 func _add_score_local(player_name: String, pontos: int) -> void:
-	# abre o json local
-	var local_data = {"geral": []}
-	if FileAccess.file_exists(RANKING_FILE):
-		var file_r = FileAccess.open(RANKING_FILE, FileAccess.READ)
-		var content = file_r.get_as_text()
-		file_r.close()
-		var json = JSON.new()
-		if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
-			local_data = json.data
+	# abre o json local (com fallback no localStorage web)
+	var local_data = _ler_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY)
+	if not local_data.has("geral"):
+		local_data["geral"] = []
 
 	var subj = ""
 	if "active_dungeon" in DatabaseManager and DatabaseManager.active_dungeon != null:
@@ -390,12 +432,7 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 		})
 
 	local_data["geral"] = list_geral
-
-	# salva no arquivo
-	var file_w = FileAccess.open(RANKING_FILE, FileAccess.WRITE)
-	if file_w:
-		file_w.store_string(JSON.stringify(local_data, "\t"))
-		file_w.close()
+	_salvar_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY, local_data)
 
 	# reordena a lista na memoria
 	var achou_na_memoria = false
@@ -412,38 +449,25 @@ func _add_score_local(player_name: String, pontos: int) -> void:
 	ranking_atualizado.emit()
 
 func _ler_score_guest_local(player_name: String, coluna: String = "") -> int:
-	if not FileAccess.file_exists(RANKING_FILE):
-		return 0
-	var file = FileAccess.open(RANKING_FILE, FileAccess.READ)
-	var content = file.get_as_text()
-	file.close()
-	var json = JSON.new()
-	if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
-		for item in json.data.get("geral", []):
-			if item.get("name", "") == player_name:
-				if not coluna.is_empty():
-					return int(item.get(coluna, 0))
-				return int(item.get("score", 0))
+	var data = _ler_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY)
+	for item in data.get("geral", []):
+		if item is Dictionary and item.get("name", "") == player_name:
+			if not coluna.is_empty():
+				return int(item.get(coluna, 0))
+			return int(item.get("score", 0))
 	return 0
 
 func _remover_player_local(player_name: String) -> void:
-	if not FileAccess.file_exists(RANKING_FILE):
+	var data = _ler_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY)
+	if data.is_empty():
 		return
-	var file = FileAccess.open(RANKING_FILE, FileAccess.READ)
-	var content = file.get_as_text()
-	file.close()
-	var json = JSON.new()
-	if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
-		var geral = json.data.get("geral", [])
-		var novo_geral = []
-		for item in geral:
-			if item.get("name", "") != player_name:
-				novo_geral.append(item)
-		json.data["geral"] = novo_geral
-		var file_w = FileAccess.open(RANKING_FILE, FileAccess.WRITE)
-		if file_w:
-			file_w.store_string(JSON.stringify(json.data, "\t"))
-			file_w.close()
+	var geral = data.get("geral", [])
+	var novo_geral = []
+	for item in geral:
+		if item is Dictionary and item.get("name", "") != player_name:
+			novo_geral.append(item)
+	data["geral"] = novo_geral
+	_salvar_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY, data)
 
 func _injetar_guest_no_ranking() -> void:
 	# se nao tem visitante ignora
@@ -478,29 +502,18 @@ func _injetar_guest_no_ranking() -> void:
 	ranking_geral.sort_custom(func(a, b): return a["score"] > b["score"])
 
 func _salvar_local() -> void:
-	var data = {"geral": ranking_geral}
-	var file = FileAccess.open(RANKING_FILE, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(data, "\t"))
-		file.close()
+	_salvar_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY, {"geral": ranking_geral})
 
 func _carregar_local() -> void:
-	if not FileAccess.file_exists(RANKING_FILE):
-		ranking_geral = []
-		return
-
-	var file = FileAccess.open(RANKING_FILE, FileAccess.READ)
-	var content = file.get_as_text()
-	file.close()
-
-	var json = JSON.new()
-	if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
-		var raw_geral = json.data.get("geral", [])
+	var data = _ler_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY)
+	if not data.is_empty():
+		var raw_geral = data.get("geral", [])
 		ranking_geral = []
 		for item in raw_geral:
-			var n = str(item.get("name", "")).strip_edges()
-			if not n.is_empty() and n.to_lower() != "admin":
-				ranking_geral.append(item)
+			if item is Dictionary:
+				var n = str(item.get("name", "")).strip_edges()
+				if not n.is_empty() and n.to_lower() != "admin":
+					ranking_geral.append(item)
 	else:
 		ranking_geral = []
 
@@ -546,26 +559,16 @@ func _add_pending_score(player_name: String, pontos: int) -> void:
 	print("[RankingManager] %d pontos salvos como pendentes para %s." % [pontos, player_name])
 
 func _load_pending_scores() -> Dictionary:
-	if not FileAccess.file_exists(PENDING_SYNC_FILE):
-		return {}
-	var file = FileAccess.open(PENDING_SYNC_FILE, FileAccess.READ)
-	var content = file.get_as_text()
-	file.close()
-	var json = JSON.new()
-	if json.parse(content) == OK and json.data is Dictionary:
-		return json.data
-	return {}
+	var raw = _ler_json_persistente(PENDING_SYNC_FILE, PENDING_STORAGE_KEY)
+	raw.erase("_saved_at_ms")
+	return raw
 
 func _save_pending_scores(pending: Dictionary) -> void:
-	var file = FileAccess.open(PENDING_SYNC_FILE, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(pending, "\t"))
-		file.close()
+	var limpo = pending.duplicate()
+	limpo.erase("_saved_at_ms")
+	_salvar_json_persistente(PENDING_SYNC_FILE, PENDING_STORAGE_KEY, limpo)
 
 func sync_pending_scores() -> void:
-	if DatabaseManager.user_token.is_empty():
-		return # Não pode sincronizar se não estiver logado
-
 	var pending = _load_pending_scores()
 	if pending.is_empty():
 		return
@@ -573,7 +576,7 @@ func sync_pending_scores() -> void:
 	print("[RankingManager] Tentando sincronizar pontos pendentes: ", pending)
 	var players_to_remove = []
 	for player_name in pending.keys():
-		var pontos = pending[player_name]
+		var pontos = int(pending[player_name])
 		if pontos <= 0:
 			players_to_remove.append(player_name)
 			continue
@@ -596,28 +599,178 @@ func sync_pending_scores() -> void:
 		_save_pending_scores(pending)
 
 # controle da conta de convidado
+func _salvar_guest_config(nick: String, updated_at_ms: int = 0) -> void:
+	var limpo := nick.strip_edges()
+	if limpo.is_empty():
+		return
+	var ts := updated_at_ms if updated_at_ms > 0 else int(Time.get_unix_time_from_system() * 1000.0)
+	var payload := {"guest_nick": limpo, "updated_at": ts}
+	var json_str := JSON.stringify(payload)
+	var file = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(json_str)
+		file.close()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_set"):
+		db.web_storage_set(GUEST_STORAGE_KEY, json_str)
+
+func _ler_guest_dict_arquivo() -> Dictionary:
+	if not FileAccess.file_exists(GUEST_FILE):
+		return {}
+	var file_read = FileAccess.open(GUEST_FILE, FileAccess.READ)
+	if not file_read:
+		return {}
+	var content = file_read.get_as_text()
+	file_read.close()
+	var json = JSON.new()
+	if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
+		return json.data
+	return {}
+
+func _ler_guest_dict_web() -> Dictionary:
+	var db = get_node_or_null("/root/DatabaseManager")
+	if not db or not db.has_method("web_storage_get"):
+		return {}
+	var raw: String = db.web_storage_get(GUEST_STORAGE_KEY)
+	if raw.is_empty():
+		return {}
+	var json = JSON.new()
+	if json.parse(raw) == OK and typeof(json.data) == TYPE_DICTIONARY:
+		return json.data
+	return {}
+
 func get_local_nick() -> String:
-	if local_guest_nick != "":
+	if not local_guest_nick.strip_edges().is_empty():
 		return local_guest_nick
 
-	if FileAccess.file_exists(GUEST_FILE):
-		var file_read = FileAccess.open(GUEST_FILE, FileAccess.READ)
-		var content = file_read.get_as_text()
-		file_read.close()
-		var json = JSON.new()
-		if json.parse(content) == OK and typeof(json.data) == TYPE_DICTIONARY:
-			if json.data.has("guest_nick"):
-				local_guest_nick = json.data["guest_nick"]
-				return local_guest_nick
+	var d_file := _ler_guest_dict_arquivo()
+	var d_web := _ler_guest_dict_web()
 
-	# id do visitante pra este pc
+	var n_file := str(d_file.get("guest_nick", "")).strip_edges()
+	var n_web := str(d_web.get("guest_nick", "")).strip_edges()
+	var ts_file: int = int(d_file.get("updated_at", 0))
+	var ts_web: int = int(d_web.get("updated_at", 0))
+
+	var escolhido := ""
+	var ts_escolhido := 0
+
+	if not n_file.is_empty() and n_web.is_empty():
+		escolhido = n_file
+		ts_escolhido = ts_file
+	elif not n_web.is_empty() and n_file.is_empty():
+		escolhido = n_web
+		ts_escolhido = ts_web
+	elif not n_file.is_empty() and not n_web.is_empty():
+		# Prioriza o registro mais recente; em empate, prioriza nick personalizado (não Mago_XXXX)
+		if ts_web > ts_file:
+			escolhido = n_web
+			ts_escolhido = ts_web
+		elif ts_file > ts_web:
+			escolhido = n_file
+			ts_escolhido = ts_file
+		elif n_file.begins_with("Mago_") and not n_web.begins_with("Mago_"):
+			escolhido = n_web
+			ts_escolhido = ts_web
+		else:
+			escolhido = n_file
+			ts_escolhido = ts_file
+
+	if not escolhido.is_empty():
+		local_guest_nick = escolhido
+		# Ressincroniza arquivo + localStorage caso um dos dois tenha se perdido
+		if escolhido != n_file or escolhido != n_web or not FileAccess.file_exists(GUEST_FILE):
+			_salvar_guest_config(local_guest_nick, ts_escolhido)
+		return local_guest_nick
+
+	# id do visitante pra este dispositivo (primeira execução real)
 	randomize()
 	local_guest_nick = "Mago_" + str(randi() % 9000 + 1000)
-	var file = FileAccess.open(GUEST_FILE, FileAccess.WRITE)
-	file.store_string(JSON.stringify({"guest_nick": local_guest_nick}))
-	file.close()
-
+	_salvar_guest_config(local_guest_nick)
 	return local_guest_nick
+
+func set_local_nick(novo_nick: String) -> void:
+	var limpo := novo_nick.strip_edges()
+	if limpo.is_empty():
+		return
+	local_guest_nick = limpo
+	_salvar_guest_config(local_guest_nick)
+
+func _migrar_nick_cache_local(nick_antigo: String, novo_nick: String) -> void:
+	# 1. Ranking local (user://ranking.json + Web storage)
+	var data = _ler_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY)
+	if not data.is_empty():
+		var geral: Array = data.get("geral", [])
+		var item_antigo: Dictionary = {}
+		var item_novo: Dictionary = {}
+		var restante: Array = []
+		for item in geral:
+			if not (item is Dictionary):
+				continue
+			var n = str(item.get("name", ""))
+			if n == nick_antigo:
+				item_antigo = item
+			elif n == novo_nick:
+				item_novo = item
+			else:
+				restante.append(item)
+		if not item_antigo.is_empty():
+			if item_novo.is_empty():
+				item_antigo["name"] = novo_nick
+				restante.append(item_antigo)
+			else:
+				item_novo["score"] = int(item_novo.get("score", 0)) + int(item_antigo.get("score", 0))
+				item_novo["score_diario"] = int(item_novo.get("score_diario", 0)) + int(item_antigo.get("score_diario", 0))
+				item_novo["score_semanal"] = int(item_novo.get("score_semanal", 0)) + int(item_antigo.get("score_semanal", 0))
+				item_novo["score_mensal"] = int(item_novo.get("score_mensal", 0)) + int(item_antigo.get("score_mensal", 0))
+				restante.append(item_novo)
+			data["geral"] = restante
+			_salvar_json_persistente(RANKING_FILE, RANKING_STORAGE_KEY, data)
+
+	# 2. Fila de sincronização pendente
+	var pending = _load_pending_scores()
+	if pending.has(nick_antigo):
+		var pts = int(pending[nick_antigo])
+		pending.erase(nick_antigo)
+		pending[novo_nick] = int(pending.get(novo_nick, 0)) + pts
+		_save_pending_scores(pending)
+
+	# 3. Atualiza listas em memória para feedback imediato na UI
+	for lista in [ranking_geral, ranking_diario, ranking_semanal, ranking_mensal]:
+		for item in lista:
+			if item is Dictionary and item.get("name", "") == nick_antigo:
+				item["name"] = novo_nick
+	ranking_atualizado.emit()
+
+func renomear_guest_async(novo_nick: String) -> void:
+	var limpo := novo_nick.strip_edges()
+	if limpo.is_empty():
+		return
+	var nick_antigo := get_local_nick()
+	set_local_nick(limpo)
+	if nick_antigo.is_empty() or nick_antigo == limpo:
+		return
+
+	_migrar_nick_cache_local(nick_antigo, limpo)
+
+	# Migra no Supabase rankinggeral se o nick antigo possuir registro online e o novo ainda não existir
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db:
+		var res_old = await db.request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode() + "&select=player_name,score", HTTPClient.METHOD_GET)
+		if res_old.get("success", false) and res_old.get("data") is Array and not res_old["data"].is_empty():
+			var res_new = await db.request_async("/rest/v1/rankinggeral?player_name=eq." + limpo.uri_encode() + "&select=player_name", HTTPClient.METHOD_GET)
+			if res_new.get("success", false) and res_new.get("data") is Array and res_new["data"].is_empty():
+				await db.request_async(
+					"/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(),
+					HTTPClient.METHOD_PATCH,
+					{
+						"player_name": limpo,
+						"updated_at": Time.get_datetime_string_from_system(true) + "Z"
+					}
+				)
+		await load_ranking()
+		await load_ranking_periodo("quimica")
+		await load_ranking_periodo("fisica")
+		await load_ranking_periodo("biologia")
 
 # passa os pontos do visitante pra conta oficial no login
 func fundir_conta_guest(nick_real: String, cla_real: String) -> void:
@@ -653,6 +806,9 @@ func fundir_conta_guest(nick_real: String, cla_real: String) -> void:
 	# limpa o visitante pra nao duplicar
 	if FileAccess.file_exists(GUEST_FILE):
 		DirAccess.remove_absolute(GUEST_FILE)
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_remove"):
+		db.web_storage_remove(GUEST_STORAGE_KEY)
 	local_guest_nick = ""
 
 	await load_ranking()

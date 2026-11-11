@@ -318,7 +318,7 @@ func _atualizar_status_conta() -> void:
 		
 	if lbl_nick_val:
 		var n = ""
-		if db and not db.user_nick.is_empty():
+		if db and not db.user_token.is_empty() and not db.user_nick.is_empty():
 			n = db.user_nick
 		else:
 			var rm = get_node_or_null("/root/RankingManager")
@@ -457,9 +457,12 @@ func _executar_deslogar() -> void:
 	
 	var db = get_node_or_null("/root/DatabaseManager")
 	if db:
-		db.user_token = ""
-		db.user_nick = ""
-		db.user_cla = "Nenhum"
+		if db.has_method("logout"):
+			db.logout()
+		else:
+			db.user_token = ""
+			db.user_nick = ""
+			db.user_cla = "Nenhum"
 	
 	if modo_in_game:
 		if get_node_or_null("/root/MenuPausaManager"):
@@ -479,8 +482,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
-			# Se o modal de confirmação estiver aberto, ESC apenas fecha o modal sem sair do jogo
-			if popup_confirmacao and popup_confirmacao.visible:
+			# Se o modal de alterar nick ou de confirmação estiver aberto, ESC apenas fecha o modal
+			if popup_alterar_nick != null and is_instance_valid(popup_alterar_nick):
+				popup_alterar_nick.queue_free()
+				var am = get_node_or_null("/root/AudioManager")
+				if am and am.has_method("play_sfx"):
+					am.play_sfx("ui_5")
+			elif popup_confirmacao and popup_confirmacao.visible:
 				_fechar_confirmacao()
 				var am = get_node_or_null("/root/AudioManager")
 				if am and am.has_method("play_sfx"):
@@ -544,10 +552,7 @@ func _criar_linha_alterar_nick() -> void:
 func _abrir_modal_alterar_nick() -> void:
 	var db = get_node_or_null("/root/DatabaseManager")
 	var logado = db != null and not db.user_token.is_empty()
-	if not logado:
-		_abrir_modal_aviso_login_nick()
-		return
-		
+
 	if db and db.is_admin:
 		_abrir_modal_aviso_admin_nick()
 		return
@@ -556,12 +561,13 @@ func _abrir_modal_alterar_nick() -> void:
 		popup_alterar_nick.queue_free()
 		
 	popup_alterar_nick = ColorRect.new()
+	popup_alterar_nick.process_mode = Node.PROCESS_MODE_ALWAYS
 	popup_alterar_nick.color = Color(0, 0, 0, 0.85)
 	popup_alterar_nick.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(popup_alterar_nick)
 	
 	var panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(460, 230)
+	panel.custom_minimum_size = Vector2(460, 245)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
@@ -591,8 +597,12 @@ func _abrir_modal_alterar_nick() -> void:
 	vbox.add_child(lbl_tit)
 	
 	var lbl_desc = Label.new()
-	lbl_desc.text = "Escolha seu novo nome (3 a 16 caracteres):"
+	if logado:
+		lbl_desc.text = "Escolha seu novo nome (3 a 16 caracteres):"
+	else:
+		lbl_desc.text = "Escolha seu nome de mago (3 a 16 caracteres).\nEle ficará salvo neste dispositivo mesmo sem conta:"
 	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lbl_desc.add_theme_color_override("font_color", Color(0.85, 0.90, 0.96))
 	lbl_desc.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(lbl_desc)
@@ -600,10 +610,12 @@ func _abrir_modal_alterar_nick() -> void:
 	var input_nick = LineEdit.new()
 	input_nick.max_length = 16
 	var n_atual = ""
-	if db and not db.user_nick.is_empty(): n_atual = db.user_nick
+	if logado and db and not db.user_nick.is_empty():
+		n_atual = db.user_nick
 	else:
 		var rm = get_node_or_null("/root/RankingManager")
-		if rm: n_atual = rm.get_local_nick()
+		if rm:
+			n_atual = rm.get_local_nick()
 	input_nick.text = n_atual
 	input_nick.placeholder_text = "Novo nome de mago..."
 	input_nick.custom_minimum_size = Vector2(300, 36)
@@ -625,7 +637,10 @@ func _abrir_modal_alterar_nick() -> void:
 	var btn_canc = Button.new()
 	btn_canc.text = "Cancelar"
 	btn_canc.custom_minimum_size = Vector2(100, 34)
-	btn_canc.pressed.connect(func(): popup_alterar_nick.queue_free())
+	btn_canc.pressed.connect(func():
+		if is_instance_valid(popup_alterar_nick):
+			popup_alterar_nick.queue_free()
+	)
 	hbox_btns.add_child(btn_canc)
 	
 	var btn_salvar = Button.new()
@@ -642,107 +657,29 @@ func _abrir_modal_alterar_nick() -> void:
 		btn_salvar.disabled = true
 		btn_salvar.text = "Salvando..."
 		var res = await DatabaseManager.atualizar_nick_usuario_async(novo_n)
-		if not res["valido"]:
-			lbl_erro.text = res["erro"]
-			btn_salvar.disabled = false
-			btn_salvar.text = "Salvar Nome"
+		if not is_instance_valid(self):
+			return
+		if not res.get("valido", false):
+			if is_instance_valid(lbl_erro):
+				lbl_erro.text = res.get("erro", "Nome inválido.")
+			if is_instance_valid(btn_salvar):
+				btn_salvar.disabled = false
+				btn_salvar.text = "Salvar Nome"
 			return
 		
 		_atualizar_status_conta()
-		popup_alterar_nick.queue_free()
+		if popup_alterar_nick != null and is_instance_valid(popup_alterar_nick):
+			popup_alterar_nick.queue_free()
 		var am = get_node_or_null("/root/AudioManager")
 		if am and am.has_method("play_sfx"):
 			am.play_sfx("ui-1")
 	)
 	input_nick.text_submitted.connect(func(_t): btn_salvar.emit_signal("pressed"))
 	hbox_btns.add_child(btn_salvar)
-
-func _abrir_modal_aviso_login_nick() -> void:
-	if popup_alterar_nick != null and is_instance_valid(popup_alterar_nick):
-		popup_alterar_nick.queue_free()
-		
-	popup_alterar_nick = ColorRect.new()
-	popup_alterar_nick.color = Color(0, 0, 0, 0.85)
-	popup_alterar_nick.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(popup_alterar_nick)
-	
-	var panel = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(480, 210)
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	
-	var sb = StyleBoxFlat.new()
-	sb.bg_color = Color(0.08, 0.10, 0.18, 0.98)
-	sb.border_color = Color(0.20, 0.65, 0.95, 0.95)
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(10)
-	sb.content_margin_left = 24
-	sb.content_margin_right = 24
-	sb.content_margin_top = 22
-	sb.content_margin_bottom = 22
-	panel.add_theme_stylebox_override("panel", sb)
-	popup_alterar_nick.add_child(panel)
-	
-	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	panel.add_child(vbox)
-	
-	var lbl_tit = Label.new()
-	lbl_tit.text = "✦ CONTA NECESSÁRIA ✦"
-	lbl_tit.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl_tit.add_theme_color_override("font_color", Color(0.95, 0.78, 0.35))
-	lbl_tit.add_theme_font_size_override("font_size", 14)
-	vbox.add_child(lbl_tit)
-	
-	var lbl_desc = Label.new()
-	lbl_desc.text = "Crie ou acesse sua conta para personalizar seu nome de mago e disputar no ranking."
-	lbl_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lbl_desc.add_theme_color_override("font_color", Color(0.88, 0.92, 0.98))
-	lbl_desc.add_theme_font_size_override("font_size", 13)
-	vbox.add_child(lbl_desc)
-	
-	var hbox_btns = HBoxContainer.new()
-	hbox_btns.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox_btns.add_theme_constant_override("separation", 14)
-	vbox.add_child(hbox_btns)
-	
-	var btn_canc = Button.new()
-	btn_canc.text = "Cancelar"
-	btn_canc.custom_minimum_size = Vector2(110, 36)
-	btn_canc.pressed.connect(func(): popup_alterar_nick.queue_free())
-	hbox_btns.add_child(btn_canc)
-	
-	var btn_entrar = Button.new()
-	btn_entrar.text = "Entrar / Cadastrar"
-	btn_entrar.custom_minimum_size = Vector2(170, 36)
-	var sb_entrar = StyleBoxFlat.new()
-	sb_entrar.bg_color = Color(0.18, 0.55, 0.85)
-	sb_entrar.set_corner_radius_all(6)
-	btn_entrar.add_theme_stylebox_override("normal", sb_entrar)
-	btn_entrar.add_theme_color_override("font_color", Color.WHITE)
-	
-	btn_entrar.pressed.connect(func():
-		var am = get_node_or_null("/root/AudioManager")
-		if am and am.has_method("play_sfx"):
-			am.play_sfx("ui_5")
-		popup_alterar_nick.queue_free()
-		if modo_in_game:
-			if get_node_or_null("/root/PlayerStats"):
-				PlayerStats.salvar()
-			if get_node_or_null("/root/MenuPausaManager"):
-				MenuPausaManager.fechar_menu_sem_som()
-			else:
-				get_tree().paused = false
-		var ts = get_node_or_null("/root/TransitionScreen")
-		if ts:
-			ts.change_scene("res://scenes/ui/login.tscn")
-		else:
-			get_tree().change_scene_to_file("res://scenes/ui/login.tscn")
-	)
-	hbox_btns.add_child(btn_entrar)
+	await get_tree().process_frame
+	if is_instance_valid(input_nick):
+		input_nick.grab_focus()
+		input_nick.select_all()
 
 func _abrir_modal_aviso_admin_nick() -> void:
 	if popup_alterar_nick != null and is_instance_valid(popup_alterar_nick):

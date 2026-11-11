@@ -6,6 +6,7 @@ signal clan_list_updated
 var clans_list: Array = []
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	# Conecta para recarregar e ajustar clãs sempre que a sessão/escola mudar
 	DatabaseManager.sessao_escola_alterada.connect(func(_id, _nome):
 		await load_clans()

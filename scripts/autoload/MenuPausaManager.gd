@@ -41,6 +41,11 @@ func _processar_tecla_esc() -> void:
 	if menu_aberto:
 		get_viewport().set_input_as_handled()
 		if _config_instancia and is_instance_valid(_config_instancia):
+			if _config_instancia.get("popup_alterar_nick") and is_instance_valid(_config_instancia.popup_alterar_nick):
+				_config_instancia.popup_alterar_nick.queue_free()
+				if get_node_or_null("/root/AudioManager"):
+					AudioManager.play_sfx("ui_5")
+				return
 			if _config_instancia.get("popup_confirmacao") and _config_instancia.popup_confirmacao.visible:
 				_config_instancia._fechar_confirmacao()
 				if get_node_or_null("/root/AudioManager"):

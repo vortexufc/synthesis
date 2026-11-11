@@ -423,6 +423,7 @@ func registrar_inimigo_derrotado(key: String) -> void:
 	if get_node_or_null("/root/PlayerStats"):
 		if not (key in PlayerStats.inimigos_derrotados):
 			PlayerStats.inimigos_derrotados.append(key)
+		PlayerStats.salvar()
 
 func is_inimigo_derrotado(key: String) -> bool:
 	if key in inimigos_derrotados:

@@ -65,6 +65,11 @@ signal insignias_atualizadas()
 
 const SAVE_PATH = "user://save.json"
 const PERF_PATH = "user://performance_pref.json"
+const SAVE_STORAGE_KEY = "synthesis_save_data"
+const PERF_STORAGE_KEY = "synthesis_performance_pref"
+
+var _save_seq: int = 0
+var _autosave_accum: float = 0.0
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -97,21 +102,40 @@ func _carregar_config_desempenho() -> void:
 			if json.parse(txt) == OK and json.data is Dictionary:
 				modo_desempenho = bool(json.data.get("modo_desempenho", padrao))
 				return
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_get"):
+		var raw_web: String = db.web_storage_get(PERF_STORAGE_KEY)
+		if not raw_web.is_empty():
+			var json_w = JSON.new()
+			if json_w.parse(raw_web) == OK and json_w.data is Dictionary:
+				modo_desempenho = bool(json_w.data.get("modo_desempenho", padrao))
+				return
 	modo_desempenho = padrao
 
 func _salvar_config_desempenho() -> void:
+	var payload := JSON.stringify({"modo_desempenho": modo_desempenho})
 	var f = FileAccess.open(PERF_PATH, FileAccess.WRITE)
 	if f:
-		f.store_string(JSON.stringify({"modo_desempenho": modo_desempenho}))
+		f.store_string(payload)
 		f.close()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_set"):
+		db.web_storage_set(PERF_STORAGE_KEY, payload)
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		salvar()
+	if what in [NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_GO_BACK_REQUEST]:
+		if _em_cena_de_jogo() and vida_atual_jogador > 0:
+			salvar()
+
+func _em_cena_de_jogo() -> bool:
+	if not is_inside_tree() or not get_tree() or not get_tree().current_scene:
+		return false
+	var caminho = str(get_tree().current_scene.scene_file_path)
+	return caminho != "" and not _eh_cena_de_menu(caminho)
 
 func _eh_cena_de_menu(caminho: String) -> bool:
 	var p = caminho.to_lower()
-	return ("main_menu" in p or "login" in p or "cadastro" in p or "auth" in p or "game_over" in p or "ranking" in p or "clas" in p)
+	return ("main_menu" in p or "login" in p or "cadastro" in p or "auth" in p or "game_over" in p or "ranking" in p or "clas" in p or "configuracoes" in p or "painel_admin" in p or "creditos" in p or "adicionar_perguntas" in p)
 
 func _inicializar_dados_padrao():
 	vida_atual_jogador = vida_maxima_jogador
@@ -192,7 +216,10 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 			percurso_salas_salvo = dg.percurso_salas.duplicate()
 			indice_sala_salvo = dg.indice_atual
 			
+	_save_seq += 1
 	var save_dict = {
+		"save_seq": _save_seq,
+		"_saved_at_ms": int(Time.get_unix_time_from_system() * 1000.0),
 		"vida_atual_jogador": vida_atual_jogador,
 		"pocoes": pocoes,
 		"itens": itens,
@@ -223,88 +250,137 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		"mortes_por_andar": mortes_por_andar,
 		"pocoes_por_andar": pocoes_por_andar
 	}
+	var json_str := JSON.stringify(save_dict)
 	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
-		file.store_string(JSON.stringify(save_dict))
+		file.store_string(json_str)
+		file.close()
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_set"):
+		db.web_storage_set(SAVE_STORAGE_KEY, json_str)
 
 func carregar():
+	var data_file: Dictionary = {}
 	if FileAccess.file_exists(SAVE_PATH):
 		var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
-		var content = file.get_as_text()
-		var json = JSON.new()
-		if json.parse(content) == OK:
-			var data = json.data
-			vida_atual_jogador = vida_maxima_jogador # reseta hp inicial
-			pocoes = data.get("pocoes", [])
-			itens = data.get("itens", [])
-			grimorio = data.get("grimorio", [])
-			consultas_grimorio = int(data.get("consultas_grimorio", 0))
-			chaves = int(data.get("chaves", 0))
-			moedas = int(data.get("moedas", 0))
-			vinhetas_desbloqueadas = []
-			for v in data.get("vinhetas_desbloqueadas", []):
-				var v_int = int(v)
-				if not vinhetas_desbloqueadas.has(v_int):
-					vinhetas_desbloqueadas.append(v_int)
-			quests_concluidas = data.get("quests_concluidas", {})
-			quests_ativas = data.get("quests_ativas", {})
-			baus_abertos = data.get("baus_abertos", {})
-			baus_spawnados = data.get("baus_spawnados", {})
-			pergaminhos_coletados = data.get("pergaminhos_coletados", {})
-			itens_coletados = data.get("itens_coletados", {})
-			spawners_sorteados = data.get("spawners_sorteados", {})
-			portas_destrancadas = data.get("portas_destrancadas", [])
-			selos_resolvidos = data.get("selos_resolvidos", [])
-			inimigos_derrotados = data.get("inimigos_derrotados", [])
-			salas_concluidas = data.get("salas_concluidas", [])
-			cena_salva = data.get("cena_salva", "")
-			pos_salva_x = float(data.get("pos_salva_x", 0.0))
-			pos_salva_y = float(data.get("pos_salva_y", 0.0))
-			tem_pos_salva = bool(data.get("tem_pos_salva", false))
-			percurso_salas_salvo = data.get("percurso_salas_salvo", [])
-			indice_sala_salvo = int(data.get("indice_sala_salvo", 0))
-			tempo_por_andar = data.get("tempo_por_andar", {"1": 0.0, "2": 0.0, "3": 0.0})
-			mortes_por_andar = data.get("mortes_por_andar", {"1": 0, "2": 0, "3": 0})
-			pocoes_por_andar = data.get("pocoes_por_andar", {"1": 0, "2": 0, "3": 0})
-			
-			if data.has("cutscene_inicial_vista"):
-				cutscene_inicial_vista = bool(data.get("cutscene_inicial_vista", false))
-			
-			# Se já existia progresso anterior no save, garante que a cutscene seja considerada já vista
-			if not cutscene_inicial_vista and (grimorio.size() > 0 or moedas > 0 or quests_concluidas.size() > 0 or baus_abertos.size() > 0 or tem_pos_salva or percurso_salas_salvo.size() > 0):
-				cutscene_inicial_vista = true
+		if file:
+			var content = file.get_as_text()
+			file.close()
+			var json = JSON.new()
+			if json.parse(content) == OK and json.data is Dictionary:
+				data_file = json.data
 
-			
-			var dg_load = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
-			if dg_load:
-				if "portas_destrancadas" in dg_load and dg_load.portas_destrancadas != null:
-					for p in portas_destrancadas:
-						if not (p in dg_load.portas_destrancadas):
-							dg_load.portas_destrancadas.append(p)
-				if "selos_resolvidos" in dg_load and dg_load.selos_resolvidos != null:
-					for s in selos_resolvidos:
-						if not (s in dg_load.selos_resolvidos):
-							dg_load.selos_resolvidos.append(s)
-				if "inimigos_derrotados" in dg_load and dg_load.inimigos_derrotados != null:
-					for i in inimigos_derrotados:
-						if not (i in dg_load.inimigos_derrotados):
-							dg_load.inimigos_derrotados.append(i)
-				if "salas_concluidas" in dg_load and dg_load.salas_concluidas != null:
-					for sc in salas_concluidas:
-						if not (sc in dg_load.salas_concluidas):
-							dg_load.salas_concluidas.append(sc)
-			
-			_normalizar_itens()
-			vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
+	var data_web: Dictionary = {}
+	var db = get_node_or_null("/root/DatabaseManager")
+	if db and db.has_method("web_storage_get"):
+		var raw_web: String = db.web_storage_get(SAVE_STORAGE_KEY)
+		if not raw_web.is_empty():
+			var json_w = JSON.new()
+			if json_w.parse(raw_web) == OK and json_w.data is Dictionary:
+				data_web = json_w.data
+
+	var data: Dictionary = {}
+	var recuperar_para_arquivo := false
+	if not data_web.is_empty() and data_file.is_empty():
+		data = data_web
+		recuperar_para_arquivo = true
+	elif not data_file.is_empty() and data_web.is_empty():
+		data = data_file
+	elif not data_web.is_empty() and not data_file.is_empty():
+		var ts_file: int = int(data_file.get("_saved_at_ms", 0))
+		var ts_web: int = int(data_web.get("_saved_at_ms", 0))
+		if ts_web > ts_file:
+			data = data_web
+			recuperar_para_arquivo = true
+		elif ts_file > ts_web:
+			data = data_file
 		else:
-			_inicializar_dados_padrao()
+			data = data_web if int(data_web.get("save_seq", 0)) >= int(data_file.get("save_seq", 0)) else data_file
+			if data == data_web:
+				recuperar_para_arquivo = true
+
+	if not data.is_empty():
+		_save_seq = int(data.get("save_seq", 0))
+		vida_atual_jogador = vida_maxima_jogador # reseta hp inicial
+		pocoes = data.get("pocoes", [])
+		itens = data.get("itens", [])
+		grimorio = data.get("grimorio", [])
+		consultas_grimorio = int(data.get("consultas_grimorio", 0))
+		chaves = int(data.get("chaves", 0))
+		moedas = int(data.get("moedas", 0))
+		vinhetas_desbloqueadas = []
+		for v in data.get("vinhetas_desbloqueadas", []):
+			var v_int = int(v)
+			if not vinhetas_desbloqueadas.has(v_int):
+				vinhetas_desbloqueadas.append(v_int)
+		quests_concluidas = data.get("quests_concluidas", {})
+		quests_ativas = data.get("quests_ativas", {})
+		baus_abertos = data.get("baus_abertos", {})
+		baus_spawnados = data.get("baus_spawnados", {})
+		pergaminhos_coletados = data.get("pergaminhos_coletados", {})
+		itens_coletados = data.get("itens_coletados", {})
+		spawners_sorteados = data.get("spawners_sorteados", {})
+		portas_destrancadas = data.get("portas_destrancadas", [])
+		selos_resolvidos = data.get("selos_resolvidos", [])
+		inimigos_derrotados = data.get("inimigos_derrotados", [])
+		salas_concluidas = data.get("salas_concluidas", [])
+		cena_salva = data.get("cena_salva", "")
+		pos_salva_x = float(data.get("pos_salva_x", 0.0))
+		pos_salva_y = float(data.get("pos_salva_y", 0.0))
+		tem_pos_salva = bool(data.get("tem_pos_salva", false))
+		percurso_salas_salvo = data.get("percurso_salas_salvo", [])
+		indice_sala_salvo = int(data.get("indice_sala_salvo", 0))
+		tempo_por_andar = data.get("tempo_por_andar", {"1": 0.0, "2": 0.0, "3": 0.0})
+		mortes_por_andar = data.get("mortes_por_andar", {"1": 0, "2": 0, "3": 0})
+		pocoes_por_andar = data.get("pocoes_por_andar", {"1": 0, "2": 0, "3": 0})
+		
+		if data.has("cutscene_inicial_vista"):
+			cutscene_inicial_vista = bool(data.get("cutscene_inicial_vista", false))
+		
+		# Se já existia progresso anterior no save, garante que a cutscene seja considerada já vista
+		if not cutscene_inicial_vista and (grimorio.size() > 0 or moedas > 0 or quests_concluidas.size() > 0 or baus_abertos.size() > 0 or tem_pos_salva or percurso_salas_salvo.size() > 0):
+			cutscene_inicial_vista = true
+
+		# Ressincroniza arquivo local caso tenha sido recuperado do localStorage web
+		if recuperar_para_arquivo:
+			var f_rec = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+			if f_rec:
+				f_rec.store_string(JSON.stringify(data))
+				f_rec.close()
+			print("[PlayerStats] Progresso restaurado do localStorage web e sincronizado!")
+		
+		var dg_load = get_node_or_null("/root/DungeonGenerator") if is_inside_tree() else null
+		if dg_load:
+			if "portas_destrancadas" in dg_load and dg_load.portas_destrancadas != null:
+				for p in portas_destrancadas:
+					if not (p in dg_load.portas_destrancadas):
+						dg_load.portas_destrancadas.append(p)
+			if "selos_resolvidos" in dg_load and dg_load.selos_resolvidos != null:
+				for s in selos_resolvidos:
+					if not (s in dg_load.selos_resolvidos):
+						dg_load.selos_resolvidos.append(s)
+			if "inimigos_derrotados" in dg_load and dg_load.inimigos_derrotados != null:
+				for i in inimigos_derrotados:
+					if not (i in dg_load.inimigos_derrotados):
+						dg_load.inimigos_derrotados.append(i)
+			if "salas_concluidas" in dg_load and dg_load.salas_concluidas != null:
+				for sc in salas_concluidas:
+					if not (sc in dg_load.salas_concluidas):
+						dg_load.salas_concluidas.append(sc)
+		
+		_normalizar_itens()
+		vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	else:
 		_inicializar_dados_padrao()
 
 func tem_progresso_salvo() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
+	var tem_dados := cutscene_inicial_vista or tem_pos_salva or (cena_salva != "" and not _eh_cena_de_menu(cena_salva)) or moedas > 0 or itens.size() > 0 or grimorio.size() > 0 or quests_ativas.size() > 0 or quests_concluidas.size() > 0 or baus_abertos.size() > 0 or inimigos_derrotados.size() > 0
+	if not tem_dados:
 		return false
-	return cutscene_inicial_vista or tem_pos_salva or (cena_salva != "" and not _eh_cena_de_menu(cena_salva)) or moedas > 0 or itens.size() > 0 or grimorio.size() > 0 or quests_ativas.size() > 0 or quests_concluidas.size() > 0 or baus_abertos.size() > 0 or inimigos_derrotados.size() > 0
+	if FileAccess.file_exists(SAVE_PATH):
+		return true
+	var db = get_node_or_null("/root/DatabaseManager")
+	return db != null and db.has_method("web_storage_get") and not db.web_storage_get(SAVE_STORAGE_KEY).is_empty()
 
 # --- Metodos de Persistencia de Mundo e Salas ---
 func is_bau_aberto(id: String) -> bool:
@@ -418,6 +494,8 @@ func resetar_salvamento_completo() -> void:
 	
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(SAVE_PATH)
+	if db and db.has_method("web_storage_remove"):
+		db.web_storage_remove(SAVE_STORAGE_KEY)
 	
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	quests_atualizadas.emit()
@@ -658,6 +736,11 @@ func _process(delta: float) -> void:
 	var a = obter_andar_atual_id()
 	if a > 0:
 		acumular_tempo_andar(a, delta)
+	if _em_cena_de_jogo() and vida_atual_jogador > 0:
+		_autosave_accum += delta
+		if _autosave_accum >= 5.0:
+			_autosave_accum = 0.0
+			salvar()
 
 func obter_andar_atual_id() -> int:
 	if is_inside_tree() and get_tree() and get_tree().current_scene:

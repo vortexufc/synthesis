@@ -165,11 +165,7 @@ func _ready() -> void:
 		else:
 			_abrir_modal_sair()
 	
-	if db == null or db.user_token == "":
-		_lbl_nome.text = "VISITANTE  •  ENTRAR"
-		_lbl_nome.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
-	else:
-		_atualizar_perfil()
+	_atualizar_perfil()
 		
 	panel_perfil.gui_input.connect(func(event: InputEvent):
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -234,16 +230,20 @@ func _on_db_auth_sucesso(_token: String) -> void:
 	_atualizar_perfil()
 
 func _on_db_sessao_encerrada() -> void:
-	if _lbl_nome and is_inside_tree():
-		_lbl_nome.text = "VISITANTE  •  ENTRAR"
-		_lbl_nome.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	_atualizar_perfil()
 
 func _on_nick_alterado(_novo_nick: String) -> void:
 	_atualizar_perfil()
 
 func _atualizar_perfil() -> void:
 	var db = get_node_or_null("/root/DatabaseManager")
-	if not is_inside_tree() or _lbl_nome == null or db == null or db.user_token == "":
+	if not is_inside_tree() or _lbl_nome == null:
+		return
+	if db == null or db.user_token == "":
+		var rm = get_node_or_null("/root/RankingManager")
+		var nick_guest = rm.get_local_nick() if rm and rm.has_method("get_local_nick") else "Visitante"
+		_lbl_nome.text = "%s (VISITANTE)  •  ENTRAR" % nick_guest.to_upper()
+		_lbl_nome.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 		return
 	var cla_texto = ""
 	if not db.user_cla.is_empty() and db.user_cla != "Nenhum":
@@ -270,7 +270,7 @@ func _on_btn_continuar_pressed() -> void:
 		if db.user_token.is_empty() and not db.user_refresh_token.is_empty():
 			await db.renovar_sessao_async()
 		if db.user_token.is_empty() and not _aviso_visitante_visto:
-			_abrir_modal_aviso_visitante(_executar_continuar)
+			_abrir_modal_aviso_visitante(_executar_continuar, false)
 			return
 	_executar_continuar()
 
@@ -285,8 +285,11 @@ func _on_btn_novo_jogo_pressed() -> void:
 		if db:
 			if db.user_token.is_empty() and not db.user_refresh_token.is_empty():
 				await db.renovar_sessao_async()
-			if db.user_token.is_empty() and not _aviso_visitante_visto:
-				_abrir_modal_aviso_visitante(_iniciar_novo_jogo)
+			if db.user_token.is_empty():
+				if not _aviso_visitante_visto:
+					_abrir_modal_aviso_visitante(_iniciar_novo_jogo, true)
+				else:
+					_mostrar_pergaminho_nick(_iniciar_novo_jogo)
 				return
 		_iniciar_novo_jogo()
 
@@ -411,8 +414,11 @@ func _abrir_modal_confirmar_novo_jogo() -> void:
 		if db_conf:
 			if db_conf.user_token.is_empty() and not db_conf.user_refresh_token.is_empty():
 				await db_conf.renovar_sessao_async()
-			if db_conf.user_token.is_empty() and not _aviso_visitante_visto:
-				_abrir_modal_aviso_visitante(_iniciar_novo_jogo)
+			if db_conf.user_token.is_empty():
+				if not _aviso_visitante_visto:
+					_abrir_modal_aviso_visitante(_iniciar_novo_jogo, true)
+				else:
+					_mostrar_pergaminho_nick(_iniciar_novo_jogo)
 				return
 		_iniciar_novo_jogo()
 	)
@@ -595,7 +601,7 @@ func _abrir_modal_sair() -> void:
 	panel.reset_size()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 
-func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
+func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable(), perguntar_nick_apos: bool = false) -> void:
 	var modal_cena = preload("res://scenes/ui/ModalAvisoVisitante.tscn")
 	if modal_cena:
 		var modal = modal_cena.instantiate()
@@ -603,7 +609,10 @@ func _abrir_modal_aviso_visitante(acao_apos: Callable = Callable()) -> void:
 		modal.continuar_como_visitante.connect(func():
 			_aviso_visitante_visto = true
 			if acao_apos.is_valid():
-				_mostrar_pergaminho_nick(acao_apos)
+				if perguntar_nick_apos:
+					_mostrar_pergaminho_nick(acao_apos)
+				else:
+					acao_apos.call()
 		)
 
 ## Exibe um pergaminho para visitantes definirem seu nick antes de iniciar.
@@ -797,16 +806,17 @@ func _mostrar_pergaminho_nick(acao_apos: Callable = Callable()) -> void:
 			lbl_erro.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
 			return
 
-		# Salva o nick no arquivo de visitante
-		if rm:
-			rm.local_guest_nick = novo_nick
-		var f = FileAccess.open("user://guest_config.json", FileAccess.WRITE)
-		if f:
-			f.store_string(JSON.stringify({"guest_nick": novo_nick}))
-			f.close()
+		btn_salvar.disabled = true
+		btn_salvar.text = "Salvando..."
+		if db and db.has_method("atualizar_nick_usuario_async"):
+			await db.atualizar_nick_usuario_async(novo_nick)
+		elif rm and rm.has_method("set_local_nick"):
+			rm.set_local_nick(novo_nick)
+		_atualizar_perfil()
 
 		_tocar_sfx("ui_5")
-		canvas.queue_free()
+		if is_instance_valid(canvas):
+			canvas.queue_free()
 		if acao_apos.is_valid():
 			acao_apos.call()
 
@@ -824,7 +834,8 @@ func _mostrar_pergaminho_nick(acao_apos: Callable = Callable()) -> void:
 
 	# Foca o campo de texto automaticamente
 	await get_tree().process_frame
-	input.grab_focus()
+	if is_instance_valid(input):
+		input.grab_focus()
 
 func _iniciar_novo_jogo() -> void:
 	print("[MainMenu] Iniciando Novo Jogo - resetando salvamento antigo!")
