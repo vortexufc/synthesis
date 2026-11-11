@@ -20,6 +20,7 @@ var vinhetas_desbloqueadas: Array = []
 
 # Telemetria acadêmica por andar (1: Química, 2: Física, 3: Biologia)
 var tempo_por_andar: Dictionary = {"1": 0.0, "2": 0.0, "3": 0.0}
+var tempo_sincronizado_por_andar: Dictionary = {"1": 0.0, "2": 0.0, "3": 0.0}
 var mortes_por_andar: Dictionary = {"1": 0, "2": 0, "3": 0}
 var pocoes_por_andar: Dictionary = {"1": 0, "2": 0, "3": 0}
 
@@ -70,6 +71,7 @@ const PERF_STORAGE_KEY = "synthesis_performance_pref"
 
 var _save_seq: int = 0
 var _autosave_accum: float = 0.0
+var _telemetria_sync_accum: float = 0.0
 
 func _ready():
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -124,6 +126,7 @@ func _salvar_config_desempenho() -> void:
 
 func _notification(what: int) -> void:
 	if what in [NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_GO_BACK_REQUEST]:
+		flush_tempo_telemetria(1.0)
 		if _em_cena_de_jogo() and vida_atual_jogador > 0:
 			salvar()
 
@@ -147,6 +150,7 @@ func _inicializar_dados_padrao():
 	moedas = 0
 	vinhetas_desbloqueadas.clear()
 	tempo_por_andar = {"1": 0.0, "2": 0.0, "3": 0.0}
+	tempo_sincronizado_por_andar = {"1": 0.0, "2": 0.0, "3": 0.0}
 	mortes_por_andar = {"1": 0, "2": 0, "3": 0}
 	pocoes_por_andar = {"1": 0, "2": 0, "3": 0}
 	buff_escudo_salas_restantes = 0
@@ -247,6 +251,7 @@ func salvar(ignorar_posicao_em_jogo: bool = false):
 		"indice_sala_salvo": indice_sala_salvo,
 		"cutscene_inicial_vista": cutscene_inicial_vista,
 		"tempo_por_andar": tempo_por_andar,
+		"tempo_sincronizado_por_andar": tempo_sincronizado_por_andar,
 		"mortes_por_andar": mortes_por_andar,
 		"pocoes_por_andar": pocoes_por_andar
 	}
@@ -331,6 +336,7 @@ func carregar():
 		percurso_salas_salvo = data.get("percurso_salas_salvo", [])
 		indice_sala_salvo = int(data.get("indice_sala_salvo", 0))
 		tempo_por_andar = data.get("tempo_por_andar", {"1": 0.0, "2": 0.0, "3": 0.0})
+		tempo_sincronizado_por_andar = data.get("tempo_sincronizado_por_andar", {"1": 0.0, "2": 0.0, "3": 0.0})
 		mortes_por_andar = data.get("mortes_por_andar", {"1": 0, "2": 0, "3": 0})
 		pocoes_por_andar = data.get("pocoes_por_andar", {"1": 0, "2": 0, "3": 0})
 		
@@ -703,7 +709,7 @@ func resetar_vida() -> void:
 	salvar()
 
 # funcao de tomar dano
-func sofrer_dano(valor: float) -> void:
+func sofrer_dano(valor: float, emitir_fim_jogo: bool = true, p_andar_id: int = 0) -> void:
 	# se tiver invencivel nao toma dano
 	var dev_mgr = get_node_or_null("/root/DevManager")
 	if dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.invencivel:
@@ -724,8 +730,8 @@ func sofrer_dano(valor: float) -> void:
 	vida_alterada.emit(vida_atual_jogador, vida_maxima_jogador)
 	salvar()
 
-	if vida_atual_jogador <= 0:
-		registrar_morte()
+	if vida_atual_jogador <= 0 and emitir_fim_jogo:
+		registrar_morte(p_andar_id)
 		var gs = get_node_or_null("/root/GlobalSignals")
 		if gs:
 			gs.fim_de_jogo.emit(false, {"dano": valor, "causa": "Armadilha"})
@@ -736,33 +742,65 @@ func _process(delta: float) -> void:
 	var a = obter_andar_atual_id()
 	if a > 0:
 		acumular_tempo_andar(a, delta)
+		_telemetria_sync_accum += delta
+		if _telemetria_sync_accum >= 20.0:
+			_telemetria_sync_accum = 0.0
+			flush_tempo_telemetria(1.0)
+	else:
+		_telemetria_sync_accum = 0.0
+		flush_tempo_telemetria(1.0)
 	if _em_cena_de_jogo() and vida_atual_jogador > 0:
 		_autosave_accum += delta
 		if _autosave_accum >= 5.0:
 			_autosave_accum = 0.0
 			salvar()
 
+func _normalizar_texto_andar(texto: String) -> String:
+	var s := texto.to_lower()
+	s = s.replace("í", "i").replace("ì", "i").replace("á", "a").replace("à", "a").replace("ã", "a").replace("â", "a")
+	s = s.replace("é", "e").replace("ê", "e").replace("ó", "o").replace("ô", "o").replace("õ", "o").replace("ú", "u").replace("ç", "c")
+	return s
+
 func obter_andar_atual_id() -> int:
 	if is_inside_tree() and get_tree() and get_tree().current_scene:
-		var path = get_tree().current_scene.scene_file_path.to_lower()
-		if _eh_cena_de_menu(path):
+		var raw_path = get_tree().current_scene.scene_file_path
+		var path = _normalizar_texto_andar(raw_path)
+		if _eh_cena_de_menu(path) or "hub_geral" in path:
 			return 0
 		if "quim" in path or "alquim" in path or "sala01" in path or "sala02" in path or "corredor." in path:
 			return 1
-		elif "fis" in path:
+		elif "fis" in path or "oficina" in path:
 			return 2
 		elif "bio" in path or "estufa" in path:
 			return 3
 	var db = get_node_or_null("/root/DatabaseManager")
 	if db and "active_dungeon" in db and not str(db.active_dungeon).is_empty():
-		var d = str(db.active_dungeon).to_lower()
+		var d = _normalizar_texto_andar(str(db.active_dungeon))
 		if "quim" in d or "alquim" in d: return 1
-		elif "fis" in d: return 2
+		elif "fis" in d or "oficina" in d: return 2
 		elif "bio" in d or "estufa" in d: return 3
 	return 0
 
+func flush_tempo_telemetria(min_segundos: float = 1.0) -> void:
+	var db = get_node_or_null("/root/DatabaseManager")
+	if not db or not db.has_method("salvar_telemetria_gameplay"):
+		return
+	var enviou := false
+	for k in ["1", "2", "3"]:
+		var total_t := float(tempo_por_andar.get(k, 0.0))
+		var sync_t := float(tempo_sincronizado_por_andar.get(k, 0.0))
+		var pendente := total_t - sync_t
+		if pendente >= min_segundos:
+			var valor := snappedf(pendente, 0.1)
+			tempo_sincronizado_por_andar[k] = sync_t + valor
+			db.salvar_telemetria_gameplay("tempo_andar", int(k), valor)
+			enviou = true
+	if enviou:
+		salvar(true)
+
 func registrar_morte(p_andar_id: int = 0) -> void:
 	var a = p_andar_id if p_andar_id > 0 else obter_andar_atual_id()
+	flush_tempo_telemetria(1.0)
 	if a > 0:
 		var k = str(a)
 		mortes_por_andar[k] = int(mortes_por_andar.get(k, 0)) + 1

@@ -150,7 +150,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
 		
 		if _sala_requer_chave() and not _chave_usada:
-			get_viewport().set_input_as_handled()
+			var ps_key = get_node_or_null("/root/PlayerStats")
+			if (ps_key and ps_key.chaves > 0) or ignorar_bloqueio:
+				get_viewport().set_input_as_handled()
 			_tentar_abrir_com_chave_f()
 		elif tem_selo_runico and not _selo_resolvido and not porta_de_retorno:
 			get_viewport().set_input_as_handled()
@@ -235,11 +237,10 @@ func _sala_requer_chave() -> bool:
 		quer_chave = true
 	elif dono and dono.get("dropar_chave_no_ultimo_monstro") == true:
 		quer_chave = true
+	elif dg and dg.has_method("sala_usa_chave") and dg.sala_usa_chave(cena_path):
+		quer_chave = true
 		
 	if quer_chave:
-		# Se a sala já não possui monstros vivos, a chave de drop não pode bloquear a porta!
-		if not _tem_inimigos_vivos():
-			return false
 		return true
 		
 	return false
@@ -321,6 +322,9 @@ func _atualizar_texto_prompt_tranca() -> void:
 	if tem_chave or ignorar:
 		_label_prompt_chave.text = "Pressione [F] para Destrancar a Porta"
 		_label_prompt_chave.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+	elif not _tem_inimigos_vivos():
+		_label_prompt_chave.text = "A porta está trancada. Colete a chave na sala para destrancar."
+		_label_prompt_chave.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	else:
 		_label_prompt_chave.text = "A porta está trancada. Derrote os monstros para obter a chave."
 		_label_prompt_chave.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
@@ -337,11 +341,15 @@ func _tentar_abrir_com_chave_f() -> void:
 	var dev_mgr = get_node_or_null("/root/DevManager")
 	var ignorar_bloqueio = dev_mgr and dev_mgr.DEV_MODE_ENABLED and dev_mgr.passar_portas_trancadas
 	
+	if _tem_inimigos_vivos() and not ignorar_bloqueio:
+		_mostrar_feedback_hub("Portão selado! Derrote todos os monstros da sala.", Color(0.85, 0.25, 0.25, 0.9))
+		return
+	
 	var ps = get_node_or_null("/root/PlayerStats")
 	var tem_chave = ps and ps.chaves > 0
 	
 	if not tem_chave and not ignorar_bloqueio:
-		_atualizar_texto_prompt_tranca()
+		_exibir_prompt_tranca()
 		return
 		
 	if tem_chave and not ignorar_bloqueio:

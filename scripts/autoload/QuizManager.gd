@@ -579,7 +579,7 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 					AudioManager.play_sfx("acerto_1")
 			else:
 				print("[QuizManager] Barreira Rúnica repeliu o ataque! Descarga de 20 HP no Mago!")
-				PlayerStats.sofrer_dano(20.0)
+				PlayerStats.sofrer_dano(20.0, false, _andar_atual)
 				if is_instance_valid(ui_instancia):
 					ui_instancia.atualizar_vida(PlayerStats.vida_atual_jogador / PlayerStats.vida_maxima_jogador, vida_atual_inimigo / vida_maxima_inimigo)
 					if is_instance_valid(_jogador_batalha) and _jogador_batalha.has_node("sprite"):
@@ -587,6 +587,24 @@ func iniciar_batalha(enemy_data: Dictionary = {}) -> void:
 						var tween = get_tree().create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 						tween.tween_property(sprite_mago, "modulate", Color.RED, 0.1)
 						tween.tween_property(sprite_mago, "modulate", Color.WHITE, 0.1)
+				if PlayerStats.vida_atual_jogador <= 0:
+					if is_instance_valid(ui_instancia):
+						ui_instancia.ocultar_interface()
+					var tempo_dec = (Time.get_ticks_msec() - _tempo_inicio_batalha) / 1000.0
+					if PlayerStats.has_method("registrar_morte"):
+						PlayerStats.registrar_morte(_andar_atual)
+					_processando_resposta = false
+					em_batalha = false
+					GlobalSignals.batalha_encerrada.emit(false)
+					PlayerStats.salvar()
+					GlobalSignals.fim_de_jogo.emit(false, {
+						"tempo": tempo_dec,
+						"precisao": 0,
+						"dano": _dano_causado,
+						"eh_boss": _eh_chefe_atual,
+						"andar_id": _andar_atual
+					})
+					return
 
 	# inicia o tempo da batalha
 	if is_instance_valid(ui_instancia):
@@ -686,7 +704,7 @@ func _on_resposta_recebida(indice_botao: int, tempo_sobrando: float) -> void:
 		print("✅ VEREDITO: Certa! Dano de %s! Sangue Golem: %s/100" % [dano_final, vida_atual_inimigo])
 	else:
 		_erros_batalha += 1
-		PlayerStats.sofrer_dano(dano_final)
+		PlayerStats.sofrer_dano(dano_final, false, _andar_atual)
 		print("❌ VEREDITO: Errou/Pausou! Dano de %s em você! Sangue Mago: %s/100" % [dano_final, PlayerStats.vida_atual_jogador])
 		
 		# pisca feedback

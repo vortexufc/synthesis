@@ -282,9 +282,9 @@ func _iniciar_desafio_memoria() -> void:
 		elif get_tree() and get_tree().current_scene:
 			nome_dungeon = get_tree().current_scene.scene_file_path.to_lower()
 			
-		if "fisica" in nome_dungeon:
+		if "fisica" in nome_dungeon or "física" in nome_dungeon or "oficina" in nome_dungeon:
 			andar_id = 2
-		elif "biologia" in nome_dungeon:
+		elif "biologia" in nome_dungeon or "estufa" in nome_dungeon:
 			andar_id = 3
 		elif get_node_or_null("/root/QuizManager"):
 			andar_id = QuizManager._andar_atual

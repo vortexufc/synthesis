@@ -842,7 +842,7 @@ func get_tier_da_sala(arquivo_cena: String = "") -> int:
 func get_tier_override(arquivo_cena: String = "") -> int:
 	return get_tier_da_sala(arquivo_cena)
 
-# Retorna a ordem da sala no percurso da run atual (1-based: Corredor=1, Sala01=2, ..., Boss=9)
+# Retorna a ordem da sala de combate no percurso da run atual (1-based: Sala 1=1, ..., Boss=8)
 func get_ordem_visita_sala_atual(cena: String = "") -> int:
 	var cena_alvo = cena
 	if cena_alvo == "" and get_tree() and get_tree().current_scene:
@@ -850,35 +850,25 @@ func get_ordem_visita_sala_atual(cena: String = "") -> int:
 	if cena_alvo != "":
 		var idx = get_index_da_cena(cena_alvo)
 		if idx != -1:
-			return idx
-	return max(1, indice_atual)
+			return clampi(max(1, idx - 1), 1, 8)
+	return clampi(max(1, indice_atual - 1), 1, 8)
 
-# Retorna a configuração de dificuldade dos minigames (Memória e Ligar Pares) baseado na ordem de visita da sala
-# Salas 1-3: Base (3 pares, Memória=15s, Ligar=20s)
-# Salas 4-7: Quantidade aumentada e tempo proporcional (4 pares, Memória=20s, Ligar=28s)
-# Salas 8+:  Quantidade ainda maior e tempo menor/difícil (5 pares, Memória=18s, Ligar=24s)
+# Retorna a configuração de dificuldade dos minigames (Memória e Ligar Pares) baseado na sala atual (1 a 8)
+# Salas 1 a 5: 3 blocos/pares (Memória=15s, Ligar=20s)
+# Salas 6 a 8: 4 blocos/pares (Memória=18s, Ligar=24s) — máximo de 4 blocos em cada jogo
 func get_config_dificuldade_minigames(cena: String = "", ordem_forcada: int = -1) -> Dictionary:
 	var ordem = ordem_forcada
 	if ordem <= 0:
 		ordem = get_ordem_visita_sala_atual(cena)
 		
-	if ordem >= 8:
+	if ordem >= 6:
 		return {
 			"ordem": ordem,
 			"fase": "dificil",
-			"memoria_pares": 5,
-			"memoria_tempo": 18.0,
-			"ligar_pares": 5,
-			"ligar_tempo": 24.0
-		}
-	elif ordem >= 4:
-		return {
-			"ordem": ordem,
-			"fase": "medio",
 			"memoria_pares": 4,
-			"memoria_tempo": 20.0,
+			"memoria_tempo": 18.0,
 			"ligar_pares": 4,
-			"ligar_tempo": 28.0
+			"ligar_tempo": 24.0
 		}
 	else:
 		return {

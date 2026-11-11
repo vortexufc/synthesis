@@ -392,10 +392,25 @@ func _iniciar_sistema_inimigos_e_portas() -> void:
 	monstros_na_sala = count
 	total_monstros_inicial = count
 	if count == 0:
-		dropar_chave_no_ultimo_monstro = false
 		var dg = get_node_or_null("/root/DungeonGenerator")
-		if dg and dg.has_method("registrar_sala_concluida"):
-			dg.registrar_sala_concluida(scene_file_path)
+		var ja_concluida: bool = dg != null and dg.has_method("is_sala_concluida") and dg.is_sala_concluida(scene_file_path)
+		if _deve_dropar_chave() and not ja_concluida:
+			var ps = get_node_or_null("/root/PlayerStats")
+			var tem_chave_inv: bool = ps != null and int(ps.get("chaves")) > 0
+			var tem_chave_chao := false
+			for ch in get_children():
+				if ch.name.begins_with("ItemChave") or "ItemChave" in str(ch.scene_file_path):
+					tem_chave_chao = true
+					break
+			if not tem_chave_inv and not tem_chave_chao and not _chave_dropada:
+				_chave_dropada = true
+				var player = find_child("Player", true, false)
+				var pos_drop = player.global_position if player else global_position
+				_dropar_chave(pos_drop)
+		else:
+			dropar_chave_no_ultimo_monstro = false
+			if dg and dg.has_method("registrar_sala_concluida"):
+				dg.registrar_sala_concluida(scene_file_path)
 
 	# Garante que todos os inimigos da sala renderizem na camada de entidades (z_index = 4)
 	# e possuam o formato de colisão vertical estilo Player (CapsuleShape2D)
@@ -447,7 +462,7 @@ func _on_inimigo_derrotado(pos: Vector2) -> void:
 	if not _chave_dropada and (monstros_na_sala <= 0 or vivos_restantes <= 1) and _deve_dropar_chave():
 		_chave_dropada = true
 		_dropar_chave(pos)
-	if monstros_na_sala <= 0 or vivos_restantes <= 0:
+	if (monstros_na_sala <= 0 or vivos_restantes <= 0) and not _deve_dropar_chave():
 		var dg = get_node_or_null("/root/DungeonGenerator")
 		if dg and dg.has_method("registrar_sala_concluida"):
 			dg.registrar_sala_concluida(scene_file_path)

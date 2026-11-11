@@ -338,19 +338,14 @@ func iniciar_conexao(p_andar_id: int = 1, p_ordem_sala: int = -1) -> void:
 		if get_tree() and get_tree().current_scene:
 			cena_path = get_tree().current_scene.scene_file_path
 		cfg = dg.get_config_dificuldade_minigames(cena_path, p_ordem_sala)
-	elif p_ordem_sala >= 8:
+	elif p_ordem_sala >= 6:
 		cfg["ordem"] = p_ordem_sala
 		cfg["fase"] = "dificil"
-		cfg["ligar_pares"] = 5
-		cfg["ligar_tempo"] = 24.0
-	elif p_ordem_sala >= 4:
-		cfg["ordem"] = p_ordem_sala
-		cfg["fase"] = "medio"
 		cfg["ligar_pares"] = 4
-		cfg["ligar_tempo"] = 28.0
+		cfg["ligar_tempo"] = 24.0
 
 	ordem_sala = int(cfg.get("ordem", 1))
-	qtd_pares = int(cfg.get("ligar_pares", 3))
+	qtd_pares = clampi(int(cfg.get("ligar_pares", 3)), 3, 4)
 	duracao_total = float(cfg.get("ligar_tempo", 20.0))
 	tempo_restante = duracao_total
 	pares_conectados = 0
