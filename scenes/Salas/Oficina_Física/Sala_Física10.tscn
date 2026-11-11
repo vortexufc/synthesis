@@ -456,7 +456,7 @@ region_rect = Rect2(56.601254, 4.5, 64.48575, 128)
 position = Vector2(-666, 585)
 
 [node name="PortaRetorno" parent="." unique_id=926234218 instance=ExtResource("13_xjwd6")]
-position = Vector2(739, 1862)
+position = Vector2(735, 1833)
 porta_de_retorno = true
 
 [node name="Robo_P_Ciano" parent="." unique_id=1200000021 instance=ExtResource("15_k6hmh")]
