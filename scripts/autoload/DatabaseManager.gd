@@ -95,6 +95,10 @@ const ANALYTICS_FILE = "user://pesquisa_analytics.json"
 const MINIGAMES_ANALYTICS_FILE = "user://minigames_analytics.json"
 const GAMEPLAY_TELEMETRIA_FILE = "user://gameplay_telemetria.json"
 const OFFLINE_SYNC_QUEUE_FILE = "user://telemetria_sync_queue.json"
+const ANALYTICS_STORAGE_KEY = "synthesis_pesquisa_analytics"
+const MINIGAMES_STORAGE_KEY = "synthesis_minigames_analytics"
+const GAMEPLAY_TELEMETRIA_STORAGE_KEY = "synthesis_gameplay_telemetria"
+const OFFLINE_SYNC_STORAGE_KEY = "synthesis_telemetria_sync_queue"
 
 var escola_ativa_id: String = "geral"
 var escola_ativa_nome: String = "Geral (Padrão)"
@@ -554,67 +558,76 @@ func remover_sessao_escola_async(id_codigo: String) -> bool:
 
 # --- ARMAZENAMENTO E CONSULTA DE ANALYTICS EDUCACIONAIS ---
 
+func _ler_array_persistente(file_path: String, storage_key: String) -> Array:
+	if FileAccess.file_exists(file_path):
+		var f = FileAccess.open(file_path, FileAccess.READ)
+		if f:
+			var json = JSON.new()
+			var ok = (json.parse(f.get_as_text()) == OK and json.data is Array)
+			f.close()
+			if ok:
+				return json.data
+	if not storage_key.is_empty():
+		var raw_web := web_storage_get(storage_key)
+		if not raw_web.is_empty():
+			var json_w = JSON.new()
+			if json_w.parse(raw_web) == OK and json_w.data is Array:
+				return json_w.data
+	return []
+
+func _salvar_array_persistente(file_path: String, storage_key: String, lista: Array) -> void:
+	var f_write = FileAccess.open(file_path, FileAccess.WRITE)
+	if f_write:
+		f_write.store_string(JSON.stringify(lista, "\t"))
+		f_write.close()
+	if not storage_key.is_empty():
+		var inicio := maxi(0, lista.size() - 500)
+		web_storage_set(storage_key, JSON.stringify(lista.slice(inicio)))
+
+func _filtrar_array_por_escola(todas: Array, filtro_escola_id: String) -> Array:
+	if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
+		return todas
+	var arr: Array = []
+	for r in todas:
+		if r is Dictionary and str(r.get("escola_id", "geral")) == filtro_escola_id:
+			arr.append(r)
+	return arr
+
 func registrar_resposta_analytics(dados: Dictionary) -> void:
 	var n_aluno = str(dados.get("aluno_nick", "")).strip_edges()
 	if n_aluno.is_empty() or n_aluno == "Mago" or n_aluno == "Mago Desconhecido" or n_aluno == "Visitante" or n_aluno.to_lower().contains("anonimo") or n_aluno.to_lower().contains("anônimo"):
 		dados["aluno_nick"] = get_active_nick()
 		
-	var respostas: Array = []
-	if FileAccess.file_exists(ANALYTICS_FILE):
-		var f_read = FileAccess.open(ANALYTICS_FILE, FileAccess.READ)
-		if f_read:
-			var json = JSON.new()
-			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-				respostas = json.data
-			f_read.close()
-			
+	var respostas: Array = _ler_array_persistente(ANALYTICS_FILE, ANALYTICS_STORAGE_KEY)
 	respostas.append(dados)
-	var f_write = FileAccess.open(ANALYTICS_FILE, FileAccess.WRITE)
-	if f_write:
-		f_write.store_string(JSON.stringify(respostas, "\t"))
-		f_write.close()
+	_salvar_array_persistente(ANALYTICS_FILE, ANALYTICS_STORAGE_KEY, respostas)
 
 func obter_respostas_analytics(filtro_escola_id: String = "") -> Array:
-	if not FileAccess.file_exists(ANALYTICS_FILE):
-		return []
-	var f = FileAccess.open(ANALYTICS_FILE, FileAccess.READ)
-	if not f: return []
-	var json = JSON.new()
-	var arr: Array = []
-	if json.parse(f.get_as_text()) == OK and json.data is Array:
-		var todas: Array = json.data
-		if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
-			arr = todas
-		else:
-			for r in todas:
-				if r is Dictionary and r.get("escola_id", "geral") == filtro_escola_id:
-					arr.append(r)
-	f.close()
-	return arr
+	return _filtrar_array_por_escola(_ler_array_persistente(ANALYTICS_FILE, ANALYTICS_STORAGE_KEY), filtro_escola_id)
 
 func resetar_analytics_sessao(filtro_escola_id: String) -> void:
 	print("[DatabaseManager] Resetando analytics locais da sessão: ", filtro_escola_id)
-	var arquivos = [ANALYTICS_FILE, MINIGAMES_ANALYTICS_FILE, GAMEPLAY_TELEMETRIA_FILE]
-	for arq in arquivos:
-		if FileAccess.file_exists(arq):
-			var f_read = FileAccess.open(arq, FileAccess.READ)
-			if f_read:
-				var json = JSON.new()
-				var mantidos: Array = []
-				if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-					for item in json.data:
-						if item is Dictionary:
-							var esc = item.get("escola_id", "geral")
-							if filtro_escola_id != "todas" and esc == filtro_escola_id:
-								continue # Descarta registros da escola resetada
-							elif filtro_escola_id == "todas":
-								continue # Limpa todos se for todas
-							mantidos.append(item)
-				f_read.close()
-				var f_write = FileAccess.open(arq, FileAccess.WRITE)
-				if f_write:
-					f_write.store_string(JSON.stringify(mantidos, "\t"))
-					f_write.close()
+	var arquivos_cfg = [
+		{"file": ANALYTICS_FILE, "key": ANALYTICS_STORAGE_KEY},
+		{"file": MINIGAMES_ANALYTICS_FILE, "key": MINIGAMES_STORAGE_KEY},
+		{"file": GAMEPLAY_TELEMETRIA_FILE, "key": GAMEPLAY_TELEMETRIA_STORAGE_KEY}
+	]
+	for cfg in arquivos_cfg:
+		var arq: String = cfg["file"]
+		var skey: String = cfg["key"]
+		var dados := _ler_array_persistente(arq, skey)
+		if dados.is_empty() and not FileAccess.file_exists(arq):
+			if filtro_escola_id == "todas":
+				web_storage_remove(skey)
+			continue
+		var mantidos: Array = []
+		for item in dados:
+			if item is Dictionary:
+				var esc = str(item.get("escola_id", "geral"))
+				if filtro_escola_id == "todas" or esc == filtro_escola_id:
+					continue
+				mantidos.append(item)
+		_salvar_array_persistente(arq, skey, mantidos)
 
 # --- ANALYTICS DE MINIGAMES (MEMÓRIA, LIGAR PARES, MURAL) ---
 
@@ -632,20 +645,9 @@ func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bo
 		"timestamp": Time.get_datetime_string_from_system(true) + "Z"
 	}
 	
-	var lista: Array = []
-	if FileAccess.file_exists(MINIGAMES_ANALYTICS_FILE):
-		var f_read = FileAccess.open(MINIGAMES_ANALYTICS_FILE, FileAccess.READ)
-		if f_read:
-			var json = JSON.new()
-			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-				lista = json.data
-			f_read.close()
-			
+	var lista: Array = _ler_array_persistente(MINIGAMES_ANALYTICS_FILE, MINIGAMES_STORAGE_KEY)
 	lista.append(reg)
-	var f_write = FileAccess.open(MINIGAMES_ANALYTICS_FILE, FileAccess.WRITE)
-	if f_write:
-		f_write.store_string(JSON.stringify(lista, "\t"))
-		f_write.close()
+	_salvar_array_persistente(MINIGAMES_ANALYTICS_FILE, MINIGAMES_STORAGE_KEY, lista)
 		
 	# Envia para o Supabase sempre (anon key + RLS aberto = funciona sem login)
 	var res_mini = await request_async("/rest/v1/minigames_respostas", HTTPClient.METHOD_POST, reg)
@@ -654,22 +656,7 @@ func salvar_minigame_analytics(tipo_minigame: String, andar_id: int, vitoria: bo
 	print("[Analytics] Minigame '%s' registrado: vitória=%s | tempo=%.1fs" % [tipo_minigame, str(vitoria), tempo_gasto])
 
 func obter_minigames_analytics(filtro_escola_id: String = "") -> Array:
-	if not FileAccess.file_exists(MINIGAMES_ANALYTICS_FILE):
-		return []
-	var f = FileAccess.open(MINIGAMES_ANALYTICS_FILE, FileAccess.READ)
-	if not f: return []
-	var json = JSON.new()
-	var arr: Array = []
-	if json.parse(f.get_as_text()) == OK and json.data is Array:
-		var todas: Array = json.data
-		if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
-			arr = todas
-		else:
-			for r in todas:
-				if r is Dictionary and r.get("escola_id", "geral") == filtro_escola_id:
-					arr.append(r)
-	f.close()
-	return arr
+	return _filtrar_array_por_escola(_ler_array_persistente(MINIGAMES_ANALYTICS_FILE, MINIGAMES_STORAGE_KEY), filtro_escola_id)
 
 # --- TELEMETRIA DE GAMEPLAY (MORTES, POÇÕES, TEMPO POR ANDAR) ---
 
@@ -683,20 +670,9 @@ func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float
 		"valor": valor,
 		"timestamp": Time.get_datetime_string_from_system(true) + "Z"
 	}
-	var lista: Array = []
-	if FileAccess.file_exists(GAMEPLAY_TELEMETRIA_FILE):
-		var f_read = FileAccess.open(GAMEPLAY_TELEMETRIA_FILE, FileAccess.READ)
-		if f_read:
-			var json = JSON.new()
-			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-				lista = json.data
-			f_read.close()
-			
+	var lista: Array = _ler_array_persistente(GAMEPLAY_TELEMETRIA_FILE, GAMEPLAY_TELEMETRIA_STORAGE_KEY)
 	lista.append(reg)
-	var f_write = FileAccess.open(GAMEPLAY_TELEMETRIA_FILE, FileAccess.WRITE)
-	if f_write:
-		f_write.store_string(JSON.stringify(lista, "\t"))
-		f_write.close()
+	_salvar_array_persistente(GAMEPLAY_TELEMETRIA_FILE, GAMEPLAY_TELEMETRIA_STORAGE_KEY, lista)
 		
 	# Envia para o Supabase sempre (anon key funciona para INSERT com RLS aberto)
 	var res_tele = await request_async("/rest/v1/telemetria_gameplay", HTTPClient.METHOD_POST, reg)
@@ -704,22 +680,7 @@ func salvar_telemetria_gameplay(tipo_evento: String, andar_id: int, valor: float
 		enfileirar_sync_offline("/rest/v1/telemetria_gameplay", reg)
 
 func obter_telemetria_gameplay(filtro_escola_id: String = "") -> Array:
-	if not FileAccess.file_exists(GAMEPLAY_TELEMETRIA_FILE):
-		return []
-	var f = FileAccess.open(GAMEPLAY_TELEMETRIA_FILE, FileAccess.READ)
-	if not f: return []
-	var json = JSON.new()
-	var arr: Array = []
-	if json.parse(f.get_as_text()) == OK and json.data is Array:
-		var todas: Array = json.data
-		if filtro_escola_id.is_empty() or filtro_escola_id == "todas":
-			arr = todas
-		else:
-			for r in todas:
-				if r is Dictionary and r.get("escola_id", "geral") == filtro_escola_id:
-					arr.append(r)
-	f.close()
-	return arr
+	return _filtrar_array_por_escola(_ler_array_persistente(GAMEPLAY_TELEMETRIA_FILE, GAMEPLAY_TELEMETRIA_STORAGE_KEY), filtro_escola_id)
 
 # --- RESPOSTAS DE V OU F (FÚRIA DO CHEFE) ---
 
@@ -799,14 +760,7 @@ func enviar_resposta_supabase(data_resp_completo: Dictionary) -> void:
 # --- SISTEMA DE FILA E CACHE OFFLINE (RESILIÊNCIA EM REDES INSTÁVEIS) ---
 
 func enfileirar_sync_offline(endpoint: String, payload: Dictionary) -> void:
-	var queue: Array = []
-	if FileAccess.file_exists(OFFLINE_SYNC_QUEUE_FILE):
-		var f_read = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.READ)
-		if f_read:
-			var json = JSON.new()
-			if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-				queue = json.data
-			f_read.close()
+	var queue: Array = _ler_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY)
 			
 	var item = {
 		"id": str(Time.get_unix_time_from_system()) + "_" + str(randi() % 10000),
@@ -820,39 +774,16 @@ func enfileirar_sync_offline(endpoint: String, payload: Dictionary) -> void:
 		queue.pop_front()
 	queue.append(item)
 	
-	var f_write = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.WRITE)
-	if f_write:
-		f_write.store_string(JSON.stringify(queue, "\t"))
-		f_write.close()
+	_salvar_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY, queue)
 	print("[Sync Offline] Evento enfileirado no buffer local: %s (Total pendente: %d)" % [endpoint, queue.size()])
 
 func obter_tamanho_fila_sync() -> int:
-	if not FileAccess.file_exists(OFFLINE_SYNC_QUEUE_FILE):
-		return 0
-	var f_read = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.READ)
-	if not f_read: return 0
-	var json = JSON.new()
-	var sz = 0
-	if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-		sz = json.data.size()
-	f_read.close()
-	return sz
+	return _ler_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY).size()
 
 func sincronizar_telemetria_pendente_async() -> void:
 	if _sincronizando_offline:
 		return
-	if not FileAccess.file_exists(OFFLINE_SYNC_QUEUE_FILE):
-		return
-		
-	var f_read = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.READ)
-	if not f_read:
-		return
-	var json = JSON.new()
-	var queue: Array = []
-	if json.parse(f_read.get_as_text()) == OK and json.data is Array:
-		queue = json.data
-	f_read.close()
-	
+	var queue: Array = _ler_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY)
 	if queue.is_empty():
 		return
 		
@@ -905,10 +836,7 @@ func sincronizar_telemetria_pendente_async() -> void:
 					item["tentativas"] = tentativas
 					itens_restantes.append(item)
 					
-	var f_write = FileAccess.open(OFFLINE_SYNC_QUEUE_FILE, FileAccess.WRITE)
-	if f_write:
-		f_write.store_string(JSON.stringify(itens_restantes, "\t"))
-		f_write.close()
+	_salvar_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY, itens_restantes)
 		
 	_sincronizando_offline = false
 	
@@ -1317,6 +1245,93 @@ func validar_nick(nick: String) -> Dictionary:
 				
 	return {"valido": true, "erro": ""}
 
+func _migrar_nick_analytics_locais(nick_antigo: String, novo_nick: String) -> void:
+	if nick_antigo.is_empty() or novo_nick.is_empty() or nick_antigo == novo_nick:
+		return
+
+	var arquivos_planos = [
+		{"file": ANALYTICS_FILE, "key": ANALYTICS_STORAGE_KEY},
+		{"file": MINIGAMES_ANALYTICS_FILE, "key": MINIGAMES_STORAGE_KEY},
+		{"file": GAMEPLAY_TELEMETRIA_FILE, "key": GAMEPLAY_TELEMETRIA_STORAGE_KEY}
+	]
+	for cfg in arquivos_planos:
+		var lista: Array = _ler_array_persistente(cfg["file"], cfg["key"])
+		if lista.is_empty():
+			continue
+		var alterou := false
+		for item in lista:
+			if item is Dictionary and str(item.get("aluno_nick", "")).strip_edges() == nick_antigo:
+				item["aluno_nick"] = novo_nick
+				alterou = true
+		if alterou:
+			_salvar_array_persistente(cfg["file"], cfg["key"], lista)
+
+	# Fila offline pendente também pode conter eventos ainda não enviados do nick antigo
+	var queue: Array = _ler_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY)
+	if not queue.is_empty():
+		var alt_fila := false
+		for item in queue:
+			if item is Dictionary and item.get("payload") is Dictionary:
+				var p: Dictionary = item["payload"]
+				if str(p.get("aluno_nick", "")).strip_edges() == nick_antigo:
+					p["aluno_nick"] = novo_nick
+					alt_fila = true
+				if str(p.get("player_name", "")).strip_edges() == nick_antigo:
+					p["player_name"] = novo_nick
+					alt_fila = true
+		if alt_fila:
+			_salvar_array_persistente(OFFLINE_SYNC_QUEUE_FILE, OFFLINE_SYNC_STORAGE_KEY, queue)
+
+## Migra TODOS os dados do nick antigo para o novo (analytics locais, fila offline, ranking, respostas, minigames, telemetria e clã).
+func migrar_dados_nick_async(nick_antigo: String, novo_nick: String) -> void:
+	var antigo := nick_antigo.strip_edges()
+	var limpo := novo_nick.strip_edges()
+	if antigo.is_empty() or limpo.is_empty() or antigo == limpo:
+		return
+	if antigo.to_lower() == "admin" or limpo.to_lower() == "admin":
+		return
+
+	# 1. Migra todos os arquivos analíticos locais + fila offline + localStorage Web
+	_migrar_nick_analytics_locais(antigo, limpo)
+
+	var rm = get_node_or_null("/root/RankingManager")
+	if rm and rm.has_method("_migrar_nick_cache_local"):
+		rm._migrar_nick_cache_local(antigo, limpo)
+
+	# 2. Tenta migração atômica no Supabase via função RPC (migra tudo e mescla duplicatas)
+	var rpc_payload := {"p_nick_antigo": antigo, "p_nick_novo": limpo}
+	var res_rpc := await request_async("/rest/v1/rpc/migrar_nick_jogador", HTTPClient.METHOD_POST, rpc_payload)
+
+	if not res_rpc.get("success", false):
+		var code: int = int(res_rpc.get("code", 0))
+		if code == 0:
+			# Sem internet no momento: enfileira para executar automaticamente quando voltar
+			enfileirar_sync_offline("/rest/v1/rpc/migrar_nick_jogador", rpc_payload)
+		else:
+			# Fallback REST caso a RPC ainda não tenha sido aplicada no banco
+			if rm and rm.has_method("_migrar_ranking_online_async"):
+				await rm._migrar_ranking_online_async(antigo, limpo)
+			var antigo_enc := antigo.uri_encode()
+			await request_async("/rest/v1/respostas?aluno_nick=eq." + antigo_enc, HTTPClient.METHOD_PATCH, {"aluno_nick": limpo})
+			await request_async("/rest/v1/minigames_respostas?aluno_nick=eq." + antigo_enc, HTTPClient.METHOD_PATCH, {"aluno_nick": limpo})
+			await request_async("/rest/v1/telemetria_gameplay?aluno_nick=eq." + antigo_enc, HTTPClient.METHOD_PATCH, {"aluno_nick": limpo})
+			if not user_token.is_empty():
+				await request_async("/rest/v1/MembrosCla?player_name=eq." + antigo_enc, HTTPClient.METHOD_PATCH, {"player_name": limpo})
+				await request_async("/rest/v1/Clas?lider=eq." + antigo_enc, HTTPClient.METHOD_PATCH, {"lider": limpo})
+
+	# 3. Recarrega rankings e clãs para refletir imediatamente na interface
+	if rm:
+		await rm.load_ranking()
+		await rm.load_ranking_periodo("quimica")
+		await rm.load_ranking_periodo("fisica")
+		await rm.load_ranking_periodo("biologia")
+
+	var cm = get_node_or_null("/root/ClanManager")
+	if cm and cm.has_method("load_clans"):
+		await cm.load_clans()
+
+	print("[DatabaseManager] Dados migrados de '%s' para '%s'." % [antigo, limpo])
+
 func atualizar_nick_usuario_async(novo_nick: String) -> Dictionary:
 	var limpo: String = novo_nick.strip_edges()
 	var validacao = validar_nick(limpo)
@@ -1326,20 +1341,23 @@ func atualizar_nick_usuario_async(novo_nick: String) -> Dictionary:
 	if is_admin:
 		return {"valido": false, "erro": "A conta de Administrador possui nome exclusivo e fixo."}
 
-	# Jogador visitante (sem conta): salva e migra nick local + ranking
+	var rm = get_node_or_null("/root/RankingManager")
+
+	# Jogador visitante (sem conta): salva novo nick e migra TODOS os dados locais e online
 	if user_token.is_empty():
-		var rm = get_node_or_null("/root/RankingManager")
-		if rm and rm.has_method("renomear_guest_async"):
-			await rm.renomear_guest_async(limpo)
-		elif rm and rm.has_method("set_local_nick"):
+		var nick_antigo: String = rm.get_local_nick() if rm and rm.has_method("get_local_nick") else get_active_nick()
+		if rm and rm.has_method("set_local_nick"):
 			rm.set_local_nick(limpo)
-		print("[DatabaseManager] Nick de visitante atualizado para '%s'!" % limpo)
+		if not nick_antigo.is_empty() and nick_antigo != limpo:
+			await migrar_dados_nick_async(nick_antigo, limpo)
+		print("[DatabaseManager] Nick de visitante atualizado de '%s' para '%s'!" % [nick_antigo, limpo])
 		nick_alterado.emit(limpo)
 		return {"valido": true, "erro": ""}
 
 	var nick_antigo = user_nick
 	user_nick = limpo
-	
+	_salvar_sessao_web()
+
 	# 1. Atualiza user_metadata no Supabase Auth
 	var payload_auth = {
 		"data": {
@@ -1347,16 +1365,10 @@ func atualizar_nick_usuario_async(novo_nick: String) -> Dictionary:
 		}
 	}
 	await request_async("/auth/v1/user", HTTPClient.METHOD_PUT, payload_auth)
-	
-	# 2. Atualiza tabela rankinggeral
-	var payload_rk = {"player_name": limpo}
-	await request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_rk)
-	
-	# 3. Atualiza tabela MembrosCla se tiver
-	var payload_cla = {"player_name": limpo}
-	await request_async("/rest/v1/MembrosCla?player_name=eq." + nick_antigo.uri_encode(), HTTPClient.METHOD_PATCH, payload_cla)
-	
-	_salvar_sessao_web()
+
+	# 2. Migra todos os dados (ranking, respostas, minigames, telemetria, clãs e cache local)
+	if not nick_antigo.is_empty() and nick_antigo != limpo:
+		await migrar_dados_nick_async(nick_antigo, limpo)
 
 	print("[DatabaseManager] Nick alterado de '%s' para '%s' com sucesso!" % [nick_antigo, limpo])
 	nick_alterado.emit(limpo)
@@ -1430,14 +1442,14 @@ func atualizar_cla_usuario(novo_cla: String) -> void:
 	make_request("/auth/v1/user", HTTPClient.METHOD_PUT, data)
 
 # faz requisicao http e espera resposta
-func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
+func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}, retry_auth: bool = true, force_anon: bool = false) -> Dictionary:
 	var url: String = supabase_url + endpoint
 	var http: HTTPRequest = HTTPRequest.new()
 	http.accept_gzip = false
 	http.timeout = 10.0
 	add_child(http)
 	
-	var auth_bearer: String = user_token if not user_token.is_empty() else supabase_key
+	var auth_bearer: String = supabase_key if (force_anon or user_token.is_empty()) else user_token
 	var headers: PackedStringArray = [
 		"apikey: " + supabase_key,
 		"Authorization: Bearer " + auth_bearer,
@@ -1472,13 +1484,39 @@ func request_async(endpoint: String, method: HTTPClient.Method, data: Dictionary
 	
 	if response_code >= 200 and response_code < 300:
 		return {"success": true, "code": response_code, "data": res_data}
-	else:
-		var error_msg: String = "Erro da API Supabase"
-		if res_data is Dictionary:
-			error_msg = res_data.get("error_description", res_data.get("msg", res_data.get("message", "Erro desconhecido")))
-		elif res_data is Array and res_data.size() > 0 and res_data[0] is Dictionary:
-			error_msg = res_data[0].get("message", "Erro desconhecido")
-		return {"success": false, "code": response_code, "message": error_msg}
+	
+	if response_code == 401 and retry_auth and not force_anon and not user_token.is_empty() and not endpoint.begins_with("/auth/v1/"):
+		var renovou := await renovar_sessao_async()
+		if renovou:
+			return await request_async(endpoint, method, data, false, false)
+		var eh_endpoint_publico := (method == HTTPClient.METHOD_GET) or endpoint.begins_with("/rest/v1/respostas") or endpoint.begins_with("/rest/v1/minigames_respostas") or endpoint.begins_with("/rest/v1/telemetria_gameplay") or endpoint.begins_with("/rest/v1/rankinggeral")
+		if eh_endpoint_publico:
+			return await request_async(endpoint, method, data, false, true)
+	
+	var error_msg: String = "Erro da API Supabase"
+	if res_data is Dictionary:
+		error_msg = res_data.get("error_description", res_data.get("msg", res_data.get("message", "Erro desconhecido")))
+	elif res_data is Array and res_data.size() > 0 and res_data[0] is Dictionary:
+		error_msg = res_data[0].get("message", "Erro desconhecido")
+	return {"success": false, "code": response_code, "message": error_msg}
+
+func request_select_all_async(base_endpoint: String, page_size: int = 1000, max_rows: int = 20000) -> Dictionary:
+	var acumulado: Array = []
+	var offset: int = 0
+	var sep: String = "&" if base_endpoint.contains("?") else "?"
+	while offset < max_rows:
+		var ep := "%s%slimit=%d&offset=%d" % [base_endpoint, sep, page_size, offset]
+		var res := await request_async(ep, HTTPClient.METHOD_GET)
+		if not res.get("success", false) or not (res.get("data") is Array):
+			if acumulado.is_empty():
+				return res
+			break
+		var lote: Array = res["data"]
+		acumulado.append_array(lote)
+		if lote.size() < page_size:
+			break
+		offset += page_size
+	return {"success": true, "code": 200, "data": acumulado}
 
 # deleta pergunta no supabase e no json local
 func remover_pergunta(pergunta_id: int) -> Dictionary:

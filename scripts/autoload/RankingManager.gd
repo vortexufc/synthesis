@@ -734,12 +734,90 @@ func _migrar_nick_cache_local(nick_antigo: String, novo_nick: String) -> void:
 		pending[novo_nick] = int(pending.get(novo_nick, 0)) + pts
 		_save_pending_scores(pending)
 
-	# 3. Atualiza listas em memória para feedback imediato na UI
+	# 3. Atualiza e mescla listas em memória para feedback imediato na UI (sem duplicatas)
 	for lista in [ranking_geral, ranking_diario, ranking_semanal, ranking_mensal]:
-		for item in lista:
-			if item is Dictionary and item.get("name", "") == nick_antigo:
-				item["name"] = novo_nick
+		var idx_old := -1
+		var idx_new := -1
+		for i in range(lista.size()):
+			if lista[i] is Dictionary:
+				var n := str(lista[i].get("name", ""))
+				if n == nick_antigo:
+					idx_old = i
+				elif n == novo_nick:
+					idx_new = i
+		if idx_old != -1:
+			if idx_new == -1:
+				lista[idx_old]["name"] = novo_nick
+			else:
+				var old_d: Dictionary = lista[idx_old]
+				var new_d: Dictionary = lista[idx_new]
+				new_d["score"] = int(new_d.get("score", 0)) + int(old_d.get("score", 0))
+				new_d["score_diario"] = int(new_d.get("score_diario", 0)) + int(old_d.get("score_diario", 0))
+				new_d["score_semanal"] = int(new_d.get("score_semanal", 0)) + int(old_d.get("score_semanal", 0))
+				new_d["score_mensal"] = int(new_d.get("score_mensal", 0)) + int(old_d.get("score_mensal", 0))
+				var ins_n: Array = new_d.get("insignias", []) if new_d.get("insignias") is Array else []
+				var ins_o: Array = old_d.get("insignias", []) if old_d.get("insignias") is Array else []
+				for ins in ins_o:
+					if not ins_n.has(ins):
+						ins_n.append(ins)
+				new_d["insignias"] = ins_n
+				lista.remove_at(idx_old)
+		lista.sort_custom(func(a, b): return int(a.get("score", 0)) > int(b.get("score", 0)))
 	ranking_atualizado.emit()
+
+func _migrar_ranking_online_async(nick_antigo: String, novo_nick: String) -> void:
+	var db = get_node_or_null("/root/DatabaseManager")
+	if not db:
+		return
+	var antigo_enc := nick_antigo.uri_encode()
+	var novo_enc := novo_nick.uri_encode()
+	var res_old = await db.request_async("/rest/v1/rankinggeral?player_name=eq." + antigo_enc + "&select=*", HTTPClient.METHOD_GET)
+	if not (res_old.get("success", false) and res_old.get("data") is Array and not res_old["data"].is_empty()):
+		return
+
+	var res_new = await db.request_async("/rest/v1/rankinggeral?player_name=eq." + novo_enc + "&select=*", HTTPClient.METHOD_GET)
+	if not res_new.get("success", false) or not (res_new.get("data") is Array):
+		return
+
+	if res_new["data"].is_empty():
+		await db.request_async(
+			"/rest/v1/rankinggeral?player_name=eq." + antigo_enc,
+			HTTPClient.METHOD_PATCH,
+			{
+				"player_name": novo_nick,
+				"updated_at": Time.get_datetime_string_from_system(true) + "Z"
+			}
+		)
+	else:
+		# Mescla pontos e insígnias no registro novo e remove o antigo
+		var row_new: Dictionary = res_new["data"][0]
+		var soma_s := int(row_new.get("score", 0))
+		var soma_sd := int(row_new.get("score_diario", 0))
+		var soma_ss := int(row_new.get("score_semanal", 0))
+		var soma_sm := int(row_new.get("score_mensal", 0))
+		var ins_merged: Array = row_new.get("insignias", []).duplicate() if row_new.get("insignias") is Array else []
+		for row_old in res_old["data"]:
+			soma_s += int(row_old.get("score", 0))
+			soma_sd += int(row_old.get("score_diario", 0))
+			soma_ss += int(row_old.get("score_semanal", 0))
+			soma_sm += int(row_old.get("score_mensal", 0))
+			if row_old.get("insignias") is Array:
+				for ins in row_old["insignias"]:
+					if not ins_merged.has(ins):
+						ins_merged.append(ins)
+		await db.request_async(
+			"/rest/v1/rankinggeral?player_name=eq." + novo_enc,
+			HTTPClient.METHOD_PATCH,
+			{
+				"score": soma_s,
+				"score_diario": soma_sd,
+				"score_semanal": soma_ss,
+				"score_mensal": soma_sm,
+				"insignias": ins_merged,
+				"updated_at": Time.get_datetime_string_from_system(true) + "Z"
+			}
+		)
+		await db.request_async("/rest/v1/rankinggeral?player_name=eq." + antigo_enc, HTTPClient.METHOD_DELETE)
 
 func renomear_guest_async(novo_nick: String) -> void:
 	var limpo := novo_nick.strip_edges()
@@ -750,65 +828,43 @@ func renomear_guest_async(novo_nick: String) -> void:
 	if nick_antigo.is_empty() or nick_antigo == limpo:
 		return
 
-	_migrar_nick_cache_local(nick_antigo, limpo)
-
-	# Migra no Supabase rankinggeral se o nick antigo possuir registro online e o novo ainda não existir
 	var db = get_node_or_null("/root/DatabaseManager")
-	if db:
-		var res_old = await db.request_async("/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode() + "&select=player_name,score", HTTPClient.METHOD_GET)
-		if res_old.get("success", false) and res_old.get("data") is Array and not res_old["data"].is_empty():
-			var res_new = await db.request_async("/rest/v1/rankinggeral?player_name=eq." + limpo.uri_encode() + "&select=player_name", HTTPClient.METHOD_GET)
-			if res_new.get("success", false) and res_new.get("data") is Array and res_new["data"].is_empty():
-				await db.request_async(
-					"/rest/v1/rankinggeral?player_name=eq." + nick_antigo.uri_encode(),
-					HTTPClient.METHOD_PATCH,
-					{
-						"player_name": limpo,
-						"updated_at": Time.get_datetime_string_from_system(true) + "Z"
-					}
-				)
-		await load_ranking()
-		await load_ranking_periodo("quimica")
-		await load_ranking_periodo("fisica")
-		await load_ranking_periodo("biologia")
+	if db and db.has_method("migrar_dados_nick_async"):
+		await db.migrar_dados_nick_async(nick_antigo, limpo)
+	else:
+		_migrar_nick_cache_local(nick_antigo, limpo)
 
-# passa os pontos do visitante pra conta oficial no login
+# passa todos os dados e pontos do visitante pra conta oficial no login
 func fundir_conta_guest(nick_real: String, cla_real: String) -> void:
-	if local_guest_nick == "":
-		get_local_nick()
-
-	if local_guest_nick.is_empty():
+	var nick_guest := get_local_nick()
+	if nick_guest.is_empty():
 		return
 
-	# le o score do json local
-	var score_acumulado: int = _ler_score_guest_local(local_guest_nick)
+	var db = get_node_or_null("/root/DatabaseManager")
 
-	if score_acumulado > 0:
-		print("[RankingManager] Migrando %d pts de '%s' para '%s'..." % [score_acumulado, local_guest_nick, nick_real])
-		
-		# manda pro supabase com o nick da conta
+	# Verifica pontos que ficaram apenas no cache local (modo offline)
+	var score_acumulado: int = _ler_score_guest_local(nick_guest)
+	if score_acumulado > 0 and nick_guest != nick_real:
+		print("[RankingManager] Migrando %d pts locais de '%s' para '%s'..." % [score_acumulado, nick_guest, nick_real])
 		var success = await _upsert_score_online(nick_real, score_acumulado)
-
 		if not success:
-			# se der erro poe na fila sob o nick real
 			_add_pending_score(nick_real, score_acumulado)
-			# e salva local com o nick novo
 			_add_score_local(nick_real, score_acumulado)
-
-		# atualiza os pontos do cla
 		if not cla_real.is_empty() and cla_real != "Nenhum":
 			if ClanManager.has_method("adicionar_pontos_cla"):
 				await ClanManager.adicionar_pontos_cla(cla_real, nick_real, score_acumulado)
 
-	# remove o visitante do arquivo
-	_remover_player_local(local_guest_nick)
+	_remover_player_local(nick_guest)
 
-	# limpa o visitante pra nao duplicar
+	# Limpa a identificação de visitante antes de migrar os registros
 	if FileAccess.file_exists(GUEST_FILE):
 		DirAccess.remove_absolute(GUEST_FILE)
-	var db = get_node_or_null("/root/DatabaseManager")
 	if db and db.has_method("web_storage_remove"):
 		db.web_storage_remove(GUEST_STORAGE_KEY)
 	local_guest_nick = ""
 
-	await load_ranking()
+	# Migra respostas, minigames, telemetria e rankinggeral online de nick_guest -> nick_real
+	if nick_guest != nick_real and db and db.has_method("migrar_dados_nick_async"):
+		await db.migrar_dados_nick_async(nick_guest, nick_real)
+	else:
+		await load_ranking()

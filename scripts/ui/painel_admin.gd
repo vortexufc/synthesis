@@ -1663,7 +1663,19 @@ func _abrir_popup_nova_sessao() -> void:
 
 # --- COLETA E ANÁLISE COMPLETA DAS 150 QUESTÕES E RESPOSTAS ---
 
+func _normalizar_ts_chave(ts: String) -> String:
+	var s := ts.strip_edges()
+	if s.length() >= 19:
+		return s.substr(0, 19)
+	return s
+
 func _coletar_dados_completos_150() -> Dictionary:
+	var ps_flush = get_node_or_null("/root/PlayerStats")
+	if ps_flush and ps_flush.has_method("flush_tempo_telemetria"):
+		ps_flush.flush_tempo_telemetria(1.0)
+	if DatabaseManager.has_method("sincronizar_telemetria_pendente_async") and DatabaseManager.obter_tamanho_fila_sync() > 0:
+		await DatabaseManager.sincronizar_telemetria_pendente_async()
+
 	var escola_id = _obter_sessao_selecionada_id()
 	var escola_nome = _obter_sessao_selecionada_nome()
 	
@@ -1688,7 +1700,7 @@ func _coletar_dados_completos_150() -> Dictionary:
 	elif escola_id != "todas":
 		query_jog += "&escola_id=eq." + escola_id.uri_encode()
 		
-	var res_jog = await DatabaseManager.request_async(query_jog, HTTPClient.METHOD_GET)
+	var res_jog = await DatabaseManager.request_select_all_async(query_jog)
 	if res_jog.get("success", false) and res_jog.get("data") is Array and res_jog["data"].size() > 0:
 		lista_jogadores_cadastrados = res_jog["data"]
 	else:
@@ -1703,21 +1715,23 @@ func _coletar_dados_completos_150() -> Dictionary:
 	var respostas_sessao: Array = DatabaseManager.obter_respostas_analytics(escola_id)
 	
 	# Se Supabase estiver conectado, tenta mesclar respostas adicionais sem duplicatas
-	var query_supa = "/rest/v1/respostas?select=*"
+	var query_supa = "/rest/v1/respostas?select=*&order=id.asc"
 	if escola_id == "geral":
 		query_supa += "&or=(escola_id.eq.geral,escola_id.is.null)"
 	elif escola_id != "todas":
 		query_supa += "&escola_id=eq." + escola_id.uri_encode()
-	var res_supa = await DatabaseManager.request_async(query_supa, HTTPClient.METHOD_GET)
+	var res_supa = await DatabaseManager.request_select_all_async(query_supa)
 	if res_supa.get("success", false) and res_supa.get("data") is Array:
 		var chaves_existentes = {}
 		for r in respostas_sessao:
-			var k = str(r.get("pergunta_id", "")) + "_" + str(r.get("aluno_nick", "")) + "_" + str(r.get("timestamp", ""))
+			var ts_loc = _normalizar_ts_chave(str(r.get("timestamp", r.get("created_at", ""))))
+			var k = str(r.get("pergunta_id", "")) + "_" + str(r.get("aluno_nick", "")).strip_edges().to_lower() + "_" + ts_loc
 			chaves_existentes[k] = true
 		for s_resp in res_supa["data"]:
-			var ts = str(s_resp.get("timestamp", s_resp.get("created_at", "")))
-			var k = str(s_resp.get("pergunta_id", "")) + "_" + str(s_resp.get("aluno_nick", "")) + "_" + ts
+			var ts = _normalizar_ts_chave(str(s_resp.get("timestamp", s_resp.get("created_at", ""))))
+			var k = str(s_resp.get("pergunta_id", "")) + "_" + str(s_resp.get("aluno_nick", "")).strip_edges().to_lower() + "_" + ts
 			if not chaves_existentes.has(k):
+				chaves_existentes[k] = true
 				respostas_sessao.append(s_resp)
 				
 	# 4. Inicializa o mapa consolidado de cada aluno (para a tabela individual de estudantes)
@@ -1725,19 +1739,25 @@ func _coletar_dados_completos_150() -> Dictionary:
 	for j in lista_jogadores_cadastrados:
 		var nick = str(j.get("player_name", j.get("name", ""))).strip_edges()
 		if not nick.is_empty() and nick.to_lower() != "admin":
-			mapa_alunos[nick] = {
-				"nick": nick,
-				"cla": str(j.get("cla", "-")),
-				"score": int(j.get("score", 0)),
-				"questoes_respondidas": 0,
-				"acertos": 0,
-				"erros": 0,
-				"taxa": 0,
-				"tempo_total": 0.0,
-				"tempo_count": 0,
-				"tempo_medio": 0.0,
-				"grimorio_total": 0
-			}
+			if not mapa_alunos.has(nick):
+				mapa_alunos[nick] = {
+					"nick": nick,
+					"cla": str(j.get("cla", "-")),
+					"score": int(j.get("score", 0)),
+					"questoes_respondidas": 0,
+					"acertos": 0,
+					"erros": 0,
+					"taxa": 0,
+					"tempo_total": 0.0,
+					"tempo_count": 0,
+					"tempo_medio": 0.0,
+					"grimorio_total": 0
+				}
+			else:
+				mapa_alunos[nick]["score"] += int(j.get("score", 0))
+				var c_j = str(j.get("cla", "-"))
+				if (mapa_alunos[nick]["cla"] == "-" or mapa_alunos[nick]["cla"].is_empty()) and not c_j.is_empty() and c_j != "-":
+					mapa_alunos[nick]["cla"] = c_j
 				
 	# 5. Mapa de Estatísticas por Pergunta (1 a 150)
 	var mapa_stats = {}
@@ -1906,43 +1926,53 @@ func _coletar_dados_completos_150() -> Dictionary:
 
 	# Carrega minigames locais e mescla com nuvem (Supabase) se disponível
 	var minigames_sessao: Array = DatabaseManager.obter_minigames_analytics(escola_id)
-	var query_mini = "/rest/v1/minigames_respostas?select=*"
+	var query_mini = "/rest/v1/minigames_respostas?select=*&order=id.asc"
 	if escola_id == "geral":
 		query_mini += "&or=(escola_id.eq.geral,escola_id.is.null)"
 	elif escola_id != "todas":
 		query_mini += "&escola_id=eq." + escola_id.uri_encode()
-	var res_mini = await DatabaseManager.request_async(query_mini, HTTPClient.METHOD_GET)
+	var res_mini = await DatabaseManager.request_select_all_async(query_mini)
 	if res_mini.get("success", false) and res_mini.get("data") is Array:
 		var chaves_mini = {}
 		for m in minigames_sessao:
-			var k = str(m.get("aluno_nick", "")) + "_" + str(m.get("tipo_minigame", "")) + "_" + str(m.get("timestamp", ""))
+			var ts_m = _normalizar_ts_chave(str(m.get("timestamp", "")))
+			var k = str(m.get("aluno_nick", "")).strip_edges().to_lower() + "_" + str(m.get("tipo_minigame", "")) + "_" + ts_m
 			chaves_mini[k] = true
 		for sm in res_mini["data"]:
-			var k = str(sm.get("aluno_nick", "")) + "_" + str(sm.get("tipo_minigame", "")) + "_" + str(sm.get("timestamp", ""))
+			var ts_sm = _normalizar_ts_chave(str(sm.get("timestamp", "")))
+			var k = str(sm.get("aluno_nick", "")).strip_edges().to_lower() + "_" + str(sm.get("tipo_minigame", "")) + "_" + ts_sm
 			if not chaves_mini.has(k):
+				chaves_mini[k] = true
 				minigames_sessao.append(sm)
 
 	# Carrega telemetria local e mescla com nuvem (Supabase) se disponível
 	var telemetria_gameplay: Array = DatabaseManager.obter_telemetria_gameplay(escola_id)
-	var query_tele = "/rest/v1/telemetria_gameplay?select=*"
+	var query_tele = "/rest/v1/telemetria_gameplay?select=*&order=id.asc"
 	if escola_id == "geral":
 		query_tele += "&or=(escola_id.eq.geral,escola_id.is.null)"
 	elif escola_id != "todas":
 		query_tele += "&escola_id=eq." + escola_id.uri_encode()
-	var res_tele = await DatabaseManager.request_async(query_tele, HTTPClient.METHOD_GET)
+	var res_tele = await DatabaseManager.request_select_all_async(query_tele)
 	if res_tele.get("success", false) and res_tele.get("data") is Array:
 		var chaves_tele = {}
 		for t in telemetria_gameplay:
-			var k = str(t.get("aluno_nick", "")) + "_" + str(t.get("tipo_evento", "")) + "_" + str(t.get("timestamp", ""))
+			var ts_t = _normalizar_ts_chave(str(t.get("timestamp", "")))
+			var k = str(t.get("aluno_nick", "")).strip_edges().to_lower() + "_" + str(t.get("tipo_evento", "")) + "_" + str(t.get("andar_id", "")) + "_" + ts_t
 			chaves_tele[k] = true
 		for st in res_tele["data"]:
-			var k = str(st.get("aluno_nick", "")) + "_" + str(st.get("tipo_evento", "")) + "_" + str(st.get("timestamp", ""))
+			var ts_st = _normalizar_ts_chave(str(st.get("timestamp", "")))
+			var k = str(st.get("aluno_nick", "")).strip_edges().to_lower() + "_" + str(st.get("tipo_evento", "")) + "_" + str(st.get("andar_id", "")) + "_" + ts_st
 			if not chaves_tele.has(k):
+				chaves_tele[k] = true
 				telemetria_gameplay.append(st)
+	var ps_ref = get_node_or_null("/root/PlayerStats")
 	var telemetria_playerstats = {
-		"tempo_por_andar": PlayerStats.tempo_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {},
-		"mortes_por_andar": PlayerStats.mortes_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {},
-		"pocoes_por_andar": PlayerStats.pocoes_por_andar.duplicate() if get_node_or_null("/root/PlayerStats") else {}
+		"tempo_por_andar": ps_ref.tempo_por_andar.duplicate() if ps_ref else {},
+		"tempo_sincronizado_por_andar": ps_ref.tempo_sincronizado_por_andar.duplicate() if (ps_ref and "tempo_sincronizado_por_andar" in ps_ref) else {},
+		"mortes_por_andar": ps_ref.mortes_por_andar.duplicate() if ps_ref else {},
+		"pocoes_por_andar": ps_ref.pocoes_por_andar.duplicate() if ps_ref else {},
+		"escola_ativa_id": DatabaseManager.escola_ativa_id,
+		"nick_ativo": DatabaseManager.get_active_nick()
 	}
 
 	return {
@@ -2118,7 +2148,8 @@ func _exportar_csv() -> void:
 		f_minigames.store_8(0xEF); f_minigames.store_8(0xBB); f_minigames.store_8(0xBF)
 		f_minigames.store_line("Sessao_Escola;Data_Hora;Aluno;Cla;Tipo_Atividade;Disciplina;Andar;Resultado;Tempo_Seg;Detalhes")
 		var mg_lista = dados.get("minigames_sessao", [])
-		if mg_lista.size() > 0:
+		var tele_lista = dados.get("telemetria_gameplay", [])
+		if mg_lista.size() > 0 or tele_lista.size() > 0:
 			for m in mg_lista:
 				var a_id = int(m.get("andar_id", 1))
 				var disc = "Química"
@@ -2137,6 +2168,27 @@ func _exportar_csv() -> void:
 					'"' + JSON.stringify(m.get("detalhes", {})).replace('"', '""') + '"'
 				]
 				f_minigames.store_line(";".join(linha_m))
+			for tg in tele_lista:
+				var a_id = int(tg.get("andar_id", 1))
+				var disc = "Química"
+				if a_id == 2: disc = "Física"
+				elif a_id == 3: disc = "Biologia"
+				var tipo_ev = str(tg.get("tipo_evento", "-"))
+				var val = float(tg.get("valor", 1.0))
+				var tempo_col = str(snappedf(val, 0.1)) if tipo_ev == "tempo_andar" else "0.0"
+				var linha_t = [
+					str(escola_nome),
+					str(tg.get("timestamp", "-")),
+					str(tg.get("aluno_nick", "Mago")),
+					"-",
+					"telemetria_" + tipo_ev,
+					disc,
+					str(a_id),
+					"Registrado",
+					tempo_col,
+					'"' + JSON.stringify({"valor": val}).replace('"', '""') + '"'
+				]
+				f_minigames.store_line(";".join(linha_t))
 		else:
 			f_minigames.store_line("%s;%s;Sem registros de minigames ainda;-;-;-;-;-;-" % [escola_nome, Time.get_datetime_string_from_system()])
 		f_minigames.close()
@@ -2468,25 +2520,45 @@ func _exportar_pdf_relatorio() -> void:
 		3: {"nome": "Biologia (Andar 3)", "tempo": 0.0, "mortes": 0, "pocoes": 0}
 	}
 	
-	var tempo_local = telemetria_playerstats.get("tempo_por_andar", {})
-	var mortes_local = telemetria_playerstats.get("mortes_por_andar", {})
-	var pocoes_local = telemetria_playerstats.get("pocoes_por_andar", {})
-	for a_id in [1, 2, 3]:
-		stats_andares_telemetria[a_id]["tempo"] += float(tempo_local.get(a_id, 0.0))
-		stats_andares_telemetria[a_id]["mortes"] += int(mortes_local.get(a_id, 0))
-		stats_andares_telemetria[a_id]["pocoes"] += int(pocoes_local.get(a_id, 0))
-		
+	var mortes_registradas_local_nick = {1: 0, 2: 0, 3: 0}
+	var pocoes_registradas_local_nick = {1: 0, 2: 0, 3: 0}
+	var nick_local = str(telemetria_playerstats.get("nick_ativo", "")).strip_edges().to_lower()
+	
 	for tg in telemetria_gameplay:
 		var a_id = int(tg.get("andar_id", 1))
 		if stats_andares_telemetria.has(a_id):
 			var tipo_ev = str(tg.get("tipo_evento", ""))
 			var val = float(tg.get("valor", 1.0))
+			var eh_nick_local = not nick_local.is_empty() and str(tg.get("aluno_nick", "")).strip_edges().to_lower() == nick_local
 			if tipo_ev == "morte":
 				stats_andares_telemetria[a_id]["mortes"] += int(val)
+				if eh_nick_local:
+					mortes_registradas_local_nick[a_id] += int(val)
 			elif tipo_ev == "pocao":
 				stats_andares_telemetria[a_id]["pocoes"] += int(val)
+				if eh_nick_local:
+					pocoes_registradas_local_nick[a_id] += int(val)
 			elif tipo_ev == "tempo_andar":
 				stats_andares_telemetria[a_id]["tempo"] += val
+
+	# Complementa com deltas locais ainda não sincronizados (apenas se a sessão do relatório corresponder à ativa)
+	var escola_ps = str(telemetria_playerstats.get("escola_ativa_id", ""))
+	if escola_id == escola_ps or escola_id == "todas":
+		var tempo_local = telemetria_playerstats.get("tempo_por_andar", {})
+		var tempo_sync_local = telemetria_playerstats.get("tempo_sincronizado_por_andar", {})
+		var mortes_local = telemetria_playerstats.get("mortes_por_andar", {})
+		var pocoes_local = telemetria_playerstats.get("pocoes_por_andar", {})
+		for a_id in [1, 2, 3]:
+			var k_str = str(a_id)
+			var t_tot = float(tempo_local.get(k_str, tempo_local.get(a_id, 0.0)))
+			var t_syn = float(tempo_sync_local.get(k_str, tempo_sync_local.get(a_id, 0.0)))
+			stats_andares_telemetria[a_id]["tempo"] += maxf(0.0, t_tot - t_syn)
+			var m_loc = int(mortes_local.get(k_str, mortes_local.get(a_id, 0)))
+			if m_loc > mortes_registradas_local_nick[a_id]:
+				stats_andares_telemetria[a_id]["mortes"] += (m_loc - mortes_registradas_local_nick[a_id])
+			var p_loc = int(pocoes_local.get(k_str, pocoes_local.get(a_id, 0)))
+			if p_loc > pocoes_registradas_local_nick[a_id]:
+				stats_andares_telemetria[a_id]["pocoes"] += (p_loc - pocoes_registradas_local_nick[a_id])
 
 	var cards_andares_html = ""
 	for a_id in [1, 2, 3]:
@@ -2530,7 +2602,7 @@ func _exportar_pdf_relatorio() -> void:
 			minigames_map[tipo]["tempo_total"] += float(mg.get("tempo_gasto", 0.0))
 			
 	for r in respostas_sessao:
-		if str(r.get("tipo", "")) == "furia_boss_vf":
+		if str(r.get("tipo", "")) == "furia_boss_vf" or int(r.get("pergunta_id", 0)) in [9100, 9200, 9300]:
 			minigames_map["furia_boss_vf"]["tentativas"] += 1
 			if r.get("acertou", false):
 				minigames_map["furia_boss_vf"]["sucessos"] += 1
@@ -2588,7 +2660,7 @@ func _exportar_pdf_relatorio() -> void:
 			</tr>
 		""" % [
 			str(reg_mg.get("timestamp", "-")),
-			str(reg_mg.get("aluno_nick", "Mago")),
+			str(reg_mg.get("aluno_nick", "Mago")).xml_escape(),
 			nome_amigavel,
 			disc_txt,
 			res_cls, res_txt,

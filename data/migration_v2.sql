@@ -35,9 +35,11 @@ CREATE TABLE IF NOT EXISTS telemetria_gameplay (
 ALTER TABLE telemetria_gameplay ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Leitura de telemetria" ON telemetria_gameplay;
 DROP POLICY IF EXISTS "Insercao de telemetria" ON telemetria_gameplay;
-CREATE POLICY "Leitura de telemetria"  ON telemetria_gameplay FOR SELECT USING (true);
-CREATE POLICY "Insercao de telemetria" ON telemetria_gameplay FOR INSERT WITH CHECK (true);
-GRANT SELECT, INSERT ON telemetria_gameplay TO anon, authenticated;
+DROP POLICY IF EXISTS "Atualizacao de telemetria" ON telemetria_gameplay;
+CREATE POLICY "Leitura de telemetria"     ON telemetria_gameplay FOR SELECT USING (true);
+CREATE POLICY "Insercao de telemetria"    ON telemetria_gameplay FOR INSERT WITH CHECK (true);
+CREATE POLICY "Atualizacao de telemetria" ON telemetria_gameplay FOR UPDATE USING (true) WITH CHECK (true);
+GRANT SELECT, INSERT, UPDATE ON telemetria_gameplay TO anon, authenticated;
 
 -- 5. Criar tabela ANALYTICS DE MINIGAMES (se não existir)
 CREATE TABLE IF NOT EXISTS minigames_respostas (
@@ -55,9 +57,11 @@ CREATE TABLE IF NOT EXISTS minigames_respostas (
 ALTER TABLE minigames_respostas ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Leitura de minigames" ON minigames_respostas;
 DROP POLICY IF EXISTS "Insercao de minigames" ON minigames_respostas;
-CREATE POLICY "Leitura de minigames"  ON minigames_respostas FOR SELECT USING (true);
-CREATE POLICY "Insercao de minigames" ON minigames_respostas FOR INSERT WITH CHECK (true);
-GRANT SELECT, INSERT ON minigames_respostas TO anon, authenticated;
+DROP POLICY IF EXISTS "Atualizacao de minigames" ON minigames_respostas;
+CREATE POLICY "Leitura de minigames"     ON minigames_respostas FOR SELECT USING (true);
+CREATE POLICY "Insercao de minigames"    ON minigames_respostas FOR INSERT WITH CHECK (true);
+CREATE POLICY "Atualizacao de minigames" ON minigames_respostas FOR UPDATE USING (true) WITH CHECK (true);
+GRANT SELECT, INSERT, UPDATE ON minigames_respostas TO anon, authenticated;
 
 -- 6. Corrigir policies do RANKING (permitir visitantes e jogadores logados inserirem/atualizarem)
 ALTER TABLE rankinggeral ENABLE ROW LEVEL SECURITY;
@@ -75,11 +79,13 @@ GRANT SELECT, INSERT, UPDATE ON rankinggeral TO anon, authenticated;
 ALTER TABLE respostas ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Leitura de respostas" ON respostas;
 DROP POLICY IF EXISTS "Insercao de respostas" ON respostas;
+DROP POLICY IF EXISTS "Atualizacao de respostas" ON respostas;
 DROP POLICY IF EXISTS "Exclusao de respostas" ON respostas;
-CREATE POLICY "Leitura de respostas"  ON respostas FOR SELECT USING (true);
-CREATE POLICY "Insercao de respostas" ON respostas FOR INSERT WITH CHECK (true);
-CREATE POLICY "Exclusao de respostas" ON respostas FOR DELETE USING (true);
-GRANT SELECT, INSERT ON respostas TO anon, authenticated;
+CREATE POLICY "Leitura de respostas"     ON respostas FOR SELECT USING (true);
+CREATE POLICY "Insercao de respostas"    ON respostas FOR INSERT WITH CHECK (true);
+CREATE POLICY "Atualizacao de respostas" ON respostas FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Exclusao de respostas"    ON respostas FOR DELETE USING (true);
+GRANT SELECT, INSERT, UPDATE ON respostas TO anon, authenticated;
 GRANT DELETE ON respostas TO authenticated;
 
 -- 8. Garantir policies em CLÃS e MEMBROS
