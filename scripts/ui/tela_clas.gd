@@ -78,7 +78,8 @@ func _aplicar_visual() -> void:
 	var rect_fundo: TextureRect = TextureRect.new()
 	rect_fundo.texture = tex_fundo_tela
 	rect_fundo.set_anchors_preset(Control.PRESET_FULL_RECT)
-	rect_fundo.ignore_texture_size = true
+	rect_fundo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect_fundo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	add_child(rect_fundo)
 	move_child(rect_fundo, 0)
 	
